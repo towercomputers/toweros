@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 
 parser = argparse.ArgumentParser(description="""Tower Computing command line to prepare SD cards and run applications. 
