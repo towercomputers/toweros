@@ -46,7 +46,7 @@ def create_computer_config(args):
         public_key, private_key = generate_key_pair(args.name)
 
     config = configparser.ConfigParser()
-    config['DEFAULT'] = {
+    config[configparser.DEFAULTSECT] = {
         'name': args.name,
         'network': network,
         'host': host,
@@ -56,11 +56,11 @@ def create_computer_config(args):
     }
     write_config_file(config, args.config_dir, f'{args.name}.ini')
     
-    return config['DEFAULT']
+    return config[configparser.DEFAULTSECT]
 
 def create_application_config(args):
     config = configparser.ConfigParser()
-    config['DEFAULT'] = {
+    config[configparser.DEFAULTSECT] = {
         'name': args.name,
         'alias': args.alias,
         'path': args.path,
@@ -69,14 +69,14 @@ def create_application_config(args):
     }
     write_config_file(config, args.config_dir, f'{args.name}.{args.alias}.ini')
 
-    return config['DEFAULT']
+    return config[configparser.DEFAULTSECT]
 
 def get_tower_config(dir):
     config = configparser.ConfigParser()
-    section = 'DEFAULT'
+    section = configparser.DEFAULTSECT
 
     config_dir = dir or default_config_dir()
-    config_file = os.path.join(config_dir, 'tower_config.ini') # TODO: put computer and apps files in subfolders
+    config_file = os.path.join(config_dir, 'tower_config.conf') # TODO: put computer and apps files in subfolders or just one file for everything
     if os.path.exists(config_file):
         config.read(config_file)
         section = config.sections()[0]
@@ -87,4 +87,16 @@ def get_tower_config(dir):
     
     return config[section]
 
-        
+def get_computer_config(dir, name):
+    config_dir = dir or default_config_dir()
+    config_file = os.path.join(config_dir, f'{name}.ini')
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    return config[configparser.DEFAULTSECT]
+
+def get_application_config(dir, name, alias):
+    config_dir = dir or default_config_dir()
+    config_file = os.path.join(config_dir, f'{name}.{alias}.ini')
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    return config[configparser.DEFAULTSECT]
