@@ -1,4 +1,6 @@
 import argparse
+import lib
+from lib.commands import provision, install, run, list
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
@@ -34,8 +36,8 @@ def parse_arguments():
         required=False
     )
     provision_parser.add_argument(
-        '--netmask', 
-        help="""Netmask of the application computer (Default: 255.255.255.0).""",
+        '--network', 
+        help="""network of the application computer (Default: 192.168.0.0/24).""",
         required=False
     )
     provision_parser.add_argument(
@@ -138,6 +140,8 @@ def parse_arguments():
         required=False
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    getattr(lib.commands, args.command).check_args(args, parser.error)
 
+    return args
 
