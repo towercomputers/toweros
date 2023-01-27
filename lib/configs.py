@@ -31,8 +31,15 @@ def generate_key_pair(name):
     return f'{name}_pub.pem', f'{name}_priv.pem'
 
 
-def create_computer_config(args):
+def write_config_file(config, dir, filename):
+    config_dir = dir or default_config_dir()
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+    config_file = os.path.join(config_dir, f'{filename}')
+    with open(config_file, 'w') as f:
+        config.write(f)
 
+def create_computer_config(args):
     network = args.network or DEFAULT_NETWORK
     host = args.host or generate_random_ip(network)
     public_key, private_key = args.public_key, args.private_key
@@ -48,13 +55,19 @@ def create_computer_config(args):
         'public_key': public_key,
         'private_key': private_key,
     }
-
-    config_dir = args.config_dir or default_config_dir()
-    if not os.path.exists(config_dir):
-        os.makedirs(config_dir)
-    config_file = os.path.join(config_dir, f'{args.name}.ini')
-    with open(config_file, 'w') as f:
-        config.write(f)
+    write_config_file(config, args.config_dir, f'{args.name}.ini')
     
     return config['DEFAULT']
-    
+
+def create_application_config(args):
+    config = configparser.ConfigParser()
+    config['DEFAULT'] = {
+        'name': args.name,
+        'alias': args.alias,
+        'path': args.path,
+        'apt-packages': args.apt_packages or "",
+        'local-apt-packages': args.local_apt_packages or "",
+    }
+    write_config_file(config, args.config_dir, f'{args.name}.{args.alias}.ini')
+
+    return config['DEFAULT']
