@@ -4,6 +4,7 @@ import ipaddress
 from random import randint
 from argparse import ArgumentParser
 import re
+from sh import ssh_keygen
 
 import rsa
 
@@ -22,14 +23,10 @@ def generate_random_ip(network):
     return f'{hosts[randint(0, len(hosts) - 1)]}' # TODO: check if is used
 
 def generate_key_pair(name):
-    (public_key, private_key) = rsa.newkeys(2048)
     ssh_dir = default_ssh_dir()
-    with open(os.path.join(ssh_dir, f'{name}_pub.pem'), 'wb') as p:
-        p.write(public_key.save_pkcs1('PEM'))
-    with open(os.path.join(ssh_dir, f'{name}_priv.pem'), 'wb') as p:
-        p.write(private_key.save_pkcs1('PEM'))
-    return f'{name}_pub.pem', f'{name}_priv.pem'
-
+    key_path = os.path.join(ssh_dir, f'{name}')
+    ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
+    return f'{key_path}.pub', key_path
 
 def write_config_file(config, dir, filename):
     config_dir = dir or default_config_dir()
