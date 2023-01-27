@@ -4,10 +4,16 @@ from lib.commands import provision, install, run, list
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
-    Tower Computing command line.
-    Provision a computer with the `provision` command then install on it an application with `install` and finally run the applications with the `run` command. 
-    Use `./tower {provision|install|run} --help` to get options list for each command.
+        Tower Computing command line.
+        Provision a computer with the `provision` command then install on it an application with `install` and finally run the applications with the `run` command. 
+        Use `./tower {provision|install|run} --help` to get options list for each command.
     """)
+
+    parser.add_argument(
+        '--config-dir', 
+        help="""Directory where config files are placed (Default: ~/.config/tower/).""",
+        required=False
+    )
 
     subparser = parser.add_subparsers(dest='command', required=True)
 
@@ -50,11 +56,6 @@ def parse_arguments():
         help="""Private key path used to access the application computer (Default: automatically generated and stored in the local ~/.ssh/ folder).""",
         required=False
     )
-    provision_parser.add_argument(
-        '--config-dir', 
-        help="""Directory where the config file for this computer will be placed (Default: ~/.config/tower/).""",
-        required=False
-    )
 
     ##########################
     #  `install` command     #
@@ -90,11 +91,6 @@ def parse_arguments():
         help="""Comma separated list of apt packages local file pathes to install in th SD Card. (Default: assume the application is already installed)""",
         required=False
     )
-    install_parser.add_argument(
-        '--config-dir', 
-        help="""Directory where the config file for this computer will be placed (Default: ~/.config/tower/).""",
-        required=False
-    )
 
     ##########################
     #  `run` command         #
@@ -115,11 +111,6 @@ def parse_arguments():
         help="""Application's alias. This name must match with the `alias` used with the `install` command (Required).""",
         required=True
     )
-    run_parser.add_argument(
-        '-c', '--config-dir', 
-        help="""Directory where the config file for this appication is placed (Default:  ~/.config/ts/).""",
-        required=False
-    )
 
     ##########################
     #  `list` command        #
@@ -132,11 +123,6 @@ def parse_arguments():
     list_parser.add_argument(
         '-n', '--name', 
         help="""List only the applications installed in the given computer (Default: none).""",
-        required=False
-    )
-    list_parser.add_argument(
-        '-c', '--config-dir', 
-        help="""Directory config files are placed (Default:  ~/.config/ts/).""",
         required=False
     )
 

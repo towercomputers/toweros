@@ -8,7 +8,9 @@ from sh import ssh_keygen
 
 import rsa
 
-DEFAULT_NETWORK = "192.168.0.0/24" # TODO: put in config file
+DEFAULT_NETWORK = "192.168.0.0/24"
+DEFAULT_SSH_USER = "tower"
+DEFAULT_SSH_PORT = 22
 
 def default_config_dir():
     home_path = os.path.expanduser('~')
@@ -68,3 +70,21 @@ def create_application_config(args):
     write_config_file(config, args.config_dir, f'{args.name}.{args.alias}.ini')
 
     return config['DEFAULT']
+
+def get_tower_config(dir):
+    config = configparser.ConfigParser()
+    section = 'DEFAULT'
+
+    config_dir = dir or default_config_dir()
+    config_file = os.path.join(config_dir, 'tower_config.ini') # TODO: put computer and apps files in subfolders
+    if os.path.exists(config_file):
+        config.read(config_file)
+        section = config.sections()[0]
+
+    config[section]['default_network'] = config[section].get('default_network', DEFAULT_NETWORK)
+    config[section]['default_ssh_user'] = config[section].get('default_ssh_user', DEFAULT_SSH_USER)
+    config[section]['default_ssh_port'] = config[section].get('default_ssh_port', f'{DEFAULT_SSH_PORT}')
+    
+    return config[section]
+
+        
