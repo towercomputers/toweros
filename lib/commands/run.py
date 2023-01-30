@@ -2,7 +2,6 @@ import os
 
 import x2go
 import gevent
-import getpass
 
 from lib.configs import (
     default_config_dir, 
