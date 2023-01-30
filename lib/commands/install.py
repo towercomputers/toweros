@@ -11,7 +11,6 @@ def check_args(args, parser_error):
     if not os.path.exists(config_file):
         parser_error("Unknown computer name.")
 
-
 def execute(args):
     config = create_application_config(args)
     print(f'{config}')

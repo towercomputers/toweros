@@ -4,6 +4,7 @@ import os
 import re
 
 from lib.configs import default_config_dir, create_computer_config
+from lib.burn import burn_image
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name):
@@ -38,3 +39,4 @@ def check_args(args, parser_error):
 def execute(args):
     config = create_computer_config(args)
     print(config)
+    burn_image(config)
