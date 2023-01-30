@@ -1,6 +1,6 @@
 import os
 import re
-from lib.configs import default_config_dir, create_application_config
+from tower.configs import default_config_dir, create_application_config
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.alias):

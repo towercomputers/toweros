@@ -3,8 +3,8 @@ import ipaddress
 import os
 import re
 
-from lib.configs import default_config_dir, create_computer_config
-from lib.burn import burn_image
+from tower.configs import default_config_dir, create_computer_config
+from tower.burn import burn_image
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name):

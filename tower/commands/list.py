@@ -1,6 +1,6 @@
 import glob
 import os
-from lib.configs import default_config_dir
+from tower.configs import default_config_dir
 
 def check_args(args, parser_error):
     if args.name:

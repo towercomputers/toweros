@@ -3,7 +3,7 @@ import os
 import x2go
 import gevent
 
-from lib.configs import (
+from tower.configs import (
     default_config_dir, 
     get_tower_config, 
     get_computer_config, 

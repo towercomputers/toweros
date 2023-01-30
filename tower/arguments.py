@@ -1,6 +1,6 @@
 import argparse
-import lib
-from lib.commands import provision, install, run, list
+import tower
+from tower.commands import provision, install, run, list
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
@@ -127,7 +127,7 @@ def parse_arguments():
     )
 
     args = parser.parse_args()
-    getattr(lib.commands, args.command).check_args(args, parser.error)
+    getattr(tower.commands, args.command).check_args(args, parser.error)
 
     return args
 
