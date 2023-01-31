@@ -19,10 +19,6 @@ def default_ssh_dir():
     home_path = os.path.expanduser('~')
     return os.path.join(home_path, '.ssh/')
 
-def generate_random_ip(network):
-    hosts = list(ipaddress.ip_network(network).hosts())
-    return f'{hosts[randint(0, len(hosts) - 1)]}' # TODO: check if is used
-
 def generate_key_pair(name):
     ssh_dir = default_ssh_dir()
     key_path = os.path.join(ssh_dir, f'{name}')
@@ -47,8 +43,6 @@ def create_computer_config(args):
     config = configparser.ConfigParser()
     config[configparser.DEFAULTSECT] = {
         'name': args.name,
-        'network': network,
-        'host': host,
         'sd-card': args.sd_card,
         'public-key': public_key,
         'private-key': private_key,

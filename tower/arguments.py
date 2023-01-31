@@ -37,16 +37,6 @@ def parse_arguments():
         required=True
     )
     provision_parser.add_argument(
-        '--host', 
-        help="""IP or domain name of the application computer (Default: randomly generated).""",
-        required=False
-    )
-    provision_parser.add_argument(
-        '--network', 
-        help="""network of the application computer (Default: 192.168.0.0/24).""",
-        required=False
-    )
-    provision_parser.add_argument(
         '--public-key', 
         help="""Public key path used to access the application computer (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
         required=False

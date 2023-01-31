@@ -15,11 +15,6 @@ def check_args(args, parser_error):
     if os.path.exists(config_file):
         parser_error("Computer name already used.")
 
-    if args.network:
-        ipaddress.ip_network(args.network) # raise error if invalid
-    if args.host:
-        ipaddress.ip_address(args.host) # raise error if invalid
-
     if not os.path.exists(args.sd_card):
         parser_error("sd-card path invalid.")
     
