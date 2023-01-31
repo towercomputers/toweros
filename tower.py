@@ -7,9 +7,5 @@ import tower
 from tower.arguments import parse_arguments 
 from tower.commands import provision, install, run, list
 
-#args = parse_arguments()
-#getattr(tower.commands, args.command).execute(args)
-
-from tower import burn
-a = burn.burn_image({})
-print(a)
+args = parse_arguments()
+getattr(tower.commands, args.command).execute(args)
