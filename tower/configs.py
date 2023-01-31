@@ -50,8 +50,8 @@ def create_computer_config(args):
         'network': network,
         'host': host,
         'sd-card': args.sd_card,
-        'public_key': public_key,
-        'private_key': private_key,
+        'public-key': public_key,
+        'private-key': private_key,
     }
     write_config_file(config, args.config_dir, f'{args.name}.ini')
     

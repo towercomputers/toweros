@@ -4,6 +4,9 @@ import re
 import time
 import json
 from io import StringIO
+from string import Template
+import sys
+import shutil
 
 import requests
 import sh
@@ -83,9 +86,43 @@ def rpi_imager_installed():
 
 
 def rpi_imager(image, device):
+    # TODO: disable ejection
+    # WIN: reg add "HKCU\Software\Raspberry Pi\Imager" /v telemetry /t REG_DWORD /d 0
+    # LINUX: eject=false in ~/.config/Raspberry Pi/Imager.conf
+    # MAC: defaults write org.raspberrypi.Imager.plist eject -bool NO
     rpi_imager = Command(rpi_imager_path())
     print(f"Burning {device} with rpi-imager, be patient please...")
     rpi_imager('--cli', '--debug', image, device, _out=print)
+
+
+def mount(device):
+    if platform.system() == "Darwin":
+        from sh import diskutil
+        diskutil('mountDisk', device)
+    elif platform.system() == "Linux":
+        from sh import mount
+        mount(device)
+
+
+def get_mount_point(device):
+    if platform.system() == "Linux":
+        from sh import lsblk
+        buf = StringIO()
+        lsblk('-J', '-T', '-d', device, _out=buf)
+        result = json.loads(buf.getvalue())
+        return result['blockdevices'][0]['mountpoint']
+    elif platform.system() == "Darwin":
+        from sh import diskutil
+        buf = StringIO()
+        try:
+            diskutil('info', f'{device}s1', _out=buf) # first partition readable in macos/windows
+        except sh.ErrorReturnCode_1: # disk not found
+            return None
+        result = buf.getvalue()
+        if "Mount Point:" in result:
+            return result.split("Mount Point:")[1].strip().split(" ")[0].strip()
+        else:
+            return None
 
 
 def unmount(device):
@@ -93,11 +130,7 @@ def unmount(device):
         from sh import diskutil
         diskutil('unmountDisk', device)
     elif platform.system() == "Linux":
-        from sh import lsblk
-        buf = StringIO()
-        lsblk('-J', '-T', '-d', _out=buf)
-        result = json.loads(buf.getvalue())
-        mountpoint = result['blockdevices'][0]['mountpoint']
+        mountpoint = get_mount_point(device)
         if mountpoint not in [None, ""]:
             from sh import umount
             umount(mountpoint)
@@ -111,6 +144,13 @@ def dd(image, device):
     dd("if=.cache/raspios.img",f"of={device}", "bs=8m", f"{flag}=sync")
 
 
+def generate_firstrun_script(params):
+    with open('scripts/firstrun.sh', 'r') as f:
+        template = Template(f.read())
+    script = template.substitute(params)
+    return script
+
+
 def burn_image(config):
     download_latest_image()
     device = detect_sdcard_device()
@@ -121,5 +161,33 @@ def burn_image(config):
     else:
         dd(".cache/raspios.img", device)
     duration = time.time() - start_time
-
     print(f"SD Card burnt in {duration}s.")
+
+    mountpoint = get_mount_point(device)
+    if mountpoint is None:
+        mount(device)
+        mountpoint = get_mount_point(device)
+
+    if mountpoint is None:
+        sys.exit("Error in mouting") #TODO
+
+    print("Generating firstrun.sh...")
+
+    firstrun_script = generate_firstrun_script(dict(
+        HOSTNAME = "office",
+        PUBLIC_KEY = "mypublickey",
+        LOGIN = "tower",
+        PASSWORD = "password",
+        WLAN_SSID = "wifi",
+        WLAN_PASSWORD = "pass",
+        WLAN_COUNTRY = "FR",
+        KEY_MAP = "fr",
+        TIME_ZONE = "Europe/Paris",
+    ))
+    with open(os.path.join(mountpoint, 'firstrun.sh'), "w") as f:
+        f.write(firstrun_script)
+    
+    shutil.copy('scripts/cmdline.txt', mountpoint)
+
+    print(f"SD Card ready.")
+    
