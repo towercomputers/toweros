@@ -4,10 +4,10 @@ import ipaddress
 from random import randint
 from argparse import ArgumentParser
 import re
+import secrets
 from sh import ssh_keygen
 
 DEFAULT_RASPIOS_IMAGE = "https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2022-09-26/2022-09-22-raspios-bullseye-arm64.img.xz"
-DEFAULT_NETWORK = "192.168.0.0/24"
 DEFAULT_SSH_USER = "tower"
 DEFAULT_SSH_PORT = 22
 
@@ -46,6 +46,7 @@ def create_computer_config(args):
         'sd-card': args.sd_card,
         'public-key': public_key,
         'private-key': private_key,
+        'password': secrets.token_urlsafe(16),
     }
     write_config_file(config, args.config_dir, f'{args.name}.ini')
     
@@ -74,10 +75,9 @@ def get_tower_config(dir):
         config.read(config_file)
         section = config.sections()[0]
 
-    config[section]['default_network'] = config[section].get('default_network', DEFAULT_NETWORK)
-    config[section]['default_ssh_user'] = config[section].get('default_ssh_user', DEFAULT_SSH_USER)
-    config[section]['default_ssh_port'] = config[section].get('default_ssh_port', f'{DEFAULT_SSH_PORT}')
-    config[section]['default_raspios_image'] = config[section].get('default_raspios_image', f'{DEFAULT_RASPIOS_IMAGE}')
+    config[section]['default-ssh-user'] = config[section].get('default-ssh-user', DEFAULT_SSH_USER)
+    config[section]['default-ssh-port'] = config[section].get('default-ssh-port', f'{DEFAULT_SSH_PORT}')
+    config[section]['default-raspios-image'] = config[section].get('default-raspios-image', f'{DEFAULT_RASPIOS_IMAGE}')
     
     return config[section]
 

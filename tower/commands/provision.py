@@ -32,6 +32,6 @@ def check_args(args, parser_error):
 
 
 def execute(args):
-    config = create_computer_config(args)
-    print(config)
-    burn_image(config)
+    tower_config = get_tower_config(args.config_dir)
+    computer_config = create_computer_config(args)
+    burn_image(dict(computer_config) | dict(tower_config))

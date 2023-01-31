@@ -17,3 +17,9 @@ def rpi_imager_path():
 
 def get_wlan_information():
     sys.exit("OS not supported")
+
+def get_timezone():
+    sys.exit("OS not supported")
+
+def get_keymap():
+    sys.exit("OS not supported")

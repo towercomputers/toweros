@@ -47,7 +47,7 @@ def download_latest_image():
 
     if not os.path.exists(".cache/raspios.img"):
         print("Downloading image...")
-        resp = requests.get(DEFAULT_RASPIOS_IMAGE)
+        resp = requests.get(config["default-raspios-image"])
         with open(".cache/raspios.img.xz", "wb") as f:
             f.write(resp.content)
         print("Decompressing image...")
@@ -94,16 +94,22 @@ def ensure_device_is_mounted(device):
 
 def prepare_first_run(mountpoint, config):
     print("Generating firstrun.sh...")
+
+    with open(config['public-key']) as f:
+        public_key = f.read()
+    
+    ssid, password = osutils.get_wlan_infos()
+    
     firstrun_script = generate_firstrun_script(dict(
-        HOSTNAME = "office",
-        PUBLIC_KEY = "mypublickey",
-        LOGIN = "tower",
-        PASSWORD = "password",
-        WLAN_SSID = "wifi",
-        WLAN_PASSWORD = "pass",
+        HOSTNAME = f'{config["name"]}.tower',
+        PUBLIC_KEY = public_key,
+        LOGIN = config["default-ssh-user"],
+        PASSWORD = config["password"],
+        WLAN_SSID = ssid,
+        WLAN_PASSWORD = password,
         WLAN_COUNTRY = "FR",
-        KEY_MAP = "fr",
-        TIME_ZONE = "Europe/Paris",
+        KEY_MAP = osutils.get_keymap(),
+        TIME_ZONE = osutils.get_timezone(),
     ))
     with open(os.path.join(mountpoint, 'firstrun.sh'), "w") as f:
         f.write(firstrun_script)
@@ -111,7 +117,7 @@ def prepare_first_run(mountpoint, config):
 
 
 def burn_image(config):
-    download_latest_image()
+    download_latest_image(config)
     device = detect_sdcard_device()
     write_image(".cache/raspios.img", device)
     mountpoint = ensure_device_is_mounted(device)

@@ -51,9 +51,9 @@ def execute(args):
     application_config = get_application_config(args.config_dir, args.name, args.alias)
 
     run_application(
-        computer_config.get('host'), 
-        tower_config.get('default_ssh_port'), 
-        tower_config.get('default_ssh_user'), 
-        computer_config.get('private_key'), 
+        f"{computer_config.get('name')}.tower", 
+        tower_config.get('default-ssh-port'), 
+        tower_config.get('default-ssh-user'), 
+        computer_config.get('private-key'), 
         application_config.get('path')
     )

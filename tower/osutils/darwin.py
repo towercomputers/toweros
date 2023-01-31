@@ -1,5 +1,8 @@
 from io import StringIO
-from sh import diskutil, dd
+import os
+import sh
+from sh import diskutil, dd, systemsetup, Command, security, defaults
+from tower import osutils
 
 def get_device_list():
     buf = StringIO()
@@ -33,4 +36,29 @@ def dd(image, device):
     dd(f"if={image}",f"of={device}", "bs=8m", "conv=sync")
 
 def get_wlan_infos():
-    pass
+    airport = Command('/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport')
+    buf = StringIO()
+    airport('-I', _out=buf)
+    result = buf.getvalue()
+    ssid = result.split(" SSID: ")[1].split(" ")[0].strip()
+
+    buf = StringIO()
+    security('find-generic-password', '-a', ssid , '-g', _err=buf)
+    result = buf.getvalue()
+    password = result.split('password: "')[1].split('"')[0]
+    
+    return ssid, password
+
+def get_timezone():
+    buf = StringIO()
+    with sh.contrib.sudo:
+        systemsetup('-gettimezone', _out=buf)
+    result = buf.getvalue()
+    return result.split("Time Zone:")[1].strip()
+
+def get_keymap():
+    buf = StringIO()
+    defaults('read', os.path.expanduser('~/Library/Preferences/com.apple.HIToolbox.plist'), _out=buf)
+    result = buf.getvalue()
+    long_name = result.split('"KeyboardLayout Name" = ')[1].strip().split(";")[0].strip()
+    return osutils.MACOS_NAME_TO_X11_CODE[long_name]
