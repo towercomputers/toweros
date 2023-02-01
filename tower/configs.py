@@ -22,6 +22,9 @@ def default_ssh_dir():
 def generate_key_pair(name):
     ssh_dir = default_ssh_dir()
     key_path = os.path.join(ssh_dir, f'{name}')
+    if os.path.exists(key_path):
+        os.remove(key_path)
+        os.remove(f'{key_path}.pub')
     ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
     return f'{key_path}.pub', key_path
 
@@ -34,8 +37,6 @@ def write_config_file(config, dir, filename):
         config.write(f)
 
 def create_computer_config(args):
-    network = args.network or DEFAULT_NETWORK
-    host = args.host or generate_random_ip(network)
     public_key, private_key = args.public_key, args.private_key
     if not public_key:
         public_key, private_key = generate_key_pair(args.name)

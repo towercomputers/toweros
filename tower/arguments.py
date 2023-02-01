@@ -33,8 +33,9 @@ def parse_arguments():
     )
     provision_parser.add_argument(
         '-sd', '--sd-card', 
-        help="""SD Card path (Required).""",
-        required=True
+        help="""SD Card path.""",
+        required=False,
+        default=""
     )
     provision_parser.add_argument(
         '--public-key', 

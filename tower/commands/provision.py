@@ -3,7 +3,7 @@ import ipaddress
 import os
 import re
 
-from tower.configs import default_config_dir, create_computer_config
+from tower.configs import default_config_dir, create_computer_config, get_tower_config
 from tower.burn import burn_image
 
 def check_args(args, parser_error):
@@ -15,8 +15,8 @@ def check_args(args, parser_error):
     if os.path.exists(config_file):
         parser_error("Computer name already used.")
 
-    if not os.path.exists(args.sd_card):
-        parser_error("sd-card path invalid.")
+    if args.sd_card and not os.path.exists(args.sd_card):
+        parser_error("sd-card path invalid.") # TODO: check is a disk
     
     if args.public_key:
         if not arg.private_key :

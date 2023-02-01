@@ -7,10 +7,13 @@ from io import StringIO
 from string import Template
 import sys
 import shutil
+import crypt
+import binascii
 
 import requests
 import sh
 from sh import xz, Command
+from backports.pbkdf2 import pbkdf2_hmac
 
 from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
@@ -41,13 +44,13 @@ def detect_sdcard_device():
         return new_devices[0]
 
 
-def download_latest_image():
+def download_latest_image(url):
     if not os.path.exists(".cache"):
         os.makedirs(".cache")
 
     if not os.path.exists(".cache/raspios.img"):
-        print("Downloading image...")
-        resp = requests.get(config["default-raspios-image"])
+        print(f"Downloading {url}...")
+        resp = requests.get(url)
         with open(".cache/raspios.img.xz", "wb") as f:
             f.write(resp.content)
         print("Decompressing image...")
@@ -91,6 +94,8 @@ def ensure_device_is_mounted(device):
         sys.exit("Error in mouting") #TODO
     return mountpoint
 
+def derive_wlan_key(ssid, psk):
+    return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
 
 def prepare_first_run(mountpoint, config):
     print("Generating firstrun.sh...")
@@ -98,16 +103,16 @@ def prepare_first_run(mountpoint, config):
     with open(config['public-key']) as f:
         public_key = f.read()
     
-    ssid, password = osutils.get_wlan_infos()
+    ssid, psk = osutils.get_wlan_infos()
     
     firstrun_script = generate_firstrun_script(dict(
         HOSTNAME = f'{config["name"]}.tower',
         PUBLIC_KEY = public_key,
         LOGIN = config["default-ssh-user"],
-        PASSWORD = config["password"],
+        PASSWORD = crypt.crypt(config["password"], crypt.mksalt(crypt.METHOD_SHA512)), # TODO: fix
         WLAN_SSID = ssid,
-        WLAN_PASSWORD = password,
-        WLAN_COUNTRY = "FR",
+        WLAN_PASSWORD = derive_wlan_key(ssid, psk),
+        WLAN_COUNTRY = "", # TODO
         KEY_MAP = osutils.get_keymap(),
         TIME_ZONE = osutils.get_timezone(),
     ))
@@ -117,8 +122,8 @@ def prepare_first_run(mountpoint, config):
 
 
 def burn_image(config):
-    download_latest_image(config)
-    device = detect_sdcard_device()
+    download_latest_image(config["default-raspios-image"])
+    device = detect_sdcard_device() if not config['sd-card'] else config['sd-card']
     write_image(".cache/raspios.img", device)
     mountpoint = ensure_device_is_mounted(device)
     prepare_first_run(mountpoint, config)
