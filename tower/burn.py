@@ -9,11 +9,14 @@ import sys
 import shutil
 import crypt
 import binascii
+import string
+from secrets import choice as randchoice
 
 import requests
 import sh
 from sh import xz, Command
 from backports.pbkdf2 import pbkdf2_hmac
+from passlib.hash import sha512_crypt
 
 from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
@@ -94,8 +97,10 @@ def ensure_device_is_mounted(device):
         sys.exit("Error in mouting") #TODO
     return mountpoint
 
+
 def derive_wlan_key(ssid, psk):
     return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
+
 
 def prepare_first_run(mountpoint, config):
     print("Generating firstrun.sh...")
@@ -109,7 +114,7 @@ def prepare_first_run(mountpoint, config):
         HOSTNAME = f'{config["name"]}.tower',
         PUBLIC_KEY = public_key,
         LOGIN = config["default-ssh-user"],
-        PASSWORD = crypt.crypt(config["password"], crypt.mksalt(crypt.METHOD_SHA512)), # TODO: fix
+        PASSWORD = sha512_crypt.hash(config["password"]),
         WLAN_SSID = ssid,
         WLAN_PASSWORD = derive_wlan_key(ssid, psk),
         WLAN_COUNTRY = "", # TODO
