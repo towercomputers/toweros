@@ -1,7 +1,8 @@
 import configparser
 from io import StringIO
 import os
-from sh import lsblk, mount, umount, timedatectl, iwconfig, localectl
+import sh
+from sh import lsblk, mount, umount, timedatectl, iwconfig, localectl, iw
 
 def get_device_list():
     buf = StringIO()
@@ -30,6 +31,23 @@ def dd(image, device):
     if get_mount_point(device) is not None:
         unmount(device)
     dd(f"if={image}",f"of={device}", "bs=8m", "oflag=sync")
+
+def scan_wifi_countries():
+    buf = StringIO()
+    with sh.contrib.sudo:
+        iw('dev', 'wlan0', 'scan', _out=buf)
+    result = buf.getvalue()
+    bss = result.split('BSS ')
+    wifis= {}
+    for info in bss:
+        if info.find("SSID: ") != -1:
+            ssid = info.split('SSID: ')[1].split('\t')[0].strip()
+            cc = '--'
+            if info.find("Country: ") != -1:
+                cc = info.split("Country: ")[1].split('\t')[0]
+            if ssid not in wifis or wifis[ssid] == '--':
+                wifis[ssid] = cc
+    return wifis
 
 def get_wlan_information():
     buf = StringIO()

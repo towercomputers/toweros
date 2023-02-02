@@ -15,6 +15,9 @@ def unmount(device):
 def rpi_imager_path():
     sys.exit("OS not supported")
 
+def scan_wifi_countries():
+    sys.exit("OS not supported")
+
 def get_wlan_information():
     sys.exit("OS not supported")
 

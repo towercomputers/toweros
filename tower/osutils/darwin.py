@@ -35,6 +35,27 @@ def dd(image, device):
         unmount(device)
     dd(f"if={image}",f"of={device}", "bs=8m", "conv=sync")
 
+def scan_wifi_countries():
+    airport = Command('/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport')
+    buf = StringIO()
+    airport('-s', _out=buf)
+    result = buf.getvalue()
+
+    lines = result.split("\n")
+    lines.pop()
+    ssid_end_pos = lines[0].find('SSID') + 4
+    cc_pos = lines[0].find('CC')
+    lines.pop(0)
+
+    wifis = {}
+    for line in lines:
+        ssid = line[0:ssid_end_pos].strip()
+        cc = line[cc_pos:cc_pos + 2]
+        if ssid not in wifis or wifis[ssid] == '--':
+            wifis[ssid] = cc
+
+    return wifis
+
 def get_wlan_infos():
     airport = Command('/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport')
     buf = StringIO()
@@ -46,6 +67,9 @@ def get_wlan_infos():
     security('find-generic-password', '-a', ssid , '-g', _err=buf)
     result = buf.getvalue()
     password = result.split('password: "')[1].split('"')[0]
+
+    # sudo iw dev wlan0 scan
+    # /System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -s
     
     return ssid, password
 
