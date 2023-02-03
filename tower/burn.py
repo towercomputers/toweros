@@ -10,10 +10,11 @@ import shutil
 import crypt
 import string
 from secrets import choice as randchoice
+from datetime import datetime
 
 import requests
 import sh
-from sh import xz, Command
+from sh import xz, Command, arp
 from passlib.hash import sha512_crypt
 
 from tower.configs import DEFAULT_RASPIOS_IMAGE
@@ -118,11 +119,36 @@ def prepare_first_run(mountpoint, config):
     shutil.copy('scripts/dhcpcd.conf', mountpoint)
 
 
+def discover_ip(computer_name):
+    buf = StringIO()
+    arp('-a', _out=buf)
+    result = buf.getvalue()
+    lines = result.split("\n")
+    for line in lines:
+        if line.startswith(f'{computer_name}.local'):
+            ip = line.split("(")[1].split(")")[0]
+            print(f"IP found: {ip}")
+            return ip
+    print(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds")
+    time.sleep(10)
+    return discover_ip(computer_name)
+
+
+def update_local_dns(computer_name, ip):
+    shutil.copy('/etc/hosts', f'/etc/hosts.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
+    # TODO: check if IP already here
+    with open('/etc/hosts', 'a') as f:
+        f.write("\n")
+        f.write(f"{ip} {computer_name}.tower")
+    print("Local DNS updated")
+
+
 def burn_image(config):
     download_latest_image(config["default-raspios-image"])
     device = detect_sdcard_device() if not config['sd-card'] else config['sd-card']
     write_image(".cache/raspios.img", device)
     mountpoint = ensure_device_is_mounted(device)
     prepare_first_run(mountpoint, config)
-    print(f"SD Card ready.")
-    
+    print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
+    ip = discover_ip(config['name'])
+    update_local_dns(config['name'], ip)

@@ -75,8 +75,7 @@ def get_wlan_infos():
 
 def get_timezone():
     buf = StringIO()
-    with sh.contrib.sudo:
-        systemsetup('-gettimezone', _out=buf)
+    systemsetup('-gettimezone', _out=buf)
     result = buf.getvalue()
     return result.split("Time Zone:")[1].strip()
 

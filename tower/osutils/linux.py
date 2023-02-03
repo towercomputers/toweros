@@ -34,8 +34,7 @@ def dd(image, device):
 
 def scan_wifi_countries():
     buf = StringIO()
-    with sh.contrib.sudo:
-        iw('dev', 'wlan0', 'scan', _out=buf)
+    iw('dev', 'wlan0', 'scan', _out=buf)
     result = buf.getvalue()
     bss = result.split('BSS ')
     wifis= {}
