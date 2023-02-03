@@ -134,13 +134,18 @@ def discover_ip(computer_name):
     return discover_ip(computer_name)
 
 
-def update_local_dns(computer_name, ip):
-    shutil.copy('/etc/hosts', f'/etc/hosts.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
-    # TODO: check if IP already here
-    with open('/etc/hosts', 'a') as f:
+def update_ssh_config(computer_name, ip, user):
+    config_path = os.path.join(os.path.expanduser('~'), '.ssh/config')
+    shutil.copy(config_path, f'{config_path}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
+    # TODO: check if IP or host already here
+    with open(config_path, 'a') as f:
         f.write("\n")
-        f.write(f"{ip} {computer_name}.tower")
-    print("Local DNS updated")
+        f.write(f"Host {computer_name}\n")
+        f.write(f" HostName {ip}\n")
+        f.write(f" User {user}\n")
+        f.write(f" IdentityFile ~/.ssh/{computer_name}\n")
+        f.write("  StrictHostKeyChecking no\n") # same IP/computer with different name should happen..
+    print(f"{config_path} updated")
 
 
 def burn_image(config):
@@ -151,4 +156,4 @@ def burn_image(config):
     prepare_first_run(mountpoint, config)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(config['name'])
-    update_local_dns(config['name'], ip)
+    update_ssh_config(config['name'], ip, config['default-ssh-user'])
