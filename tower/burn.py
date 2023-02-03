@@ -154,7 +154,7 @@ def update_ssh_config(computer_name, ip, user):
 def burn_image(config):
     download_latest_image(config["default-raspios-image"])
     device = detect_sdcard_device() if not config['sd-card'] else config['sd-card']
-    #write_image(".cache/raspios.img", device)
+    write_image(".cache/raspios.img", device)
     mountpoint = ensure_device_is_mounted(device)
     prepare_first_run(mountpoint, config)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
