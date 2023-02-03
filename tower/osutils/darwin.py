@@ -1,7 +1,7 @@
 from io import StringIO
 import os
 import sh
-from sh import diskutil, dd, systemsetup, Command, security, defaults
+from sh import diskutil, dd, Command, security, defaults, readlink
 from tower import osutils
 
 def get_device_list():
@@ -67,18 +67,14 @@ def get_wlan_infos():
     security('find-generic-password', '-a', ssid , '-g', _err=buf)
     result = buf.getvalue()
     password = result.split('password: "')[1].split('"')[0]
-
-    # sudo iw dev wlan0 scan
-    # /System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -s
     
     return ssid, password
 
 def get_timezone():
     buf = StringIO()
-    with sh.contrib.sudo: # TODO: find no-sudo way to get the TZ
-        systemsetup('-gettimezone', _out=buf)
+    readlink('/etc/localtime', _out=buf)
     result = buf.getvalue()
-    return result.split("Time Zone:")[1].strip()
+    return ("/").join(result.strip().split("/")[-2:])
 
 def get_keymap():
     buf = StringIO()
