@@ -47,6 +47,13 @@ def parse_arguments():
         help="""Private key path used to access the application computer (Default: automatically generated and stored in the local ~/.ssh/ folder).""",
         required=False
     )
+    provision_parser.add_argument(
+        '--online', 
+        help="""Set wifi connection using the same parameters as the client""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
     ##########################
     #  `install` command     #

@@ -7,7 +7,6 @@ from tower import osutils
 def derive_wlan_key(ssid, psk):
     return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
 
-
 def find_wlan_country(ssid):
     wifi_countries = osutils.scan_wifi_countries()
     if ssid in wifi_countries and wifi_countries[ssid] != '--':
@@ -26,3 +25,11 @@ def find_wlan_country(ssid):
                 max_count = count_by_country[cc]
                 max_cc = cc
     return max_cc
+
+def discover_wlan_params():
+    ssid, psk = osutils.get_wlan_infos()
+    return dict(
+        WLAN_SSID = ssid,
+        WLAN_PASSWORD = derive_wlan_key(ssid, psk),
+        WLAN_COUNTRY = find_wlan_country(ssid),
+    )

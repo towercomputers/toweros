@@ -103,16 +103,19 @@ def prepare_first_run(mountpoint, config):
     with open(config['public-key']) as f:
         public_key = f.read()
     
-    ssid, psk = osutils.get_wlan_infos()
-    
-    firstrun_script = generate_firstrun_script(dict(
+    params = dict(
         HOSTNAME = f'{config["name"]}.tower',
         PUBLIC_KEY = public_key,
         LOGIN = config["default-ssh-user"],
         PASSWORD = sha512_crypt.hash(config["password"]),
         KEY_MAP = osutils.get_keymap(),
         TIME_ZONE = osutils.get_timezone(),
-    ))
+        SET_WLAN = '1' if config["online"] else '0',
+    )
+    if config["online"]:
+        params.update(osutils.discover_wlan_params())
+
+    firstrun_script = generate_firstrun_script(params)
     with open(os.path.join(mountpoint, 'firstrun.sh'), "w") as f:
         f.write(firstrun_script)
     shutil.copy('scripts/cmdline.txt', mountpoint)

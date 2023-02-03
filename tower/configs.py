@@ -48,6 +48,7 @@ def create_computer_config(args):
         'public-key': public_key,
         'private-key': private_key,
         'password': secrets.token_urlsafe(16),
+        'online': args.online
     }
     write_config_file(config, args.config_dir, f'{args.name}.ini')
     
