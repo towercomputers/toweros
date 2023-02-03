@@ -66,7 +66,7 @@ def download_latest_image(url):
 def generate_firstrun_script(params):
     with open('scripts/firstrun.sh', 'r') as f:
         template = Template(f.read())
-    script = template.substitute(params)
+    script = template.safe_substitute(params)
     return script
 
 
@@ -110,7 +110,7 @@ def prepare_first_run(mountpoint, config):
         PASSWORD = sha512_crypt.hash(config["password"]),
         KEY_MAP = osutils.get_keymap(),
         TIME_ZONE = osutils.get_timezone(),
-        SET_WLAN = '1' if config["online"] else '0',
+        ONLINE = 'true' if config["online"] else 'false',
     )
     if config["online"]:
         params.update(osutils.discover_wlan_params())
@@ -154,7 +154,7 @@ def update_ssh_config(computer_name, ip, user):
 def burn_image(config):
     download_latest_image(config["default-raspios-image"])
     device = detect_sdcard_device() if not config['sd-card'] else config['sd-card']
-    write_image(".cache/raspios.img", device)
+    #write_image(".cache/raspios.img", device)
     mountpoint = ensure_device_is_mounted(device)
     prepare_first_run(mountpoint, config)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")

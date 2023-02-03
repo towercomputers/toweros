@@ -7,7 +7,8 @@ set +e
 /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh -k '$PUBLIC_KEY'
 /usr/lib/userconf-pi/userconf '$LOGIN' '$PASSWORD'
 
-if [ '$SET_WLAN' = '1' ]; then
+SET_WLAN = $ONLINE
+if [ $SET_WLAN = true ]; then
     /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan '$WLAN_SSID' '$WLAN_PASSWORD' '$WLAN_COUNTRY'
 fi
 
