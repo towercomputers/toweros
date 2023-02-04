@@ -27,9 +27,9 @@ def parse_arguments():
     )
 
     provision_parser.add_argument(
-        '-n', '--name', 
-        help="""Computer's name. This name is used to install and run an application (Required).""",
-        required=True
+        'name', 
+        nargs=1,
+        help="""Computer's name. This name is used to install and run an application (Required)."""
     )
     provision_parser.add_argument(
         '-sd', '--sd-card', 
