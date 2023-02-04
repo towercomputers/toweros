@@ -21,6 +21,23 @@ from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
 
 
+def download_latest_image(url):
+    if not os.path.exists(".cache"):
+        os.makedirs(".cache")
+
+    if not os.path.exists(".cache/raspios.img"):
+        print(f"Downloading {url}...")
+        resp = requests.get(url)
+        with open(".cache/raspios.img.xz", "wb") as f:
+            f.write(resp.content)
+        print("Decompressing image...")
+        xz('-d', ".cache/raspios.img.xz")
+    else:
+        print("Using image in cache.")
+
+    print("Image ready to burn.")
+
+
 def detect_sdcard_device():
     k = None
     while k is None:
@@ -46,58 +63,7 @@ def detect_sdcard_device():
         return new_devices[0]
 
 
-def download_latest_image(url):
-    if not os.path.exists(".cache"):
-        os.makedirs(".cache")
-
-    if not os.path.exists(".cache/raspios.img"):
-        print(f"Downloading {url}...")
-        resp = requests.get(url)
-        with open(".cache/raspios.img.xz", "wb") as f:
-            f.write(resp.content)
-        print("Decompressing image...")
-        xz('-d', ".cache/raspios.img.xz")
-    else:
-        print("Using image in cache.")
-
-    print("Image ready to burn.")
-
-
-def generate_firstrun_script(params):
-    with open('scripts/firstrun.sh', 'r') as f:
-        template = Template(f.read())
-    script = template.safe_substitute(params)
-    return script
-
-
-def write_image(image, device):
-    start_time = time.time()
-    if os.path.exists(osutils.rpi_imager_path()):
-        # TODO: disable ejection
-        # WIN: reg add "HKCU\Software\Raspberry Pi\Imager" /v telemetry /t REG_DWORD /d 0
-        # LINUX: eject=false in ~/.config/Raspberry Pi/Imager.conf
-        # MAC: defaults write org.raspberrypi.Imager.plist eject -bool NO
-        rpi_imager = Command(osutils.rpi_imager_path())
-        print(f"Burning {device} with rpi-imager, be patient please...")
-        rpi_imager('--cli', '--debug', image, device, _out=print)
-    else:
-        print(f"Burning {device} with dd, be patient please...")
-        osutils.dd(image, device)
-    duration = time.time() - start_time
-    print(f"{device} burnt in {duration}s.")
-
-
-def ensure_device_is_mounted(device):
-    mountpoint = osutils.get_mount_point(device)
-    if mountpoint is None:
-        osutils.mount(device)
-        mountpoint = osutils.get_mount_point(device)
-    if mountpoint is None:
-        sys.exit("Error in mouting") #TODO
-    return mountpoint
-
-
-def prepare_first_run(mountpoint, config):
+def generate_firstrun_script(config):
     print("Generating firstrun.sh...")
 
     with open(config['public-key']) as f:
@@ -115,7 +81,14 @@ def prepare_first_run(mountpoint, config):
     if config["online"]:
         params.update(osutils.discover_wlan_params())
 
-    firstrun_script = generate_firstrun_script(params)
+    with open('scripts/firstrun.sh', 'r') as f:
+        template = Template(f.read())
+    script = template.safe_substitute(params)
+    return script
+
+
+def copy_firstrun_files(device, firstrun_script):
+    mountpoint = osutils.ensure_device_is_mounted(device)
     with open(os.path.join(mountpoint, 'firstrun.sh'), "w") as f:
         f.write(firstrun_script)
     shutil.copy('scripts/cmdline.txt', mountpoint)
@@ -151,12 +124,19 @@ def update_ssh_config(computer_name, ip, user):
     print(f"{config_path} updated")
 
 
+# 1. Download image
+# 2. Select sd-card device
+# 3. Prepare firstrun.sh
+# 4. Burn image
+# 5. Copy files in sd-card
+# 6. Discover IP
+# 7. Update ssh config file
 def burn_image(config):
     download_latest_image(config["default-raspios-image"])
     device = detect_sdcard_device() if not config['sd-card'] else config['sd-card']
-    write_image(".cache/raspios.img", device)
-    mountpoint = ensure_device_is_mounted(device)
-    prepare_first_run(mountpoint, config)
+    firstrun_script = generate_firstrun_script(config)
+    osutils.write_image(".cache/raspios.img", device)
+    copy_firstrun_files(device, firstrun_script)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(config['name'])
     update_ssh_config(config['name'], ip, config['default-ssh-user'])

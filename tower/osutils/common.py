@@ -1,5 +1,8 @@
 import binascii
+import time
+import os
 
+from sh import Command
 from backports.pbkdf2 import pbkdf2_hmac
 
 from tower import osutils
@@ -33,3 +36,25 @@ def discover_wlan_params():
         WLAN_PASSWORD = derive_wlan_key(ssid, psk),
         WLAN_COUNTRY = find_wlan_country(ssid),
     )
+
+def write_image(image, device):
+    start_time = time.time()
+    if os.path.exists(osutils.rpi_imager_path()):
+        osutils.disable_rpi_image_ejection()
+        rpi_imager = Command(osutils.rpi_imager_path())
+        print(f"Burning {device} with rpi-imager, be patient please...")
+        rpi_imager('--cli', '--debug', image, device, _out=print)
+    else:
+        print(f"Burning {device} with dd, be patient please...")
+        osutils.dd(image, device)
+    duration = time.time() - start_time
+    print(f"{device} burnt in {duration}s.")
+
+def ensure_device_is_mounted(device):
+    mountpoint = osutils.get_mount_point(device)
+    if mountpoint is None:
+        osutils.mount(device)
+        mountpoint = osutils.get_mount_point(device)
+    if mountpoint is None:
+        sys.exit("Error in mouting") #TODO
+    return mountpoint

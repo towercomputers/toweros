@@ -27,6 +27,15 @@ def unmount(device):
 def rpi_imager_path():
     return "/usr/bin/rpi-imager"
 
+def disable_rpi_image_ejection():
+    conf_path = os.path.join(os.path.expanduser('~'), '.config/', 'Raspberry Pi/', 'Imager.conf')
+    config = configparser.ConfigParser()
+    if os.path.exists(conf_path):
+        config.read(conf_path)
+    config[configparser.DEFAULTSECT]['eject'] = 'false'
+    with open(conf_path, 'w') as f:
+        config.write(f)
+
 def dd(image, device):
     if get_mount_point(device) is not None:
         unmount(device)

@@ -15,6 +15,10 @@ def unmount(device):
 def rpi_imager_path():
     sys.exit("OS not supported")
 
+def disable_rpi_image_ejection():
+    # WIN: reg add "HKCU\Software\Raspberry Pi\Imager" /v eject /t REG_DWORD /d 0
+    sys.exit("OS not supported")
+
 def scan_wifi_countries():
     sys.exit("OS not supported")
 

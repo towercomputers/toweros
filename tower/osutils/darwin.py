@@ -30,6 +30,9 @@ def unmount(device):
 def rpi_imager_path():
     return "/Applications/Raspberry Pi Imager.app/Contents/MacOS/rpi-imager"
 
+def disable_rpi_image_ejection():
+    defaults('write', 'org.raspberrypi.Imager.plist', 'eject', '-bool', 'NO')
+
 def dd(image, device):
     if get_mount_point(device) is not None:
         unmount(device)
