@@ -6,10 +6,8 @@ from random import randint
 from argparse import ArgumentParser
 import re
 import secrets
-from sh import ssh_keygen
 
 from passlib.hash import sha512_crypt
-from backports.pbkdf2 import pbkdf2_hmac
 
 from tower import osutils
 
@@ -24,24 +22,19 @@ def default_config_dir():
     home_path = os.path.expanduser('~')
     return os.path.join(home_path, '.config/', 'tower/')
 
-def default_ssh_dir():
-    home_path = os.path.expanduser('~')
-    return os.path.join(home_path, '.ssh/')
+def read_config(dir, filename):
+    config = configparser.ConfigParser()
+    config_dir = dir or default_config_dir()
+    config_file = os.path.join(config_dir, filename)
+    if os.path.exists(config_file):
+        config.read(config_file)
+    return config
 
-def generate_key_pair(name):
-    ssh_dir = default_ssh_dir()
-    key_path = os.path.join(ssh_dir, f'{name}')
-    if os.path.exists(key_path):
-        os.remove(key_path)
-        os.remove(f'{key_path}.pub')
-    ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
-    return f'{key_path}.pub', key_path
-
-def write_config_file(config, dir, filename):
+def write_config(dir, filename, config):
     config_dir = dir or default_config_dir()
     if not os.path.exists(config_dir):
         os.makedirs(config_dir)
-    config_file = os.path.join(config_dir, f'{filename}')
+    config_file = os.path.join(config_dir, filename)
     with open(config_file, 'w') as f:
         config.write(f)
 
@@ -49,15 +42,29 @@ def check_missing_value(key, value):
     if not value:
         raise MissingConfigValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
-def derive_wlan_key(ssid, psk):
-    return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
+##########################
+# General configuration  #
+##########################
+
+def get_tower_config(dir):
+    config = configparser.ConfigParser()
+    section = configparser.DEFAULTSECT
+    config = read_config(dir, 'tower.ini')
+    config[section]['default-ssh-user'] = config[section].get('default-ssh-user', DEFAULT_SSH_USER)
+    config[section]['default-ssh-port'] = config[section].get('default-ssh-port', f'{DEFAULT_SSH_PORT}')
+    config[section]['default-raspios-image'] = config[section].get('default-raspios-image', f'{DEFAULT_RASPIOS_IMAGE}')
+    return config[section]
+
+############################
+# Computers configurations #
+############################
 
 def create_computer_config(args):
     name = args.name[0]
 
     public_key_path, private_key_path = args.public_key_path, args.private_key_path
     if not public_key_path:
-        public_key_path, private_key_path = generate_key_pair(name)
+        public_key_path, private_key_path = osutils.generate_key_pair(name)
     
     with open(public_key_path) as f:
         public_key = f.read().strip()
@@ -76,15 +83,15 @@ def create_computer_config(args):
         check_missing_value('wlan-ssid', wlan_ssid)
         wlan_password = args.wlan_password or osutils.get_ssid_password(wlan_ssid)
         check_missing_value('wlan-password', wlan_password)
-        wlan_password = derive_wlan_key(wlan_ssid, wlan_password)
+        wlan_password = osutils.derive_wlan_key(wlan_ssid, wlan_password)
         wlan_country = args.wlan_country or osutils.find_wlan_country(wlan_ssid)
         check_missing_value('wlan-country', wlan_country)
     else:
         online = 'false'
         wlan_ssid, wlan_password, wlan_country = '', '', ''
-
-    config = configparser.ConfigParser()
-    config[configparser.DEFAULTSECT] = {
+  
+    config = read_config(args.config_dir, 'computers.ini')
+    config[name] = {
         'name': name,
         'sd-card': sd_card,
         'public-key': public_key,
@@ -98,10 +105,29 @@ def create_computer_config(args):
         'wlan-password': wlan_password,
         'wlan-country': wlan_country,
     }
-    write_config_file(config, args.config_dir, f'{name}.ini')
+    write_config(args.config_dir, 'computers.ini', config)
     
-    return config[configparser.DEFAULTSECT]
+    return config[name]
 
+def get_computer_config(dir, name):
+    config = read_config(dir, 'computers.ini')
+    if name in config:
+        return config[name]
+    else:
+        return None
+
+def get_computer_list(dir):
+    config = read_config(dir, 'computers.ini')
+    return config.sections()
+
+def computer_exists(dir, name):
+    return True if get_computer_config(dir, name) is not None else False
+
+###############################
+# Applications configurations #
+###############################
+
+# TODO: use one file for all applications
 def create_application_config(args):
     config = configparser.ConfigParser()
     config[configparser.DEFAULTSECT] = {
@@ -111,31 +137,7 @@ def create_application_config(args):
         'apt-packages': args.apt_packages or "",
         'local-apt-packages': args.local_apt_packages or "",
     }
-    write_config_file(config, args.config_dir, f'{args.name}.{args.alias}.ini')
-
-    return config[configparser.DEFAULTSECT]
-
-def get_tower_config(dir):
-    config = configparser.ConfigParser()
-    section = configparser.DEFAULTSECT
-
-    config_dir = dir or default_config_dir()
-    config_file = os.path.join(config_dir, 'tower_config.conf') # TODO: put computer and apps files in subfolders or just one file for everything
-    if os.path.exists(config_file):
-        config.read(config_file)
-        section = config.sections()[0]
-
-    config[section]['default-ssh-user'] = config[section].get('default-ssh-user', DEFAULT_SSH_USER)
-    config[section]['default-ssh-port'] = config[section].get('default-ssh-port', f'{DEFAULT_SSH_PORT}')
-    config[section]['default-raspios-image'] = config[section].get('default-raspios-image', f'{DEFAULT_RASPIOS_IMAGE}')
-    
-    return config[section]
-
-def get_computer_config(dir, name):
-    config_dir = dir or default_config_dir()
-    config_file = os.path.join(config_dir, f'{name}.ini')
-    config = configparser.ConfigParser()
-    config.read(config_file)
+    write_config(args.config_dir, f'{args.name}.{args.alias}.ini', config)
     return config[configparser.DEFAULTSECT]
 
 def get_application_config(dir, name, alias):

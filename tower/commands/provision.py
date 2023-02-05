@@ -4,16 +4,20 @@ import os
 import re
 import sys
 
-from tower.configs import default_config_dir, create_computer_config, get_tower_config, MissingConfigValue
+from tower.configs import (
+    computer_exists,
+    create_computer_config, 
+    default_config_dir,
+    get_tower_config, 
+    MissingConfigValue,
+)
 from tower.imager import burn_image
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
         parser_error(message="Computer name invalid. Must be between one and 15 alphanumeric chars.")
 
-    config_dir = args.config_dir or default_config_dir()
-    config_file = os.path.join(config_dir, f'{args.name}.ini')
-    if os.path.exists(config_file):
+    if computer_exists(args.config_dir, args.name[0]):
         parser_error("Computer name already used.")
 
     if args.sd_card and not os.path.exists(args.sd_card):

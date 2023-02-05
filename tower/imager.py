@@ -16,10 +16,8 @@ import requests
 import sh
 from sh import xz, Command, arp
 
-
 from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
-
 
 def download_latest_image(url):
     if not os.path.exists(".cache"):

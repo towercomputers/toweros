@@ -2,9 +2,26 @@ import binascii
 import time
 import os
 
-from sh import Command
+from backports.pbkdf2 import pbkdf2_hmac
+from sh import Command, ssh_keygen
 
 from tower import osutils
+
+def default_ssh_dir():
+    home_path = os.path.expanduser('~')
+    return os.path.join(home_path, '.ssh/')
+
+def generate_key_pair(name):
+    ssh_dir = default_ssh_dir()
+    key_path = os.path.join(ssh_dir, f'{name}')
+    if os.path.exists(key_path):
+        os.remove(key_path)
+        os.remove(f'{key_path}.pub')
+    ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
+    return f'{key_path}.pub', key_path
+
+def derive_wlan_key(ssid, psk):
+    return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
 
 def find_wlan_country(ssid):
     wifi_countries = osutils.scan_wifi_countries()
