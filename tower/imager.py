@@ -15,7 +15,7 @@ from datetime import datetime
 import requests
 import sh
 from sh import xz, Command, arp
-from passlib.hash import sha512_crypt
+
 
 from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
@@ -65,22 +65,7 @@ def detect_sdcard_device():
 
 def generate_firstrun_script(config):
     print("Generating firstrun.sh...")
-
-    with open(config['public-key']) as f:
-        public_key = f.read()
-    
-    params = dict(
-        HOSTNAME = f'{config["name"]}.tower',
-        PUBLIC_KEY = public_key,
-        LOGIN = config["default-ssh-user"],
-        PASSWORD = sha512_crypt.hash(config["password"]),
-        KEY_MAP = osutils.get_keymap(),
-        TIME_ZONE = osutils.get_timezone(),
-        ONLINE = 'true' if config["online"] else 'false',
-    )
-    if config["online"]:
-        params.update(osutils.discover_wlan_params())
-
+    params = {key.upper().replace("-", "_"): config[key] for key in config}
     with open('scripts/firstrun.sh', 'r') as f:
         template = Template(f.read())
     script = template.safe_substitute(params)
@@ -110,33 +95,31 @@ def discover_ip(computer_name):
     return discover_ip(computer_name)
 
 
-def update_ssh_config(computer_name, ip, user):
+def update_ssh_config(config, ip):
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/config')
     shutil.copy(config_path, f'{config_path}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
     # TODO: check if IP or host already here
     with open(config_path, 'a') as f:
         f.write("\n")
-        f.write(f"Host {computer_name}\n")
+        f.write(f"Host {config['name']}\n")
         f.write(f" HostName {ip}\n")
-        f.write(f" User {user}\n")
-        f.write(f" IdentityFile ~/.ssh/{computer_name}\n")
+        f.write(f" User {config['default-ssh-user']}\n")
+        f.write(f" IdentityFile {config['private-key-path']}\n")
         f.write("  StrictHostKeyChecking no\n") # same IP/computer with different name should happen..
     print(f"{config_path} updated")
 
 
 # 1. Download image
-# 2. Select sd-card device
-# 3. Prepare firstrun.sh
-# 4. Burn image
-# 5. Copy files in sd-card
-# 6. Discover IP
-# 7. Update ssh config file
+# 2. Prepare firstrun.sh
+# 3. Burn image
+# 4. Copy files in sd-card
+# 5. Discover IP
+# 6. Update ssh config file
 def burn_image(config):
     download_latest_image(config["default-raspios-image"])
-    device = detect_sdcard_device() if not config['sd-card'] else config['sd-card']
     firstrun_script = generate_firstrun_script(config)
-    osutils.write_image(".cache/raspios.img", device)
-    copy_firstrun_files(device, firstrun_script)
+    osutils.write_image(".cache/raspios.img", config['sd-card'])
+    copy_firstrun_files(config['sd-card'], firstrun_script)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(config['name'])
-    update_ssh_config(config['name'], ip, config['default-ssh-user'])
+    update_ssh_config(config, ip)

@@ -59,19 +59,27 @@ def scan_wifi_countries():
 
     return wifis
 
-def get_wlan_infos():
-    airport = Command('/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport')
-    buf = StringIO()
-    airport('-I', _out=buf)
-    result = buf.getvalue()
-    ssid = result.split(" SSID: ")[1].split(" ")[0].strip()
+def get_connected_ssid():
+    try:
+        airport = Command('/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport')
+        buf = StringIO()
+        airport('-I', _out=buf)
+        result = buf.getvalue()
+        ssid = result.split(" SSID: ")[1].split(" ")[0].strip()
+        return ssid
+    except: # no need to be curious here
+        return None
 
-    buf = StringIO()
-    security('find-generic-password', '-a', ssid , '-g', _err=buf)
-    result = buf.getvalue()
-    password = result.split('password: "')[1].split('"')[0]
-    
-    return ssid, password
+def get_ssid_password(ssid):
+    try:
+        buf = StringIO()
+        security('find-generic-password', '-a', ssid , '-g', _err=buf)
+        result = buf.getvalue()
+        password = result.split('password: "')[1].split('"')[0]
+        return password
+    except: # no need to be curious here
+        return None
+
 
 def get_timezone():
     buf = StringIO()

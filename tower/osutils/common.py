@@ -3,12 +3,8 @@ import time
 import os
 
 from sh import Command
-from backports.pbkdf2 import pbkdf2_hmac
 
 from tower import osutils
-
-def derive_wlan_key(ssid, psk):
-    return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
 
 def find_wlan_country(ssid):
     wifi_countries = osutils.scan_wifi_countries()
@@ -28,14 +24,6 @@ def find_wlan_country(ssid):
                 max_count = count_by_country[cc]
                 max_cc = cc
     return max_cc
-
-def discover_wlan_params():
-    ssid, psk = osutils.get_wlan_infos()
-    return dict(
-        WLAN_SSID = ssid,
-        WLAN_PASSWORD = derive_wlan_key(ssid, psk),
-        WLAN_COUNTRY = find_wlan_country(ssid),
-    )
 
 def write_image(image, device):
     start_time = time.time()
@@ -58,3 +46,27 @@ def ensure_device_is_mounted(device):
     if mountpoint is None:
         sys.exit("Error in mouting") #TODO
     return mountpoint
+
+def select_sdcard_device():
+    k = None
+    while k is None:
+        k = input("Please ensure the sd-card is *NOT* connected and press ENTER.")
+    devices_before = osutils.get_device_list()
+    
+    k = None
+    while k is None:
+        k = input("Please insert now the sd-card and press ENTER.")
+
+    time.sleep(2)
+    devices_after = osutils.get_device_list()
+    new_devices = list(set(devices_after) - set(devices_before))
+
+    if (len(new_devices) == 0):
+        print("sd-card not found.")
+        return None
+    elif (len(new_devices) > 1):
+        print("More than one disk found.")
+        return None
+    else:
+        print(f"sd-card found: {new_devices[0]}")
+        return new_devices[0]

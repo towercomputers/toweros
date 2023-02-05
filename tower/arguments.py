@@ -25,7 +25,6 @@ def parse_arguments():
         'provision',
         help="""Command used to prepare the bootable SD Card needed to provision a computer."""
     )
-
     provision_parser.add_argument(
         'name', 
         nargs=1,
@@ -38,22 +37,53 @@ def parse_arguments():
         default=""
     )
     provision_parser.add_argument(
-        '--public-key', 
+        '--public-key-path', 
         help="""Public key path used to access the application computer (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
         required=False
     )
     provision_parser.add_argument(
-        '--private-key', 
+        '--private-key-path', 
         help="""Private key path used to access the application computer (Default: automatically generated and stored in the local ~/.ssh/ folder).""",
         required=False
     )
     provision_parser.add_argument(
+        '--keymap', 
+        help="""Keyboard layout code (Default: same as the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
+        '--timezone', 
+        help="""Timezone of the computer (Default: same as the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
         '--online', 
-        help="""Set wifi connection using the same parameters as the client""",
+        help="""Set wifi connection (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
+    provision_parser.add_argument(
+        '--wlan-ssid', 
+        help="""Wifi SSID (Default: same as the connection currently used by the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
+        '--wlan-password', 
+        help="""Wifi password (Default: same as the connection currently used by the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
+        '--wlan-country', 
+        help="""Wifi country (Default: same as the connection currently used by the thin client)""",
+        required=False,
+        default=""
+    )
+
 
     ##########################
     #  `install` command     #

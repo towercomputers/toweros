@@ -58,28 +58,33 @@ def scan_wifi_countries():
                 wifis[ssid] = cc
     return wifis
 
-def get_wlan_information():
-    buf = StringIO()
-    iwconfig(_out=buf)
-    result = buf.getvalue()
-    ssid = result.split('ESSID: "')[1].split('"')[0]
+def get_connected_ssid():
+    try:
+        buf = StringIO()
+        iwconfig(_out=buf)
+        result = buf.getvalue()
+        ssid = result.split('ESSID: "')[1].split('"')[0]
+        return ssid
+    except: # no need to be curious here
+        return None
 
-    network_manager_conf_path = f'/etc/NetworkManager/system-connections/{ssid}.nmconnection'
-    if os.path.exists(network_manager_conf_path):
-        wlan_conf = configparser.ConfigParser()
-        wlan_conf.read(network_manager_conf_path)
-        password = wlan_conf['wifi-security']['psk']
-        return ssid, password
-    
-    wpa_supplicant_path = '/etc/wpa_supplicant/wpa_supplicant.conf'
-    if os.path.exists(wpa_supplicant_path):
-        with open(wpa_supplicant_path) as f:
-            wlan_conf = f.read()
-        password = wlan_conf.split('psk="')[1].split('"')[0]
-        return ssid, password
-    
-    password = getpass.getpass(prompt=f'Please enter password for {ssid}: ')
-    return ssid, password
+def get_ssid_password(ssid):
+    try:
+        network_manager_conf_path = f'/etc/NetworkManager/system-connections/{ssid}.nmconnection'
+        if os.path.exists(network_manager_conf_path):
+            wlan_conf = configparser.ConfigParser()
+            wlan_conf.read(network_manager_conf_path)
+            password = wlan_conf['wifi-security']['psk']
+            return password
+        wpa_supplicant_path = '/etc/wpa_supplicant/wpa_supplicant.conf'
+        if os.path.exists(wpa_supplicant_path):
+            with open(wpa_supplicant_path) as f:
+                wlan_conf = f.read()
+            password = wlan_conf.split('psk="')[1].split('"')[0]
+            return password
+        return None
+    except: # no need to be curious here
+        return None
 
 def get_timezone():
     buf = StringIO()

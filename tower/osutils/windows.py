@@ -22,7 +22,10 @@ def disable_rpi_image_ejection():
 def scan_wifi_countries():
     sys.exit("OS not supported")
 
-def get_wlan_information():
+def get_connected_ssid():
+    sys.exit("OS not supported")
+
+def get_ssid_password(ssid):
     sys.exit("OS not supported")
 
 def get_timezone():
