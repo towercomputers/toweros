@@ -17,6 +17,11 @@ fi
 
 mv -f /boot/dhcpcd.conf /etc/
 
+tar -xf /boot/apt-offline-1.8.5.tar.gz --directory /tmp
+cd /tmp/apt-offline
+sudo python setup.py install
+rm -rf /tmp/apt-offline /boot/apt-offline-1.8.5.tar.gz
+
 rm -f /boot/firstrun.sh
 sed -i 's| systemd.run.*||g' /boot/cmdline.txt
 exit 0

@@ -76,6 +76,7 @@ def copy_firstrun_files(device, firstrun_script):
         f.write(firstrun_script)
     shutil.copy('scripts/cmdline.txt', mountpoint)
     shutil.copy('scripts/dhcpcd.conf', mountpoint)
+    shutil.copy('scripts/apt-offline-1.8.5.tar.gz', mountpoint)
 
 
 def discover_ip(computer_name):
