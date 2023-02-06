@@ -3,10 +3,11 @@ import os
 import x2go
 import gevent
 
+from tower import computers
+
 from tower.configs import (
     default_config_dir, 
     get_tower_config, 
-    get_computer_config, 
     get_application_config
 )
 
@@ -47,7 +48,7 @@ def run_application(host, port, username, key_filename, command):
 
 def execute(args):
     tower_config = get_tower_config(args.config_dir)
-    computer_config = get_computer_config(args.config_dir, args.name)
+    computer_config = computers.get_computer_config(args.config_dir, args.name)
     application_config = get_application_config(args.config_dir, args.name, args.alias)
 
     run_application(
