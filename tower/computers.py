@@ -11,7 +11,7 @@ from datetime import datetime
 import sys
 
 from passlib.hash import sha512_crypt
-from sh import ssh, scp
+from sh import ssh, scp, ErrorReturnCode_1
 
 from tower import osutils
 from tower import configs
@@ -93,26 +93,28 @@ def copy_file(computer_name_src, computer_name_dest, filename):
 def install_package(dir, computer_name, package_name, online_computer=None):
     proxy = computer_name if online_computer is None else online_computer
 
-    print("Generate package signature in target computer.")
-    sig_filename = os.path.join('~/Downloads', f'{package_name}-apt.sig')
-    ssh(computer_name, 'sudo', 'apt-offline',
-        'set', sig_filename, '--install-packages', package_name, _out=sys.stdin)
+    try:
+        print("Generate package signature in target computer.")
+        sig_filename = os.path.join('~/Downloads', f'{package_name}-apt.sig')
+        ssh(computer_name, 'sudo', 'apt-offline',
+            'set', sig_filename, '--install-packages', package_name, _out=sys.stdin)
 
-    print("Copy package signature to online computer.")
-    if proxy != computer_name:
-        copy_file(computer_name, proxy, sig_filename, _out=sys.stdin)
+        print("Copy package signature to online computer.")
+        if proxy != computer_name:
+            copy_file(computer_name, proxy, sig_filename, _out=sys.stdin)
 
-    print("Downloading bundle...")
-    bundle_filename = os.path.join('~/Downloads', f'{package_name}-apt-bundle.zip')
-    ssh(proxy, 'sudo', 'apt-offline',
-        'get', sig_filename, '--bundle', bundle_filename, _out=sys.stdin)
+        print("Downloading bundle...")
+        bundle_filename = os.path.join('~/Downloads', f'{package_name}-apt-bundle.zip')
+        ssh(proxy, 'sudo', 'apt-offline',
+            'get', sig_filename, '--bundle', bundle_filename, _out=sys.stdin)
 
-    print("Copy bundle to target computer.")
-    if proxy != computer_name:
-        copy_file(proxy, computer_name, bundle_filename)
+        print("Copy bundle to target computer.")
+        if proxy != computer_name:
+            copy_file(proxy, computer_name, bundle_filename)
 
-    print("Install bundle in target computer.")
-    ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=sys.stdin)
-    ssh(computer_name, 'sudo', 'apt-get', 'install', package_name, _out=sys.stdin)
-
+        print("Install bundle in target computer.")
+        ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=sys.stdin)
+        ssh(computer_name, 'sudo', 'apt-get', 'install', package_name, _out=sys.stdin)
+    except ErrorReturnCode_1 as e:
+        sys.exit(e)
     # TODO: check if ok and remove the dpkg file

@@ -104,7 +104,8 @@ def update_ssh_config(config, ip):
         f.write(f" HostName {ip}\n")
         f.write(f" User {config['default-ssh-user']}\n")
         f.write(f" IdentityFile {config['private-key-path']}\n")
-        f.write("  StrictHostKeyChecking no\n") # same IP/computer with different name should happen..
+        f.write(" StrictHostKeyChecking no\n") # same IP/computer with different name should happen..
+        f.write(" LogLevel FATAL\n") # TODO: in dev mode only
     print(f"{config_path} updated")
 
 
