@@ -6,8 +6,11 @@ from random import randint
 from argparse import ArgumentParser
 import re
 import secrets
+from io import StringIO
+from datetime import datetime
 
 from passlib.hash import sha512_crypt
+from sh import ssh, scp
 
 from tower import osutils
 from tower import configs
@@ -63,6 +66,8 @@ def create_computer_config(args):
     
     return config[name]
 
+#TODO: get rid of this `dir` argument
+
 def get_computer_config(dir, name):
     config = configs.read_config(dir, 'computers.ini')
     if name in config:
@@ -76,3 +81,26 @@ def get_computer_list(dir):
 
 def computer_exists(dir, name):
     return True if get_computer_config(dir, name) is not None else False
+
+# TODO: make all these function more robust
+
+def download(dir, computer_name, url):
+    computer_config = get_computer_config(dir, computer_name)
+    if computer_config['online'] == 'false':
+        raise Exception("You can't download from offline computer")
+    filename = os.path.split(url)[1]
+    ssh(computer_name, 'wget', '-P', '~/Downloads', url)
+    return os.path.join('~/Downloads', filename)
+
+def copy_file(computer_name_src, computer_name_dest, filename):
+    scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}')
+
+def install_from_url(dir, computer_name, url, online_computer=None):
+    proxy = computer_name if online_computer is None else online_computer
+    cache_filename = download(dir, proxy, url)
+    if proxy != computer_name:
+        copy_file(proxy, computer_name, cache_filename)
+    buf = StringIO()
+    ssh(computer_name, 'sudo', 'dpkg', '-i', cache_filename, _out=buf)
+    print(buf.getvalue())
+    # TODO: check if ok and remove the dpkg file

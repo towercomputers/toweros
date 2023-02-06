@@ -54,27 +54,3 @@ def get_tower_config(dir):
     config[section]['default-ssh-port'] = config[section].get('default-ssh-port', f'{DEFAULT_SSH_PORT}')
     config[section]['default-raspios-image'] = config[section].get('default-raspios-image', f'{DEFAULT_RASPIOS_IMAGE}')
     return config[section]
-
-###############################
-# Applications configurations #
-###############################
-
-# TODO: use one file for all applications
-def create_application_config(args):
-    config = configparser.ConfigParser()
-    config[configparser.DEFAULTSECT] = {
-        'name': args.name,
-        'alias': args.alias,
-        'path': args.path,
-        'apt-packages': args.apt_packages or "",
-        'local-apt-packages': args.local_apt_packages or "",
-    }
-    write_config(args.config_dir, f'{args.name}.{args.alias}.ini', config)
-    return config[configparser.DEFAULTSECT]
-
-def get_application_config(dir, name, alias):
-    config_dir = dir or default_config_dir()
-    config_file = os.path.join(config_dir, f'{name}.{alias}.ini')
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    return config[configparser.DEFAULTSECT]

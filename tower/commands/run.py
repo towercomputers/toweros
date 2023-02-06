@@ -7,8 +7,7 @@ from tower import computers
 
 from tower.configs import (
     default_config_dir, 
-    get_tower_config, 
-    get_application_config
+    get_tower_config
 )
 
 def check_args(args, parser_error):
@@ -47,7 +46,7 @@ def run_application(host, port, username, key_filename, command):
 
 
 def execute(args):
-    tower_config = get_tower_config(args.config_dir)
+    """ tower_config = get_tower_config(args.config_dir)
     computer_config = computers.get_computer_config(args.config_dir, args.name)
     application_config = get_application_config(args.config_dir, args.name, args.alias)
 
@@ -57,4 +56,4 @@ def execute(args):
         tower_config.get('default-ssh-user'), 
         computer_config.get('private-key'), 
         application_config.get('path')
-    )
+    ) """

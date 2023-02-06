@@ -95,30 +95,21 @@ def parse_arguments():
     )
 
     install_parser.add_argument(
-        '-n', '--name', 
-        help="""Computer's name where to install the application. A config file MUST exists for this name (Required).""",
-        required=True
+        'url', 
+        help="""URL of the pkg file (Required).""",
+        nargs=1
     )
     install_parser.add_argument(
-        '-p', '--path', 
-        help="""Application's binary path in the application computer (Required).""",
-        required=True
+        'name', 
+        help="""Computer name where to install the package (Required).""",
+        nargs=1
     )
     install_parser.add_argument(
-        '-a', '--alias',
-        help="""Name used to run the application (Required).""",
-        required=True
+        '--online-host', 
+        help="""Computer name used to download the file (Default: same as `name`)""",
+        required=False,
     )
-    install_parser.add_argument(
-        '--apt-packages', 
-        help="""Comma separated list of apt packages to install in th SD Card (Default: assume the application is already installed).""",
-        required=False
-    )
-    install_parser.add_argument(
-        '--local-apt-packages', 
-        help="""Comma separated list of apt packages local file pathes to install in th SD Card. (Default: assume the application is already installed)""",
-        required=False
-    )
+
 
     ##########################
     #  `run` command         #
