@@ -122,14 +122,14 @@ def parse_arguments():
     )
 
     run_parser.add_argument(
-        '-n', '--name', 
+        'computer_name', 
         help="""Computer's name. This name must match with the `name` used with the `provision` command (Required).""",
-        required=True
+        nargs=1
     )
     run_parser.add_argument(
-        '-a', '--alias', 
-        help="""Application's alias. This name must match with the `alias` used with the `install` command (Required).""",
-        required=True
+        'run_command', 
+        help="""Command to execute with X2GO (Required).""",
+        nargs='+'
     )
 
     ##########################

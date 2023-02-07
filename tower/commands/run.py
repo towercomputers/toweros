@@ -1,4 +1,5 @@
 import os
+import sys
 
 import x2go
 import gevent
@@ -11,16 +12,9 @@ from tower.configs import (
 )
 
 def check_args(args, parser_error):
-    config_dir = args.config_dir or default_config_dir()
-
-    computer_config_file = os.path.join(config_dir, f'{args.name}.ini')
-    if not os.path.exists(computer_config_file):
+    config = computers.get_computer_config(args.config_dir, args.computer_name[0])
+    if config is None:
         parser_error("Unkown computer name.")
-    
-    application_config_file = os.path.join(config_dir, f'{args.name}.{args.alias}.ini')
-    if not os.path.exists(application_config_file):
-        parser_error("Unkown application alias.")
-
 
 def run_application(host, port, username, key_filename, command):
     cli = x2go.X2GoClient(use_cache=False, loglevel=x2go.log.loglevel_DEBUG)
@@ -46,14 +40,18 @@ def run_application(host, port, username, key_filename, command):
 
 
 def execute(args):
-    """ tower_config = get_tower_config(args.config_dir)
-    computer_config = computers.get_computer_config(args.config_dir, args.name)
-    application_config = get_application_config(args.config_dir, args.name, args.alias)
+    tower_config = get_tower_config(args.config_dir)
+    computer_config = computers.get_computer_config(args.config_dir, args.computer_name[0])
+
+    # TODO: x2go should support ~/.ssh/config
+    ip = computer_config.get('ip')
+    if not ip:
+        sys.exit('Unkown IP. Please run `tower config refresh`') # TODO: hum.. blah..
 
     run_application(
-        f"{computer_config.get('name')}.tower", 
+        ip, 
         tower_config.get('default-ssh-port'), 
         tower_config.get('default-ssh-user'), 
-        computer_config.get('private-key'), 
-        application_config.get('path')
-    ) """
+        computer_config.get('private-key-path'), 
+        " ".join(args.run_command)
+    )

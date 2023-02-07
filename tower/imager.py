@@ -18,6 +18,7 @@ from sh import xz, Command, arp
 
 from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
+from tower import computers
 
 def download_latest_image(url):
     if not os.path.exists(".cache"):
@@ -118,7 +119,8 @@ def update_ssh_config(config, ip):
 # 4. Copy files in sd-card
 # 5. Discover IP
 # 6. Update ssh config file
-def burn_image(config):
+# 6. Update computer config
+def burn_image(dir, config):
     download_latest_image(config["default-raspios-image"])
     firstrun_script = generate_firstrun_script(config)
     osutils.write_image(".cache/raspios.img", config['sd-card'])
@@ -126,3 +128,5 @@ def burn_image(config):
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(config['name'])
     update_ssh_config(config, ip)
+    # TODO: let's think if we can get rid of computers.ini
+    computers.set_computer_config(dir, config['name'], 'ip', ip)

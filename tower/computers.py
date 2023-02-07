@@ -76,6 +76,14 @@ def get_computer_config(dir, name):
     else:
         return None
 
+def set_computer_config(dir, name, key, value):
+    computers_config = configs.read_config(dir, 'computers.ini')
+    if name in computers_config:
+        computers_config[name][key] = value
+        configs.write_config(dir, 'computers.ini', computers_config)
+    else:
+        raise Exception("Unkown computer") #TODO: custom exception
+
 def get_computer_list(dir):
     config = configs.read_config(dir, 'computers.ini')
     return config.sections()
@@ -118,3 +126,5 @@ def install_package(dir, computer_name, package_name, online_computer=None):
     except ErrorReturnCode_1 as e:
         sys.exit(e)
     # TODO: check if ok and remove the dpkg file
+
+    

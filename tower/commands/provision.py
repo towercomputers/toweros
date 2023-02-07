@@ -43,4 +43,4 @@ def execute(args):
         computer_config = computers.create_computer_config(args)
     except MissingConfigValue as e:
         sys.exit(e)
-    burn_image(dict(computer_config) | dict(tower_config))
+    burn_image(args.config_dir, dict(computer_config) | dict(tower_config))
