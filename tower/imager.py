@@ -76,7 +76,10 @@ def copy_firstrun_files(device, firstrun_script):
         f.write(firstrun_script)
     shutil.copy('scripts/cmdline.txt', mountpoint)
     shutil.copy('scripts/dhcpcd.conf', mountpoint)
+    # TODO: integrate this apps in the image
     shutil.copy('scripts/apt-offline-1.8.5.tar.gz', mountpoint)
+    shutil.copy('scripts/apt-update-20230207.zip', mountpoint)
+    shutil.copy('scripts/x2goserver-apt.zip', mountpoint)
 
 
 def discover_ip(computer_name):

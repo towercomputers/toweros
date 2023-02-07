@@ -22,6 +22,11 @@ cd /tmp/apt-offline
 sudo python setup.py install
 rm -rf /tmp/apt-offline /boot/apt-offline-1.8.5.tar.gz
 
+sudo apt-offline install /boot/apt-update-20230207.zip > /firstrun.log
+sudo apt-offline install /boot/x2goserver-apt.zip >> /firstrun.log
+sudo apt-get -y install x2goserver x2goserver-xsession >> /firstrun.log
+rm -f /boot/x2goserver-apt.zip /boot/apt-update-20230207.zip
+
 rm -f /boot/firstrun.sh
 sed -i 's| systemd.run.*||g' /boot/cmdline.txt
 exit 0
