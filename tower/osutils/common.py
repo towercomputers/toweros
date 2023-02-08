@@ -3,6 +3,7 @@ import time
 import os
 
 from backports.pbkdf2 import pbkdf2_hmac
+import sh
 from sh import Command, ssh_keygen
 
 from tower import osutils
@@ -48,7 +49,8 @@ def write_image(image, device):
         osutils.disable_rpi_image_ejection()
         rpi_imager = Command(osutils.rpi_imager_path())
         print(f"Burning {device} with rpi-imager, be patient please...")
-        rpi_imager('--cli', '--debug', image, device, _out=print)
+        with sh.contrib.sudo:
+            rpi_imager('--cli', '--debug', image, device, _out=print)
     else:
         print(f"Burning {device} with dd, be patient please...")
         osutils.dd(image, device)

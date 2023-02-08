@@ -41,7 +41,6 @@ def create_computer_config(args):
         configs.check_missing_value('wlan-ssid', wlan_ssid)
         wlan_password = args.wlan_password or osutils.get_ssid_password(wlan_ssid)
         configs.check_missing_value('wlan-password', wlan_password)
-        wlan_password = osutils.derive_wlan_key(wlan_ssid, wlan_password)
         wlan_country = args.wlan_country or osutils.find_wlan_country(wlan_ssid)
         configs.check_missing_value('wlan-country', wlan_country)
     else:

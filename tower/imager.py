@@ -75,12 +75,12 @@ def copy_firstrun_files(device, firstrun_script):
     mountpoint = osutils.ensure_device_is_mounted(device)
     with open(os.path.join(mountpoint, 'firstrun.sh'), "w") as f:
         f.write(firstrun_script)
-    shutil.copy('scripts/cmdline.txt', mountpoint)
-    shutil.copy('scripts/dhcpcd.conf', mountpoint)
+    shutil.copyfile('scripts/cmdline.txt', os.path.join(mountpoint, 'cmdline.txt'))
+    shutil.copyfile('scripts/dhcpcd.conf', os.path.join(mountpoint, 'dhcpcd.conf'))
     # TODO: integrate this apps in the image
-    shutil.copy('scripts/apt-offline-1.8.5.tar.gz', mountpoint)
-    shutil.copy('scripts/apt-update-20230207.zip', mountpoint)
-    shutil.copy('scripts/x2goserver-apt.zip', mountpoint)
+    shutil.copyfile('scripts/apt-offline-1.8.5.tar.gz', os.path.join(mountpoint, 'apt-offline-1.8.5.tar.gz'))
+    shutil.copyfile('scripts/apt-update-20230207.zip', os.path.join(mountpoint, 'apt-update-20230207.zip'))
+    shutil.copyfile('scripts/x2goserver-apt.zip', os.path.join(mountpoint, 'x2goserver-apt.zip'))
 
 
 def discover_ip(computer_name):
@@ -102,7 +102,7 @@ def update_ssh_config(config, ip):
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/config')
     shutil.copy(config_path, f'{config_path}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
     # TODO: check if IP or host already here
-    with open(config_path, 'a') as f:
+    with open(config_path, 'a+') as f:
         f.write("\n")
         f.write(f"Host {config['name']}\n")
         f.write(f" HostName {ip}\n")

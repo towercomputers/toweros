@@ -76,7 +76,7 @@ def get_ssid_password(ssid):
         security('find-generic-password', '-a', ssid , '-g', _err=buf)
         result = buf.getvalue()
         password = result.split('password: "')[1].split('"')[0]
-        return password
+        return osutils.derive_wlan_key(ssid, password)
     except: # no need to be curious here
         return None
 
