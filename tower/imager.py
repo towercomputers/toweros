@@ -15,6 +15,7 @@ from datetime import datetime
 import requests
 import sh
 from sh import xz, Command, arp
+from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower.configs import DEFAULT_RASPIOS_IMAGE
 from tower import osutils
@@ -98,19 +99,52 @@ def discover_ip(computer_name):
     return discover_ip(computer_name)
 
 
-def update_ssh_config(config, ip):
-    config_path = os.path.join(os.path.expanduser('~'), '.ssh/config')
-    if os.path.exists(config_path):
-        shutil.copy(config_path, f'{config_path}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
-    # TODO: check if IP or host already here
-    with open(config_path, 'a+') as f:
-        f.write("\n")
-        f.write(f"Host {config['name']}\n")
-        f.write(f" HostName {ip}\n")
-        f.write(f" User {config['default-ssh-user']}\n")
-        f.write(f" IdentityFile {config['private-key-path']}\n")
-        f.write(" StrictHostKeyChecking no\n") # same IP/computer with different name should happen..
-        f.write(" LogLevel FATAL\n") # TODO: in dev mode only
+def insert_ssh_include():
+    config_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
+    master_config_path = os.path.join(config_dir, 'config')
+    tower_config_path = os.path.join(config_dir, 'tower')
+    directive = f"Include {tower_config_path}"
+
+    if os.path.exists(master_config_path):
+        with open(master_config_path, 'r') as f:
+            current_config = f.read()
+        if directive not in current_config:
+            with open(master_config_path, 'a') as f:
+                f.write("\n")
+                f.write(directive)
+    else:
+        with open(master_config_path, 'w') as f:
+            f.write(directive)
+
+
+def update_ssh_config(name, ip):
+    insert_ssh_include()
+    config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower')
+    key_path = os.path.join(os.path.expanduser('~'), '.ssh/', name)
+    config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
+    existing_hosts = config.hosts()
+
+    if name in existing_hosts:
+        config.set(name, Hostname=ip)
+        config.save()
+        return
+
+    for host_name in existing_hosts:
+        host = config.host(host_name)
+        if host['hostname'] == ip:
+            config.rename(host_name, name)
+            config.set(name, IdentityFile=key_path)
+            config.save()
+            return
+    
+    config.add(name,
+        Hostname=ip,
+        User="tower",
+        IdentityFile=key_path,
+        StrictHostKeyChecking="no",
+        LogLevel="FATAL"
+    )
+    config.write(config_path)
     print(f"{config_path} updated")
 
 
@@ -129,6 +163,6 @@ def burn_image(dir, config):
     # TODO: unmount device
     print(f"SD Card ready. Please unmount and insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(config['name'])
-    update_ssh_config(config, ip)
+    update_ssh_config(config['name'], ip)
     # TODO: let's think if we can get rid of computers.ini
     computers.set_computer_config(dir, config['name'], 'ip', ip)
