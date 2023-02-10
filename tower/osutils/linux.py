@@ -27,6 +27,7 @@ def get_mount_point(device):
     return result['blockdevices'][0]['children'][0]['mountpoint'] # first partition where to put files
 
 def unmount(device):
+    # TODO: unmount all partitions
     mountpoint = get_mount_point(device)
     if mountpoint not in [None, ""]:
         umount(mountpoint)

@@ -7,7 +7,7 @@
 ```
 $> wget https://code.x2go.org/releases/source/python-x2go/python-x2go-0.6.1.3.tar.gz
 $> cd python-x2go-0.6.1.3
-$> python setup.py install
+$> sudo python setup.py install
 ```
 
 2. Install other requirements

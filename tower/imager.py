@@ -100,7 +100,8 @@ def discover_ip(computer_name):
 
 def update_ssh_config(config, ip):
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/config')
-    shutil.copy(config_path, f'{config_path}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
+    if os.path.exists(config_path):
+        shutil.copy(config_path, f'{config_path}.{datetime.now().strftime("%Y%m%d%H%M%S")}.bak')
     # TODO: check if IP or host already here
     with open(config_path, 'a+') as f:
         f.write("\n")
@@ -125,7 +126,8 @@ def burn_image(dir, config):
     firstrun_script = generate_firstrun_script(config)
     osutils.write_image(".cache/raspios.img", config['sd-card'])
     copy_firstrun_files(config['sd-card'], firstrun_script)
-    print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
+    # TODO: unmount device
+    print(f"SD Card ready. Please unmount and insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(config['name'])
     update_ssh_config(config, ip)
     # TODO: let's think if we can get rid of computers.ini
