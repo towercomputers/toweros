@@ -12,7 +12,7 @@ from tower.configs import (
 )
 
 def check_args(args, parser_error):
-    config = computers.get_computer_config(args.config_dir, args.computer_name[0])
+    config = computers.get_config(args.computer_name[0])
     if config is None:
         parser_error("Unkown computer name.")
 
@@ -41,17 +41,15 @@ def run_application(host, port, username, key_filename, command):
 
 def execute(args):
     tower_config = get_tower_config(args.config_dir)
-    computer_config = computers.get_computer_config(args.config_dir, args.computer_name[0])
+    computer_config = computers.get_config(args.computer_name[0])
 
     # TODO: x2go should support ~/.ssh/config
-    ip = computer_config.get('ip')
-    if not ip:
-        sys.exit('Unkown IP. Please run `tower config refresh`') # TODO: hum.. blah..
+    ip = computer_config['hostname']
 
     run_application(
         ip, 
         tower_config.get('default-ssh-port'), 
         tower_config.get('default-ssh-user'), 
-        computer_config.get('private-key-path'), 
+        computer_config['IdentityFile'], 
         " ".join(args.run_command)
     )

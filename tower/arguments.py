@@ -9,12 +9,6 @@ def parse_arguments():
         Use `./tower {provision|install|run} --help` to get options list for each command.
     """)
 
-    parser.add_argument(
-        '--config-dir', 
-        help="""Directory where config files are placed (Default: ~/.config/tower/).""",
-        required=False
-    )
-
     subparser = parser.add_subparsers(dest='command', required=True)
 
     ##########################

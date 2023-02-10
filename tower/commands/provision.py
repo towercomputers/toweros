@@ -4,7 +4,7 @@ import os
 import re
 import sys
 
-from tower import computers
+from tower import computers, osutils
 from tower.configs import (
     default_config_dir,
     get_tower_config, 
@@ -16,7 +16,7 @@ def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
         parser_error(message="Computer name invalid. Must be between one and 15 alphanumeric chars.")
 
-    if computers.computer_exists(args.config_dir, args.name[0]):
+    if computers.exists(args.name[0]):
         parser_error("Computer name already used.")
 
     if args.sd_card and not os.path.exists(args.sd_card):
@@ -38,9 +38,15 @@ def check_args(args, parser_error):
 
 
 def execute(args):
-    tower_config = get_tower_config(args.config_dir)
     try:
-        computer_config = computers.create_computer_config(args)
+        firstrun_script = computers.firstrun_script(args)
     except MissingConfigValue as e:
         sys.exit(e)
-    burn_image(args.config_dir, dict(computer_config) | dict(tower_config))
+
+    sd_card = args.sd_card or osutils.select_sdcard_device()
+    configs.check_missing_value('sd-card', sd_card)
+
+    burn_image(configs.DEFAULT_OS_IMAGE, sd_card, firstrun_script)
+
+    print(f"SD Card ready. Please unmount and insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
+    computers.refresh_config(args.name[0])

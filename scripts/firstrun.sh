@@ -5,7 +5,7 @@ set +e
 /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname '$NAME.tower'
 
 /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh -k '$PUBLIC_KEY'
-/usr/lib/userconf-pi/userconf '$DEFAULT_SSH_USER' '$ENCRYPTED_PASSWORD'
+/usr/lib/userconf-pi/userconf '$USER' '$ENCRYPTED_PASSWORD'
 
 SET_WLAN=$ONLINE
 if $SET_WLAN; then

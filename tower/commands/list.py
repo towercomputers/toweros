@@ -7,4 +7,4 @@ def check_args(args, parser_error):
     pass
 
 def execute(args):
-    print(computers.get_computer_list(args.config_dir))
+    print(computers.get_list())
