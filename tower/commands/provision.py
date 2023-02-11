@@ -38,7 +38,8 @@ def execute(args):
         sys.exit(e)
 
     sd_card = args.sd_card or osutils.select_sdcard_device()
-    computers.check_environment_value('sd-card', sd_card)
+    if not sd_card:
+        sys.exit("Impossible to determine the sd-card")
 
     imager.burn_image(defaults.DEFAULT_OS_IMAGE, sd_card, firstrun_env)
 
