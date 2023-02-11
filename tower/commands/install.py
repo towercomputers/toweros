@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 from urllib.parse import urlparse
@@ -21,4 +22,7 @@ def check_args(args, parser_error):
             parser_error(f"{args.online_host} is not online.")
 
 def execute(args):
-    computers.install_package(args.computer_name[0], args.package_name[0], args.online_host)
+    try:
+        computers.install_package(args.computer_name[0], args.package_name[0], args.online_host)
+    except Exception as e:
+        sys.exit(e)

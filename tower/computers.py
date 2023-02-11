@@ -171,6 +171,21 @@ def copy_file(computer_name_src, computer_name_dest, filename):
     scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}', _out=sys.stdin)
 
 
+def clean_install_files(computer_name, package_name, online_computer=None):
+    proxy = computer_name if online_computer is None else online_computer
+    sig_filename = os.path.join('~/Downloads', f'{package_name}-apt.sig')
+    bundle_filename = os.path.join('~/Downloads', f'{package_name}-apt-bundle.zip')
+
+    try:
+        ssh(proxy, 'rm', '-f', sig_filename, _out=sys.stdin)
+        ssh(computer_name, 'rm', '-f', bundle_filename, _out=sys.stdin)
+        if proxy != computer_name:
+            ssh(computer_name, 'rm', '-f', sig_filename, _out=sys.stdin)
+            ssh(proxy, 'rm', '-f', bundle_filename, _out=sys.stdin)
+    except ErrorReturnCode_1 as e:
+       pass
+
+
 def install_package(computer_name, package_name, online_computer=None):
     proxy = computer_name if online_computer is None else online_computer
 
@@ -196,8 +211,10 @@ def install_package(computer_name, package_name, online_computer=None):
         print("Install bundle in target computer.")
         ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=sys.stdin)
         ssh(computer_name, 'sudo', 'apt-get', 'install', package_name, _out=sys.stdin)
+        clean_install_files(computer_name, package_name, online_computer)
     except ErrorReturnCode_1 as e:
-        sys.exit(e)
-    # TODO: check if ok and remove the dpkg file
+        clean_install_files(computer_name, package_name, online_computer)
+        raise(e)
+
 
     
