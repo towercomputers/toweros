@@ -18,8 +18,8 @@ from tower import osutils
 from tower import configs
 
 
-def firstrun_script(args):
-    print("Generating firstrun.sh...")
+def firstrun_env(args):
+    print("Generating first run environment...")
     name = args.name[0]
 
     public_key_path, private_key_path = args.public_key_path, args.private_key_path
@@ -46,7 +46,7 @@ def firstrun_script(args):
         online = 'false'
         wlan_ssid, wlan_password, wlan_country = '', '', ''
   
-    vars = {
+    return {
         'NAME': name,
         'PUBLIC_KEY': public_key,
         'ENCRYPTED_PASSWORD': sha512_crypt.hash(password),
@@ -58,10 +58,6 @@ def firstrun_script(args):
         'WLAN_COUNTRY': wlan_country,
         'USER': configs.DEFAULT_SSH_USER
     }
-    with open('scripts/firstrun.sh', 'r') as f:
-        template = Template(f.read())
-    script = template.safe_substitute(vars)
-    return script
 
 
 def insert_include_directive():
