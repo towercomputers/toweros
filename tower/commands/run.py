@@ -6,10 +6,6 @@ import gevent
 
 from tower import computers
 
-from tower.configs import (
-    default_config_dir, 
-    get_tower_config
-)
 
 def check_args(args, parser_error):
     config = computers.get_config(args.computer_name[0])

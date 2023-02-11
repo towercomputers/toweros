@@ -1,17 +1,11 @@
-import binascii
-import configparser
 import os
-import ipaddress
-from random import randint
-from argparse import ArgumentParser
-import re
 import secrets
 from io import StringIO
-from datetime import datetime
 import sys
+import time
 
 from passlib.hash import sha512_crypt
-from sh import ssh, scp, ErrorReturnCode_1
+from sh import ssh, scp, arp, ErrorReturnCode_1
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import osutils
@@ -115,7 +109,7 @@ def update_config(name, ip):
     
     config.add(name,
         Hostname=ip,
-        User=config.DEFAULT_SSH_USER,
+        User=configs.DEFAULT_SSH_USER,
         IdentityFile=key_path,
         StrictHostKeyChecking="no",
         LogLevel="FATAL"
@@ -157,8 +151,8 @@ def discover_ip(computer_name):
 
 
 def refresh_config(computer_name):
-    ip = discover_ip(params['name'])
-    update_config(params['name'], ip)
+    ip = discover_ip(computer_name)
+    update_config(computer_name, ip)
 
 
 # TODO: make all these function more robust

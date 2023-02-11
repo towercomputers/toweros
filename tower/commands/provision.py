@@ -4,13 +4,7 @@ import os
 import re
 import sys
 
-from tower import computers, osutils
-from tower.configs import (
-    default_config_dir,
-    get_tower_config, 
-    MissingConfigValue,
-)
-from tower.imager import burn_image
+from tower import computers, osutils, configs, imager
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
@@ -38,15 +32,15 @@ def check_args(args, parser_error):
 
 
 def execute(args):
-    try:
+    """ try:
         firstrun_env = computers.firstrun_env(args)
-    except MissingConfigValue as e:
+    except configs.MissingConfigValue as e:
         sys.exit(e)
 
     sd_card = args.sd_card or osutils.select_sdcard_device()
     configs.check_missing_value('sd-card', sd_card)
 
-    burn_image(configs.DEFAULT_OS_IMAGE, sd_card, firstrun_env)
+    imager.burn_image(configs.DEFAULT_OS_IMAGE, sd_card, firstrun_env) """
 
     print(f"SD Card ready. Please unmount and insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     computers.refresh_config(args.name[0])

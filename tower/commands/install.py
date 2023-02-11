@@ -3,7 +3,6 @@ import re
 from urllib.parse import urlparse
 
 from tower import computers
-from tower.configs import default_config_dir
 
 def check_args(args, parser_error):
     # TODO: check package name format
