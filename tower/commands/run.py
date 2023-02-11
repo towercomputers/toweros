@@ -4,7 +4,7 @@ import sys
 import x2go
 import gevent
 
-from tower import computers
+from tower import computers, configs
 
 
 def check_args(args, parser_error):
@@ -36,16 +36,13 @@ def run_application(host, port, username, key_filename, command):
 
 
 def execute(args):
-    tower_config = get_tower_config(args.config_dir)
+    # TODO: x2go should support ~/.ssh/config
     computer_config = computers.get_config(args.computer_name[0])
 
-    # TODO: x2go should support ~/.ssh/config
-    ip = computer_config['hostname']
-
     run_application(
-        ip, 
-        tower_config.get('default-ssh-port'), 
-        tower_config.get('default-ssh-user'), 
-        computer_config['IdentityFile'], 
+        computer_config['hostname'], 
+        configs.DEFAULT_SSH_PORT, 
+        configs.DEFAULT_SSH_USER, 
+        computer_config['identityfile'], 
         " ".join(args.run_command)
     )
