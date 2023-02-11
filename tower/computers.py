@@ -9,7 +9,17 @@ from sh import ssh, scp, arp, ErrorReturnCode_1
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import osutils
-from tower import configs
+from tower import defaults
+
+class MissingEnvironmentValue(Exception):
+    pass
+
+class UnkownComputer(Exception):
+    pass
+
+def check_environment_value(key, value):
+    if not value:
+        raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
 
 def firstrun_env(args):
@@ -31,11 +41,11 @@ def firstrun_env(args):
     if args.online:
         online = 'true'
         wlan_ssid = args.wlan_ssid or osutils.get_connected_ssid()
-        configs.check_missing_value('wlan-ssid', wlan_ssid)
+        check_environment_value('wlan-ssid', wlan_ssid)
         wlan_password = args.wlan_password or osutils.get_ssid_password(wlan_ssid)
-        configs.check_missing_value('wlan-password', wlan_password)
+        check_environment_value('wlan-password', wlan_password)
         wlan_country = args.wlan_country or osutils.find_wlan_country(wlan_ssid)
-        configs.check_missing_value('wlan-country', wlan_country)
+        check_environment_value('wlan-country', wlan_country)
     else:
         online = 'false'
         wlan_ssid, wlan_password, wlan_country = '', '', ''
@@ -50,7 +60,7 @@ def firstrun_env(args):
         'WLAN_SSID': wlan_ssid,
         'WLAN_PASSWORD': wlan_password,
         'WLAN_COUNTRY': wlan_country,
-        'USER': configs.DEFAULT_SSH_USER
+        'USER': defaults.DEFAULT_SSH_USER
     }
 
 
@@ -109,7 +119,7 @@ def update_config(name, ip):
     
     config.add(name,
         Hostname=ip,
-        User=configs.DEFAULT_SSH_USER,
+        User=defaults.DEFAULT_SSH_USER,
         IdentityFile=key_path,
         StrictHostKeyChecking="no",
         LogLevel="FATAL"
@@ -132,7 +142,7 @@ def is_online(name):
         ssh(name, 'sudo', 'ifconfig', _out=buf)
         result = buf.getvalue()
         return "wlan0" in result
-    raise Exception("Unknown computer") # TODO: custom exception
+    raise UnkownComputer(f"Unknown computer: {name}")
 
 
 def discover_ip(computer_name):
@@ -158,7 +168,7 @@ def refresh_config(computer_name):
 # TODO: make all these function more robust
 
 def copy_file(computer_name_src, computer_name_dest, filename):
-    scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}')
+    scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}', _out=sys.stdin)
 
 
 def install_package(computer_name, package_name, online_computer=None):
@@ -172,7 +182,7 @@ def install_package(computer_name, package_name, online_computer=None):
 
         print("Copy package signature to online computer.")
         if proxy != computer_name:
-            copy_file(computer_name, proxy, sig_filename, _out=sys.stdin)
+            copy_file(computer_name, proxy, sig_filename)
 
         print("Downloading bundle...")
         bundle_filename = os.path.join('~/Downloads', f'{package_name}-apt-bundle.zip')

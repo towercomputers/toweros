@@ -4,7 +4,7 @@ import sys
 import x2go
 import gevent
 
-from tower import computers, configs
+from tower import computers, defaults
 
 
 def check_args(args, parser_error):
@@ -41,8 +41,8 @@ def execute(args):
 
     run_application(
         computer_config['hostname'], 
-        configs.DEFAULT_SSH_PORT, 
-        configs.DEFAULT_SSH_USER, 
+        defaults.DEFAULT_SSH_PORT, 
+        defaults.DEFAULT_SSH_USER, 
         computer_config['identityfile'], 
         " ".join(args.run_command)
     )
