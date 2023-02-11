@@ -18,12 +18,49 @@ $> sudo apt-get install nxproxy
 $> pip install -r requirements.txt
 ```
 
-## Usage
-
+## Provision an host
 
 ```
-$> ./tower.py <command> --help
+$> ./tower.py provision office
 ```
 
-Commands `provision`, `install`, `run` or `list`
+for online host:
 
+```
+$> ./tower.py provision web --online
+```
+
+Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the
+appropriate argument (see `./tower.py provision --help`).
+
+## Execute a command in one of the host
+
+With `ssh`:
+
+```
+$> ssh office ls Dowloads
+```
+
+With `x2go`:
+
+```
+$> ./tower.py run office thunderbird
+```
+
+## Install a package in one of the host
+
+```
+$> ./tower.py install office thunderbird
+```
+
+or, if the host is not online
+
+```
+$> ./tower.py install office thunderbird --online-host web
+```
+
+## List hosts
+
+```
+$> ./tower.py list
+```
