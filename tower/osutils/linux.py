@@ -30,7 +30,8 @@ def unmount(device):
     # TODO: unmount all partitions
     mountpoint = get_mount_point(device)
     if mountpoint not in [None, ""]:
-        umount(mountpoint)
+        with sh.contrib.sudo: #TODO: avoid sudo
+            umount(mountpoint)
 
 def rpi_imager_path():
     return "/usr/bin/rpi-imager"

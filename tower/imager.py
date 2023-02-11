@@ -43,5 +43,5 @@ def burn_image(image_url, device, firstrun_env):
     mountpoint = osutils.ensure_device_is_mounted(device)
     set_firstrun_env(mountpoint, firstrun_env)
     copy_firstrun_files(mountpoint)
-    # TODO: unmount device
+    osutils.unmount(device)
 
