@@ -1,30 +1,27 @@
+import json
 import time
 import os
 from io import StringIO
 
 import sh
-from sh import udisksctl, lsblk
+from sh import udisksctl, lsblk, mount as _mount, umount
 
+def mount(partition):
+    mountpoint = os.path.expanduser('~/tower-sd-card')
+    if not os.path.exists(mountpoint):
+        os.makedirs(mountpoint)
+    with sh.contrib.sudo(password="", _with=True):
+        _mount('-o', f'gid={os.getgid()},uid={os.getuid()}', partition, mountpoint)
+    return mountpoint
 
-def udisk(action, partition):
-    # TODO: configure thin client to not need sudo
-    if action not in ["mount", "unmount"]:
-        raise OperatingSystemException(f"Invald operation `{action}`")
+def unmount_all(device):
     buf = StringIO()
-    try:
-        udisksctl(action, '-b', partition, '--no-user-interaction', _out=buf)
-    except sh.ErrorReturnCode_1 as e:
-        message = f"{e}"
-        if "Not authorized to perform operation" in message:
-            with sh.contrib.sudo:
-                udisksctl(action, '-b', partition, '--no-user-interaction', _out=buf)
-        else:
-            raise(e)
-    result = buf.getvalue()
-    if f"{action}ed {partition}" not in result.lower():
-        raise OperatingSystemException(f"Impossible to {action} {partition}")
-    if action == "mount":
-        return result.split(" at ")[1].strip()
+    lsblk('-J', '-T', device, _out=buf)
+    result = json.loads(buf.getvalue())
+    for partition in result['blockdevices'][0]['children']:
+        if partition['mountpoint']:
+            with sh.contrib.sudo(password="", _with=True):
+                umount(partition['mountpoint'])
 
 def mountpoint(device, partition_index=0):
     buf = StringIO()
@@ -35,19 +32,11 @@ def mountpoint(device, partition_index=0):
         return partition['name'], partition['mountpoint']
     raise OperatingSystemException(f"Invalide partition index `{partition_index}`")
 
-def unmount_all(device):
-    buf = StringIO()
-    lsblk('-J', '-T', device, _out=buf)
-    result = json.loads(buf.getvalue())
-    for partition in result['blockdevices'][0]['children']:
-        if partition['mountpoint']:
-            udisk("unmount", f"/dev/{partition['name']}")
-
 def ensure_partition_is_mounted(device, partition_index=0):
-    name, mountpoint = mountpoint(device, partition_index)
-    if mountpoint is None:
-        return udisk("mount", f"/dev/{name}")
-    return mountpoint
+    name, mountpoint_path = mountpoint(device, partition_index)
+    if mountpoint_path is None:
+        return mount(f"/dev/{name}")
+    return mountpoint_path
 
 def get_device_list():
     buf = StringIO()

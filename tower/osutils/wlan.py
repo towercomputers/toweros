@@ -43,7 +43,7 @@ def get_ssid_password(ssid):
 
 def scan_wifi_countries():
     buf = StringIO()
-    with sh.contrib.sudo: # TODO: find no-sudo way
+    with sh.contrib.sudo(password="", _with=True):
         iw('dev', 'wlan0', 'scan', _out=buf)
     result = buf.getvalue()
     bss = result.split('BSS ')

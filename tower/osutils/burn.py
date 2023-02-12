@@ -1,3 +1,4 @@
+import configparser
 import time
 import os
 
@@ -28,7 +29,7 @@ def write_image(image, device):
         disable_rpi_image_ejection()
         rpi_imager = Command(rpi_imager_path)
         print(f"Burning {device} with rpi-imager, be patient please...")
-        with sh.contrib.sudo:
+        with sh.contrib.sudo(password="", _with=True):
             rpi_imager('--cli', '--debug', image, device, _out=print)
     else:
         print(f"Burning {device} with dd, be patient please...")

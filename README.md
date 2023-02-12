@@ -18,6 +18,15 @@ $> sudo apt-get install nxproxy
 $> pip install -r requirements.txt
 ```
 
+3. Update sudoers
+
+The script assumes that the current user is a "full" sudoers with no password.
+Check if `/etc/sudoers` contains the following line:
+
+```
+<you_username> ALL=(ALL) NOPASSWD: ALL
+```
+
 ## Provision an host
 
 ```
