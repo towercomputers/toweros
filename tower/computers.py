@@ -22,13 +22,23 @@ def check_environment_value(key, value):
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
 
+def generate_key_pair(name):
+    ssh_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
+    key_path = os.path.join(ssh_dir, f'{name}')
+    if os.path.exists(key_path):
+        os.remove(key_path)
+        os.remove(f'{key_path}.pub')
+    ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
+    return f'{key_path}.pub', key_path
+
+
 def firstrun_env(args):
     print("Generating first run environment...")
     name = args.name[0]
 
     public_key_path, private_key_path = args.public_key_path, args.private_key_path
     if not public_key_path:
-        public_key_path, private_key_path = osutils.generate_key_pair(name)
+        public_key_path, private_key_path = generate_key_pair(name)
     
     with open(public_key_path) as f:
         public_key = f.read().strip()
