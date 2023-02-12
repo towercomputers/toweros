@@ -13,8 +13,12 @@ def check_args(args, parser_error):
     if computers.exists(args.name[0]):
         parser_error("Computer name already used.")
 
-    if args.sd_card and not os.path.exists(args.sd_card):
-        parser_error("sd-card path invalid.") # TODO: check is a disk
+    if args.sd_card:
+        disk_list = osutils.get_device_list()
+        if args.sd_card not in disk_list:
+            parser_error("sd-card path invalid.") 
+        elif len(disk_list) == 1:
+            parser_error("sd-card path invalid.") # can't right on the only disk
     
     if args.public_key_path:
         if not arg.private_key_path :
@@ -28,7 +32,17 @@ def check_args(args, parser_error):
         if not os.path.exists(args.private_key_path):
             parser_error("private_key path invalid.")
     
-    # TODO: check format for keymap, timezone, and wlan-country
+    if args.keymap:
+        if re.match(r'^[a-zA-Z]{2}$', args.keymap) is None:
+            parser_error(message="Keymap invalid. Must be 2 chars.")
+    
+    if args.timezone:
+        if re.match(r'^[a-zA-Z-\ ]+\/[a-zA-Z-\ ]+$', args.timezone) is None:
+            parser_error(message="Timezone invalide. Must be in <Area>/<City> format. eg. Europe/Paris.")
+    
+    if args.wlan_country:
+        if re.match(r'^[a-zA-Z]{2}$', args.wlan_country) is None:
+            parser_error(message="Wlan country invalid. Must be 2 chars.")
 
 
 def execute(args):
