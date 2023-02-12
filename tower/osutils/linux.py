@@ -4,7 +4,11 @@ import os
 import json
 
 import sh
-from sh import lsblk, mount as _mount, umount, timedatectl, iwconfig, localectl, iw
+from sh import lsblk, umount, timedatectl, iwconfig, localectl, iw, udisksctl
+
+class OperatingSystemException(Exception):
+    pass
+
 
 def get_device_list():
     buf = StringIO()
@@ -12,26 +16,41 @@ def get_device_list():
     result = json.loads(buf.getvalue())
     return [f"/dev/{e['name']}" for e in result['blockdevices']]
 
-def mount(device):
-    mountpoint = os.path.expanduser('~/towersd')
-    if not os.path.exists(mountpoint):
-        os.makedirs(mountpoint)
-    with sh.contrib.sudo:
-        # first partition where to put files
-        _mount('-o', f'gid={os.getgid()},uid={os.getuid()}', f'{device}1', mountpoint) 
+def udisk(action, partition):
+    if action not in ["mount", "unmount"]:
+        raise OperatingSystemException(f"Invald operation `{action}`")
+    buf = StringIO()
+    try:
+        udisksctl(action, '-b', partition, '--no-user-interaction', _out=buf)
+    except sh.ErrorReturnCode_1 as e:
+        message = f"{e}"
+        if "Not authorized to perform operation" in message:
+            with sh.contrib.sudo:
+                udisksctl(action, '-b', partition, '--no-user-interaction', _out=buf)
+        else:
+            raise(e)
+    result = buf.getvalue()
+    if f"{action}ed {partition}" not in result.lower():
+        raise OperatingSystemException(f"Impossible to {action} {partition}")
+    if action == "mount":
+        return result.split(" at ")[1].strip()
 
-def get_mount_point(device):
+def mountpoint(device, partition_index=0):
     buf = StringIO()
     lsblk('-J', '-T', device, _out=buf)
     result = json.loads(buf.getvalue())
-    return result['blockdevices'][0]['children'][0]['mountpoint'] # first partition where to put files
+    if partition_index < len(result['blockdevices'][0]['children']):
+        partition = result['blockdevices'][0]['children'][partition_index]
+        return partition['name'], partition['mountpoint']
+    raise OperatingSystemException(f"Invalide partition index `{partition_index}`")
 
-def unmount(device):
-    # TODO: unmount all partitions
-    mountpoint = get_mount_point(device)
-    if mountpoint not in [None, ""]:
-        with sh.contrib.sudo: #TODO: avoid sudo
-            umount(mountpoint)
+def unmount_all(device):
+    buf = StringIO()
+    lsblk('-J', '-T', device, _out=buf)
+    result = json.loads(buf.getvalue())
+    for partition in result['blockdevices'][0]['children']:
+        if partition['mountpoint']:
+            udisk("unmount", f"/dev/{partition['name']}")
 
 def rpi_imager_path():
     return "/usr/bin/rpi-imager"

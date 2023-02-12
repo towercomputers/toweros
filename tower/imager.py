@@ -40,8 +40,8 @@ def set_firstrun_env(mountpoint, firstrun_env):
 def burn_image(image_url, device, firstrun_env):
     image_path = download_latest_image(image_url)
     osutils.write_image(image_path, device)
-    mountpoint = osutils.ensure_device_is_mounted(device)
+    mountpoint = osutils.ensure_partition_is_mounted(device, 0) # first parition where to put files
     set_firstrun_env(mountpoint, firstrun_env)
     copy_firstrun_files(mountpoint)
-    osutils.unmount(device)
+    osutils.unmount_all(device)
 

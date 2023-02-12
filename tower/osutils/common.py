@@ -57,13 +57,10 @@ def write_image(image, device):
     duration = time.time() - start_time
     print(f"{device} burnt in {duration}s.")
 
-def ensure_device_is_mounted(device):
-    mountpoint = osutils.get_mount_point(device)
+def ensure_partition_is_mounted(device, partition_index=0):
+    name, mountpoint = osutils.mountpoint(device, partition_index)
     if mountpoint is None:
-        osutils.mount(device)
-        mountpoint = osutils.get_mount_point(device)
-    if mountpoint is None:
-        sys.exit("Error in mouting") #TODO
+        return osutils.udisk("mount", f"/dev/{name}")
     return mountpoint
 
 def select_sdcard_device():
