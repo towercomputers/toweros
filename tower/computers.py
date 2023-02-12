@@ -5,7 +5,7 @@ import sys
 import time
 
 from passlib.hash import sha512_crypt
-from sh import ssh, scp, arp, ErrorReturnCode_1
+from sh import ssh, scp, arp, ssh_keygen, ErrorReturnCode_1
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import osutils

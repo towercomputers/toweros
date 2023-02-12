@@ -13,23 +13,6 @@ from tower import osutils
 def derive_wlan_key(ssid, psk):
     return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
 
-def scan_wifi_countries():
-    buf = StringIO()
-    with sh.contrib.sudo: # TODO: find no-sudo way
-        iw('dev', 'wlan0', 'scan', _out=buf)
-    result = buf.getvalue()
-    bss = result.split('BSS ')
-    wifis= {}
-    for info in bss:
-        if info.find("SSID: ") != -1:
-            ssid = info.split('SSID: ')[1].split('\t')[0].strip()
-            cc = '--'
-            if info.find("Country: ") != -1:
-                cc = info.split("Country: ")[1].split('\t')[0]
-            if ssid not in wifis or wifis[ssid] == '--':
-                wifis[ssid] = cc
-    return wifis
-
 def get_connected_ssid():
     try:
         buf = StringIO()
@@ -57,6 +40,23 @@ def get_ssid_password(ssid):
         return None
     except: # no need to be curious here
         return None
+
+def scan_wifi_countries():
+    buf = StringIO()
+    with sh.contrib.sudo: # TODO: find no-sudo way
+        iw('dev', 'wlan0', 'scan', _out=buf)
+    result = buf.getvalue()
+    bss = result.split('BSS ')
+    wifis= {}
+    for info in bss:
+        if info.find("SSID: ") != -1:
+            ssid = info.split('SSID: ')[1].split('\t')[0].strip()
+            cc = '--'
+            if info.find("Country: ") != -1:
+                cc = info.split("Country: ")[1].split('\t')[0]
+            if ssid not in wifis or wifis[ssid] == '--':
+                wifis[ssid] = cc
+    return wifis
 
 def find_wlan_country(ssid):
     wifi_countries = scan_wifi_countries()

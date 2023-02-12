@@ -4,9 +4,6 @@ import os
 import sh
 from sh import Command
 
-from tower import osutils
-
-
 def disable_rpi_image_ejection():
     conf_path = os.path.join(os.path.expanduser('~'), '.config/', 'Raspberry Pi/', 'Imager.conf')
     conf_dir = os.path.dirname(conf_path)

@@ -7,6 +7,7 @@ from sh import udisksctl, lsblk
 
 
 def udisk(action, partition):
+    # TODO: configure thin client to not need sudo
     if action not in ["mount", "unmount"]:
         raise OperatingSystemException(f"Invald operation `{action}`")
     buf = StringIO()
