@@ -2,12 +2,15 @@ import os
 import sys
 import shutil
 import hashlib
+import logging
 
 from sh import xz
 import requests
 
 from tower import osutils
 from tower import computers
+
+logger = logging.getLogger('tower')
 
 def download_image(url, archive_hash):
     if not os.path.exists(".cache"):
@@ -18,30 +21,30 @@ def download_image(url, archive_hash):
 
     if not os.path.exists(img_filename):
         if not os.path.exists(xz_filename):
-            print(f"Downloading {url}...")
+            logger.info(f"Downloading {url}...")
             with requests.get(url, stream=True) as resp:
                 resp.raise_for_status()
                 with open(xz_filename, "wb") as f:
                     for chunk in resp.iter_content(chunk_size=4096):
                         f.write(chunk)
 
-        print(f"Calculating sha256 hash...")
+        logger.info(f"Calculating sha256 hash...")
         sha256_hash = hashlib.sha256()
         with open(xz_filename, "rb") as f:
             for byte_block in iter(lambda: f.read(4096),b""):
                 sha256_hash.update(byte_block)
             xz_hash = sha256_hash.hexdigest()
 
-        print(xz_hash, archive_hash)
+        logger.info(xz_hash, archive_hash)
         if xz_hash != archive_hash:
             sys.exit("Invalid image hash")
         
-        print("Decompressing image...")
+        logger.info("Decompressing image...")
         xz('-d', xz_filename)
     else:
-        print("Using image in cache.")
+        logger.info("Using image in cache.")
 
-    print("Image ready to burn.")
+    logger.info("Image ready to burn.")
     return img_filename
 
 

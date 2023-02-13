@@ -3,6 +3,7 @@ import secrets
 from io import StringIO
 import sys
 import time
+import logging
 
 from passlib.hash import sha512_crypt
 from sh import ssh, scp, arp, ssh_keygen, ErrorReturnCode_1
@@ -10,6 +11,8 @@ from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import osutils
 from tower import defaults
+
+logger = logging.getLogger('tower')
 
 class MissingEnvironmentValue(Exception):
     pass
@@ -33,7 +36,7 @@ def generate_key_pair(name):
 
 
 def firstrun_env(args):
-    print("Generating first run environment...")
+    logger.info("Generating first run environment...")
     name = args.name[0]
 
     public_key_path, private_key_path = args.public_key_path, args.private_key_path
@@ -135,7 +138,7 @@ def update_config(name, ip):
         LogLevel="FATAL"
     )
     config.write(config_path)
-    print(f"{config_path} updated")
+    logger.info(f"{config_path} updated")
 
 
 def get_list():
@@ -163,9 +166,9 @@ def discover_ip(computer_name):
     for line in lines:
         if line.startswith(f'{computer_name}.local'):
             ip = line.split("(")[1].split(")")[0]
-            print(f"IP found: {ip}")
+            logger.info(f"IP found: {ip}")
             return ip
-    print(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds")
+    logger.info(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds")
     time.sleep(10)
     return discover_ip(computer_name)
 
@@ -176,7 +179,7 @@ def refresh_config(computer_name):
 
 
 def copy_file(computer_name_src, computer_name_dest, filename):
-    scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}', _out=sys.stdin)
+    scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}', _out=logger.debug)
 
 
 def clean_install_files(computer_name, packages, online_computer=None):
@@ -185,11 +188,11 @@ def clean_install_files(computer_name, packages, online_computer=None):
     sig_filename = os.path.join('~/Downloads', f'{install_name}-apt.sig')
     bundle_filename = os.path.join('~/Downloads', f'{install_name}-apt-bundle.zip')
     try:
-        ssh(proxy, 'rm', '-f', sig_filename, _out=sys.stdin)
-        ssh(computer_name, 'rm', '-f', bundle_filename, _out=sys.stdin)
+        ssh(proxy, 'rm', '-f', sig_filename, _out=logger.debug)
+        ssh(computer_name, 'rm', '-f', bundle_filename, _out=logger.debug)
         if proxy != computer_name:
-            ssh(computer_name, 'rm', '-f', sig_filename, _out=sys.stdin)
-            ssh(proxy, 'rm', '-f', bundle_filename, _out=sys.stdin)
+            ssh(computer_name, 'rm', '-f', sig_filename, _out=logger.debug)
+            ssh(proxy, 'rm', '-f', bundle_filename, _out=logger.debug)
     except ErrorReturnCode_1 as e:
        pass
 
@@ -198,27 +201,27 @@ def install(computer_name, packages, online_computer=None):
     proxy = computer_name if online_computer is None else online_computer
     install_name = "_".join(packages)
     try:
-        print("Generate package signature in target computer.")
+        logger.info("Generate package signature in target computer.")
         sig_filename = os.path.join('~/Downloads', f'{install_name}-apt.sig')
         ssh(computer_name, 'sudo', 'apt-offline',
-            'set', sig_filename, '--install-packages', *packages, _out=sys.stdin)
+            'set', sig_filename, '--install-packages', *packages, _out=logger.debug)
 
-        print("Copy package signature to online computer.")
+        logger.info("Copy package signature to online computer.")
         if proxy != computer_name:
             copy_file(computer_name, proxy, sig_filename)
 
-        print("Downloading bundle...")
+        logger.info("Downloading bundle...")
         bundle_filename = os.path.join('~/Downloads', f'{install_name}-apt-bundle.zip')
         ssh(proxy, 'sudo', 'apt-offline',
-            'get', sig_filename, '--bundle', bundle_filename, _out=sys.stdin)
+            'get', sig_filename, '--bundle', bundle_filename, _out=logger.debug)
 
-        print("Copy bundle to target computer.")
+        logger.info("Copy bundle to target computer.")
         if proxy != computer_name:
             copy_file(proxy, computer_name, bundle_filename)
 
-        print("Install bundle in target computer.")
-        ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=sys.stdin)
-        ssh(computer_name, 'sudo', 'apt-get', 'install', *packages, _out=sys.stdin)
+        logger.info("Install bundle in target computer.")
+        ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=logger.debug)
+        ssh(computer_name, 'sudo', 'apt-get', 'install', *packages, _out=logger.debug)
         clean_install_files(computer_name, packages, online_computer)
     except ErrorReturnCode_1 as e:
         clean_install_files(computer_name, packages, online_computer)

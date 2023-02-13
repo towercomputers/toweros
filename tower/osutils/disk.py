@@ -1,10 +1,13 @@
 import json
+import logging
 import time
 import os
 from io import StringIO
 
 import sh
 from sh import udisksctl, lsblk, mount as _mount, umount
+
+logger = logging.getLogger('tower')
 
 def mount(partition):
     mountpoint = os.path.expanduser('~/tower-sd-card')
@@ -59,11 +62,11 @@ def select_sdcard_device():
     new_devices = list(set(devices_after) - set(devices_before))
 
     if (len(new_devices) == 0):
-        print("sd-card not found.")
+        logger.error("sd-card not found.")
         return None
     elif (len(new_devices) > 1):
-        print("More than one disk found.")
+        logger.error("More than one disk found.")
         return None
     else:
-        print(f"sd-card found: {new_devices[0]}")
+        logger.info(f"sd-card found: {new_devices[0]}")
         return new_devices[0]

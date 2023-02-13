@@ -1,4 +1,8 @@
+import logging
+
 from tower import computers
+
+logger = logging.getLogger('tower')
 
 def check_args(args, parser_error):
     pass

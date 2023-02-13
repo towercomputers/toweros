@@ -9,6 +9,22 @@ def parse_arguments():
         Use `./tower {provision|install|run} --help` to get options list for each command.
     """)
 
+    parser.add_argument(
+        '--quiet',
+        help="""Set log level to ERROR.""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+
+    parser.add_argument(
+        '--verbose',
+        help="""Set log level to DEBUG.""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+
     subparser = parser.add_subparsers(dest='command', required=True)
 
     ##########################
