@@ -95,9 +95,9 @@ def parse_arguments():
         nargs=1
     )
     install_parser.add_argument(
-        'package_name', 
-        help="""Name of the package to install (Required).""",
-        nargs=1
+        'packages', 
+        help="""Package(s) to install (Required).""",
+        nargs='+'
     )
     install_parser.add_argument(
         '--online-host', 

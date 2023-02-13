@@ -6,13 +6,16 @@ from urllib.parse import urlparse
 from tower import computers
 
 def check_args(args, parser_error):
-    # TODO: check package name format
     name = args.computer_name[0]
     config = computers.get_config(name)
     if config is None:
         parser_error("Unkown computer name.")
     elif not computers.is_online(name) and args.online_host is None:
         parser_error(f"{name} is not online. Please use the flag `--online-host`.")
+    
+    for pkg_name in args.packages:
+        if re.match(r'^[a-z0-9]{1}[a-z0-9\-\+\.]+$', pkg_name) is None:
+            parser_error(f"Invalid package name:{pkg_name}")
 
     if args.online_host:
         config = computers.get_config(args.online_host)
@@ -23,6 +26,6 @@ def check_args(args, parser_error):
 
 def execute(args):
     try:
-        computers.install_package(args.computer_name[0], args.package_name[0], args.online_host)
+        computers.install(args.computer_name[0], args.packages, args.online_host)
     except Exception as e:
         sys.exit(e)

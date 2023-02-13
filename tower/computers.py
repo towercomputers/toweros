@@ -175,17 +175,15 @@ def refresh_config(computer_name):
     update_config(computer_name, ip)
 
 
-# TODO: make all these function more robust
-
 def copy_file(computer_name_src, computer_name_dest, filename):
     scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}', _out=sys.stdin)
 
 
-def clean_install_files(computer_name, package_name, online_computer=None):
+def clean_install_files(computer_name, packages, online_computer=None):
     proxy = computer_name if online_computer is None else online_computer
-    sig_filename = os.path.join('~/Downloads', f'{package_name}-apt.sig')
-    bundle_filename = os.path.join('~/Downloads', f'{package_name}-apt-bundle.zip')
-
+    install_name = "_".join(packages)
+    sig_filename = os.path.join('~/Downloads', f'{install_name}-apt.sig')
+    bundle_filename = os.path.join('~/Downloads', f'{install_name}-apt-bundle.zip')
     try:
         ssh(proxy, 'rm', '-f', sig_filename, _out=sys.stdin)
         ssh(computer_name, 'rm', '-f', bundle_filename, _out=sys.stdin)
@@ -196,21 +194,21 @@ def clean_install_files(computer_name, package_name, online_computer=None):
        pass
 
 
-def install_package(computer_name, package_name, online_computer=None):
+def install(computer_name, packages, online_computer=None):
     proxy = computer_name if online_computer is None else online_computer
-
+    install_name = "_".join(packages)
     try:
         print("Generate package signature in target computer.")
-        sig_filename = os.path.join('~/Downloads', f'{package_name}-apt.sig')
+        sig_filename = os.path.join('~/Downloads', f'{install_name}-apt.sig')
         ssh(computer_name, 'sudo', 'apt-offline',
-            'set', sig_filename, '--install-packages', package_name, _out=sys.stdin)
+            'set', sig_filename, '--install-packages', *packages, _out=sys.stdin)
 
         print("Copy package signature to online computer.")
         if proxy != computer_name:
             copy_file(computer_name, proxy, sig_filename)
 
         print("Downloading bundle...")
-        bundle_filename = os.path.join('~/Downloads', f'{package_name}-apt-bundle.zip')
+        bundle_filename = os.path.join('~/Downloads', f'{install_name}-apt-bundle.zip')
         ssh(proxy, 'sudo', 'apt-offline',
             'get', sig_filename, '--bundle', bundle_filename, _out=sys.stdin)
 
@@ -220,11 +218,8 @@ def install_package(computer_name, package_name, online_computer=None):
 
         print("Install bundle in target computer.")
         ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=sys.stdin)
-        ssh(computer_name, 'sudo', 'apt-get', 'install', package_name, _out=sys.stdin)
-        clean_install_files(computer_name, package_name, online_computer)
+        ssh(computer_name, 'sudo', 'apt-get', 'install', *packages, _out=sys.stdin)
+        clean_install_files(computer_name, packages, online_computer)
     except ErrorReturnCode_1 as e:
-        clean_install_files(computer_name, package_name, online_computer)
+        clean_install_files(computer_name, packages, online_computer)
         raise(e)
-
-
-    
