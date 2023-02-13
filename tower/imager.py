@@ -6,8 +6,8 @@ import hashlib
 from sh import xz
 import requests
 
-#from tower import osutils
-#from tower import computers
+from tower import osutils
+from tower import computers
 
 def download_image(url, archive_hash):
     if not os.path.exists(".cache"):
@@ -19,9 +19,11 @@ def download_image(url, archive_hash):
     if not os.path.exists(img_filename):
         if not os.path.exists(xz_filename):
             print(f"Downloading {url}...")
-            resp = requests.get(url)
-            with open(xz_filename, "wb") as f:
-                f.write(resp.content)
+            with requests.get(url, stream=True) as resp:
+                resp.raise_for_status()
+                with open(xz_filename, "wb") as f:
+                    for chunk in resp.iter_content(chunk_size=4096):
+                        f.write(chunk)
 
         print(f"Calculating sha256 hash...")
         sha256_hash = hashlib.sha256()
