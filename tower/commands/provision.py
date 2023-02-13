@@ -55,7 +55,7 @@ def execute(args):
     if not sd_card:
         sys.exit("Impossible to determine the sd-card")
 
-    imager.burn_image(defaults.DEFAULT_OS_IMAGE, sd_card, firstrun_env)
+    imager.burn_image(defaults.DEFAULT_OS_IMAGE, defaults.DEFAULT_OS_SHA256, sd_card, firstrun_env)
 
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     computers.refresh_config(args.name[0])

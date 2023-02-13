@@ -88,7 +88,6 @@ def parse_arguments():
         help="""Command used to install an application in a computer prepared with the `provision` command."""
     )
 
-    # TODO: support multiple install
     install_parser.add_argument(
         'computer_name', 
         help="""Computer name where to install the package (Required).""",
