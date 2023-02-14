@@ -46,16 +46,23 @@ def check_args(args, parser_error):
 
 
 def execute(args):
+    if not args.public_key_path:
+        args.public_key_path, private_key_path = computers.generate_key_pair(args.name[0])
+
     try:
         firstrun_env = computers.firstrun_env(args)
     except computers.MissingEnvironmentValue as e:
-        sys.exit(e)
+        logger.error(e)
+        os.exit(1)
 
     sd_card = args.sd_card or osutils.select_sdcard_device()
     if not sd_card:
-        sys.exit("Impossible to determine the sd-card")
+        logger.error("Impossible to determine the sd-card")
+        os.exit(1)
 
     imager.burn_image(defaults.DEFAULT_OS_IMAGE, defaults.DEFAULT_OS_SHA256, sd_card, firstrun_env)
 
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
-    computers.refresh_config(args.name[0])
+    
+    ip = computers.discover_ip(args.name[0])
+    computers.update_config(args.name[0], ip, private_key_path)

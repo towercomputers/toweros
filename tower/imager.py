@@ -1,3 +1,7 @@
+# https://stackoverflow.com/questions/49820173/recursionerror-maximum-recursion-depth-exceeded-from-ssl-py-supersslcontex
+import gevent.monkey
+gevent.monkey.patch_all()
+
 import os
 import sys
 import shutil
@@ -28,14 +32,12 @@ def download_image(url, archive_hash):
                     for chunk in resp.iter_content(chunk_size=4096):
                         f.write(chunk)
 
-        logger.info(f"Calculating sha256 hash...")
+        logger.info(f"Verifying image hash...")
         sha256_hash = hashlib.sha256()
         with open(xz_filename, "rb") as f:
             for byte_block in iter(lambda: f.read(4096),b""):
                 sha256_hash.update(byte_block)
             xz_hash = sha256_hash.hexdigest()
-
-        logger.info(xz_hash, archive_hash)
         if xz_hash != archive_hash:
             sys.exit("Invalid image hash")
         

@@ -38,12 +38,9 @@ def generate_key_pair(name):
 def firstrun_env(args):
     logger.info("Generating first run environment...")
     name = args.name[0]
-
-    public_key_path, private_key_path = args.public_key_path, args.private_key_path
-    if not public_key_path:
-        public_key_path, private_key_path = generate_key_pair(name)
     
-    with open(public_key_path) as f:
+    check_environment_value('public-key-path', args.public_key_path)
+    with open(args.public_key_path) as f:
         public_key = f.read().strip()
 
     password = secrets.token_urlsafe(16)
@@ -109,11 +106,10 @@ def get_config(name):
         return None
 
 
-def update_config(name, ip):
+def update_config(name, ip, private_key_path):
     insert_include_directive()
 
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
-    key_path = os.path.join(os.path.expanduser('~'), '.ssh/', name)
     config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
     existing_hosts = config.hosts()
 
@@ -126,14 +122,14 @@ def update_config(name, ip):
         host = config.host(host_name)
         if host['hostname'] == ip:
             config.rename(host_name, name)
-            config.set(name, IdentityFile=key_path)
+            config.set(name, IdentityFile=private_key_path)
             config.save()
             return
     
     config.add(name,
         Hostname=ip,
         User=defaults.DEFAULT_SSH_USER,
-        IdentityFile=key_path,
+        IdentityFile=private_key_path,
         StrictHostKeyChecking="no",
         LogLevel="FATAL"
     )
@@ -171,11 +167,6 @@ def discover_ip(computer_name):
     logger.info(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds")
     time.sleep(10)
     return discover_ip(computer_name)
-
-
-def refresh_config(computer_name):
-    ip = discover_ip(computer_name)
-    update_config(computer_name, ip)
 
 
 def copy_file(computer_name_src, computer_name_dest, filename):
