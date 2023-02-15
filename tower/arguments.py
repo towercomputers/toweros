@@ -1,6 +1,6 @@
 import argparse
 import tower
-from tower.commands import provision, install, run, list
+from tower.commands import provision, install, run, status
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
@@ -142,16 +142,16 @@ def parse_arguments():
     )
 
     ##########################
-    #  `list` command        #
+    #  `status` command        #
     ##########################
 
-    list_parser = subparser.add_parser(
-        'list',
-        help="List all the computers and applications."
+    status_parser = subparser.add_parser(
+        'status',
+        help="Get status of one or all the computers."
     )
-    list_parser.add_argument(
+    status_parser.add_argument(
         '-n', '--name', 
-        help="""List only the applications installed in the given computer (Default: none).""",
+        help="""Get only status of one computer (Default: none).""",
         required=False
     )
 

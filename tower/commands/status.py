@@ -1,4 +1,5 @@
 import logging
+import json
 
 from tower import computers
 
@@ -8,4 +9,4 @@ def check_args(args, parser_error):
     pass
 
 def execute(args):
-    print(computers.get_list())
+    print(json.dumps(computers.status(args.name), indent=4))

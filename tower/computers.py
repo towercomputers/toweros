@@ -6,7 +6,7 @@ import time
 import logging
 
 from passlib.hash import sha512_crypt
-from sh import ssh, scp, arp, ssh_keygen, ErrorReturnCode_1
+from sh import ssh, scp, arp, ssh_keygen, ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import osutils
@@ -217,3 +217,29 @@ def install(computer_name, packages, online_computer=None):
     except ErrorReturnCode_1 as e:
         clean_install_files(computer_name, packages, online_computer)
         raise(e)
+
+def computer_status(computer_name):
+    computer_config = get_config(computer_name)
+
+    status = 'up'
+    try:
+        ssh(computer_name, 'ls') # any ssh command sould make the job
+    except ErrorReturnCode:
+        status = 'down'
+
+    online = is_online(computer_name) if status == 'up' else "N/A"
+
+    return {
+        'name': computer_name,
+        'status': status,
+        'online': online,
+        'ip': computer_config['hostname']
+    }
+
+def status(computer_name=None):
+    if computer_name:
+        return computer_status(computer_name)
+    computers_list = []
+    for computer_name in get_list():
+        computers_list.append(computer_status(computer_name))
+    return computers_list

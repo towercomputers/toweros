@@ -6,7 +6,7 @@ warnings.filterwarnings("ignore") # TODO: fix x2go syntax warning in python3
 
 import tower
 from tower.arguments import parse_arguments 
-from tower.commands import provision, install, run, list
+from tower.commands import provision, install, run, status
 
 
 args = parse_arguments()
