@@ -93,6 +93,12 @@ def parse_arguments():
         required=False,
         default=""
     )
+    provision_parser.add_argument(
+        '--image', 
+        help="""Image path or URL""",
+        required=False,
+        default=""
+    )
 
 
     ##########################
