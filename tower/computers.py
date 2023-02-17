@@ -218,28 +218,20 @@ def install(computer_name, packages, online_computer=None):
         clean_install_files(computer_name, packages, online_computer)
         raise(e)
 
-def computer_status(computer_name):
-    computer_config = get_config(computer_name)
 
-    status = 'up'
-    try:
-        ssh(computer_name, 'ls') # any ssh command sould make the job
-    except ErrorReturnCode:
-        status = 'down'
-
-    online = is_online(computer_name) if status == 'up' else "N/A"
-
-    return {
-        'name': computer_name,
-        'status': status,
-        'online': online,
-        'ip': computer_config['hostname']
-    }
-
-def status(computer_name=None):
+def status(computer_name = None):
     if computer_name:
-        return computer_status(computer_name)
-    computers_list = []
-    for computer_name in get_list():
-        computers_list.append(computer_status(computer_name))
-    return computers_list
+        computer_config = get_config(computer_name)
+        computer_status = 'up'
+        try:
+            ssh(computer_name, 'ls') # any ssh command sould make the job
+        except ErrorReturnCode:
+            computer_status = 'down'
+        online = is_online(computer_name) if computer_status == 'up' else "N/A"
+        return {
+            'name': computer_name,
+            'status': computer_status,
+            'online-host': online,
+            'ip': computer_config['hostname']
+        }
+    return [status(computer_name) for computer_name in get_list()]

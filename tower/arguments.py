@@ -147,12 +147,7 @@ def parse_arguments():
 
     status_parser = subparser.add_parser(
         'status',
-        help="Get status of one or all the computers."
-    )
-    status_parser.add_argument(
-        '-n', '--name', 
-        help="""Get only status of one computer (Default: none).""",
-        required=False
+        help="Get status of all the computers."
     )
 
     args = parser.parse_args()
