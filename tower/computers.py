@@ -193,7 +193,7 @@ def install(computer_name, packages, online_computer=None):
     install_name = "_".join(packages)
     try:
         logger.info("Generate package signature in target computer.")
-        sig_filename = os.path.join('~/Downloads', f'{install_name}-apt.sig')
+        sig_filename = os.path.join('~/', f'{install_name}-apt.sig')
         ssh(computer_name, 'sudo', 'apt-offline',
             'set', sig_filename, '--install-packages', *packages, _out=logger.debug)
 
@@ -202,7 +202,7 @@ def install(computer_name, packages, online_computer=None):
             copy_file(computer_name, proxy, sig_filename)
 
         logger.info("Downloading bundle...")
-        bundle_filename = os.path.join('~/Downloads', f'{install_name}-apt-bundle.zip')
+        bundle_filename = os.path.join('~/', f'{install_name}-apt-bundle.zip')
         ssh(proxy, 'sudo', 'apt-offline',
             'get', sig_filename, '--bundle', bundle_filename, _out=logger.debug)
 
