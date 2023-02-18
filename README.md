@@ -29,14 +29,24 @@ Check if `/etc/sudoers` contains the following line:
 
 ## Provision an host
 
+1. Generate an image with `build-image`:
+
 ```
-$> ./tower.py provision office
+$> ./pi-gen/build-image.py
+```
+
+This will generate an `img` file compresses with `xz`.
+
+2. Use this file to prepare the `sd-card`.
+
+```
+$> ./tower.py provision office --image Raspbian-tower-20230218182752.img.xz
 ```
 
 for online host:
 
 ```
-$> ./tower.py provision web --online
+$> ./tower.py provision web --online --image Raspbian-tower-20230218182752.img.xz
 ```
 
 Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the
