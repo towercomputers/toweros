@@ -1,10 +1,23 @@
 from argparse import ArgumentParser
 import ipaddress
+import logging
 import os
 import re
 import sys
+from urllib.parse import urlparse
+
+from sh import xz
 
 from tower import computers, osutils, defaults, imager
+
+logger = logging.getLogger('tower')
+
+def is_valid_https_url(str):
+    try:
+        result = urlparse(str)
+        return all([result.scheme, result.netloc]) and result.scheme == 'https'
+    except:
+        return False
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
@@ -43,6 +56,15 @@ def check_args(args, parser_error):
     if args.wlan_country:
         if re.match(r'^[a-zA-Z]{2}$', args.wlan_country) is None:
             parser_error(message="Wlan country invalid. Must be 2 chars.")
+    
+    if args.image:
+        if not os.path.exists(args.image) and not is_valid_https_url(args.image):
+            parser_error(message="Invalid path or url for the image.")
+        ext = args.image.split(".").pop()
+        if os.path.exists(args.image) and ext not in ['img', 'xz']:
+            parser_error(message="Invalid extension for image path (only `xz`or `img`).")
+        elif is_valid_https_url(args.image) and ext not in ['xz']:
+            parser_error(message="Invalid extension for image url (only `xz`).")
 
 
 def execute(args):
@@ -60,8 +82,17 @@ def execute(args):
         logger.error("Impossible to determine the sd-card")
         os.exit(1)
 
-    # TODO: check if args.image is an url
-    image_path = args.image or imager.download_image(defaults.DEFAULT_OS_IMAGE, defaults.DEFAULT_OS_SHA256)
+    if args.image:
+        image_path = imager.download_image(args.image) if is_valid_https_url(args.image) else args.image
+    else:
+        image_path = imager.download_image(defaults.DEFAULT_OS_IMAGE, defaults.DEFAULT_OS_SHA256)
+    
+    ext = image_path.split(".").pop()
+    if ext == 'xz': # TODO: support more formats
+        logger.info("Decompressing image...")
+        xz('-d', image_path)
+        image_path = image_path.replace('.xz', '')
+
     imager.burn_image(image_path, sd_card, firstrun_env)
 
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")

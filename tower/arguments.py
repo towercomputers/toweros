@@ -96,8 +96,7 @@ def parse_arguments():
     provision_parser.add_argument(
         '--image', 
         help="""Image path or URL""",
-        required=False,
-        default=""
+        required=True, # TODO: make optional when `tower` image will be online
     )
 
 

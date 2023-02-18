@@ -1,4 +1,5 @@
 import configparser
+from datetime import timedelta
 import logging
 import time
 import os
@@ -37,7 +38,7 @@ def write_image(image, device):
     else:
         logger.info(f"Burning {device} with dd, be patient please...")
         dd(image, device)
-    duration = time.time() - start_time
-    logger.info(f"{device} burnt in {duration}s.")
+    duration = timedelta(seconds=time.time() - start_time)
+    logger.info(f"{device} burnt in {duration}.")
 
 

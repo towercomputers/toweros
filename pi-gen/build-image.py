@@ -19,10 +19,6 @@ def build_image():
     config = dict(
         IMG_NAME='Raspbian',
         DEPLOY_COMPRESSION='xz',
-        FIRST_USER_NAME='tower',
-        FIRST_USER_PASS='tower',
-        ENABLE_SSH=1,
-        DISABLE_FIRST_BOOT_USER_RENAME=1,
         STAGE_LIST='stage0 stage1 stage2 stagetower'
     )
 

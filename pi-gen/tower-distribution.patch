@@ -13,7 +13,7 @@ index 03cde68..cd6cc93 100644
 +++ b/stage1/00-boot-files/files/cmdline.txt
 @@ -1 +1 @@
 -console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait
-+console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait systemd.run=/boot/firstrun.sh
++console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target
 diff --git a/stage1/00-boot-files/files/firstrun.sh b/stage1/00-boot-files/files/firstrun.sh
 new file mode 100755
 index 0000000..bc91234
@@ -53,8 +53,8 @@ index dfc01d4..9ea222c 100644
  @@ -1 +1 @@
 --console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait
 -+console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait quiet init=/usr/lib/raspberrypi-sys-mods/firstboot
-+-console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait systemd.run=/boot/firstrun.sh
-++console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait quiet systemd.run=/boot/firstrun.sh init=/usr/lib/raspberrypi-sys-mods/firstboot
++-console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target
+++console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait quiet systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target init=/usr/lib/raspberrypi-sys-mods/firstboot
 diff --git a/stagetower/00-install-x2goserver/00-packages b/stagetower/00-install-x2goserver/00-packages
 new file mode 100644
 index 0000000..22223ce
