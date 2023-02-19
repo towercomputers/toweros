@@ -27,6 +27,10 @@ Check if `/etc/sudoers` contains the following line:
 <you_username> ALL=(ALL) NOPASSWD: ALL
 ```
 
+4. Install Docker
+
+Docker is required, if you need to build an image with `build-image.py`.
+
 ## Provision an host
 
 1. Generate an image with `build-image`:

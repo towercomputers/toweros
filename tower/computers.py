@@ -4,6 +4,9 @@ from io import StringIO
 import sys
 import time
 import logging
+import fcntl
+import struct
+import socket
 
 from passlib.hash import sha512_crypt
 from sh import ssh, scp, arp, ssh_keygen, ErrorReturnCode_1, ErrorReturnCode
@@ -33,6 +36,15 @@ def generate_key_pair(name):
         os.remove(f'{key_path}.pub')
     ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
     return f'{key_path}.pub', key_path
+
+
+def get_interface_ip(ifname):
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+            s.fileno(),
+            0x8915,  # SIOCGIFADDR
+            struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+        )[20:24])
 
 
 def firstrun_env(args):
@@ -70,7 +82,8 @@ def firstrun_env(args):
         'WLAN_SSID': wlan_ssid,
         'WLAN_PASSWORD': wlan_password,
         'WLAN_COUNTRY': wlan_country,
-        'USER': defaults.DEFAULT_SSH_USER
+        'USER': defaults.DEFAULT_SSH_USER,
+        'THIN_CLIENT_IP': get_interface_ip('eth0') # TODO: make the interface configurable ?
     }
 
 

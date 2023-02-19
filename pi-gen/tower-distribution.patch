@@ -19,7 +19,7 @@ new file mode 100755
 index 0000000..bc91234
 --- /dev/null
 +++ b/stage1/00-boot-files/files/firstrun.sh
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,31 @@
 +#!/bin/bash
 +
 +set +e
@@ -39,6 +39,14 @@ index 0000000..bc91234
 +
 +    rm -f /boot/tower.env
 +fi
++
++sudo iptables -A INPUT -i lo -j ACCEPT
++sudo iptables -A INPUT -p tcp -s $THIN_CLIENT_IP --dport 22 -j ACCEPT
++sudo iptables -A INPUT -j DROP
++sudo sh -c 'iptables-save > /etc/firewall.conf'
++sudo sh -c 'echo "#!/bin/sh" > /etc/network/if-up.d/iptables'
++sudo sh -c 'echo "iptables-restore < /etc/firewall.conf" >> /etc/network/if-up.d/iptables'
++sudo chmod +x /etc/network/if-up.d/iptables
 +
 +rm -f /boot/firstrun.sh
 +sed -i 's| systemd.run.*||g' /boot/cmdline.txt
