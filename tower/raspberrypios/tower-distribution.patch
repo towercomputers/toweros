@@ -44,7 +44,7 @@ index 0000000..bc91234
 +sudo iptables -A INPUT -p tcp -s $THIN_CLIENT_IP --dport 22 -j ACCEPT
 +sudo iptables -A INPUT -j DROP
 +sudo iptables -I OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-+sudo iptables -A OUTPUT -d $THIN_CLIENT_IP -j DROP
++sudo iptables -A OUTPUT -d $TOWER_NETWORK -j DROP
 +sudo sh -c 'iptables-save > /etc/firewall.conf'
 +sudo sh -c 'echo "#!/bin/sh" > /etc/network/if-up.d/iptables'
 +sudo sh -c 'echo "iptables-restore < /etc/firewall.conf" >> /etc/network/if-up.d/iptables'

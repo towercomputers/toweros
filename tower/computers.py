@@ -7,6 +7,7 @@ import logging
 import fcntl
 import struct
 import socket
+import ipaddress
 
 from passlib.hash import sha512_crypt
 from sh import ssh, scp, arp, ssh_keygen, ErrorReturnCode_1, ErrorReturnCode
@@ -38,17 +39,28 @@ def generate_key_pair(name):
     return f'{key_path}.pub', key_path
 
 
-def get_interface_ip(ifname):
+def get_interface_info(ifname, ioctl_command):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         return socket.inet_ntoa(fcntl.ioctl(
                 s.fileno(),
-                0x8915,  # SIOCGIFADDR
+                ioctl_command,
                 struct.pack('256s', bytes(ifname[:15], 'utf-8'))
             )[20:24])
     except OSError as e:
         if e.errno == 19: # No such device
             return None
+
+def get_interface_ip(ifname):
+    return get_interface_info(ifname, 0x8915) # SIOCGIFADDR
+
+def get_interface_netmask(ifname):
+    return get_interface_info(ifname,  0x891B) # SIOCGIFNETMASK
+
+def get_interface_network(ifname):
+    ip = get_interface_ip(ifname)
+    netmask = get_interface_netmask(ifname)
+    return str(ipaddress.ip_network(f'{ip}/{netmask}', strict=False))
 
 
 def firstrun_env(args):
@@ -77,8 +89,9 @@ def firstrun_env(args):
         wlan_ssid, wlan_password, wlan_country = '', '', ''
     
     thin_client_ip = get_interface_ip('eth0') # TODO: make the interface configurable ?
-    if not thin_client_ip:
-        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP. Please ensure you are connected to the network on `eth0`.")
+    tower_network = get_interface_network('eth0')
+    if not thin_client_ip or not tower_network:
+        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `eth0`.")
   
     return {
         'NAME': name,
@@ -91,7 +104,8 @@ def firstrun_env(args):
         'WLAN_PASSWORD': wlan_password,
         'WLAN_COUNTRY': wlan_country,
         'USER': defaults.DEFAULT_SSH_USER,
-        'THIN_CLIENT_IP': thin_client_ip
+        'THIN_CLIENT_IP': thin_client_ip,
+        'TOWER_NETWORK': tower_network,
     }
 
 
