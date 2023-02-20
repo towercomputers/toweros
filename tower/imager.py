@@ -57,7 +57,8 @@ def set_firstrun_env(mountpoint, firstrun_env):
 
 
 def burn_image(image_path, device, firstrun_env):
-    logger.info(f"Burning {image_path} in {device} with the following environment:\n{firstrun_env}")
+    firstrun_env_str = "\n".join([f"{key}={value}" for key, value in firstrun_env.items()])
+    logger.info(f"Burning {image_path} in {device} with the following environment:\n{firstrun_env_str}")
     osutils.write_image(image_path, device)
     mountpoint = osutils.ensure_partition_is_mounted(device, 0) # first parition where to put files
     set_firstrun_env(mountpoint, firstrun_env)
