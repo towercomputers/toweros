@@ -24,7 +24,12 @@ def unmount_all(device):
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoint']:
             with sh.contrib.sudo(password="", _with=True):
-                umount(partition['mountpoint'])
+                try:
+                    umount(partition['mountpoint'])
+                except sh.ErrorReturnCode_32: # target is busy
+                    logger.debug("Unmount: device is busy. Retrying in 5 seconds.")
+                    time.sleep(5)
+                    umount(partition['mountpoint'])
 
 def mountpoint(device, partition_index=0):
     buf = StringIO()
