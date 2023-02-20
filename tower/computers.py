@@ -39,12 +39,16 @@ def generate_key_pair(name):
 
 
 def get_interface_ip(ifname):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-            s.fileno(),
-            0x8915,  # SIOCGIFADDR
-            struct.pack('256s', bytes(ifname[:15], 'utf-8'))
-        )[20:24])
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        return socket.inet_ntoa(fcntl.ioctl(
+                s.fileno(),
+                0x8915,  # SIOCGIFADDR
+                struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+            )[20:24])
+    except OSError as e:
+        if e.errno == 19: # No such device
+            return None
 
 
 def firstrun_env(args):
@@ -71,6 +75,10 @@ def firstrun_env(args):
     else:
         online = 'false'
         wlan_ssid, wlan_password, wlan_country = '', '', ''
+    
+    thin_client_ip = get_interface_ip('eth0') # TODO: make the interface configurable ?
+    if not thin_client_ip:
+        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP. Please ensure you are connected to the network on `eth0`.")
   
     return {
         'NAME': name,
@@ -83,7 +91,7 @@ def firstrun_env(args):
         'WLAN_PASSWORD': wlan_password,
         'WLAN_COUNTRY': wlan_country,
         'USER': defaults.DEFAULT_SSH_USER,
-        'THIN_CLIENT_IP': get_interface_ip('eth0') # TODO: make the interface configurable ?
+        'THIN_CLIENT_IP': thin_client_ip
     }
 
 

@@ -75,12 +75,12 @@ def execute(args):
         firstrun_env = computers.firstrun_env(args)
     except computers.MissingEnvironmentValue as e:
         logger.error(e)
-        os.exit(1)
+        sys.exit(1)
 
     sd_card = args.sd_card or osutils.select_sdcard_device()
     if not sd_card:
         logger.error("Impossible to determine the sd-card")
-        os.exit(1)
+        sys.exit(1)
 
     if args.image:
         image_path = imager.download_image(args.image) if is_valid_https_url(args.image) else args.image
