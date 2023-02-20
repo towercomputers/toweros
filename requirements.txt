@@ -1,6 +1,0 @@
-python-xlib==0.33
-requests==2.28.2
-sh==1.14.3
-backports.pbkdf2==0.1
-passlib==1.7.4
-sshconf==0.2.5

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import argparse
 from datetime import datetime, timedelta
 import logging
@@ -12,6 +10,8 @@ import time
 from sh import git, docker, Command
 
 GIT_BRANCH = "arm64"
+
+logger = logging.getLogger('tower')
 
 def build_image():
     start_time = time.time()
@@ -59,24 +59,3 @@ def build_image():
 
     duration = timedelta(seconds=time.time() - start_time)
     logger.info(f"Image `{image_dest_path}` created in {duration}.")
-    
-
-parser = argparse.ArgumentParser(description="""Generate Raspberry Pi OS compatible with `tower`""")
-parser.add_argument(
-    '-v', '--verbose',
-    help="""Set log level to DEBUG.""",
-    required=False,
-    action='store_true',
-    default=False
-)
-args = parser.parse_args()
-
-logger = logging.getLogger('tower')
-logger.setLevel(logging.DEBUG)
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG if args.verbose else logging.INFO)
-logger.addHandler(console_handler)
-
-build_image()
-
-
