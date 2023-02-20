@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tower"
+name = "tower-tools"
 version = "0.0.1"
 description = "Tower tools"
 readme = "README.md"
@@ -20,12 +20,16 @@ dependencies = [
     "sh==1.14.3",
     "backports.pbkdf2==0.1",
     "passlib==1.7.4",
-    "sshconf==0.2.5"
+    "sshconf==0.2.5",
+    "tower-tools[tower]",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["tower"]
 
 [tool.hatch.build]
 include = [
-  "tower/raspberrypios/*.path",
+  "tower/raspberrypios/*.patch",
 ]
 
 [project.scripts]
