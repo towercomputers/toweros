@@ -4,7 +4,7 @@ from tower.raspberrypios import pigen
 from tower.clis import clilogger
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="""Generate Raspberry Pi OS compatible with `tower`""")
+    parser = argparse.ArgumentParser(description="""Generate Raspberry Pi OS image compatible with `tower`""")
     parser.add_argument(
         '-v', '--verbose',
         help="""Set log level to DEBUG.""",
