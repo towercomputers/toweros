@@ -5,6 +5,7 @@
 1. Install requirements
 
 - Linux platform only
+- Python >= 3.9
 - `nxproxy` to run an application with x2go (`sudo apt-get install nxproxy`)
 - Docker (only if you need to build an image)
 
@@ -41,18 +42,18 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/too
 $> build-tower-image
 ```
 
-This will generate an `img` file compresses with `xz`.
+This will generate an `img` file compressed with `xz`.
 
 2. Use this file to prepare the `sd-card`.
 
 ```
-$> tower provision office --image Raspbian-tower-20230218182752.img.xz
+$> tower provision <computer-name> --image <image-path-generated-with-build-tower-image>
 ```
 
 for online host:
 
 ```
-$> tower provision web --online --image Raspbian-tower-20230218182752.img.xz
+$> tower provision <computer-name> --online --image <image-path-generated-with-build-tower-image>
 ```
 
 Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the
@@ -60,28 +61,28 @@ appropriate argument (see `./tower.py provision --help`).
 
 ### Execute a command in one of the host
 
-With `ssh`:
+A terminal command line with `ssh`:
 
 ```
-$> ssh office ls Dowloads
+$> ssh <computer-name> ls ~/
 ```
 
-With `x2go`:
+or a graphical appication with `x2go`:
 
 ```
-$> tower run office thunderbird
+$> tower run <computer-name> thunderbird
 ```
 
-### Install a package in one of the host
+### Install an APT package in one of the host
 
 ```
-$> tower install office thunderbird
+$> tower install <computer-name> thunderbird
 ```
 
 or, if the host is not online
 
 ```
-$> tower install office thunderbird --online-host web
+$> tower install <offline-computer-name> thunderbird --online-host <online-computer-name> 
 ```
 
 ### List hosts and their status
