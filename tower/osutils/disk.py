@@ -5,7 +5,7 @@ import os
 from io import StringIO
 
 import sh
-from sh import udisksctl, lsblk, mount as _mount, umount
+from sh import lsblk, mount as _mount, umount
 
 logger = logging.getLogger('tower')
 

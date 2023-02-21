@@ -2,12 +2,14 @@ import binascii
 import configparser
 from io import StringIO
 import os
+import fcntl
+import struct
+import socket
+import ipaddress
 
 from backports.pbkdf2 import pbkdf2_hmac
 import sh
 from sh import iw, iwconfig
-
-from tower import osutils
 
 
 def derive_wlan_key(ssid, psk):
@@ -76,3 +78,26 @@ def find_wlan_country(ssid):
                 max_count = count_by_country[cc]
                 max_cc = cc
     return max_cc
+
+def get_interface_info(ifname, ioctl_command):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        return socket.inet_ntoa(fcntl.ioctl(
+                s.fileno(),
+                ioctl_command,
+                struct.pack('256s', bytes(ifname[:15], 'utf-8'))
+            )[20:24])
+    except OSError as e:
+        if e.errno == 19: # No such device
+            return None
+
+def get_interface_ip(ifname):
+    return get_interface_info(ifname, 0x8915) # SIOCGIFADDR
+
+def get_interface_netmask(ifname):
+    return get_interface_info(ifname,  0x891B) # SIOCGIFNETMASK
+
+def get_interface_network(ifname):
+    ip = get_interface_ip(ifname)
+    netmask = get_interface_netmask(ifname)
+    return str(ipaddress.ip_network(f'{ip}/{netmask}', strict=False))

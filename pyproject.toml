@@ -21,7 +21,7 @@ dependencies = [
     "backports.pbkdf2==0.1",
     "passlib==1.7.4",
     "sshconf==0.2.5",
-    "tower-tools[tower]",
+    #"tower-tools[tower]",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -38,3 +38,6 @@ build-tower-image = "tower.clis.buildimage:main"
 
 [tool.hatch.metadata]
 allow-direct-references=true
+
+#[tool.hatch.envs.default]
+#python = "/opt/homebrew/opt/python@3.10/bin/python3.10"

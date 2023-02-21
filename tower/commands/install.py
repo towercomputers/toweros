@@ -1,7 +1,4 @@
-import sys
-import os
 import re
-from urllib.parse import urlparse
 
 from tower import computers
 
@@ -25,7 +22,4 @@ def check_args(args, parser_error):
             parser_error(f"{args.online_host} is not online.")
 
 def execute(args):
-    try:
-        computers.install(args.computer_name[0], args.packages, args.online_host)
-    except Exception as e:
-        sys.exit(e)
+    computers.install(args.computer_name[0], args.packages, args.online_host)
