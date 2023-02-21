@@ -40,5 +40,3 @@ def write_image(image, device):
         dd(image, device)
     duration = timedelta(seconds=time.time() - start_time)
     logger.info(f"{device} burnt in {duration}.")
-
-

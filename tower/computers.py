@@ -24,8 +24,6 @@ import gevent
 from tower import osutils
 from tower import defaults
 
-
-
 logger = logging.getLogger('tower')
 
 class MissingEnvironmentValue(Exception):
