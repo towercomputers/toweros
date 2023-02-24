@@ -3,9 +3,12 @@ from datetime import timedelta
 import logging
 import time
 import os
+import sys
 
 import sh
-from sh import Command
+from sh import Command, dd as _dd
+
+from tower import osutils
 
 logger = logging.getLogger('tower')
 
@@ -22,9 +25,10 @@ def disable_rpi_image_ejection():
         config.write(f)
 
 def dd(image, device):
-    if get_mount_point(device) is not None:
-        unmount(device)
-    dd(f"if={image}",f"of={device}", "bs=8m", "oflag=sync")
+    if osutils.mountpoint(device) is not None:
+        osutils.unmount_all(device)
+    with sh.contrib.sudo(password="", _with=True):
+        _dd(f"if={image}", f"of={device}", "bs=8M", "conv=sync", "status=progress", _out=sys.stdout)
 
 def write_image(image, device):
     rpi_imager_path = "/usr/bin/rpi-imager"

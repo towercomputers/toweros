@@ -22,14 +22,14 @@ def unmount_all(device):
     lsblk('-J', '-T', device, _out=buf)
     result = json.loads(buf.getvalue())
     for partition in result['blockdevices'][0]['children']:
-        if partition['mountpoint']:
+        if partition['mountpoints'][0]:
             with sh.contrib.sudo(password="", _with=True):
                 try:
-                    umount(partition['mountpoint'])
+                    umount(partition['mountpoints'][0])
                 except sh.ErrorReturnCode_32: # target is busy
                     logger.debug("Unmount: device is busy. Retrying in 5 seconds.")
                     time.sleep(5)
-                    umount(partition['mountpoint'])
+                    umount(partition['mountpoints'][0])
 
 def mountpoint(device, partition_index=0):
     buf = StringIO()
@@ -37,7 +37,7 @@ def mountpoint(device, partition_index=0):
     result = json.loads(buf.getvalue())
     if partition_index < len(result['blockdevices'][0]['children']):
         partition = result['blockdevices'][0]['children'][partition_index]
-        return partition['name'], partition['mountpoint']
+        return partition['name'], partition['mountpoints'][0]
     raise OperatingSystemException(f"Invalide partition index `{partition_index}`")
 
 def ensure_partition_is_mounted(device, partition_index=0):

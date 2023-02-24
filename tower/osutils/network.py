@@ -101,3 +101,6 @@ def get_interface_network(ifname):
     ip = get_interface_ip(ifname)
     netmask = get_interface_netmask(ifname)
     return str(ipaddress.ip_network(f'{ip}/{netmask}', strict=False))
+
+def get_wired_interfaces():
+    return [i[1] for i in socket.if_nameindex() if i[1].startswith('e')]

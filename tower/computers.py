@@ -79,10 +79,15 @@ def prepare_firstrun_env(args):
         online = 'false'
         wlan_ssid, wlan_password, wlan_country = '', '', ''
     
-    thin_client_ip = osutils.get_interface_ip('eth0') # TODO: make the interface configurable ?
-    tower_network = osutils.get_interface_network('eth0')
+    wired_interfaces = osutils.get_wired_interfaces()
+    if not wired_interfaces:
+        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to a wired network.")
+    
+    interface = wired_interfaces[0]  # TODO: make the interface configurable ?
+    thin_client_ip = osutils.get_interface_ip(interface)
+    tower_network = osutils.get_interface_network(interface)
     if not thin_client_ip or not tower_network:
-        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `eth0`.")
+        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `{interface}`.")
   
     return {
         'NAME': name,
