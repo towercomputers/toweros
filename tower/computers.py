@@ -15,7 +15,7 @@ import hashlib
 
 import requests
 from passlib.hash import sha512_crypt
-from sh import ssh, scp, arp, ssh_keygen, xz
+from sh import ssh, scp, arp, ssh_keygen, xz, avahi_resolve
 from sh import ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 import x2go
@@ -254,15 +254,13 @@ def is_online(name):
 
 def discover_ip(computer_name):
     buf = StringIO()
-    arp('-a', _out=buf)
-    result = buf.getvalue()
-    lines = result.split("\n")
-    for line in lines:
-        if line.startswith(f'{computer_name}.local'):
-            ip = line.split("(")[1].split(")")[0]
-            logger.info(f"IP found: {ip}")
-            return ip
-    logger.info(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds")
+    avahi_resolve('-4', '-n', f'{computer_name}.local', _out=buf)
+    res = buf.getvalue()
+    if res != "":
+        ip = res.strip().split("\t").pop()
+        logger.info(f"IP found: {ip}")
+        return ip
+    logger.info(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds with avahi")
     time.sleep(10)
     return discover_ip(computer_name)
 

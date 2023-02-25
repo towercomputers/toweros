@@ -19,7 +19,7 @@ new file mode 100755
 index 0000000..bc91234
 --- /dev/null
 +++ b/stage1/00-boot-files/files/firstrun.sh
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,35 @@
 +#!/bin/bash
 +
 +set +e
@@ -40,8 +40,10 @@ index 0000000..bc91234
 +    rm -f /boot/tower.env
 +fi
 +
++ping -c 1 -W 5 $THIN_CLIENT_IP || true
 +sudo iptables -A INPUT -i lo -j ACCEPT
 +sudo iptables -A INPUT -p tcp -s $THIN_CLIENT_IP --dport 22 -j ACCEPT
++sudo iptables -A INPUT -i eth0 -s $THIN_CLIENT_IP -p udp -m udp --dport 5353 -j ACCEPT
 +sudo iptables -A INPUT -j DROP
 +sudo iptables -I OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 +sudo iptables -A OUTPUT -d $TOWER_NETWORK -j DROP
