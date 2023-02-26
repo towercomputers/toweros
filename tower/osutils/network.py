@@ -9,7 +9,7 @@ import ipaddress
 
 from backports.pbkdf2 import pbkdf2_hmac
 import sh
-from sh import iw, iwconfig
+from sh import iw, iwconfig, cat
 
 
 def derive_wlan_key(ssid, psk):
@@ -39,6 +39,16 @@ def get_ssid_password(ssid):
                 wlan_conf = f.read()
             password = wlan_conf.split('psk=')[1].split('\n')[0].strip().replace('"', '')
             return password
+        iwdspot_path = f'/var/lib/iwd/{ssid}.psk'
+        try:
+            buf = StringIO()
+            with sh.contrib.sudo(password="", _with=True):
+                cat(iwdspot_path, _out=buf)
+                iwdspot_conf = buf.getvalue()
+                password = iwdspot_conf.split("Passphrase=")[1].split("\n")[0].strip()
+                return derive_wlan_key(ssid, password)
+        except sh.sh.ErrorReturnCode:
+            pass
         return None
     except: # no need to be curious here
         return None

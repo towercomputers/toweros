@@ -1,11 +1,13 @@
 import json
 import logging
 import time
+from datetime import timedelta
 import os
 from io import StringIO
+import sys
 
 import sh
-from sh import lsblk, mount as _mount, umount
+from sh import lsblk, mount as _mount, umount, dd as _dd
 
 logger = logging.getLogger('tower')
 
@@ -75,3 +77,14 @@ def select_sdcard_device():
     else:
         logger.info(f"sd-card found: {new_devices[0]}")
         return new_devices[0]
+
+def write_image(image, device):
+    start_time = time.time()
+    logger.info(f"Burning {device} with dd, be patient please...")
+    if mountpoint(device) is not None:
+        unmount_all(device)
+    with sh.contrib.sudo(password="", _with=True):
+        #cat(image, '>', device)
+        _dd(f"if={image}", f"of={device}", "bs=8M", "conv=sync", "status=progress", _out=sys.stdout)
+    duration = timedelta(seconds=time.time() - start_time)
+    logger.info(f"{device} burnt in {duration}.")

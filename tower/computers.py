@@ -340,7 +340,7 @@ def install(computer_name, packages, online_computer=None):
         ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=logger.debug)
         ssh(computer_name, 'sudo', 'apt-get', 'install', *packages, _out=logger.debug)
         clean_install_files(computer_name, packages, online_computer)
-    except ErrorReturnCode_1 as e:
+    except ErrorReturnCode as e:
         clean_install_files(computer_name, packages, online_computer)
         raise(e)
 
