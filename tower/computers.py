@@ -15,7 +15,7 @@ import hashlib
 
 import requests
 from passlib.hash import sha512_crypt
-from sh import ssh, scp, arp, ssh_keygen, xz, avahi_resolve
+from sh import ssh, scp, ssh_keygen, xz, avahi_resolve
 from sh import ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 import x2go
