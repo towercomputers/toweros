@@ -4,10 +4,37 @@
 
 1. Install requirements
 
-- Linux platform only
-- Python >= 3.9
-- `nxproxy` to run an application with x2go (`sudo apt-get install nxproxy`)
-- Docker (only if you need to build an image)
+Arch Linux is required.
+
+1.1 Install packages
+
+```
+$> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel docker
+```
+
+1.2 Enable services
+
+```
+$> systemctl enable avahi-daemon.service
+$> systemctl enable docker.service
+$> usermod -aG docker $USER
+```
+
+1.3 Install nxagent
+
+```
+$> git clone https://aur.archlinux.org/nx.git
+$> cd nx
+$> makepkg -s -i -r -c
+```
+
+1.4 Eventually install a graphical desktop to use `x2go`:
+
+```
+$> pacman -S lxkde xorg-xinit
+$> echo "exec startlxde" > /home/tower/.xinitrc
+$> startx
+```
 
 2. Update sudoers
 
