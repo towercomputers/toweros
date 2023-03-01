@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 TARGET_DRIVE=$1
 
 # zeroing hard drive
@@ -20,3 +22,6 @@ mkfs.ext4 -F "${TARGET_DRIVE}3"
 mount "${TARGET_DRIVE}3" /mnt
 mount --mkdir "${TARGET_DRIVE}1" /mnt/boot
 swapon "${TARGET_DRIVE}2"
+# update fstab
+mkdir /mnt/etc/
+genfstab -U /mnt > /mnt/etc/fstab

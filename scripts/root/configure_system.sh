@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 ROOT_PASSWORD=$1
 USERNAME=$2
 PASSWORD=$3
@@ -21,8 +23,10 @@ echo "tower" > /etc/hostname
 usermod --password $(echo $ROOT_PASSWORD | openssl passwd -1 -stdin) root
 # create first user
 useradd -m $USERNAME -p $(echo $PASSWORD | openssl passwd -1 -stdin)
-echo "tower ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-usermod -aG docker tower
+echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+usermod -aG docker $USERNAME
+groupadd netdev
+usermod -aG netdev $USERNAME
 # install boot loader
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -33,10 +37,3 @@ systemctl enable iwd.service
 systemctl enable dhcpcd.service
 systemctl enable avahi-daemon.service
 systemctl enable docker.service
-
-#install nxagent
-#cd /home/tower && \
-#    && sudo -u tower -- git clone https://aur.archlinux.org/nx.git \
-#    && cd nx \
-#    && sudo -u tower -- makepkg -s -i -r -c --noconfirm \
-#    && cd .. && rm -rf nx
