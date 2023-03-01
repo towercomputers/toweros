@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 ROOT_PASSWORD=$1
 USERNAME=$2

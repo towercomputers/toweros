@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+set -x
 
 TARGET_DRIVE="/dev/sda"
 ROOT_PASSWORD="tower"
@@ -22,7 +23,7 @@ pacstrap -K /mnt base linux linux-firmware \
                  dhcpcd git python python-pip avahi \
                  iw wireless_tools base-devel docker \
                  lxde xorg-xinit nano vi \
-                 nx
+                 nxagent nxproxy nx-headers
 
 # configure as root the new system
 cp configure_system.sh /mnt/root/
