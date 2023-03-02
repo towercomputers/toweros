@@ -21,7 +21,7 @@ dependencies = [
     "backports.pbkdf2==0.1",
     "passlib==1.7.4",
     "sshconf==0.2.5",
-    #"tower-tools[tower]",
+    "hatchling",
 ]
 
 [tool.hatch.build.targets.wheel]
