@@ -28,6 +28,7 @@ echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
 usermod -aG docker $USERNAME
 groupadd netdev
 usermod -aG netdev $USERNAME
+echo 'export PATH=~/.local/bin:$PATH' >> /home/$USERNAME/.bash_profile
 # install boot loader
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
@@ -39,4 +40,7 @@ systemctl enable dhcpcd.service
 systemctl enable avahi-daemon.service
 systemctl enable docker.service
 # install tower-tools
-runuser -u $USERNAME -- pip install --no-index --find-links=/pippackages tower-tools
+runuser -u $USERNAME -- pip install --no-index --find-links=/pippackages \
+    "x2go @ file:///pippackages/python-x2go-0.6.1.3.tar.gz" \
+    gevent python-xlib requests sh backports.pbkdf2 passlib sshconf hatchling wheel
+runuser -u $USERNAME -- pip install --no-index --find-links=/pippackages --no-deps tower-tools
