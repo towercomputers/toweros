@@ -38,3 +38,5 @@ systemctl enable iwd.service
 systemctl enable dhcpcd.service
 systemctl enable avahi-daemon.service
 systemctl enable docker.service
+# install tower-tools
+runuser -u $USERNAME -- pip install --no-index --find-links=/pippackages tower-tools

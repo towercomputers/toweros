@@ -13,16 +13,17 @@ KEYMAP="us"
 
 sh prepare_drive.sh $TARGET_DRIVE
 
-# prepare local repo for pacstrap
+# prepare local repo for pacstrap and pip
 cp -r towerpackages /mnt
 cp pacman.conf /etc/
+cp -r pippackages /mnt
 
 # install packages in /mnt
 pacstrap -K /mnt base linux linux-firmware \
                  iwd openssh sudo grub efibootmgr \
                  dhcpcd git python python-pip avahi \
                  iw wireless_tools base-devel docker \
-                 lxde xorg-xinit nano vi \
+                 archiso lxde xorg-xinit nano vi \
                  nxagent nxproxy nx-headers
 
 # configure as root the new system
