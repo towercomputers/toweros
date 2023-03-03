@@ -10,3 +10,5 @@ echo 'PASSWORD="tower"' >> tower.env
 echo 'LANG="en_US.UTF-8"' >> tower.env
 echo 'TIMEZONE="Europe/Paris"' >> tower.env
 echo 'KEYMAP="us"' >> tower.env
+
+# sudo xinit /usr/bin/zenity --entry $* -- :0 vt1 > answer.txt

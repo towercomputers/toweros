@@ -8,14 +8,12 @@ sh 01_ask_configuration.sh
 
 sh 02_prepare_drive.sh $TARGET_DRIVE
 
-sh 03_install_base.sh
+sh 03_install_pacman_packages.sh
 
-cp 04_update_users.sh /mnt/root/
-arch-chroot /mnt sh /root/04_update_users.sh $ROOT_PASSWORD $USERNAME $PASSWORD
+cp 04_configure_system.sh /mnt/root/
+arch-chroot /mnt sh /root/04_configure_system.sh $ROOT_PASSWORD $USERNAME $PASSWORD $LANG $TIMEZONE $KEYMAP
 
-sh 05_install_packages.sh $USERNAME
+cp 05_install_pip_packages.sh /mnt/root/
+arch-chroot /mnt sh /root/05_install_pip_packages.sh $USERNAME 
 
-cp 06_configure_system.sh /mnt/root/
-arch-chroot /mnt sh /root/06_configure_system.sh $LANG $TIMEZONE $KEYMAP
-
-sh 07_clean_and_reboot.sh
+sh 06_clean_and_reboot.sh
