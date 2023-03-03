@@ -1,7 +1,6 @@
 sudo pacman -Suy
-sudo pacman -S archiso
 
-mkdir /tmp/blankdb
+sudo rm -rf /tmp/blankdb && mkdir /tmp/blankdb
 #pacman -S - < pkglist.txt
 sudo pacman -Syw --cachedir ./root/towerpackages --dbpath /tmp/blankdb --noconfirm \
     base linux linux-firmware \
@@ -21,6 +20,10 @@ pip download "tower-tools @ git+ssh://github.com/towercomputing/tools.git@archos
 
 cp -r /usr/share/archiso/configs/releng/ archtower
 sudo cp -r root/* archtower/airootfs/root/
+
+echo "lxde" >> archtower/packages.x86_64
+echo "xorg-xinit" >> archtower/packages.x86_64
+echo "zenity" >> archtower/packages.x86_64
 
 sudo mkarchiso -v archtower/
 

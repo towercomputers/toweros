@@ -3,32 +3,19 @@
 set -e
 set -x
 
-TARGET_DRIVE="/dev/sda"
-ROOT_PASSWORD="tower"
-USERNAME="tower"
-PASSWORD="tower"
-LANG="en_US.UTF-8"
-TIMEZONE="Europe/Paris"
-KEYMAP="us"
+sh 01_ask_configuration.sh
+. ./tower.env
 
-sh prepare_drive.sh $TARGET_DRIVE
+sh 02_prepare_drive.sh $TARGET_DRIVE
 
-# prepare local repo for pacstrap and pip
-cp -r towerpackages /mnt
-cp pacman.conf /etc/
-cp -r pippackages /mnt
+sh 03_install_base.sh
 
-# install packages in /mnt
-pacstrap -K /mnt base linux linux-firmware \
-                 iwd openssh sudo grub efibootmgr \
-                 dhcpcd git python python-pip avahi \
-                 iw wireless_tools base-devel docker \
-                 archiso lxde xorg-xinit nano vi \
-                 nxagent nxproxy nx-headers
+cp 04_update_users.sh /mnt/root/
+arch-chroot /mnt sh /root/04_update_users.sh $ROOT_PASSWORD $USERNAME $PASSWORD
 
-# configure as root the new system
-cp configure_system.sh /mnt/root/
-arch-chroot /mnt sh /root/configure_system.sh $ROOT_PASSWORD $USERNAME $PASSWORD $LANG $TIMEZONE $KEYMAP
+sh 05_install_packages.sh $USERNAME
 
-#umount -R /mnt
-#reboot
+cp 06_configure_system.sh /mnt/root/
+arch-chroot /mnt sh /root/06_configure_system.sh $LANG $TIMEZONE $KEYMAP
+
+sh 07_clean_and_reboot.sh
