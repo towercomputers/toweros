@@ -23,7 +23,7 @@ sudo cp -r root/* archtower/airootfs/root/
 
 echo "lxde" >> archtower/packages.x86_64
 echo "xorg-xinit" >> archtower/packages.x86_64
-echo "zenity" >> archtower/packages.x86_64
+echo "yad" >> archtower/packages.x86_64
 
 sudo mkarchiso -v archtower/
 
