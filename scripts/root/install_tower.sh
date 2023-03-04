@@ -13,7 +13,6 @@ sh 03_install_pacman_packages.sh
 cp 04_configure_system.sh /mnt/root/
 arch-chroot /mnt sh /root/04_configure_system.sh $ROOT_PASSWORD $USERNAME $PASSWORD $LANG $TIMEZONE $KEYMAP
 
-cp 05_install_pip_packages.sh /mnt/root/
-arch-chroot /mnt sh /root/05_install_pip_packages.sh $USERNAME 
+sh 05_install_pip_packages.sh $USERNAME
 
 sh 06_clean_and_reboot.sh

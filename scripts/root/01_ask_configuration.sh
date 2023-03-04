@@ -61,7 +61,7 @@ FORM_ERROR=$(printf ", %s" "${FORM_ERROR[@]}")
 FORM_ERROR=${FORM_ERROR:2}
 
 if ! [ -z "$FORM_ERROR" ]; then 
-    sh ./zenity.sh "$FORM_ERROR"
+    sh ./01_ask_configuration.sh "$FORM_ERROR"
     exit 0
 fi
 
