@@ -25,6 +25,8 @@ echo "lxde" >> archtower/packages.x86_64
 echo "xorg-xinit" >> archtower/packages.x86_64
 echo "yad" >> archtower/packages.x86_64
 
+sed -i '/.automated_script.sh/c\sh ~\/install_tower.sh' archtower/airootfs/root/.zlogin
+
 sudo mkarchiso -v archtower/
 
 #sudo cat out/*.iso | sudo tee /dev/sdb > /dev/null
