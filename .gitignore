@@ -1,6 +1,7 @@
 .DS_Store
 *.xz
 *.img
+*.iso
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

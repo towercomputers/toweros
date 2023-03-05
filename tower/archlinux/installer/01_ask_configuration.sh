@@ -30,6 +30,7 @@ if ! [ -z "$ERROR" ]; then
     args+=( '--field' "<span foreground='red'><big>$ERROR</big></span>:LBL" "" )
 fi
 YADCONF=$(sudo xinit /usr/bin/yad "${args[@]}" $* -- :0 vt1)
+#YADCONF=$(yad "${args[@]}")
 
 if [ -z "$YADCONF" ]; then
     echo "Installation canceled. Type 'sh intall_tower.sh' to restart the installation."
