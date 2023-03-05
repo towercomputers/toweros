@@ -22,9 +22,15 @@ def parse_arguments():
     )
     parser.add_argument(
         '--nx-path',
-        help="""Skip `nx` compilation and use packages in provided path.""",
+        help="""Skip `nx` compilation and use packages in provided folder path.""",
         required=False
     )
+    parser.add_argument(
+        '--computer-image-path',
+        help="""Skip computer image building and use provided image path.""",
+        required=False
+    )
+
     parser.add_argument(
         'image_name', 
         help="""`thinclient` or `computer` (Required).""",
@@ -38,6 +44,6 @@ def main():
     if args.image_name == 'computer':
         pigen.build_image()
     elif args.image_name == 'thinclient':
-        archiso.build_image(args.nx_path)
+        archiso.build_image(args.nx_path, args.computer_image_path)
 
 

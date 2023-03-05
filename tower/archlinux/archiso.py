@@ -11,6 +11,8 @@ import glob
 import sh
 from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso
 
+from tower import raspberrypios
+
 logger = logging.getLogger('tower')
 
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git@archos"
@@ -55,7 +57,7 @@ def create_pacman_db(towerpackages_path):
 def download_pip_packages(pippackages_path):
     pip("download", f"tower-tools @ {TOWER_TOOLS_URL}", '-d', pippackages_path, _out=logger.debug)
 
-def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path):
+def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path, rpi_image_path):
     # copy installer, pacman and pip packages
     cp('-r', '/usr/share/archiso/configs/releng/', archiso_path)
     root_path = os.path.join(archiso_path, 'airootfs', 'root')
@@ -65,6 +67,7 @@ def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackage
             cp(f, root_path)
         cp('-r', towerpackages_path, root_path)
         cp('-r', pippackages_path, root_path)
+        cp(rpi_image_path, root_path)
     # add packages
     with open(os.path.join(archiso_path, 'packages.x86_64'), "a") as f:
         f.write("lxde\n")
@@ -83,7 +86,7 @@ def make_archiso(archiso_path, working_dir):
         cp(image_src_path, image_dest_path)
     return image_dest_path
 
-def build_image(nx_path=None):
+def build_image(nx_path=None, computer_image_path=None):
     start_time = time.time()
 
     working_dir = os.path.join(os.getcwd(), datetime.now().strftime('buildtower%Y%m%d%H%M%S'))
@@ -97,14 +100,16 @@ def build_image(nx_path=None):
     os.makedirs(blankdb_path)
     logger.info("Downloading pacman packages...")
     download_pacman_packages(blankdb_path, towerpackages_path)
-    logger.info("Compiling nx packages...")
+    logger.info("Prepare nx packages...")
     compile_nx_packages(working_dir, blankdb_path, towerpackages_path, nx_path)
-    logger.info("Preparing pacman database..")
+    logger.info("Preparing pacman database...")
     create_pacman_db(towerpackages_path)
-    logger.info("Downloading pip packages..")
+    logger.info("Downloading pip packages...")
     download_pip_packages(pippackages_path)
+    logger.info("Preparing computer Rasperry PI OS image...")
+    rpi_image_path = computer_image_path or raspberrypios.pigen.build_image()
     logger.info("Preparing archiso folder..")
-    prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path)
+    prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path, rpi_image_path)
     logger.info("Building image file...")
     image_dest_path = make_archiso(archiso_path, working_dir)
     clean_folders([working_dir])

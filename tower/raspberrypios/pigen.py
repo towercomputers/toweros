@@ -60,3 +60,5 @@ def build_image():
 
     duration = timedelta(seconds=time.time() - start_time)
     logger.info(f"Image `{image_dest_path}` created in {duration}.")
+
+    return image_dest_path
