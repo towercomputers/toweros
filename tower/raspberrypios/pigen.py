@@ -34,7 +34,7 @@ def build_image():
         shutil.rmtree(git_folder)
 
     logger.info("Cloning `pi-gen` repository...")
-    git("clone",  "https://github.com/RPI-Distro/pi-gen.git", _cwd=working_dir, _out=logger.debug)
+    git("clone", "--branch", GIT_BRANCH, "https://github.com/RPI-Distro/pi-gen.git", _cwd=working_dir, _out=logger.debug)
 
     logger.info("Apply `tower` distribution patch...")
     git("apply", patch_path, _cwd=git_folder, _out=logger.debug)
@@ -44,7 +44,8 @@ def build_image():
 
     logger.info("Build image with docker, please be patient...")
     try:
-        Command(build_docker_path)(_cwd=git_folder, _out=sys.stdin)
+        docker('run', '--rm', '--privileged', 'multiarch/qemu-user-static', '--reset', '-p', 'yes', _out=logger.debug)
+        Command(build_docker_path)(_cwd=git_folder, _out=logger.debug)
     except KeyboardInterrupt:
         logger.info("Build interrupted. Cleaning docker container and files, please wait some seconds..")
         shutil.rmtree(git_folder)
