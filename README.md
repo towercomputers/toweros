@@ -68,6 +68,8 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/too
 
 ### 1. Provision a RPI computer
 
+Note: if you are using the Tower Distribution you can skip the first step and use the image in `~/.cache/tower`.
+
 1.1 Generate an image with `build-image`:
 
 ```
