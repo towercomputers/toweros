@@ -17,5 +17,6 @@ sh 05_install_pip_packages.sh $USERNAME
 
 mkdir /mnt/etc/tower
 cp *.xz /mnt/etc/tower
+cp welcome.msg /etc/issue
 
 sh 06_clean_and_reboot.sh
