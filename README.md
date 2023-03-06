@@ -1,18 +1,31 @@
 # Tower System Command Line
 
+## Hardware configuration
+
+You must have a thin client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
+
 ## Installation
 
-1. Install requirements
+### 1. With Arch Linux Tower Distribution
 
-Arch Linux is required.
+The recommended way to use  `tower` tools is to install the Arch Linux Tower Distribution. This distribution contains all the necessary dependencies and is pre-configured so that `tower` tools are directly usable at the first boot.
+1. Download the latest image here: ____
+2. Use on of the method described here https://wiki.archlinux.org/title/USB_flash_installation_medium to prepare a bootable USB medium.
+3. Boot on the USB drive and follow the instruction.
 
-1.1 Install packages
+This is the way.
+
+Note: you can build your own image of Tower Distribution with command `build-tower-image thinclient`
+
+### 2. Manually on an Arch Linux distribution
+
+#### 2.1 Install packages
 
 ```
-$> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel docker
+$> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel docker archiso
 ```
 
-1.2 Enable services
+#### 2.2 Enable services
 
 ```
 $> systemctl enable avahi-daemon.service
@@ -20,7 +33,7 @@ $> systemctl enable docker.service
 $> usermod -aG docker $USER
 ```
 
-1.3 Install nxagent
+#### 2.3 Install nxagent
 
 ```
 $> git clone https://aur.archlinux.org/nx.git
@@ -28,24 +41,16 @@ $> cd nx
 $> makepkg -s -i -r -c
 ```
 
-1.4 Eventually install a graphical desktop to use `x2go`:
+#### 2.4 Update sudoers
 
-```
-$> pacman -S lxkde xorg-xinit
-$> echo "exec startlxde" > /home/tower/.xinitrc
-$> startx
-```
-
-2. Update sudoers
-
-The script assumes that the current user is a "full" sudoers with no password.
+The `tower` tools assumes that the current user is a "full" sudoers with no password.
 Check if `/etc/sudoers` contains the following line:
 
 ```
 <you_username> ALL=(ALL) NOPASSWD: ALL
 ```
 
-3. Install `tower`
+#### 2.5. Install `tower`
 
 Update `pip` to the latest version:
 
@@ -61,17 +66,17 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/too
 
 ## Usage
 
-### Provision an host
+### 1. Provision a RPI computer
 
-1. Generate an image with `build-image`:
+1.1 Generate an image with `build-image`:
 
 ```
-$> build-tower-image
+$> build-tower-image computer
 ```
 
 This will generate an `img` file compressed with `xz`.
 
-2. Use this file to prepare the `sd-card`.
+1.2 Use this file to prepare the `sd-card`.
 
 ```
 $> tower provision <computer-name> --image <image-path-generated-with-build-tower-image>
@@ -83,10 +88,9 @@ for online host:
 $> tower provision <computer-name> --online --image <image-path-generated-with-build-tower-image>
 ```
 
-Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the
-appropriate argument (see `./tower.py provision --help`).
+Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
 
-### Execute a command in one of the host
+### 2. Execute a command in one of the computer
 
 A terminal command line with `ssh`:
 
@@ -100,19 +104,19 @@ or a graphical appication with `x2go`:
 $> tower run <computer-name> thunderbird
 ```
 
-### Install an APT package in one of the host
+###  3. Install an APT package in one of the computer
 
 ```
 $> tower install <computer-name> thunderbird
 ```
 
-or, if the host is not online
+or, if the computer is not online
 
 ```
 $> tower install <offline-computer-name> thunderbird --online-host <online-computer-name> 
 ```
 
-### List hosts and their status
+### 4. List computers and their status
 
 ```
 $> tower status
