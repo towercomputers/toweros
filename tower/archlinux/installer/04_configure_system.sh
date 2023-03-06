@@ -57,6 +57,7 @@ iptables -I UDP -p udp -m recent --update --rsource --seconds 60 --name UDP-PORT
 iptables -D INPUT -p udp -j REJECT --reject-with icmp-port-unreachable
 iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j REJECT --reject-with icmp-port-unreachable
 iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
+iptables -I UDP -p udp -m udp --dport 5353 -j ACCEPT
 iptables-save -f /etc/iptables/iptables.rules
 # enable services
 systemctl enable iwd.service
