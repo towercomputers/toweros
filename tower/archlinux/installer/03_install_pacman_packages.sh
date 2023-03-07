@@ -12,3 +12,5 @@ pacstrap -K /mnt base linux linux-firmware openssh sudo \
                  iw wireless_tools base-devel docker \
                  archiso lxde xorg-xinit nano vi \
                  nxagent nxproxy nx-headers
+
+rm -rf /mnt/towerpackages

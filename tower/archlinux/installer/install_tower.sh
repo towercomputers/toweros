@@ -12,13 +12,14 @@ sh 03_install_pacman_packages.sh
 
 cp 04_configure_system.sh /mnt/root/
 arch-chroot /mnt sh /root/04_configure_system.sh $ROOT_PASSWORD $USERNAME $PASSWORD $LANG $TIMEZONE $KEYMAP
+rm /mnt/root/04_configure_system.sh
 
-sh 05_install_pip_packages.sh $USERNAME
+cp 05_configure_firewall.sh /mnt/root/
+arch-chroot /mnt sh /root/05_configure_firewall.sh
+rm /mnt/root/05_configure_firewall.sh
 
-mkdir /mnt/home/$USERNAME/.cache/tower
-cp *.xz /mnt/home/$USERNAME/.cache/tower/
-arch-chroot /mnt chown -R $USERNAME:$USERNAME /home/$USERNAME/.cache/tower
+sh 06_install_tower_tools.sh $USERNAME
 
 cp welcome.msg /mnt/etc/issue
 
-sh 06_clean_and_reboot.sh
+reboot
