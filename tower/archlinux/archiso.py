@@ -15,7 +15,7 @@ from tower import raspberrypios
 
 logger = logging.getLogger('tower')
 
-TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git@archos"
+TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 
 def clean_folders(folders):
     with sh.contrib.sudo(password="", _with=True):
