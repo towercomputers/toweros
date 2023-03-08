@@ -103,25 +103,52 @@ $> ssh <computer-name> ls ~/
 or a graphical appication with `x2go`:
 
 ```
-$> tower run <computer-name> thunderbird
+$> tower run <computer-name> <application-name>
 ```
 
 ###  3. Install an APT package in one of the computer
 
 ```
-$> tower install <computer-name> thunderbird
+$> tower install <computer-name> <application-name>
 ```
 
 or, if the computer is not online
 
 ```
-$> tower install <offline-computer-name> thunderbird --online-host <online-computer-name> 
+$> tower install <offline-computer-name> <application-name> --online-host <online-computer-name> 
 ```
 
 ### 4. List computers and their status
 
 ```
 $> tower status
+```
+
+### 5. Example using two computers
+
+provision a first offline computer named `office`
+
+```
+$> tower provision office --image=/home/tower/.cache/Raspbian-tower-20230306141627.img.xz
+```
+
+provision a second online computer named `web`
+
+```
+$> tower provision web --online --image=/home/tower/.cache/Raspbian-tower-20230306141627.img
+```
+
+install `galculator` in `office` computer
+
+```
+$> tower install office galculator --online-host=web
+```
+
+run `galculator` from `office`
+
+```
+$> startx
+$> tower run office galculator
 ```
 
 ## Using with `hatch`
