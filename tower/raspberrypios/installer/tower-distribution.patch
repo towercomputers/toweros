@@ -1,62 +1,22 @@
 diff --git a/stage1/00-boot-files/00-run.sh b/stage1/00-boot-files/00-run.sh
-index bc61397..d71e260 100755
+index bc61397..a93dcec 100755
 --- a/stage1/00-boot-files/00-run.sh
 +++ b/stage1/00-boot-files/00-run.sh
-@@ -2,3 +2,4 @@
+@@ -2,3 +2,5 @@
  
  install -m 644 files/cmdline.txt "${ROOTFS_DIR}/boot/"
  install -m 644 files/config.txt "${ROOTFS_DIR}/boot/"
 +install -m 644 files/firstrun.sh "${ROOTFS_DIR}/boot/"
++install -m 644 files/configure_firewall.sh "${ROOTFS_DIR}/boot/"
 diff --git a/stage1/00-boot-files/files/cmdline.txt b/stage1/00-boot-files/files/cmdline.txt
-index 03cde68..cd6cc93 100644
+index 03cde68..3b8a09b 100644
 --- a/stage1/00-boot-files/files/cmdline.txt
 +++ b/stage1/00-boot-files/files/cmdline.txt
 @@ -1 +1 @@
 -console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait
 +console=serial0,115200 console=tty1 root=ROOTDEV rootfstype=ext4 fsck.repair=yes rootwait systemd.run=/boot/firstrun.sh systemd.run_success_action=reboot systemd.unit=kernel-command-line.target
-diff --git a/stage1/00-boot-files/files/firstrun.sh b/stage1/00-boot-files/files/firstrun.sh
-new file mode 100755
-index 0000000..bc91234
---- /dev/null
-+++ b/stage1/00-boot-files/files/firstrun.sh
-@@ -0,0 +1,35 @@
-+#!/bin/bash
-+
-+set +e
-+
-+if [ -f "/boot/tower.env" ]; then
-+    . "/boot/tower.env"
-+
-+    /usr/lib/raspberrypi-sys-mods/imager_custom set_hostname "$NAME.tower"
-+    /usr/lib/raspberrypi-sys-mods/imager_custom enable_ssh -k "$PUBLIC_KEY"
-+    /usr/lib/userconf-pi/userconf "$USER" "$ENCRYPTED_PASSWORD"
-+    /usr/lib/raspberrypi-sys-mods/imager_custom set_keymap "$KEYMAP"
-+    /usr/lib/raspberrypi-sys-mods/imager_custom set_timezone "$TIMEZONE"
-+
-+    if "$ONLINE" == "true"; then
-+        /usr/lib/raspberrypi-sys-mods/imager_custom set_wlan "$WLAN_SSID" "$WLAN_PASSWORD" "$WLAN_COUNTRY"
-+    fi
-+
-+    rm -f /boot/tower.env
-+fi
-+
-+ping -c 1 -W 5 $THIN_CLIENT_IP || true
-+sudo iptables -A INPUT -i lo -j ACCEPT
-+sudo iptables -A INPUT -p tcp -s $THIN_CLIENT_IP --dport 22 -j ACCEPT
-+sudo iptables -A INPUT -i eth0 -s $THIN_CLIENT_IP -p udp -m udp --dport 5353 -j ACCEPT
-+sudo iptables -A INPUT -j DROP
-+sudo iptables -I OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-+sudo iptables -A OUTPUT -d $TOWER_NETWORK -j DROP
-+sudo sh -c 'iptables-save > /etc/firewall.conf'
-+sudo sh -c 'echo "#!/bin/sh" > /etc/network/if-up.d/iptables'
-+sudo sh -c 'echo "iptables-restore < /etc/firewall.conf" >> /etc/network/if-up.d/iptables'
-+sudo chmod +x /etc/network/if-up.d/iptables
-+
-+rm -f /boot/firstrun.sh
-+sed -i 's| systemd.run.*||g' /boot/cmdline.txt
-+exit 0
 diff --git a/stage2/01-sys-tweaks/00-patches/07-resize-init.diff b/stage2/01-sys-tweaks/00-patches/07-resize-init.diff
-index dfc01d4..9ea222c 100644
+index dfc01d4..1e2bdcc 100644
 --- a/stage2/01-sys-tweaks/00-patches/07-resize-init.diff
 +++ b/stage2/01-sys-tweaks/00-patches/07-resize-init.diff
 @@ -1,5 +1,5 @@
