@@ -9,7 +9,7 @@ import time
 import glob
 
 import sh
-from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso
+from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown
 
 from tower import raspberrypios
 
@@ -85,6 +85,7 @@ def make_archiso(archiso_path, working_dir):
     with sh.contrib.sudo(password="", _with=True):
         mkarchiso('-v', archiso_path, _cwd=working_dir, _out=logger.debug)
         cp(image_src_path, image_dest_path)
+        chown(os.getlogin(), image_dest_path)
     return image_dest_path
 
 def build_image(nx_path=None, computer_image_path=None):
