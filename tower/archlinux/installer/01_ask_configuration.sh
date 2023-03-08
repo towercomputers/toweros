@@ -15,6 +15,7 @@ args+=( '--form' '--title' 'Tower Computing' )
 args+=( '--text' '<b><big>\nTower Distribution Installation\n</big></b>' )
 args+=( '--fixed' '--center' '--sticky' )
 args+=( '--field' 'Target Disk:CB' "$DRIVES" )
+args+=( '--field' "<span foreground='red'>Please note that all data on the chosen disk will be destroyed FOREVER</span>:LBL" "" )
 args+=( '--field' ':LBL' "" )
 args+=( '--field' 'Localization:LBL' "" )
 args+=( '--field' 'Language:CB' "$LANGS" )
@@ -39,12 +40,12 @@ fi
 
 set +e
 TARGET_DRIVE=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $1 }' | rev | cut -d' ' -f 2 | rev)
-LANG=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $4 }')
-TIMEZONE=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $5 }')
-KEYMAP=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $6 }')
-USERNAME=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $9 }')
-PASSWORD=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $10 }')
-CONFIRM_PASSWORD=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $11 }')
+LANG=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $5 }')
+TIMEZONE=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $6 }')
+KEYMAP=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $7 }')
+USERNAME=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $10 }')
+PASSWORD=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $11 }')
+CONFIRM_PASSWORD=$(echo $YADCONF | awk 'BEGIN {FS="|" } { print $12 }')
 set -e
 
 FORM_ERROR=()
