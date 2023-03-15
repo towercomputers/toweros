@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from tower.raspberrypios import pigen
 from tower.archlinux import archiso
@@ -36,7 +37,14 @@ def parse_arguments():
         help="""`thinclient` or `computer` (Required).""",
         choices=['thinclient', 'computer']
     )
-    return parser.parse_args()
+
+    args = parser.parse_args()
+    if args.computer_image_path and args.computer_image_path.split(".").pop() != "xz":
+        parser.error("Invalid image path. Must be an xz archive.")
+    if args.nx_path and not os.path.isdir(args.nx_path):
+        parser.error("Invalid nx path. Must be a folder containing zst files.")
+    return args
+
 
 def main():
     args = parse_arguments()
