@@ -6,14 +6,16 @@ You must have a thin client (typically a laptop like a Lenovo X270) connected to
 
 ## Installation
 
-### 1. With TowerOS
+### 1. TowerOS Thin Client
 
-The recommended way to use  `tower` tools is to install the TowerOS Linux Distribution (based on Arch Linux). This distribution contains all the necessary dependencies and is pre-configured so that `tower` tools are directly usable at the first boot.
+The easiest way to use Tower is to run the TowerOS GNU/Linux distribution (based on Arch Linux) on your Thin Client.
+
+#### To install get TowerOS:
 1. Download the latest image here: ____
 2. Prepare a bootable USB medium using the above image.
 3. Boot the Thin Client the USB drive and follow the instruction.
 
-Note: you can build your own image of Tower Distribution with command `build-tower-image thinclient`
+Note: you can build your own image of TowerOS with command `build-tower-image thinclient`.
 
 ### 2. Custom Thin-Client (Linux)
 
