@@ -6,21 +6,20 @@ You must have a thin client (typically a laptop like a Lenovo X270) connected to
 
 ## Installation
 
-### 1. With Arch Linux Tower Distribution
+### 1. With TowerOS
 
-The recommended way to use  `tower` tools is to install the Arch Linux Tower Distribution. This distribution contains all the necessary dependencies and is pre-configured so that `tower` tools are directly usable at the first boot.
+The recommended way to use  `tower` tools is to install the TowerOS Linux Distribution (based on Arch Linux). This distribution contains all the necessary dependencies and is pre-configured so that `tower` tools are directly usable at the first boot.
 1. Download the latest image here: ____
-2. Use on of the method described here https://wiki.archlinux.org/title/USB_flash_installation_medium to prepare a bootable USB medium.
-3. Boot on the USB drive and follow the instruction.
-
-This is the way.
+2. Prepare a bootable USB medium using the above image.
+3. Boot the Thin Client the USB drive and follow the instruction.
 
 Note: you can build your own image of Tower Distribution with command `build-tower-image thinclient`
 
-### 2. Manually on an Arch Linux distribution
+### 2. Custom Thin-Client (Linux)
 
 #### 2.1 Install packages
 
+##### 2.1.1 from Arch Linux
 ```
 $> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel docker archiso
 ```
@@ -33,7 +32,7 @@ $> systemctl enable docker.service
 $> usermod -aG docker $USER
 ```
 
-#### 2.3 Install nxagent
+#### 2.3 Install `nxagent`
 
 ```
 $> git clone https://aur.archlinux.org/nx.git
@@ -41,9 +40,9 @@ $> cd nx
 $> makepkg -s -i -r -c
 ```
 
-#### 2.4 Update sudoers
+#### 2.4 Update `/etc/sudoers`
 
-The `tower` tools assumes that the current user is a "full" sudoers with no password.
+The `tower` tools assumes that the current user has full `sudo` access, with no password. (Please refer to our *threat model*.)
 Check if `/etc/sudoers` contains the following line:
 
 ```
@@ -66,9 +65,9 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/too
 
 ## Usage
 
-### 1. Provision a RPI computer
+### 1. Provision a Host
 
-Note: if you are using the Tower Distribution you can skip the first step and use the image in `~/.cache/tower`.
+Note: if you are using TowerOS, you can skip the first step and use the image in `~/.cache/tower`.
 
 1.1 Generate an image with `build-image`:
 
@@ -78,53 +77,53 @@ $> build-tower-image computer
 
 This will generate an `img` file compressed with `xz`.
 
-1.2 Use this file to prepare the `sd-card`.
+1.2 Use this file to prepare the SD card.
 
 ```
 $> tower provision <computer-name> --image <image-path-generated-with-build-tower-image>
 ```
 
-for online host:
+or, for an online host:
 
 ```
 $> tower provision <computer-name> --online --image <image-path-generated-with-build-tower-image>
 ```
 
-Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
+Keyboard, timezone and WiFi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
 
-### 2. Execute a command in one of the computer
+### 2. Execute a command on one of the computers:
 
-A terminal command line with `ssh`:
+A terminal command line with SSH:
 
 ```
 $> ssh <computer-name> ls ~/
 ```
 
-or a graphical appication with `x2go`:
+or a graphical application with `x2go`:
 
 ```
 $> tower run <computer-name> <application-name>
 ```
 
-###  3. Install an APT package in one of the computer
+###  3. Install an APT package on one of the hosts:
 
 ```
 $> tower install <computer-name> <application-name>
 ```
 
-or, if the computer is not online
+or, if the host is offline, you can tunnel the installation through an online host:
 
 ```
 $> tower install <offline-computer-name> <application-name> --online-host <online-computer-name> 
 ```
 
-### 4. List computers and their status
+### 4. List computers and their status:
 
 ```
 $> tower status
 ```
 
-### 5. Example using two computers
+### 5. Example using two hosts:
 
 provision a first offline computer named `office`
 
@@ -151,7 +150,7 @@ $> startx
 $> tower run office galculator
 ```
 
-## Using with `hatch`
+## Use with `hatch`
 
 ```
 $> git clone git@github.com:towercomputing/tools.git
