@@ -10,7 +10,7 @@ DISPLAY_NUM="50"
 NXAGENT_PORT="4001"
 
 # copy latest startagent script to the computer
-SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 ssh $COMPUTER rm -f /home/tower/startagent.sh
 scp $SCRIPT_DIR/startagent.sh $COMPUTER:/home/tower/
 

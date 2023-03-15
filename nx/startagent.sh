@@ -13,7 +13,7 @@ SESSION_ID="$MAGIC_COOKIE"
 SESSION_DIR="$HOME/.nxsessions"
 mkdir "$SESSION_DIR" || true
 
-XAUTHORITYH_PATH="$SESSION_DIR/$SESSION_ID.xauthority"
+XAUTHORITYH_PATH="$HOME/.Xauthority"
 rm -f $XAUTHORITYH_PATH
 touch $XAUTHORITYH_PATH
 
@@ -23,7 +23,7 @@ xauth -f $XAUTHORITYH_PATH add "$HOSTNAME/unix:$DISPLAY_NUM" 'MIT-MAGIC-COOKIE-1
 # start the nx agent
 DISPLAY="nx/nx,accept=127.0.0.1,listen=$NXAGENT_PORT:$DISPLAY_NUM"
 export DISPLAY
-nxagent -ac -R -nolisten tcp -auth $XAUTHORITYH_PATH :$DISPLAY_NUM 2> "$SESSION_DIR/$SESSION_ID.log" &
+nxagent -R -nolisten tcp -auth $XAUTHORITYH_PATH :$DISPLAY_NUM 2> "$SESSION_DIR/$SESSION_ID.log" &
 NXAGENT_PID="${!}"
 echo $NXAGENT_PID > "$SESSION_DIR/$SESSION_ID.pid"
 
