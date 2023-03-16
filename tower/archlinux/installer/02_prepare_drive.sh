@@ -16,9 +16,9 @@ parted $TARGET_DRIVE mkpart primary linux-swap 1GB 9GB
 # create root partition (/dev/sda3)
 parted $TARGET_DRIVE mkpart primary ext4 9GB 100%
 # get partitions names
-BOOT_PARTITION=$(ls /dev/$TARGET_DRIVE*1)
-SWAP_PARTITION=$(ls /dev/$TARGET_DRIVE*2)
-ROOT_PARTITION=$(ls /dev/$TARGET_DRIVE*3)
+BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
+SWAP_PARTITION=$(ls $TARGET_DRIVE*2)
+ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
 # format partitions
 mkfs.fat -F 32 "$BOOT_PARTITION"
 mkswap "$SWAP_PARTITION"
