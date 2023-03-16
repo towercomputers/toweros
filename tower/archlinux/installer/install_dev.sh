@@ -13,8 +13,8 @@
 # $ ls SD/
 # finish.sh id_ed25519
 # $ cat finish.sh
-# sh /home/tower/install_dev.sh mywifibox mywifipassord \
-#    "Ouziel Slama" ouziel@gmail.com /home/tower/SD/id_ed25519 \
+# sh ~/install_dev.sh mywifibox mywifipassord \
+#    "Ouziel Slama" ouziel@gmail.com ~/SD/id_ed25519 \
 #    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJMdPXjBDbI7fV4ieSkT9GJZghyXtcmuS1oiI6qLils2 air"
 #
 
@@ -49,17 +49,18 @@ if [ ! -z "$GIT_EMAIL" ]; then
 fi
 
 if [ ! -z "$GIT_KEY_PATH" ]; then
-    mkdir /home/tower/.ssh || true
-    cp $GIT_KEY_PATH /home/tower/.ssh
-    echo "Host github.com" > /home/tower/.ssh/config
-    echo "  HostName github.com" >> /home/tower/.ssh/config
-    echo "  IdentityFile $GIT_KEY_PATH" >> /home/tower/.ssh/config
-    echo "  User git" >> /home/tower/.ssh/config
-    chmod 700 /home/tower/.ssh
-    chmod 600 /home/tower/.ssh/*
+    mkdir ~/.ssh || true
+    cp $GIT_KEY_PATH ~/.ssh
+    KEY_NAME=$(basename $GIT_KEY_PATH)
+    echo "Host github.com" > ~/.ssh/config
+    echo "  HostName github.com" >> ~/.ssh/config
+    echo "  IdentityFile ~/.ssh/$KEY_NAME" >> ~/.ssh/config
+    echo "  User git" >> ~/.ssh/config
+    chmod 700 ~/.ssh
+    chmod 600 ~/.ssh/*
     if $CONNECTED; then
-        mkdir /home/tower/towercomputing || true
-        cd /home/tower/towercomputing
+        mkdir ~/towercomputing || true
+        cd ~/towercomputing
         git clone git@github.com:towercomputing/tools.git
     fi
 fi
@@ -77,6 +78,6 @@ if [ ! -z "$AUTHORIZED_KEY" ]; then
     sudo iptables -D INPUT -j REJECT --reject-with icmp-proto-unreachable
     sudo iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
     sudo iptables-save -f /etc/iptables/iptables.rules
-    echo "$AUTHORIZED_KEY" > /home/tower/.ssh/authorized_keys
-    chmod 600 /home/tower/.ssh/*
+    echo "$AUTHORIZED_KEY" > ~/.ssh/authorized_keys
+    chmod 600 ~/.ssh/*
 fi
