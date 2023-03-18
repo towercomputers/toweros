@@ -31,6 +31,11 @@ def parse_arguments():
         help="""Skip computer image building and use provided image path.""",
         required=False
     )
+    parser.add_argument(
+        '--tower-tools-wheel-path',
+        help="""Tower tools wheel package path.""",
+        required=False
+    )
 
     parser.add_argument(
         'image_name', 
@@ -52,6 +57,6 @@ def main():
     if args.image_name == 'computer':
         pigen.build_image()
     elif args.image_name == 'thinclient':
-        archiso.build_image(args.nx_path, args.computer_image_path)
+        archiso.build_image(args.nx_path, args.computer_image_path, args.tower_tools_wheel_path)
 
 
