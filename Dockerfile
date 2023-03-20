@@ -4,13 +4,13 @@
 # docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
 # docker run --privileged --rm tonistiigi/binfmt --install all
 # docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged build-tower-image
-# docker cp towerbuilder:/home/tower/arch-tower-20230318154719-x86_64.iso ./
+# docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 #
 # On amd64:
 #
 # docker build -t build-tower-image:latest .
 # docker run --name towerbuilder --user tower --privileged build-tower-image
-# docker cp towerbuilder:/home/tower/arch-tower-20230318154719-x86_64.iso ./
+# docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 
 FROM archlinux:latest
 
@@ -44,8 +44,7 @@ COPY dist/tower_tools-0.0.1-py3-none-any.whl ./
 RUN sudo chown tower:tower tower_tools-0.0.1-py3-none-any.whl
 RUN pip install tower_tools-0.0.1-py3-none-any.whl
 
-# TODO: fix non verbose mode: sometime building process just stop silently...
-ENTRYPOINT ["build-tower-image", "thinclient", "--verbose", \
+ENTRYPOINT ["build-tower-image", "thinclient", \
             "--computer-image-path", "/home/tower/Raspbian-tower-latest.img.xz", \
             "--nx-path", "/home/tower/nx", \
             "--tower-tools-wheel-path", "file:///home/tower/tower_tools-0.0.1-py3-none-any.whl"]
