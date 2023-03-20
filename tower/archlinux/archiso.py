@@ -82,7 +82,7 @@ def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackage
 def make_archiso(archiso_path, working_dir):
     archiso_out_path = os.path.join(working_dir, 'out')
     image_src_path = os.path.join(archiso_out_path, datetime.now().strftime('archlinux-%Y.%m.%d-x86_64.iso'))
-    image_dest_path = os.path.join(os.getcwd(), datetime.now().strftime('arch-tower-%Y%m%d%H%M%S-x86_64.iso'))
+    image_dest_path = os.path.join(os.getcwd(), datetime.now().strftime('toweros-%Y%m%d%H%M%S-x86_64.iso'))
     with sh.contrib.sudo(password="", _with=True):
         mkarchiso('-v', archiso_path, _cwd=working_dir, _out=logger.debug)
         cp(image_src_path, image_dest_path)

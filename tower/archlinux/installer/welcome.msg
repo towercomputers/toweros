@@ -1,6 +1,5 @@
-Arch Linux \r (\l)
+Welcome to TowerOS!
 
-Welcome to Arch Linux Tower Distribution!
 Here are some useful commands to start the day off right:
 
 Connect to internet with:
