@@ -4,7 +4,8 @@
 # docker build -t build-tower-image:latest .
 #
 # Build TowerOS image with
-# docker run --name towerbuilder --user tower --privileged build-tower-image thinclient
+# docker run --name towerbuilder --user tower \
+#       -v /var/run/docker.sock:/var/run/docker.sock --privileged build-tower-image thinclient
 # docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 #
 # Build hosts image with
@@ -16,15 +17,14 @@
 # docker buildx create --use
 # docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
 # docker run --privileged --rm tonistiigi/binfmt --install all
-# docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged build-tower-image thinclient
+# docker run --platform=linux/amd64 --name towerbuilder --user tower \
+#       -v /var/run/docker.sock:/var/run/docker.sock --privileged build-tower-image thinclient
 # docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 #
 
 FROM archlinux:latest
 
 ARG TOWER_WHEEL_PATH="dist/tower_tools-0.0.1-py3-none-any.whl"
-ARG NX_PATH="dist/nx"
-ARG RASPBIAN_PATH="dist/Raspbian-tower-latest.img.xz"
 
 # install pacman packages
 RUN pacman -Suy --noconfirm 
@@ -45,16 +45,9 @@ RUN python -m pip install --upgrade pip
 RUN pip install gevent python-xlib requests sh backports.pbkdf2 passlib sshconf hatchling wheel \
         "x2go @ https://code.x2go.org/releases/source/python-x2go/python-x2go-0.6.1.3.tar.gz"
 
-# copy Raspberry PI OS image
-COPY $RASPBIAN_PATH ./
-# copy nx packages
-COPY $NX_PATH ./nx
-
 # copy and install `tower-tools` at the end so everything above is cached
-COPY $TOWER_WHEEL_PATH ./
+COPY --chown=tower:tower $TOWER_WHEEL_PATH ./
 RUN pip install $(basename $TOWER_WHEEL_PATH)
 
 ENTRYPOINT ["build-tower-image", \
-            "--computer-image-path", "/home/tower/Raspbian-tower-latest.img.xz", \
-            "--nx-path", "/home/tower/nx", \
             "--tower-tools-wheel-path", "file:///home/tower/tower_tools-0.0.1-py3-none-any.whl"]
