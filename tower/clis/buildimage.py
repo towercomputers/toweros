@@ -39,8 +39,8 @@ def parse_arguments():
 
     parser.add_argument(
         'image_name', 
-        help="""`thinclient` or `computer` (Required).""",
-        choices=['thinclient', 'computer']
+        help="""`thinclient` or `host` (Required).""",
+        choices=['thinclient', 'host']
     )
 
     args = parser.parse_args()
@@ -54,7 +54,7 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     clilogger.initialize(args.verbose, args.quiet)
-    if args.image_name == 'computer':
+    if args.image_name == 'host':
         pigen.build_image()
     elif args.image_name == 'thinclient':
         archiso.build_image(args.nx_path, args.computer_image_path, args.tower_tools_wheel_path)
