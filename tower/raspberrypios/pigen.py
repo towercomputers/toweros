@@ -6,6 +6,8 @@ from pathlib import Path
 import shutil
 import tempfile
 import time
+from io import StringIO
+import json
 
 from sh import git, docker, Command
 
@@ -47,7 +49,11 @@ def build_image():
 
     logger.info("Build image with docker, please be patient...")
     try:
-        docker('run', '--rm', '--privileged', 'multiarch/qemu-user-static', '--reset', '-p', 'yes', _out=logger.debug)
+        buf = StringIO()
+        docker('info', '-f', '{{json .Architecture}}', _out=buf)
+        arch = json.loads(buf.getvalue())
+        if arch not in ["aarch64", "arm64"]:
+            docker('run', '--rm', '--privileged', 'multiarch/qemu-user-static', '--reset', '-p', 'yes', _out=logger.debug)
         Command(build_docker_path)(_cwd=git_folder, _out=logger.debug)
     except KeyboardInterrupt:
         logger.info("Build interrupted. Cleaning docker container and files, please wait some seconds..")

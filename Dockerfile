@@ -1,18 +1,30 @@
+# On amd64:
+#  
+# Build docker image with:
+# docker build -t build-tower-image:latest .
+#
+# Build TowerOS image with
+# docker run --name towerbuilder --user tower --privileged build-tower-image thinclient
+# docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
+#
+# Build hosts image with
+# docker run --name towerbuilder --user tower -v /var/run/docker.sock:/var/run/docker.sock build-tower-image host
+# docker cp towerbuilder:/home/tower/Raspbian-tower-20230321173402.img.xz ./
+#
 # On Apple M1 (arm64):
 #
 # docker buildx create --use
 # docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
 # docker run --privileged --rm tonistiigi/binfmt --install all
-# docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged build-tower-image
+# docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged build-tower-image thinclient
 # docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 #
-# On amd64:
-#
-# docker build -t build-tower-image:latest .
-# docker run --name towerbuilder --user tower --privileged build-tower-image
-# docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 
 FROM archlinux:latest
+
+ARG TOWER_WHEEL_PATH="dist/tower_tools-0.0.1-py3-none-any.whl"
+ARG NX_PATH="dist/nx"
+ARG RASPBIAN_PATH="dist/Raspbian-tower-latest.img.xz"
 
 # install pacman packages
 RUN pacman -Suy --noconfirm 
@@ -21,6 +33,7 @@ RUN pacman -S --noconfirm openssh git python python-pip avahi iw wireless_tools 
 # create `tower` user
 RUN useradd -m tower -p $(echo $tower | openssl passwd -1 -stdin)
 RUN echo "tower ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+RUN usermod -aG docker tower
 ENV PATH="$PATH:/home/tower/.local/bin"
 
 # change default user
@@ -33,18 +46,15 @@ RUN pip install gevent python-xlib requests sh backports.pbkdf2 passlib sshconf 
         "x2go @ https://code.x2go.org/releases/source/python-x2go/python-x2go-0.6.1.3.tar.gz"
 
 # copy Raspberry PI OS image
-COPY dist/Raspbian-tower-latest.img.xz ./
-RUN sudo chown tower:tower Raspbian-tower-latest.img.xz
+COPY $RASPBIAN_PATH ./
 # copy nx packages
-COPY dist/nx ./nx
-RUN sudo chown -R tower:tower nx/
+COPY $NX_PATH ./nx
 
 # copy and install `tower-tools` at the end so everything above is cached
-COPY dist/tower_tools-0.0.1-py3-none-any.whl ./
-RUN sudo chown tower:tower tower_tools-0.0.1-py3-none-any.whl
-RUN pip install tower_tools-0.0.1-py3-none-any.whl
+COPY $TOWER_WHEEL_PATH ./
+RUN pip install $(basename $TOWER_WHEEL_PATH)
 
-ENTRYPOINT ["build-tower-image", "thinclient", \
+ENTRYPOINT ["build-tower-image", \
             "--computer-image-path", "/home/tower/Raspbian-tower-latest.img.xz", \
             "--nx-path", "/home/tower/nx", \
             "--tower-tools-wheel-path", "file:///home/tower/tower_tools-0.0.1-py3-none-any.whl"]
