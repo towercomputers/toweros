@@ -15,7 +15,7 @@ The easiest way to use Tower is to run the TowerOS GNU/Linux distribution (based
 2. Prepare a bootable USB medium using the above image.
 3. Boot the Thin Client the USB drive and follow the instruction.
 
-Note: you can build your own image of TowerOS with command `build-tower-image thinclient`.
+Note: you can build your own image of TowerOS with command `build-tower-image thinclient` or with Docker (see below).
 
 ### 2. Custom Thin-Client (Linux)
 
@@ -160,4 +160,37 @@ $> cd tools
 $> pip install hatch
 $> hatch run tower --help
 $> hatch run build-tower-image --help
+```
+
+## Build TowerOS image with Docker
+
+1. Build docker image with:
+
+```
+$> docker build -t build-tower-image:latest .
+```
+
+2. Buid TowerOS image inside a docker container 
+
+```
+$> docker run --name towerbuilder --user tower --privileged \
+               -v /var/run/docker.sock:/var/run/docker.sock \
+               build-tower-image thinclient
+```
+
+3. retrieve image from the container
+
+```
+$> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
+```
+
+Note: In `arm64` architecture you must use `buildx` and cross-platform emulator like `tonistiigi/binfmt`.
+
+```
+$> docker buildx create --use
+$> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
+$> docker run --privileged --rm tonistiigi/binfmt --install all
+$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              build-tower-image thinclient
 ```
