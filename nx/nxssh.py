@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # usage: ./nxssh.py <hostname> <cmd>
-# exemple: ./nxssh.py office galculator
+# example: ./nxssh.py office galculator
 
 from io import StringIO
 import os
@@ -17,6 +17,7 @@ from sh import ssh, nxproxy
 logger = logging.getLogger('tower') # TODO
 
 NXAGENT_FIRST_PORT = 4000
+NXAGENT_FIRST_DISPLAY_NUM = 50
 
 DEFAULTS_NXAGENT_ARGS=dict(
     link="lan",
@@ -28,13 +29,14 @@ DEFAULTS_NXAGENT_ARGS=dict(
     client="linux",
     menu="0",
     keyboard="clone",
+    composite="1",
+    autodpi="1"
 )
 
 DEFAULTS_NXPROXY_ARGS = dict(
     retry="5",
-    composite="1",
     connect="127.0.0.1",
-    clipboard="1",
+    cleanup="0"
 )
 
 NX_TIMEOUT = 5
@@ -110,7 +112,7 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
 
 def kill_nx_agent(hostname, display_num):
     try:
-        kill_command = f"ps -ef | grep 'nxagent \-R \-nolisten tcp \-terminate \-id nx{display_num} :{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
+        kill_command = f"ps -ef | grep 'nxagent .* nx{display_num} :{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
         ssh(hostname, kill_command)
     except sh.ErrorReturnCode:
         pass # fail silently if no process to kill
@@ -139,12 +141,20 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     print("nxproxy connected to nxagent.")
     return nxproxy_process
 
+def get_next_display_num(hostname):
+    xauth_list = ssh_command(hostname, 'xauth', 'list')
+    if xauth_list == "":
+        return NXAGENT_FIRST_DISPLAY_NUM
+    used_num = [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
+    used_num.sort()
+    return used_num.pop() + 1
+
 def run_nx_command(hostname, *cmd):
     nxagent_process = None
     nxproxy_process = None
     app_process = None
     try:
-        display_num = 50 # TODO
+        display_num = get_next_display_num(hostname)
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
         nxagent_process = start_nx_agent(hostname, display_num, cookie)
@@ -160,10 +170,11 @@ def run_nx_command(hostname, *cmd):
         print("closing nxproxy and nxagent..")
         kill_nx_agent(hostname, display_num)
         revoke_cookies(hostname, display_num)
-        if nxproxy_process:
-            nxproxy_process.kill()
-        if nxagent_process:
-            nxagent_process.kill()
+        if nxproxy_process and nxproxy_process.is_alive():
+            nxproxy_process.terminate()
+        if nxagent_process and nxagent_process.is_alive():
+            nxagent_process.terminate()
+        
 
 # TODO
 def main():
