@@ -12,7 +12,7 @@ import sys
 import time
 
 import sh
-from sh import ssh, nxproxy
+from sh import ssh, nxproxy, xinit
 
 logger = logging.getLogger('tower') # TODO
 
@@ -95,7 +95,7 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     nxagent_process = ssh(hostname, 
         '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}',
         f'DISPLAY={display}',
-        'nxagent', '-R', '-nolisten', 'tcp', '-terminate', '-id', f'nx{display_num}',f':{display_num}',
+        'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
     start_time = time.time()
@@ -105,15 +105,27 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
         nxagent_output = buf.getvalue()
         elapsed_time = time.time() - start_time
         if elapsed_time > NX_TIMEOUT:
+            print(nxagent_output)
             raise NxTimeoutException("nxagent not ready after {NX_TIMEOUT}s")
         
     print("nxagent is waiting for connection...")
     return nxagent_process
 
 def kill_nx_agent(hostname, display_num):
+    kill_command = f"ps -ef | grep 'nxagent .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
     try:
-        kill_command = f"ps -ef | grep 'nxagent .* nx{display_num} :{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
         ssh(hostname, kill_command)
+    except sh.ErrorReturnCode:
+        pass # fail silently if no process to kill
+    try:
+        sh.Command('sh')('-c', kill_command)
+    except sh.ErrorReturnCode:
+        pass # fail silently if no process to kill
+
+def kill_nx_proxy(display_num):
+    try:
+        kill_command = f"ps -ef | grep 'nxproxy .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
+        sh.Command('sh')('-c', kill_command)
     except sh.ErrorReturnCode:
         pass # fail silently if no process to kill
 
@@ -136,6 +148,7 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
         nxproxy_output = buf.getvalue()
         elapsed_time = time.time() - start_time
         if elapsed_time > NX_TIMEOUT:
+            print(nxproxy_output)
             raise NxTimeoutException("nxproxy not ready after {NX_TIMEOUT}s")
 
     print("nxproxy connected to nxagent.")
@@ -149,31 +162,31 @@ def get_next_display_num(hostname):
     used_num.sort()
     return used_num.pop() + 1
 
+def cleanup(hostname, display_num):
+    print("closing nxproxy and nxagent..")
+    kill_nx_proxy(display_num)
+    kill_nx_agent(hostname, display_num)
+    revoke_cookies(hostname, display_num)
+
 def run_nx_command(hostname, *cmd):
-    nxagent_process = None
-    nxproxy_process = None
     app_process = None
     try:
         display_num = get_next_display_num(hostname)
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
-        nxagent_process = start_nx_agent(hostname, display_num, cookie)
-        nxproxy_process = start_nx_proxy(display_num, cookie)
+        start_nx_agent(hostname, display_num, cookie)
+        start_nx_proxy(display_num, cookie)
         # run the command in foreground
         print(f"run {' '.join(cmd)}")
         app_process = ssh(hostname, f"DISPLAY=:{display_num}", *cmd)
+    except NxTimeoutException:
+        print("Failed to initialize NX, please check the log above.")
     except KeyboardInterrupt:
-        if app_process:
-            app_process.kill()
+        if app_process and app_process.is_alive():
+            app_process.terminate()
     finally:
         # kill bakground processes when done
-        print("closing nxproxy and nxagent..")
-        kill_nx_agent(hostname, display_num)
-        revoke_cookies(hostname, display_num)
-        if nxproxy_process and nxproxy_process.is_alive():
-            nxproxy_process.terminate()
-        if nxagent_process and nxagent_process.is_alive():
-            nxagent_process.terminate()
+        cleanup(hostname, display_num)
         
 
 # TODO
@@ -181,7 +194,11 @@ def main():
     args = sys.argv
     hostname = sys.argv[1]
     cmd = sys.argv[2:]
-    run_nx_command(hostname, *cmd)
+    if os.getenv('DISPLAY'):
+        run_nx_command(hostname, *cmd)
+    else:
+        cmd = " ".join(['xinit'] + sys.argv + ['--', ':0', 'vt1'])
+        os.system(cmd)
 
 if __name__ == '__main__':
     main()
