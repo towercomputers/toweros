@@ -1,4 +1,8 @@
+import os
+import sys
+
 from tower import hosts
+from tower import nxssh
 
 def add_args(argparser):
     run_parser = argparser.add_parser(
@@ -23,4 +27,9 @@ def check_args(args, parser_error):
         parser_error("Unkown host name.")
 
 def execute(args):
-    hosts.run(args.host_name[0], " ".join(args.run_command))
+    if os.getenv('DISPLAY'):
+        nxssh.run(args.host_name[0], *args.run_command)
+    else:
+        cmd = " ".join(['xinit'] + sys.argv + ['--', ':0', 'vt1'])
+        os.system(cmd)
+    

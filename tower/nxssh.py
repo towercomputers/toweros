@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-
-# usage: ./nxssh.py <hostname> <cmd>
-# example: ./nxssh.py office galculator
-
 from io import StringIO
 import os
 import random
@@ -174,17 +169,3 @@ def run(hostname, *cmd):
     finally:
         # kill bakground processes when done
         cleanup(hostname, display_num)
-        
-# TODO
-def main():
-    args = sys.argv
-    hostname = sys.argv[1]
-    cmd = sys.argv[2:]
-    if os.getenv('DISPLAY'):
-        run(hostname, *cmd)
-    else:
-        cmd = " ".join(['xinit'] + sys.argv + ['--', ':0', 'vt1'])
-        os.system(cmd)
-
-if __name__ == '__main__':
-    main()
