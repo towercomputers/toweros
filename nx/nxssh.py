@@ -91,78 +91,65 @@ def revoke_cookies(hostname, display_num):
         'remove', f":{display_num}", _out=print
     )
 
+def gen_display_args(display_num, *dicts):
+    arg_dicts = list(dicts)
+    args = dict(arg_dicts.pop(0))
+    for arg_dict in arg_dicts:
+        args.update(arg_dict)
+    str_args = ",".join([f"{key}={value}" for key, value in args.items()])
+    return f"nx/nx,{str_args}:{display_num}"
+
+def wait_for_output(_out, expected_output):
+    start_time = time.time()
+    elapsed_time = 0
+    process_output = ""
+    while expected_output not in process_output:
+        process_output = _out.getvalue()
+        elapsed_time = time.time() - start_time
+        if elapsed_time > NX_TIMEOUT:
+            print(process_output)
+            raise NxTimeoutException("NX agent or proxy not ready after {NX_TIMEOUT}s")
+
 def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
-    args = dict(DEFAULTS_NXAGENT_ARGS)
-    args.update(nxagent_args)
-    args.update({'listen': nxagent_port})
-    str_args = ",".join([f"{key}={value}" for key, value in args.items()])
-    display = f"nx/nx,{str_args}:{display_num}"
+    display = gen_display_args(
+        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args, 
+        {'listen': nxagent_port}
+    )
     authorize_cookie(hostname, cookie, display_num)
     buf = StringIO()
-    nxagent_process = ssh(hostname, 
-        '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}',
+    ssh(hostname, 
+        '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
         f'DISPLAY={display}',
         'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    start_time = time.time()
-    elapsed_time = 0
-    nxagent_output = ""
-    while "Waiting for connection" not in nxagent_output:
-        nxagent_output = buf.getvalue()
-        elapsed_time = time.time() - start_time
-        if elapsed_time > NX_TIMEOUT:
-            print(nxagent_output)
-            raise NxTimeoutException("nxagent not ready after {NX_TIMEOUT}s")
-        
+    wait_for_output(buf, "Waiting for connection")     
     print("nxagent is waiting for connection...")
-    return nxagent_process
 
 def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
-    args = dict(DEFAULTS_NXPROXY_ARGS)
-    args.update(nxproxy_args)
-    args.update({'cookie': cookie, 'port': nxagent_port})
-    str_args = ",".join([f"{key}={value}" for key, value in args.items()])
-    display = f"nx/nx,{str_args}:{display_num}"
+    display = gen_display_args(
+        display_num, DEFAULTS_NXPROXY_ARGS, nxproxy_args,
+        {'cookie': cookie, 'port': nxagent_port}
+    )
     buf = StringIO()
-    nxproxy_process = nxproxy(
+    nxproxy(
         '-S', display, 
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    start_time = time.time()
-    elapsed_time = 0
-    nxproxy_output = ""
-    while "Established X server connection" not in nxproxy_output:
-        nxproxy_output = buf.getvalue()
-        elapsed_time = time.time() - start_time
-        if elapsed_time > NX_TIMEOUT:
-            print(nxproxy_output)
-            raise NxTimeoutException("nxproxy not ready after {NX_TIMEOUT}s")
-
+    wait_for_output(buf, "Established X server connection")  
     print("nxproxy connected to nxagent.")
-    return nxproxy_process
 
 def kill_nx_processes(hostname, display_num):
     print("closing nxproxy and nxagent..")
-    kill_command = f"ps -ef | grep 'nxagent .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
+    killcmd = lambda app: f"ps -ef | grep '{app} .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     # nxagent in host
-    try:
-        ssh(hostname, kill_command)
-    except sh.ErrorReturnCode:
-        pass # fail silently if no process to kill
+    ssh(hostname, killcmd('nxagent'))
     # ssh tunnel in thinclient
-    try:
-        sh.Command('sh')('-c', kill_command)
-    except sh.ErrorReturnCode:
-        pass # fail silently if no process to kill
+    sh.Command('sh')('-c', killcmd('nxagent'))
     # nxproxy in thinclient
-    try:
-        kill_command = f"ps -ef | grep 'nxproxy .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
-        sh.Command('sh')('-c', kill_command)
-    except sh.ErrorReturnCode:
-        pass # fail silently if no process to kill
+    sh.Command('sh')('-c', killcmd('nxproxy'))
 
 def cleanup(hostname, display_num):
     kill_nx_processes(hostname, display_num)
