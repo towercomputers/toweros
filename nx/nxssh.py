@@ -77,6 +77,14 @@ def authorize_cookie(hostname, cookie, display_num):
         'add', f"{get_real_hostname(hostname)}/unix:{display_num}", 
         'MIT-MAGIC-COOKIE-1', cookie
     )
+
+def get_next_display_num(hostname):
+    xauth_list = ssh_command(hostname, 'xauth', 'list')
+    if xauth_list == "":
+        return NXAGENT_FIRST_DISPLAY_NUM
+    used_num = [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
+    used_num.sort()
+    return used_num.pop() + 1
    
 def revoke_cookies(hostname, display_num):
     return ssh(hostname, 'xauth', 
@@ -111,24 +119,6 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     print("nxagent is waiting for connection...")
     return nxagent_process
 
-def kill_nx_agent(hostname, display_num):
-    kill_command = f"ps -ef | grep 'nxagent .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
-    try:
-        ssh(hostname, kill_command)
-    except sh.ErrorReturnCode:
-        pass # fail silently if no process to kill
-    try:
-        sh.Command('sh')('-c', kill_command)
-    except sh.ErrorReturnCode:
-        pass # fail silently if no process to kill
-
-def kill_nx_proxy(display_num):
-    try:
-        kill_command = f"ps -ef | grep 'nxproxy .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
-        sh.Command('sh')('-c', kill_command)
-    except sh.ErrorReturnCode:
-        pass # fail silently if no process to kill
-
 def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
     args = dict(DEFAULTS_NXPROXY_ARGS)
@@ -154,21 +144,31 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     print("nxproxy connected to nxagent.")
     return nxproxy_process
 
-def get_next_display_num(hostname):
-    xauth_list = ssh_command(hostname, 'xauth', 'list')
-    if xauth_list == "":
-        return NXAGENT_FIRST_DISPLAY_NUM
-    used_num = [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
-    used_num.sort()
-    return used_num.pop() + 1
+def kill_nx_processes(hostname, display_num):
+    print("closing nxproxy and nxagent..")
+    kill_command = f"ps -ef | grep 'nxagent .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
+    # nxagent in host
+    try:
+        ssh(hostname, kill_command)
+    except sh.ErrorReturnCode:
+        pass # fail silently if no process to kill
+    # ssh tunnel in thinclient
+    try:
+        sh.Command('sh')('-c', kill_command)
+    except sh.ErrorReturnCode:
+        pass # fail silently if no process to kill
+    # nxproxy in thinclient
+    try:
+        kill_command = f"ps -ef | grep 'nxproxy .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill"
+        sh.Command('sh')('-c', kill_command)
+    except sh.ErrorReturnCode:
+        pass # fail silently if no process to kill
 
 def cleanup(hostname, display_num):
-    print("closing nxproxy and nxagent..")
-    kill_nx_proxy(display_num)
-    kill_nx_agent(hostname, display_num)
+    kill_nx_processes(hostname, display_num)
     revoke_cookies(hostname, display_num)
 
-def run_nx_command(hostname, *cmd):
+def run(hostname, *cmd):
     app_process = None
     try:
         display_num = get_next_display_num(hostname)
@@ -188,14 +188,13 @@ def run_nx_command(hostname, *cmd):
         # kill bakground processes when done
         cleanup(hostname, display_num)
         
-
 # TODO
 def main():
     args = sys.argv
     hostname = sys.argv[1]
     cmd = sys.argv[2:]
     if os.getenv('DISPLAY'):
-        run_nx_command(hostname, *cmd)
+        run(hostname, *cmd)
     else:
         cmd = " ".join(['xinit'] + sys.argv + ['--', ':0', 'vt1'])
         os.system(cmd)
