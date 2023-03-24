@@ -1,7 +1,11 @@
 import os
 import sys
 
+<<<<<<< HEAD
 from tower import hosts
+=======
+from tower import computers
+>>>>>>> 8269d26 (remove x2go)
 from tower import nxssh
 
 def add_args(argparser):
