@@ -9,7 +9,7 @@ import time
 import sh
 from sh import ssh, nxproxy, xinit
 
-logger = logging.getLogger('tower') # TODO
+logger = logging.getLogger('tower')
 
 NXAGENT_FIRST_PORT = 4000
 NXAGENT_FIRST_DISPLAY_NUM = 50
@@ -83,7 +83,7 @@ def get_next_display_num(hostname):
    
 def revoke_cookies(hostname, display_num):
     return ssh(hostname, 'xauth', 
-        'remove', f":{display_num}", _out=print
+        'remove', f":{display_num}", _out=logger.debug
     )
 
 def gen_display_args(display_num, *dicts):
@@ -102,8 +102,9 @@ def wait_for_output(_out, expected_output):
         process_output = _out.getvalue()
         elapsed_time = time.time() - start_time
         if elapsed_time > NX_TIMEOUT:
-            print(process_output)
+            logger.info(process_output)
             raise NxTimeoutException("NX agent or proxy not ready after {NX_TIMEOUT}s")
+    logger.debug(process_output)
 
 def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
@@ -120,7 +121,7 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
     wait_for_output(buf, "Waiting for connection")     
-    print("nxagent is waiting for connection...")
+    logger.info("nxagent is waiting for connection...")
 
 def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
@@ -134,17 +135,15 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
     wait_for_output(buf, "Established X server connection")  
-    print("nxproxy connected to nxagent.")
+    logger.info("nxproxy connected to nxagent.")
 
 def kill_nx_processes(hostname, display_num):
-    print("closing nxproxy and nxagent..")
-    killcmd = lambda app: f"ps -ef | grep '{app} .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
+    logger.info("closing nxproxy and nxagent..")
+    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     # nxagent in host
-    ssh(hostname, killcmd('nxagent'))
-    # ssh tunnel in thinclient
-    sh.Command('sh')('-c', killcmd('nxagent'))
-    # nxproxy in thinclient
-    sh.Command('sh')('-c', killcmd('nxproxy'))
+    ssh(hostname, killcmd)
+    # ssh tunnel and nxproxy in thinclient
+    sh.Command('sh')('-c', killcmd)
 
 def cleanup(hostname, display_num):
     kill_nx_processes(hostname, display_num)
@@ -159,10 +158,13 @@ def run(hostname, *cmd):
         start_nx_agent(hostname, display_num, cookie)
         start_nx_proxy(display_num, cookie)
         # run the command in foreground
-        print(f"run {' '.join(cmd)}")
-        app_process = ssh(hostname, f"DISPLAY=:{display_num}", *cmd)
+        logger.info(f"run {' '.join(cmd)}")
+        app_process = ssh(
+            hostname, f"DISPLAY=:{display_num}", *cmd,
+            _out=logger.info, _err_to_out=True
+        )
     except NxTimeoutException:
-        print("Failed to initialize NX, please check the log above.")
+        logger.error("Failed to initialize NX, please check the log above.")
     except KeyboardInterrupt:
         if app_process and app_process.is_alive():
             app_process.terminate()
