@@ -13,6 +13,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
+    "setuptools",
     "requests==2.27.1",
     "sh==1.14.3",
     "passlib==1.7.4",
