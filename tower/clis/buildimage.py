@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from tower.raspberrypios import pigen
 from tower.archlinux import archiso
@@ -30,20 +31,32 @@ def parse_arguments():
         help="""Skip computer image building and use provided image path.""",
         required=False
     )
+    parser.add_argument(
+        '--tower-tools-wheel-path',
+        help="""Tower tools wheel package path.""",
+        required=False
+    )
 
     parser.add_argument(
         'image_name', 
-        help="""`thinclient` or `computer` (Required).""",
-        choices=['thinclient', 'computer']
+        help="""`thinclient` or `host` (Required).""",
+        choices=['thinclient', 'host']
     )
-    return parser.parse_args()
+
+    args = parser.parse_args()
+    if args.computer_image_path and args.computer_image_path.split(".").pop() != "xz":
+        parser.error("Invalid image path. Must be an xz archive.")
+    if args.nx_path and not os.path.isdir(args.nx_path):
+        parser.error("Invalid nx path. Must be a folder containing zst files.")
+    return args
+
 
 def main():
     args = parse_arguments()
     clilogger.initialize(args.verbose, args.quiet)
-    if args.image_name == 'computer':
+    if args.image_name == 'host':
         pigen.build_image()
     elif args.image_name == 'thinclient':
-        archiso.build_image(args.nx_path, args.computer_image_path)
+        archiso.build_image(args.nx_path, args.computer_image_path, args.tower_tools_wheel_path)
 
 

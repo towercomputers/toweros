@@ -6,21 +6,22 @@ You must have a thin client (typically a laptop like a Lenovo X270) connected to
 
 ## Installation
 
-### 1. With Arch Linux Tower Distribution
+### 1. TowerOS Thin Client
 
-The recommended way to use  `tower` tools is to install the Arch Linux Tower Distribution. This distribution contains all the necessary dependencies and is pre-configured so that `tower` tools are directly usable at the first boot.
+The easiest way to use Tower is to run the TowerOS GNU/Linux distribution (based on Arch Linux) on your Thin Client.
+
+#### To install get TowerOS:
 1. Download the latest image here: ____
-2. Use on of the method described here https://wiki.archlinux.org/title/USB_flash_installation_medium to prepare a bootable USB medium.
-3. Boot on the USB drive and follow the instruction.
+2. Prepare a bootable USB medium using the above image.
+3. Boot the Thin Client the USB drive and follow the instruction.
 
-This is the way.
+Note: you can build your own image of TowerOS with command `build-tower-image thinclient` or with Docker (see below).
 
-Note: you can build your own image of Tower Distribution with command `build-tower-image thinclient`
-
-### 2. Manually on an Arch Linux distribution
+### 2. Custom Thin-Client (Linux)
 
 #### 2.1 Install packages
 
+##### 2.1.1 from Arch Linux
 ```
 $> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel docker archiso
 ```
@@ -33,7 +34,7 @@ $> systemctl enable docker.service
 $> usermod -aG docker $USER
 ```
 
-#### 2.3 Install nxagent
+#### 2.3 Install `nxagent`
 
 ```
 $> git clone https://aur.archlinux.org/nx.git
@@ -41,9 +42,9 @@ $> cd nx
 $> makepkg -s -i -r -c
 ```
 
-#### 2.4 Update sudoers
+#### 2.4 Update `/etc/sudoers`
 
-The `tower` tools assumes that the current user is a "full" sudoers with no password.
+The `tower` tools assumes that the current user has full `sudo` access, with no password. (Please refer to our *threat model*.)
 Check if `/etc/sudoers` contains the following line:
 
 ```
@@ -66,9 +67,9 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/too
 
 ## Usage
 
-### 1. Provision an RPI host
+### 1. Provision a Host
 
-Note: if you are using the Tower Distribution you can skip the first step and use the image in `~/.cache/tower`.
+Note: if you are using TowerOS, you can skip the first step and use the image in `~/.cache/tower`.
 
 1.1 Generate an image with `build-image`:
 
@@ -78,53 +79,81 @@ $> build-tower-image host
 
 This will generate an `img` file compressed with `xz`.
 
-1.2 Use this file to prepare the `sd-card`.
+1.2 Use this file to prepare the SD card.
 
 ```
 $> tower provision <name-of-host> --image <image-path-generated-with-build-tower-image>
 ```
 
-for online host:
+or, for an online host:
 
 ```
 $> tower provision <name-of-host> --online --image <image-path-generated-with-build-tower-image>
 ```
 
-Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
+Keyboard, timezone and WiFi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
+
 
 ### 2. Execute a command in one of the hosts
 
-A terminal command line with `ssh`:
+A terminal command line with SSH:
 
 ```
 $> ssh <name-of-host> ls ~/
 ```
 
-or a graphical appication with `x2go`:
+or a graphical application with `x2go`:
 
 ```
-$> tower run <name-of-host> thunderbird
+$> tower run <host> <application-name>
 ```
 
-###  3. Install an APT package on one of the hosts
+###  3. Install an APT package on one of the hosts:
 
 ```
-$> tower install <name-of-host> thunderbird
+$> tower install <host> <application-name>
 ```
 
-or, if the host is not online
+or, if the host is offline, you can tunnel the installation through an online host:
 
 ```
-$> tower install <offline-host> thunderbird --online-host <online-host> 
+$> tower install <offline-host> <application-name> --online-host <online-host> 
 ```
 
-### 4. List hosts and their status
+### 4. List computers and their status:
 
 ```
 $> tower status
 ```
 
-## Using with `hatch`
+### 5. Example using two hosts:
+
+provision a first offline computer named `office`
+
+```
+$> tower provision office --image=/home/tower/.cache/Raspbian-tower-20230306141627.img.xz
+```
+
+provision a second online computer named `web`
+
+```
+$> tower provision web --online --image=/home/tower/.cache/Raspbian-tower-20230306141627.img
+```
+
+install `galculator` in `office` computer
+
+```
+$> tower install office galculator --online-host=web
+```
+
+run `galculator` from `office`
+
+```
+$> startx
+$> tower run office galculator
+```
+
+## Use with `hatch`
 
 ```
 $> git clone git@github.com:towercomputing/tools.git
@@ -132,4 +161,37 @@ $> cd tools
 $> pip install hatch
 $> hatch run tower --help
 $> hatch run build-tower-image --help
+```
+
+## Build TowerOS image with Docker
+
+1. Build the Docker image with:
+
+```
+$> docker build -t build-tower-image:latest .
+```
+
+2. Build the TowerOS image inside a Docker container 
+
+```
+$> docker run --name towerbuilder --user tower --privileged \
+               -v /var/run/docker.sock:/var/run/docker.sock \
+               build-tower-image thinclient
+```
+
+3. Retrieve image from the container
+
+```
+$> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
+```
+
+Note: With the `ARM64` architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
+
+```
+$> docker buildx create --use
+$> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
+$> docker run --privileged --rm tonistiigi/binfmt --install all
+$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              build-tower-image thinclient
 ```

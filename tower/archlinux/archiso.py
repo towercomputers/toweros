@@ -7,9 +7,10 @@ import shutil
 import tempfile
 import time
 import glob
+import getpass
 
 import sh
-from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso
+from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown
 
 from tower import raspberrypios
 
@@ -54,8 +55,8 @@ def create_pacman_db(towerpackages_path):
         zsts = [f for f in glob.glob(f'{towerpackages_path}/*') if f.split('.').pop() != 'sig']
         repo_add(os.path.join(towerpackages_path, 'towerpackages.db.tar.gz'), *zsts, _out=logger.debug)
 
-def download_pip_packages(pippackages_path):
-    pip("download", f"tower-tools @ {TOWER_TOOLS_URL}", '-d', pippackages_path, _out=logger.debug)
+def download_pip_packages(pippackages_path, tower_tools_wheel_path):
+    pip("download", f"tower-tools @ {tower_tools_wheel_path or TOWER_TOOLS_URL}", '-d', pippackages_path, _out=logger.debug)
 
 def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path, rpi_image_path):
     # copy installer, pacman and pip packages
@@ -81,13 +82,14 @@ def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackage
 def make_archiso(archiso_path, working_dir):
     archiso_out_path = os.path.join(working_dir, 'out')
     image_src_path = os.path.join(archiso_out_path, datetime.now().strftime('archlinux-%Y.%m.%d-x86_64.iso'))
-    image_dest_path = os.path.join(os.getcwd(), datetime.now().strftime('arch-tower-%Y%m%d%H%M%S-x86_64.iso'))
+    image_dest_path = os.path.join(os.getcwd(), datetime.now().strftime('toweros-%Y%m%d%H%M%S-x86_64.iso'))
     with sh.contrib.sudo(password="", _with=True):
         mkarchiso('-v', archiso_path, _cwd=working_dir, _out=logger.debug)
         cp(image_src_path, image_dest_path)
+        chown(getpass.getuser(), image_dest_path)
     return image_dest_path
 
-def build_image(nx_path=None, computer_image_path=None):
+def build_image(nx_path=None, computer_image_path=None, tower_tools_wheel_path=None):
     start_time = time.time()
 
     working_dir = os.path.join(os.getcwd(), datetime.now().strftime('buildtower%Y%m%d%H%M%S'))
@@ -106,7 +108,7 @@ def build_image(nx_path=None, computer_image_path=None):
     logger.info("Preparing pacman database...")
     create_pacman_db(towerpackages_path)
     logger.info("Downloading pip packages...")
-    download_pip_packages(pippackages_path)
+    download_pip_packages(pippackages_path, tower_tools_wheel_path)
     logger.info("Preparing computer Rasperry PI OS image...")
     rpi_image_path = computer_image_path or raspberrypios.pigen.build_image()
     logger.info("Preparing archiso folder..")

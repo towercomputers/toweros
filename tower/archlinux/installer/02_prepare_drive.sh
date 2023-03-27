@@ -15,14 +15,18 @@ parted $TARGET_DRIVE set 1 esp on
 parted $TARGET_DRIVE mkpart primary linux-swap 1GB 9GB
 # create root partition (/dev/sda3)
 parted $TARGET_DRIVE mkpart primary ext4 9GB 100%
+# get partitions names
+BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
+SWAP_PARTITION=$(ls $TARGET_DRIVE*2)
+ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
 # format partitions
-mkfs.fat -F 32 "${TARGET_DRIVE}1"
-mkswap "${TARGET_DRIVE}2"
-mkfs.ext4 -F "${TARGET_DRIVE}3"
+mkfs.fat -F 32 "$BOOT_PARTITION"
+mkswap "$SWAP_PARTITION"
+mkfs.ext4 -F "$ROOT_PARTITION"
 # mount partitions
-mount "${TARGET_DRIVE}3" /mnt
-mount --mkdir "${TARGET_DRIVE}1" /mnt/boot
-swapon "${TARGET_DRIVE}2"
+mount "$ROOT_PARTITION" /mnt
+mount --mkdir "$BOOT_PARTITION" /mnt/boot
+swapon "$SWAP_PARTITION"
 # update fstab
 mkdir /mnt/etc/
 genfstab -U /mnt > /mnt/etc/fstab
