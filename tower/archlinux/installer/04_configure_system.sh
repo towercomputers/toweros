@@ -33,14 +33,14 @@ echo "KEYMAP=$KEYMAP" > /etc/vconsole.conf
 # set hostname
 echo "tower" > /etc/hostname
 # install boot loader
-BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
+ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
 bootctl install
 echo "default arch" > /boot/loader/loader.conf
 echo "timeout 5" >> /boot/loader/loader.conf
 echo "title   TowerOS" > /boot/loader/entries/arch.conf
 echo "linux   /vmlinuz-linux" >> /boot/loader/entries/arch.conf
 echo "initrd  /initramfs-linux.img" >> /boot/loader/entries/arch.conf
-echo "options root=$BOOT_PARTITION rw" >> /boot/loader/entries/arch.conf
+echo "options root=$ROOT_PARTITION rw" >> /boot/loader/entries/arch.conf
 # enable services
 systemctl enable iwd.service
 systemctl enable dhcpcd.service
