@@ -109,6 +109,8 @@ def get_interface_netmask(ifname):
 
 def get_interface_network(ifname):
     ip = get_interface_ip(ifname)
+    if not ip:
+        return None
     netmask = get_interface_netmask(ifname)
     return str(ipaddress.ip_network(f'{ip}/{netmask}', strict=False))
 
