@@ -2,7 +2,7 @@
 
 ## Hardware configuration
 
-You must have a thin client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
+You must have a Thin Client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
 
 ## Installation
 
@@ -82,16 +82,16 @@ This will generate an `img` file compressed with `xz`.
 1.2 Use this file to prepare the SD card.
 
 ```
-$> tower provision <name-of-host> --image <image-path-generated-with-build-tower-image>
+$> tower provision <host> --image <image-path-generated-with-build-tower-image>
 ```
 
 or, for an online host:
 
 ```
-$> tower provision <name-of-host> --online --image <image-path-generated-with-build-tower-image>
+$> tower provision <host> --online --image <generated-image-path>
 ```
 
-Keyboard, timezone and WiFi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
+Keyboard, timezone and WiFi parameters are retrieved from the the Thin Client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
 
 
 ### 2. Execute a command in one of the hosts
@@ -99,7 +99,7 @@ Keyboard, timezone and WiFi parameters are retrieved from the the thin client. Y
 A terminal command line with SSH:
 
 ```
-$> ssh <name-of-host> ls ~/
+$> ssh <host> ls ~/
 ```
 
 or a graphical application with `x2go`:
@@ -163,7 +163,7 @@ $> hatch run tower --help
 $> hatch run build-tower-image --help
 ```
 
-## Build TowerOS image with Docker
+## Build a TowerOS image with Docker.
 
 1. Build the Docker image with:
 
@@ -171,7 +171,7 @@ $> hatch run build-tower-image --help
 $> docker build -t build-tower-image:latest .
 ```
 
-2. Build the TowerOS image inside a Docker container 
+2. Build the TowerOS image inside a Docker container:
 
 ```
 $> docker run --name towerbuilder --user tower --privileged \
@@ -179,13 +179,13 @@ $> docker run --name towerbuilder --user tower --privileged \
                build-tower-image thinclient
 ```
 
-3. Retrieve image from the container
+3. Retrieve that image from the container:
 
 ```
 $> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 ```
 
-Note: With the `ARM64` architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
+Note: With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
 
 ```
 $> docker buildx create --use
