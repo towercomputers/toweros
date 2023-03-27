@@ -66,14 +66,14 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/too
 
 ## Usage
 
-### 1. Provision a RPI computer
+### 1. Provision an RPI host
 
 Note: if you are using the Tower Distribution you can skip the first step and use the image in `~/.cache/tower`.
 
 1.1 Generate an image with `build-image`:
 
 ```
-$> build-tower-image computer
+$> build-tower-image host
 ```
 
 This will generate an `img` file compressed with `xz`.
@@ -81,44 +81,44 @@ This will generate an `img` file compressed with `xz`.
 1.2 Use this file to prepare the `sd-card`.
 
 ```
-$> tower provision <computer-name> --image <image-path-generated-with-build-tower-image>
+$> tower provision <name-of-host> --image <image-path-generated-with-build-tower-image>
 ```
 
 for online host:
 
 ```
-$> tower provision <computer-name> --online --image <image-path-generated-with-build-tower-image>
+$> tower provision <name-of-host> --online --image <image-path-generated-with-build-tower-image>
 ```
 
 Keyboard, time zone and wifi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
 
-### 2. Execute a command in one of the computer
+### 2. Execute a command in one of the hosts
 
 A terminal command line with `ssh`:
 
 ```
-$> ssh <computer-name> ls ~/
+$> ssh <name-of-host> ls ~/
 ```
 
 or a graphical appication with `x2go`:
 
 ```
-$> tower run <computer-name> thunderbird
+$> tower run <name-of-host> thunderbird
 ```
 
-###  3. Install an APT package in one of the computer
+###  3. Install an APT package on one of the hosts
 
 ```
-$> tower install <computer-name> thunderbird
+$> tower install <name-of-host> thunderbird
 ```
 
-or, if the computer is not online
+or, if the host is not online
 
 ```
-$> tower install <offline-computer-name> thunderbird --online-host <online-computer-name> 
+$> tower install <offline-host> thunderbird --online-host <online-host> 
 ```
 
-### 4. List computers and their status
+### 4. List hosts and their status
 
 ```
 $> tower status
