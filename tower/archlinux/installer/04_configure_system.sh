@@ -10,6 +10,7 @@ PASSWORD=$3
 LANG=$4
 TIMEZONE=$5
 KEYMAP=$6
+TARGET_DRIVE=$7
 
 # change root password
 usermod --password $(echo $ROOT_PASSWORD | openssl passwd -1 -stdin) root
@@ -32,8 +33,14 @@ echo "KEYMAP=$KEYMAP" > /etc/vconsole.conf
 # set hostname
 echo "tower" > /etc/hostname
 # install boot loader
-grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-grub-mkconfig -o /boot/grub/grub.cfg
+BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
+bootctl install
+echo "default arch" > /boot/loader/loader.conf
+echo "timeout 5" >> /boot/loader/loader.conf
+echo "title   TowerOS" > /boot/loader/entries/arch.conf
+echo "linux   /vmlinuz-linux" >> /boot/loader/entries/arch.conf
+echo "initrd  /initramfs-linux.img" >> /boot/loader/entries/arch.conf
+echo "options root=$BOOT_PARTITION rw" >> /boot/loader/entries/arch.conf
 # enable services
 systemctl enable iwd.service
 systemctl enable dhcpcd.service
