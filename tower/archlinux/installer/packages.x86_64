@@ -15,8 +15,7 @@ iw
 docker
 base-devel
 archiso
+xorg-server
 xorg-xinit
-lxde
-nxagent
-nxproxy
 nx-headers
+nxproxy
