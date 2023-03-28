@@ -6,10 +6,11 @@ import fcntl
 import struct
 import socket
 import ipaddress
+import array
 
 from backports.pbkdf2 import pbkdf2_hmac
 import sh
-from sh import iw, iwconfig, cat
+from sh import iw, cat
 
 
 def derive_wlan_key(ssid, psk):
@@ -17,13 +18,27 @@ def derive_wlan_key(ssid, psk):
 
 def get_connected_ssid():
     try:
-        buf = StringIO()
-        iwconfig(_out=buf)
-        result = buf.getvalue()
-        ssid = result.split('ESSID:"')[1].split('"')[0]
+        ifnames = get_wireless_interfaces()
+        if not ifnames:
+            return None
+        ifname = ifnames[0] # assume one wifi connection
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        essidBuf = array.array("b", [0] * 32) # 32: essid max length
+        essidPointer, essidLength = essidBuf.buffer_info()
+        # 16: ifname max legth
+        request = struct.pack('16sPHH', bytes(ifname, 'utf8'), essidPointer, essidLength, 0)
+        fcntl_res = fcntl.ioctl(
+            s.fileno(),
+            0x8B1B, # SIOCGIWESSID
+            request
+        )
+        ssid = "".join([chr(c) for c in essidBuf if c != 0])
+        if not ssid:
+            return None
         return ssid
-    except: # no need to be curious here
-        return None
+    except OSError as e:
+        if e.errno == 19: # No such device
+            return None
 
 def get_ssid_password(ssid):
     try:
@@ -116,3 +131,6 @@ def get_interface_network(ifname):
 
 def get_wired_interfaces():
     return [i[1] for i in socket.if_nameindex() if i[1].startswith('e')]
+
+def get_wireless_interfaces():
+    return [i[1] for i in socket.if_nameindex() if i[1].startswith('w')]

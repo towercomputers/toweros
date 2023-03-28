@@ -28,7 +28,7 @@ def download_pacman_packages(blankdb_path, towerpackages_path):
         'base', 'linux', 'linux-firmware',
         'iwd', 'openssh', 'sudo', 'grub', 'efibootmgr',
         'dhcpcd', 'git', 'python', 'python-pip', 'avahi',
-        'iw', 'wireless_tools', 'base-devel', 'docker',
+        'iw', 'base-devel', 'docker',
         'archiso', 'lxde', 'xorg-xinit', 'nano', 'vi',
     ]
     with sh.contrib.sudo(password="", _with=True):
