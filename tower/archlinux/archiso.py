@@ -8,6 +8,7 @@ import tempfile
 import time
 import glob
 import getpass
+import re
 
 import sh
 from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown
@@ -23,14 +24,11 @@ def clean_folders(folders):
         for folder in folders:
             rm('-rf', folder)
 
-def download_pacman_packages(blankdb_path, towerpackages_path):
-    packages = [
-        'base', 'linux', 'linux-firmware',
-        'iwd', 'openssh', 'sudo', 'grub', 'efibootmgr',
-        'dhcpcd', 'git', 'python', 'python-pip', 'avahi',
-        'iw', 'base-devel', 'docker',
-        'archiso', 'lxde', 'xorg-xinit', 'nano', 'vi',
-    ]
+def download_pacman_packages(blankdb_path, towerpackages_path, installer_path):
+    with open(os.path.join(installer_path, 'packages.x86_64'), 'r') as fp:
+        packages_str = fp.read(fp)
+        # remove nx packages
+        packages = re.sub(r'\nnx[^\n]+', "", packages_str).split("\n")
     with sh.contrib.sudo(password="", _with=True):
         pacman('-Suy', _out=logger.debug)
         pacman('-Syw', '--cachedir', towerpackages_path, '--dbpath', blankdb_path, '--noconfirm', *packages, _out=logger.debug)
@@ -72,7 +70,6 @@ def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackage
         cp(os.path.join(installer_path, 'grub.cfg'), os.path.join(archiso_path, 'grub'))
     # add packages
     with open(os.path.join(archiso_path, 'packages.x86_64'), "a") as f:
-        f.write("lxde\n")
         f.write("xorg-xinit\n")
         f.write("yad\n")
     # start installer on login
@@ -102,7 +99,7 @@ def build_image(nx_path=None, computer_image_path=None, tower_tools_wheel_path=N
     clean_folders([working_dir])
     os.makedirs(blankdb_path)
     logger.info("Downloading pacman packages...")
-    download_pacman_packages(blankdb_path, towerpackages_path)
+    download_pacman_packages(blankdb_path, towerpackages_path, installer_path)
     logger.info("Prepare nx packages...")
     compile_nx_packages(working_dir, blankdb_path, towerpackages_path, nx_path)
     logger.info("Preparing pacman database...")
