@@ -70,6 +70,7 @@ def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackage
         cp(os.path.join(installer_path, 'grub.cfg'), os.path.join(archiso_path, 'grub'))
     # add packages
     with open(os.path.join(archiso_path, 'packages.x86_64'), "a") as f:
+        f.write("xorg-server\n")
         f.write("xorg-xinit\n")
         f.write("yad\n")
     # start installer on login
