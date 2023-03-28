@@ -8,13 +8,8 @@ import socket
 import ipaddress
 import array
 
-from backports.pbkdf2 import pbkdf2_hmac
 import sh
 from sh import iw, cat
-
-
-def derive_wlan_key(ssid, psk):
-    return binascii.hexlify(pbkdf2_hmac("sha1", psk.encode("utf-8"), ssid.encode("utf-8"), 4096, 32)).decode()
 
 def get_connected_ssid():
     try:
@@ -60,8 +55,8 @@ def get_ssid_password(ssid):
             with sh.contrib.sudo(password="", _with=True):
                 cat(iwdspot_path, _out=buf)
                 iwdspot_conf = buf.getvalue()
-                password = iwdspot_conf.split("Passphrase=")[1].split("\n")[0].strip()
-                return derive_wlan_key(ssid, password)
+                password = iwdspot_conf.split("PreSharedKey=")[1].split("\n")[0].strip()
+                return password
         except sh.sh.ErrorReturnCode:
             pass
         return None
