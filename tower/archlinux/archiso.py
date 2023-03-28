@@ -26,7 +26,7 @@ def clean_folders(folders):
 
 def download_pacman_packages(blankdb_path, towerpackages_path, installer_path):
     with open(os.path.join(installer_path, 'packages.x86_64'), 'r') as fp:
-        packages_str = fp.read(fp)
+        packages_str = fp.read()
         # remove nx packages
         packages = re.sub(r'\nnx[^\n]+', "", packages_str).split("\n")
     with sh.contrib.sudo(password="", _with=True):
