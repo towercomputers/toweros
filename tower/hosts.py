@@ -330,7 +330,7 @@ def install(host_name, packages, online_host=None):
 
         logger.info("Install bundle in target host.")
         ssh(host_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=logger.debug)
-        ssh(host_name, 'sudo', 'apt-get', 'install', *packages, _out=logger.debug)
+        ssh(host_name, 'sudo', 'apt-get', '--assume-yes', 'install', *packages, _out=logger.debug)
         clean_install_files(host_name, packages, online_host)
     except ErrorReturnCode as e:
         clean_install_files(host_name, packages, online_host)
