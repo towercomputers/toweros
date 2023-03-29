@@ -1,9 +1,3 @@
-# https://stackoverflow.com/questions/49820173/recursionerror-maximum-recursion-depth-exceeded-from-ssl-py-supersslcontex
-import gevent.monkey
-gevent.monkey.patch_all()
-import warnings
-warnings.filterwarnings("ignore") # TODO: fix x2go syntax warning in python3
-
 import os
 import secrets
 from io import StringIO
@@ -18,8 +12,6 @@ from passlib.hash import sha512_crypt
 from sh import ssh, scp, ssh_keygen, xz, avahi_resolve
 from sh import ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
-import x2go
-import gevent
 
 from tower import osutils
 from tower import defaults
@@ -343,20 +335,6 @@ def install(host_name, packages, online_host=None):
     except ErrorReturnCode as e:
         clean_install_files(host_name, packages, online_host)
         raise(e)
-
-
-def run(host_name, command):
-    # TODO: x2go should support ~/.ssh/config
-    host_config = get_config(host_name)
-
-    run_application(
-        host_config['hostname'], 
-        defaults.DEFAULT_SSH_PORT, 
-        defaults.DEFAULT_SSH_USER, 
-        host_config['identityfile'], 
-        command
-    )
-
 
 def status(host_name = None):
     if host_name:

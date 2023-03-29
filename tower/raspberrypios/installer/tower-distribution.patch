@@ -32,9 +32,8 @@ new file mode 100644
 index 0000000..22223ce
 --- /dev/null
 +++ b/stagetower/00-install-x2goserver/00-packages
-@@ -0,0 +1,2 @@
-+x2goserver
-+x2goserver-xsession
+@@ -0,0 +1,1 @@
++nxagent
 diff --git a/stagetower/01-install-apt-offline/00-packages b/stagetower/01-install-apt-offline/00-packages
 new file mode 100644
 index 0000000..f40b64c

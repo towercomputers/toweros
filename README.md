@@ -34,7 +34,7 @@ $> systemctl enable docker.service
 $> usermod -aG docker $USER
 ```
 
-#### 2.3 Install `nxagent`
+#### 2.3 Install `nxproxy`
 
 ```
 $> git clone https://aur.archlinux.org/nx.git
@@ -148,7 +148,6 @@ $> tower install office galculator --online-host=web
 run `galculator` from `office`
 
 ```
-$> startx
 $> tower run office galculator
 ```
 
