@@ -21,7 +21,6 @@ usermod -aG docker $USERNAME
 groupadd netdev
 usermod -aG netdev $USERNAME
 echo 'export PATH=~/.local/bin:$PATH' >> /home/$USERNAME/.bash_profile
-echo "exec startlxde" > /home/$USERNAME/.xinitrc
 # set locales
 ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 hwclock --systohc
