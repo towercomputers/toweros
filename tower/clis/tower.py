@@ -6,7 +6,7 @@ from tower.clis import clilogger
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
-        Tower Computing command line to provision a computer, install apt packages on it and run applications with x2go.
+        Tower Computing command line to provision a host, install apt packages on it and run applications with x2go.
     """)
     parser.add_argument(
         '--quiet',

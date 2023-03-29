@@ -27,8 +27,8 @@ def parse_arguments():
         required=False
     )
     parser.add_argument(
-        '--computer-image-path',
-        help="""Skip computer image building and use provided image path.""",
+        '--host-image-path',
+        help="""Skip host image building and use provided image path.""",
         required=False
     )
     parser.add_argument(
@@ -44,7 +44,7 @@ def parse_arguments():
     )
 
     args = parser.parse_args()
-    if args.computer_image_path and args.computer_image_path.split(".").pop() != "xz":
+    if args.host_image_path and args.host_image_path.split(".").pop() != "xz":
         parser.error("Invalid image path. Must be an xz archive.")
     if args.nx_path and not os.path.isdir(args.nx_path):
         parser.error("Invalid nx path. Must be a folder containing zst files.")
@@ -57,6 +57,6 @@ def main():
     if args.image_name == 'host':
         pigen.build_image()
     elif args.image_name == 'thinclient':
-        archiso.build_image(args.nx_path, args.computer_image_path, args.tower_tools_wheel_path)
+        archiso.build_image(args.nx_path, args.host_image_path, args.tower_tools_wheel_path)
 
 

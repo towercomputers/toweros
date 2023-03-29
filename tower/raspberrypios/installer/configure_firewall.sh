@@ -48,7 +48,7 @@ iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
 iptables -I UDP -i eth0 -s $THIN_CLIENT_IP -p udp -m udp --dport 5353 -j ACCEPT
 # open port for ssh connection from thin client
 iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j ACCEPT
-# reject traffic from computers to thin client and other computers
+# reject traffic from host to thin client and other hosts
 iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A OUTPUT -d $TOWER_NETWORK -j DROP
 

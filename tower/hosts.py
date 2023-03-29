@@ -29,7 +29,7 @@ logger = logging.getLogger('tower')
 class MissingEnvironmentValue(Exception):
     pass
 
-class UnkownComputer(Exception):
+class UnkownHost(Exception):
     pass
 
 def check_environment_value(key, value):
@@ -249,36 +249,36 @@ def is_online(name):
         ssh(name, 'sudo', 'ifconfig', _out=buf)
         result = buf.getvalue()
         return "wlan0" in result
-    raise UnkownComputer(f"Unknown computer: {name}")
+    raise UnkownHost(f"Unknown host: {name}")
 
 
-def discover_ip(computer_name):
+def discover_ip(host_name):
     buf = StringIO()
-    avahi_resolve('-4', '-n', f'{computer_name}.local', _out=buf)
+    avahi_resolve('-4', '-n', f'{host_name}.local', _out=buf)
     res = buf.getvalue()
     if res != "":
         ip = res.strip().split("\t").pop()
         logger.info(f"IP found: {ip}")
         return ip
-    logger.info(f"Fail to discover the IP for {computer_name}. Retrying in 10 seconds with avahi")
+    logger.info(f"Fail to discover the IP for {host_name}. Retrying in 10 seconds with avahi")
     time.sleep(10)
-    return discover_ip(computer_name)
+    return discover_ip(host_name)
 
 
-def copy_file(computer_name_src, computer_name_dest, filename):
-    scp('-3', f'{computer_name_src}:{filename}', f'{computer_name_dest}:{filename}', _out=logger.debug)
+def copy_file(host_name_src, host_name_dest, filename):
+    scp('-3', f'{host_name_src}:{filename}', f'{host_name_dest}:{filename}', _out=logger.debug)
 
 
-def clean_install_files(computer_name, packages, online_computer=None):
-    proxy = computer_name if online_computer is None else online_computer
+def clean_install_files(host_name, packages, online_host=None):
+    proxy = host_name if online_host is None else online_host
     install_name = "_".join(packages)
     sig_filename = os.path.join('~/Downloads', f'{install_name}-apt.sig')
     bundle_filename = os.path.join('~/Downloads', f'{install_name}-apt-bundle.zip')
     try:
         ssh(proxy, 'rm', '-f', sig_filename, _out=logger.debug)
-        ssh(computer_name, 'rm', '-f', bundle_filename, _out=logger.debug)
-        if proxy != computer_name:
-            ssh(computer_name, 'rm', '-f', sig_filename, _out=logger.debug)
+        ssh(host_name, 'rm', '-f', bundle_filename, _out=logger.debug)
+        if proxy != host_name:
+            ssh(host_name, 'rm', '-f', sig_filename, _out=logger.debug)
             ssh(proxy, 'rm', '-f', bundle_filename, _out=logger.debug)
     except ErrorReturnCode_1 as e:
        pass
@@ -314,63 +314,63 @@ def provision(name, image_path, sd_card, firstrun_env, private_key_path):
     update_config(name, ip, private_key_path)
 
 
-def install(computer_name, packages, online_computer=None):
-    proxy = computer_name if online_computer is None else online_computer
+def install(host_name, packages, online_host=None):
+    proxy = host_name if online_host is None else online_host
     install_name = "_".join(packages)
     try:
-        logger.info("Generate package signature in target computer.")
+        logger.info("Generate package signature in target host.")
         sig_filename = os.path.join('~/', f'{install_name}-apt.sig')
-        ssh(computer_name, 'sudo', 'apt-offline',
+        ssh(host_name, 'sudo', 'apt-offline',
             'set', sig_filename, '--install-packages', *packages, _out=logger.debug)
 
-        logger.info("Copy package signature to online computer.")
-        if proxy != computer_name:
-            copy_file(computer_name, proxy, sig_filename)
+        logger.info("Copy package signature to online host.")
+        if proxy != host_name:
+            copy_file(host_name, proxy, sig_filename)
 
         logger.info("Downloading bundle...")
         bundle_filename = os.path.join('~/', f'{install_name}-apt-bundle.zip')
         ssh(proxy, 'sudo', 'apt-offline',
             'get', sig_filename, '--bundle', bundle_filename, _out=logger.debug)
 
-        logger.info("Copy bundle to target computer.")
-        if proxy != computer_name:
-            copy_file(proxy, computer_name, bundle_filename)
+        logger.info("Copy bundle to target host.")
+        if proxy != host_name:
+            copy_file(proxy, host_name, bundle_filename)
 
-        logger.info("Install bundle in target computer.")
-        ssh(computer_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=logger.debug)
-        ssh(computer_name, 'sudo', 'apt-get', 'install', *packages, _out=logger.debug)
-        clean_install_files(computer_name, packages, online_computer)
+        logger.info("Install bundle in target host.")
+        ssh(host_name, 'sudo', 'apt-offline', 'install', bundle_filename, _out=logger.debug)
+        ssh(host_name, 'sudo', 'apt-get', 'install', *packages, _out=logger.debug)
+        clean_install_files(host_name, packages, online_host)
     except ErrorReturnCode as e:
-        clean_install_files(computer_name, packages, online_computer)
+        clean_install_files(host_name, packages, online_host)
         raise(e)
 
 
-def run(computer_name, command):
+def run(host_name, command):
     # TODO: x2go should support ~/.ssh/config
-    computer_config = get_config(computer_name)
+    host_config = get_config(host_name)
 
     run_application(
-        computer_config['hostname'], 
+        host_config['hostname'], 
         defaults.DEFAULT_SSH_PORT, 
         defaults.DEFAULT_SSH_USER, 
-        computer_config['identityfile'], 
+        host_config['identityfile'], 
         command
     )
 
 
-def status(computer_name = None):
-    if computer_name:
-        computer_config = get_config(computer_name)
-        computer_status = 'up'
+def status(host_name = None):
+    if host_name:
+        host_config = get_config(host_name)
+        host_status = 'up'
         try:
-            ssh(computer_name, 'ls') # any ssh command sould make the job
+            ssh(host_name, 'ls') # any ssh command sould make the job
         except ErrorReturnCode:
-            computer_status = 'down'
-        online = is_online(computer_name) if computer_status == 'up' else "N/A"
+            host_status = 'down'
+        online = is_online(host_name) if host_status == 'up' else "N/A"
         return {
-            'name': computer_name,
-            'status': computer_status,
+            'name': host_name,
+            'status': host_status,
             'online-host': online,
-            'ip': computer_config['hostname']
+            'ip': host_config['hostname']
         }
-    return [status(computer_name) for computer_name in get_list()]
+    return [status(host_name) for host_name in get_list()]

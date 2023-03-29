@@ -26,7 +26,7 @@ WIFI_PASSWORD="$2"
 GIT_NAME="$3"
 GIT_EMAIL="$4"
 GIT_KEY_PATH="$5"
-# set this variable if you need to connect with ssh from another computer
+# set this variable if you need to connect with ssh from another host
 AUTHORIZED_KEY="$6"
 
 CONNECTED=false

@@ -87,7 +87,7 @@ def make_archiso(archiso_path, working_dir):
         chown(getpass.getuser(), image_dest_path)
     return image_dest_path
 
-def build_image(nx_path=None, computer_image_path=None, tower_tools_wheel_path=None):
+def build_image(nx_path=None, host_image_path=None, tower_tools_wheel_path=None):
     start_time = time.time()
 
     working_dir = os.path.join(os.getcwd(), datetime.now().strftime('buildtower%Y%m%d%H%M%S'))
@@ -107,8 +107,8 @@ def build_image(nx_path=None, computer_image_path=None, tower_tools_wheel_path=N
     create_pacman_db(towerpackages_path)
     logger.info("Downloading pip packages...")
     download_pip_packages(pippackages_path, tower_tools_wheel_path)
-    logger.info("Preparing computer Rasperry PI OS image...")
-    rpi_image_path = computer_image_path or raspberrypios.pigen.build_image()
+    logger.info("Preparing host Rasperry PI OS image...")
+    rpi_image_path = host_image_path or raspberrypios.pigen.build_image()
     logger.info("Preparing archiso folder..")
     prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path, rpi_image_path)
     logger.info("Building image file...")

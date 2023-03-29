@@ -1,16 +1,16 @@
 import re
 
-from tower import computers
+from tower import hosts
 
 def add_args(argparser):
     install_parser = argparser.add_parser(
         'install',
-        help="""Command used to install an application in a computer prepared with the `provision` command."""
+        help="""Command used to install an application in a host prepared with the `provision` command."""
     )
 
     install_parser.add_argument(
-        'computer_name', 
-        help="""Computer name where to install the package (Required).""",
+        'host_name', 
+        help="""Host name where to install the package (Required).""",
         nargs=1
     )
     install_parser.add_argument(
@@ -20,16 +20,16 @@ def add_args(argparser):
     )
     install_parser.add_argument(
         '--online-host', 
-        help="""Computer name used to download the file (Default: same as `name`)""",
+        help="""Host name used to download the file (Default: same as `name`)""",
         required=False,
     )
 
 def check_args(args, parser_error):
-    name = args.computer_name[0]
-    config = computers.get_config(name)
+    name = args.host_name[0]
+    config = hosts.get_config(name)
     if config is None:
-        parser_error("Unkown computer name.")
-    elif not computers.is_online(name) and args.online_host is None:
+        parser_error("Unkown host name.")
+    elif not hosts.is_online(name) and args.online_host is None:
         parser_error(f"{name} is not online. Please use the flag `--online-host`.")
     
     for pkg_name in args.packages:
@@ -37,11 +37,11 @@ def check_args(args, parser_error):
             parser_error(f"Invalid package name:{pkg_name}")
 
     if args.online_host:
-        config = computers.get_config(args.online_host)
+        config = hosts.get_config(args.online_host)
         if config is None:
-            parser_error("Unkown computer name for online host.")
-        elif not computers.is_online(args.online_host):
+            parser_error("Unkown host name for online host.")
+        elif not hosts.is_online(args.online_host):
             parser_error(f"{args.online_host} is not online.")
 
 def execute(args):
-    computers.install(args.computer_name[0], args.packages, args.online_host)
+    hosts.install(args.host_name[0], args.packages, args.online_host)

@@ -1,4 +1,4 @@
-from tower import computers
+from tower import hosts
 
 def add_args(argparser):
     run_parser = argparser.add_parser(
@@ -7,8 +7,8 @@ def add_args(argparser):
     )
 
     run_parser.add_argument(
-        'computer_name', 
-        help="""Computer's name. This name must match with the `name` used with the `provision` command (Required).""",
+        'host_name', 
+        help="""Host's name. This name must match with the `name` used with the `provision` command (Required).""",
         nargs=1
     )
     run_parser.add_argument(
@@ -18,9 +18,9 @@ def add_args(argparser):
     )    
 
 def check_args(args, parser_error):
-    config = computers.get_config(args.computer_name[0])
+    config = hosts.get_config(args.host_name[0])
     if config is None:
-        parser_error("Unkown computer name.")
+        parser_error("Unkown host name.")
 
 def execute(args):
-    computers.run(args.computer_name[0], " ".join(args.run_command))
+    hosts.run(args.host_name[0], " ".join(args.run_command))

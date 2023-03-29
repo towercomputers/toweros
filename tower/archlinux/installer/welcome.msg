@@ -8,6 +8,6 @@ Connect to internet with:
 Open a graphical desktop with:
 \e[7;30;42mstartx\e[0m
 
-Provision your first computer with:
-\e[7;30;42mtower provision <computer_name>\e[0m
+Provision your first host with:
+\e[7;30;42mtower provision <host_name>\e[0m
  

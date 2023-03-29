@@ -3,19 +3,19 @@ import os
 import re
 import sys
 
-from tower import computers, osutils
+from tower import hosts, osutils
 
 logger = logging.getLogger('tower')
 
 def add_args(argparser):
     provision_parser = argparser.add_parser(
         'provision',
-        help="""Command used to prepare the bootable SD Card needed to provision a computer."""
+        help="""Command used to prepare the bootable SD Card needed to provision a host."""
     )
     provision_parser.add_argument(
         'name', 
         nargs=1,
-        help="""Computer's name. This name is used to install and run an application (Required)."""
+        help="""Host's name. This name is used to install and run an application (Required)."""
     )
     provision_parser.add_argument(
         '-sd', '--sd-card', 
@@ -25,12 +25,12 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--public-key-path', 
-        help="""Public key path used to access the application computer (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
+        help="""Public key path used to access the host (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
         required=False
     )
     provision_parser.add_argument(
         '--private-key-path', 
-        help="""Private key path used to access the application computer (Default: automatically generated and stored in the local ~/.ssh/ folder).""",
+        help="""Private key path used to access the host (Default: automatically generated and stored in the local ~/.ssh/ folder).""",
         required=False
     )
     provision_parser.add_argument(
@@ -41,7 +41,7 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--timezone', 
-        help="""Timezone of the computer (Default: same as the thin client)""",
+        help="""Timezone of the host (Default: same as the thin client)""",
         required=False,
         default=""
     )
@@ -78,10 +78,10 @@ def add_args(argparser):
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
-        parser_error(message="Computer name invalid. Must be between one and 15 alphanumeric chars.")
+        parser_error(message="Host name invalid. Must be between one and 15 alphanumeric chars.")
 
-    if computers.exists(args.name[0]):
-        parser_error("Computer name already used.")
+    if hosts.exists(args.name[0]):
+        parser_error("Host name already used.")
 
     if args.sd_card:
         disk_list = osutils.get_device_list()
@@ -115,19 +115,19 @@ def check_args(args, parser_error):
             parser_error(message="Wlan country invalid. Must be 2 chars.")
     
     if args.image:
-        if not os.path.exists(args.image) and not computers.is_valid_https_url(args.image):
+        if not os.path.exists(args.image) and not hosts.is_valid_https_url(args.image):
             parser_error(message="Invalid path or url for the image.")
         ext = args.image.split(".").pop()
         if os.path.exists(args.image) and ext not in ['img', 'xz']:
             parser_error(message="Invalid extension for image path (only `xz`or `img`).")
-        elif computers.is_valid_https_url(args.image) and ext not in ['xz']:
+        elif hosts.is_valid_https_url(args.image) and ext not in ['xz']:
             parser_error(message="Invalid extension for image url (only `xz`).")
 
 def execute(args):
     try:
-        image_path, sd_card, firstrun_env, private_key_path = computers.prepare_provision(args)
-        computers.provision(args.name[0], image_path, sd_card, firstrun_env, private_key_path)
-    except computers.MissingEnvironmentValue as e:
+        image_path, sd_card, firstrun_env, private_key_path = hosts.prepare_provision(args)
+        hosts.provision(args.name[0], image_path, sd_card, firstrun_env, private_key_path)
+    except hosts.MissingEnvironmentValue as e:
         logger.error(e)
         sys.exit(1)
     
