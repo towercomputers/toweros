@@ -19,3 +19,6 @@ xorg-server
 xorg-xinit
 nx-headers
 nxproxy
+qemu-user-static
+rsync
+parted

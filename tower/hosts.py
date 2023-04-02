@@ -9,12 +9,14 @@ import hashlib
 
 import requests
 from passlib.hash import sha512_crypt
-from sh import ssh, scp, ssh_keygen, xz, avahi_resolve
-from sh import ErrorReturnCode_1, ErrorReturnCode
+import sh
+from sh import ssh, scp, ssh_keygen, xz, avahi_resolve, cat, mount
+from sh import Command, ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import osutils
 from tower import defaults
+from tower.archlinux import pigen
 
 logger = logging.getLogger('tower')
 
@@ -47,7 +49,7 @@ def generate_key_pair(name):
 
 
 def prepare_firstrun_env(args):
-    logger.info("Generating first run environment...")
+    logger.info("Generating environment...")
     name = args.name[0]
     
     check_environment_value('public-key-path', args.public_key_path)
@@ -82,16 +84,17 @@ def prepare_firstrun_env(args):
         raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `{interface}`.")
   
     return {
-        'NAME': name,
+        'HOSTNAME': name,
+        'USERNAME': defaults.DEFAULT_SSH_USER,
         'PUBLIC_KEY': public_key,
         'ENCRYPTED_PASSWORD': sha512_crypt.hash(password),
         'KEYMAP': keymap,
         'TIMEZONE': timezone,
+        'LANG': 'en_US.UTF_8',
         'ONLINE': online,
         'WLAN_SSID': wlan_ssid,
-        'WLAN_PASSWORD': wlan_password,
+        'WLAN_SHARED_KEY': wlan_password,
         'WLAN_COUNTRY': wlan_country,
-        'USER': defaults.DEFAULT_SSH_USER,
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
     }
@@ -152,16 +155,6 @@ def prepare_provision(args):
         image_path = image_path.replace('.xz', '')
 
     return image_path, sd_card, firstrun_env, private_key_path
-
-
-def burn_image(image_path, device, firstrun_env):
-    env = "\n".join([f'{key}="{value}"' for key, value in firstrun_env.items()])
-    logger.info(f"Burning {image_path} in {device} with the following environment:\n{env}")
-    osutils.write_image(image_path, device)
-    mountpoint = osutils.ensure_partition_is_mounted(device, 0) # first parition where to put files
-    with open(os.path.join(mountpoint, 'tower.env'), "w") as f:
-        f.write(env)
-    osutils.unmount_all(device)
 
 
 def insert_include_directive():
@@ -300,7 +293,8 @@ def run_application(host, port, username, key_filename, command):
 
 
 def provision(name, image_path, sd_card, firstrun_env, private_key_path):
-    burn_image(image_path, sd_card, firstrun_env)
+    osutils.write_image(image_path, sd_card)
+    pigen.configure_image(sd_card, firstrun_env)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     ip = discover_ip(name)
     update_config(name, ip, private_key_path)
