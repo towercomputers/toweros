@@ -191,7 +191,8 @@ def configure_image(device, config):
             cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
             # put configuration scripts
             cp(f'{INSTALLER_DIR}/configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
-            cp(f'{INSTALLER_DIR}/configure_pi_firewall.sh', wd("ROOTFS_DIR/root/"))
+            cp(f'{INSTALLER_DIR}/towerospi-iptables.rules', wd("ROOTFS_DIR/root/"))
+
             args_key = [
                 "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
                 "KEYMAP", "TIMEZONE", "LANG",
@@ -199,11 +200,11 @@ def configure_image(device, config):
                 "THIN_CLIENT_IP", "TOWER_NETWORK"
             ]
             # run configuration script
-            args = [f"{config[key]}" for key in args_key]
+            args = [config[key] for key in args_key]
             chroot_process = arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
             # clean configuration files
             rm(wd("ROOTFS_DIR/root/configure_towerospi.sh"))
-            #rm(wd("ROOTFS_DIR/root/configure_pi_firewall.sh"))
+            rm(wd("ROOTFS_DIR/root/towerospi-iptables.rules"))
             rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static"))            
         finally:
             if chroot_process:

@@ -12,10 +12,10 @@ TIMEZONE="$6"
 LANG="$7"
 ONLINE="$8"
 WLAN_SSID="$9"
-WLAN_SHARED_KEY="$10"
-WLAN_COUNTRY="$11"
-THIN_CLIENT_IP="$12"
-TOWER_NETWORK="$13"
+WLAN_SHARED_KEY="${10}"
+WLAN_COUNTRY="${11}"
+THIN_CLIENT_IP="${12}"
+TOWER_NETWORK="${13}"
 
 # change root password
 usermod --password "$ENCRYPTED_PASSWORD" root
@@ -30,6 +30,7 @@ userdel -f -r alarm
 # add publick key
 mkdir -p /home/$USERNAME/.ssh
 echo "$PUBLIC_KEY" > /home/$USERNAME/.ssh/authorized_keys
+chown -R $USERNAME:$USERNAME /home/$USERNAME
 chmod 700 /home/$USERNAME/.ssh
 chmod 600 /home/$USERNAME/.ssh/*
 # set locales
@@ -57,4 +58,7 @@ if "$ONLINE" == "true"; then
     echo "PreSharedKey=$WLAN_SHARED_KEY" >> "/var/lib/iwd/$WLAN_SSID.psk"
 fi
 # configure firewall
-#sh /root/configure_pi_firewall.sh $THIN_CLIENT_IP $TOWER_NETWORK
+ESCAPED_TOWER_NETWORK=$(printf '%s\n' "$TOWER_NETWORK" | sed -e 's/[\/&]/\\&/g')
+sed -e "s/THIN_CLIENT_IP/$THIN_CLIENT_IP/g" \
+    -e "s/TOWER_NETWORK/$ESCAPED_TOWER_NETWORK/g" \
+    /root/towerospi-iptables.rules > /etc/iptables/iptables.rules

@@ -23,6 +23,8 @@ def unmount_all(device):
     buf = StringIO()
     lsblk('-J', '-T', device, _out=buf)
     result = json.loads(buf.getvalue())
+    if not 'children' in result['blockdevices'][0]:
+        return
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoints'][0]:
             with sh.contrib.sudo(password="", _with=True):
@@ -37,6 +39,8 @@ def mountpoint(device, partition_index=0):
     buf = StringIO()
     lsblk('-J', '-T', device, _out=buf)
     result = json.loads(buf.getvalue())
+    if not 'children' in result['blockdevices'][0]:
+        return 
     if partition_index < len(result['blockdevices'][0]['children']):
         partition = result['blockdevices'][0]['children'][partition_index]
         return partition['name'], partition['mountpoints'][0]
