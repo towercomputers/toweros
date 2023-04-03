@@ -28,7 +28,7 @@ COMMIT
 -A OUTPUT -d TOWER_NETWORK -j DROP
 -A TCP -p tcp -m recent --update --seconds 60 --name TCP-PORTSCAN --mask 255.255.255.255 --rsource -j REJECT --reject-with tcp-reset
 -A TCP -s THIN_CLIENT_IP/32 -p tcp -m tcp --dport 22 -j ACCEPT
--A UDP -s THIN_CLIENT_IP/32 -i eth0 -p udp -m udp --dport 5353 -j ACCEPT
+-A UDP -s THIN_CLIENT_IP/32 -i end0 -p udp -m udp --dport 5353 -j ACCEPT
 -A UDP -p udp -m recent --update --seconds 60 --name UDP-PORTSCAN --mask 255.255.255.255 --rsource -j REJECT --reject-with icmp-port-unreachable
 COMMIT
 # Completed on Sun Apr  2 19:38:04 2023

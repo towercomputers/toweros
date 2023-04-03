@@ -57,7 +57,7 @@ def ssh_command(hostname, *cmd):
     return sanitized_stdout.strip()
 
 def get_real_hostname(hostname):
-    return ssh_command(hostname, 'hostname')
+    return ssh_command(hostname, 'cat /etc/hostname')
 
 def get_home(hostname):
     return ssh_command(hostname, 'echo', '$HOME')

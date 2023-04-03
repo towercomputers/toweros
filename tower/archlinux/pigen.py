@@ -8,12 +8,13 @@ import sh
 from sh import (
     Command, ErrorReturnCode,
     mount, umount, parted, mkdosfs,
-    cp, rm, sync, rsync, chown, truncate, mkdir, ls,
+    cp, rm, sync, rsync, chown, truncate, mkdir, ls, tee, genfstab, resize2fs,
     arch_chroot, 
     bsdtar, xz,
     losetup, 
 )
 mkfs_ext4 = Command('mkfs.ext4')
+fsck_ext4 = Command('fsck.ext4')
 
 from tower import osutils
 
@@ -140,12 +141,7 @@ def force_umount(path, retry=0):
     if not os.path.exists(path):
         return
     try:
-        umount(path, _out=logger.debug)
-    except sh.ErrorReturnCode_32: # target is busy
-        if retry < 3:
-            logger.info(f"{path} is busy. Please wait 3 seconds!")
-            time.sleep(3)
-            force_umount(path, retry=retry+1)
+        umount('-l', path, _out=logger.debug)
     except ErrorReturnCode:
         pass
 
@@ -185,6 +181,12 @@ def configure_image(device, config):
             prepare_working_dir()
             boot_part = Command('sh')('-c', f'ls {device}*1').strip()
             root_part = Command('sh')('-c', f'ls {device}*2').strip()
+            if not boot_part or not root_part:
+                raise Exception("Invalid partitions")
+            # extend root partition
+            parted(device, 'resizepart', 2, '100%')
+            resize2fs(root_part)
+            # mount partions
             mount('--mkdir', root_part, wd("ROOTFS_DIR"), '-t', 'ext4')
             mount('--mkdir', boot_part, wd("ROOTFS_DIR/boot/"), '-t', 'vfat')
             # put cross platform emulator
@@ -202,6 +204,9 @@ def configure_image(device, config):
             # run configuration script
             args = [config[key] for key in args_key]
             chroot_process = arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
+            # update fstab
+            #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
+            Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
             # clean configuration files
             rm(wd("ROOTFS_DIR/root/configure_towerospi.sh"))
             rm(wd("ROOTFS_DIR/root/towerospi-iptables.rules"))

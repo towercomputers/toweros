@@ -10,7 +10,7 @@ import hashlib
 import requests
 from passlib.hash import sha512_crypt
 import sh
-from sh import ssh, scp, ssh_keygen, xz, avahi_resolve, cat, mount
+from sh import ssh, scp, ssh_keygen, xz, avahi_resolve, cat, mount, parted
 from sh import Command, ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 
@@ -296,6 +296,7 @@ def provision(name, image_path, sd_card, firstrun_env, private_key_path):
     osutils.write_image(image_path, sd_card)
     pigen.configure_image(sd_card, firstrun_env)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
+    # TODO: check network
     ip = discover_ip(name)
     update_config(name, ip, private_key_path)
 
