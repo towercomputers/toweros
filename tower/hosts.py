@@ -213,7 +213,8 @@ def update_config(name, ip, private_key_path):
         Hostname=ip,
         User=defaults.DEFAULT_SSH_USER,
         IdentityFile=private_key_path,
-        StrictHostKeyChecking="no",
+        # TODO: clean known_hosts
+        #StrictHostKeyChecking="no",
         LogLevel="FATAL"
     )
     config.write(config_path)

@@ -70,7 +70,8 @@ def authorize_cookie(hostname, cookie, display_num):
     ssh(hostname, "touch", xauthority_path)
     ssh(hostname, 'xauth', 
         'add', f"{get_real_hostname(hostname)}/unix:{display_num}", 
-        'MIT-MAGIC-COOKIE-1', cookie
+        'MIT-MAGIC-COOKIE-1', cookie,
+        _out=logger.debug
     )
 
 def get_next_display_num(hostname):
@@ -83,7 +84,7 @@ def get_next_display_num(hostname):
    
 def revoke_cookies(hostname, display_num):
     return ssh(hostname, 'xauth', 
-        'remove', f":{display_num}", _out=logger.debug
+        'remove', f"{hostname}:{display_num}/unix", _out=logger.debug
     )
 
 def gen_display_args(display_num, *dicts):
