@@ -84,7 +84,7 @@ def get_next_display_num(hostname):
    
 def revoke_cookies(hostname, display_num):
     return ssh(hostname, 'xauth', 
-        'remove', f"{hostname}:{display_num}/unix", _out=logger.debug
+        'remove', f"{hostname}/unix:{display_num}", _out=logger.debug
     )
 
 def gen_display_args(display_num, *dicts):
