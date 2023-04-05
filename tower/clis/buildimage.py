@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from tower.archlinux import archiso, pigen
+from tower import toweros, towerospi
 from tower.clis import clilogger
 
 def parse_arguments():
@@ -86,8 +86,8 @@ def main():
     args = parse_arguments()
     clilogger.initialize(args.verbose, args.quiet)
     if args.image_name == 'host':
-        pigen.build_image(args.archlinux_tar_path, args.nx_tar_path)
+        towerospi.build_image(args.archlinux_tar_path, args.nx_tar_path)
     elif args.image_name == 'thinclient':
-        archiso.build_image(args.nx_path, args.host_image_path, args.tower_tools_wheel_path)
+        toweros.build_image(args.nx_path, args.host_image_path, args.tower_tools_wheel_path)
 
 

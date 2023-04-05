@@ -14,7 +14,7 @@ from sh import ssh, scp, ssh_keygen, xz, avahi_resolve, cat, mount, parted
 from sh import Command, ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 
-from tower import osutils
+from tower import utils
 from tower import defaults
 from tower.archlinux import pigen
 
@@ -58,28 +58,28 @@ def prepare_firstrun_env(args):
 
     password = secrets.token_urlsafe(16)
     
-    keymap = args.keymap or osutils.get_keymap()
-    timezone = args.timezone or osutils.get_timezone()
+    keymap = args.keymap or utils.get_keymap()
+    timezone = args.timezone or utils.get_timezone()
 
     if args.online:
         online = 'true'
-        wlan_ssid = args.wlan_ssid or osutils.get_connected_ssid()
+        wlan_ssid = args.wlan_ssid or utils.get_connected_ssid()
         check_environment_value('wlan-ssid', wlan_ssid)
-        wlan_password = args.wlan_password or osutils.get_ssid_password(wlan_ssid)
+        wlan_password = args.wlan_password or utils.get_ssid_password(wlan_ssid)
         check_environment_value('wlan-password', wlan_password)
-        wlan_country = args.wlan_country or osutils.find_wlan_country(wlan_ssid)
+        wlan_country = args.wlan_country or utils.find_wlan_country(wlan_ssid)
         check_environment_value('wlan-country', wlan_country)
     else:
         online = 'false'
         wlan_ssid, wlan_password, wlan_country = '', '', ''
     
-    wired_interfaces = osutils.get_wired_interfaces()
+    wired_interfaces = utils.get_wired_interfaces()
     if not wired_interfaces:
         raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to a wired network.")
     
     interface = wired_interfaces[0]  # TODO: make the interface configurable ?
-    thin_client_ip = osutils.get_interface_ip(interface)
-    tower_network = osutils.get_interface_network(interface)
+    thin_client_ip = utils.get_interface_ip(interface)
+    tower_network = utils.get_interface_network(interface)
     if not thin_client_ip or not tower_network:
         raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `{interface}`.")
   
@@ -140,7 +140,7 @@ def prepare_provision(args):
 
     firstrun_env = prepare_firstrun_env(args)
     
-    sd_card = args.sd_card or osutils.select_sdcard_device()
+    sd_card = args.sd_card or utils.select_sdcard_device()
     check_environment_value('sd-card', sd_card)
 
     if args.image:
@@ -294,7 +294,7 @@ def run_application(host, port, username, key_filename, command):
 
 
 def provision(name, image_path, sd_card, firstrun_env, private_key_path):
-    osutils.write_image(image_path, sd_card)
+    utils.write_image(image_path, sd_card)
     pigen.configure_image(sd_card, firstrun_env)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     # TODO: check network

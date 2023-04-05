@@ -2,6 +2,8 @@
 *.xz
 *.img
 *.iso
+ArchLinuxARM*.tar.gz
+buildtower*/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

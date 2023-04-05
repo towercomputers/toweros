@@ -1,0 +1,50 @@
+# mangle
+*mangle
+:PREROUTING ACCEPT [12:624]
+:INPUT ACCEPT [12:624]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [12:2064]
+:POSTROUTING ACCEPT [12:2064]
+# protection against spoofing attacks
+-A PREROUTING -m rpfilter --invert -j DROP
+COMMIT
+# filter
+*filter
+# drop all input traffic by default
+:INPUT DROP [0:0]
+# reject all forward traffic
+:FORWARD DROP [0:0]
+# allow all outbound traffic
+:OUTPUT ACCEPT [0:0]
+# user defined chains
+:TCP - [0:0]
+:UDP - [0:0]
+# allow ICMP messages
+-A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+# allow local traffic
+-A INPUT -i lo -j ACCEPT
+# drop all traffic with an "INVALID" state 
+-A INPUT -m conntrack --ctstate INVALID -j DROP
+# allow ICMP echo requests (pings)
+-A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
+# attach the TCP and UDP chains to the INPUT
+-A INPUT -p udp -m conntrack --ctstate NEW -j UDP
+-A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j TCP
+# reject TCP connections with TCP RESET 
+-A INPUT -p tcp -m recent --set --name TCP-PORTSCAN --mask 255.255.255.255 --rsource -j REJECT --reject-with tcp-reset
+# reject UDP streams with ICMP port unreachable messages
+-A INPUT -p udp -m recent --set --name UDP-PORTSCAN --mask 255.255.255.255 --rsource -j REJECT --reject-with icmp-port-unreachable
+# reject all remaining incoming traffic with icmp protocol unreachable messages
+-A INPUT -j REJECT --reject-with icmp-proto-unreachable
+# reject traffic from host to thin client and other hosts
+-A OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A OUTPUT -d TOWER_NETWORK -j DROP
+# block SYN port scanning
+-A TCP -p tcp -m recent --update --seconds 60 --name TCP-PORTSCAN --mask 255.255.255.255 --rsource -j REJECT --reject-with tcp-reset
+# open port for ssh connection from thin client
+-A TCP -s THIN_CLIENT_IP/32 -p tcp -m tcp --dport 22 -j ACCEPT
+# open port for avahi
+-A UDP -s THIN_CLIENT_IP/32 -i end0 -p udp -m udp --dport 5353 -j ACCEPT
+# block UDP port scanning
+-A UDP -p udp -m recent --update --seconds 60 --name UDP-PORTSCAN --mask 255.255.255.255 --rsource -j REJECT --reject-with icmp-port-unreachable
+COMMIT

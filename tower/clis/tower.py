@@ -1,7 +1,7 @@
 import argparse
 
 import tower
-from tower.commands import provision, install, run, status
+from tower.clis.commands import provision, install, run, status
 from tower.clis import clilogger
 
 def parse_arguments():
