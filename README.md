@@ -2,7 +2,7 @@
 
 ## Hardware configuration
 
-You must have a thin client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
+You must have a Thin Client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
 
 ## Installation
 
@@ -74,7 +74,7 @@ Note: if you are using TowerOS, you can skip the first step and use the image in
 1.1 Generate an image with `build-image`:
 
 ```
-$> build-tower-image computer
+$> build-tower-image host
 ```
 
 This will generate an `img` file compressed with `xz`.
@@ -82,41 +82,42 @@ This will generate an `img` file compressed with `xz`.
 1.2 Use this file to prepare the SD card.
 
 ```
-$> tower provision <computer-name> --image <image-path-generated-with-build-tower-image>
+$> tower provision <host> --image <image-path-generated-with-build-tower-image>
 ```
 
 or, for an online host:
 
 ```
-$> tower provision <computer-name> --online --image <image-path-generated-with-build-tower-image>
+$> tower provision <host> --online --image <generated-image-path>
 ```
 
-Keyboard, timezone and WiFi parameters are retrieved from the the thin client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
+Keyboard, timezone and WiFi parameters are retrieved from the the Thin Client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
 
-### 2. Execute a command on one of the computers:
+
+### 2. Execute a command in one of the hosts
 
 A terminal command line with SSH:
 
 ```
-$> ssh <computer-name> ls ~/
+$> ssh <host> ls ~/
 ```
 
 or a graphical application with `x2go`:
 
 ```
-$> tower run <computer-name> <application-name>
+$> tower run <host> <application-name>
 ```
 
 ###  3. Install an APT package on one of the hosts:
 
 ```
-$> tower install <computer-name> <application-name>
+$> tower install <host> <application-name>
 ```
 
 or, if the host is offline, you can tunnel the installation through an online host:
 
 ```
-$> tower install <offline-computer-name> <application-name> --online-host <online-computer-name> 
+$> tower install <offline-host> <application-name> --online-host <online-host> 
 ```
 
 ### 4. List computers and their status:
@@ -161,15 +162,15 @@ $> hatch run tower --help
 $> hatch run build-tower-image --help
 ```
 
-## Build TowerOS image with Docker
+## Build a TowerOS image with Docker.
 
-1. Build docker image with:
+1. Build the Docker image with:
 
 ```
 $> docker build -t build-tower-image:latest .
 ```
 
-2. Buid TowerOS image inside a docker container 
+2. Build the TowerOS image inside a Docker container:
 
 ```
 $> docker run --name towerbuilder --user tower --privileged \
@@ -177,13 +178,13 @@ $> docker run --name towerbuilder --user tower --privileged \
                build-tower-image thinclient
 ```
 
-3. retrieve image from the container
+3. Retrieve that image from the container:
 
 ```
 $> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 ```
 
-Note: In `arm64` architecture you must use `buildx` and cross-platform emulator like `tonistiigi/binfmt`.
+Note: With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
 
 ```
 $> docker buildx create --use
