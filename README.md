@@ -30,8 +30,6 @@ $> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel do
 
 ```
 $> systemctl enable avahi-daemon.service
-$> systemctl enable docker.service
-$> usermod -aG docker $USER
 ```
 
 #### 2.3 Install `nxproxy`
@@ -174,7 +172,6 @@ $> docker build -t build-tower-image:latest .
 
 ```
 $> docker run --name towerbuilder --user tower --privileged \
-               -v /var/run/docker.sock:/var/run/docker.sock \
                build-tower-image thinclient
 ```
 
@@ -191,6 +188,5 @@ $> docker buildx create --use
 $> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
 $> docker run --privileged --rm tonistiigi/binfmt --install all
 $> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged \
-              -v /var/run/docker.sock:/var/run/docker.sock \
               build-tower-image thinclient
 ```

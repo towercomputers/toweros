@@ -12,7 +12,6 @@ dhcpcd
 avahi
 iwd
 iw
-docker
 base-devel
 archiso
 xorg-server

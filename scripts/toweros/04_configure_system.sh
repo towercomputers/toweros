@@ -17,7 +17,6 @@ usermod --password $(echo $ROOT_PASSWORD | openssl passwd -1 -stdin) root
 # create first user
 useradd -m $USERNAME -p $(echo $PASSWORD | openssl passwd -1 -stdin)
 echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-usermod -aG docker $USERNAME
 groupadd netdev
 usermod -aG netdev $USERNAME
 echo 'export PATH=~/.local/bin:$PATH' >> /home/$USERNAME/.bash_profile
@@ -44,7 +43,6 @@ echo "options root=$ROOT_PARTITION rw" >> /boot/loader/entries/arch.conf
 systemctl enable iwd.service
 systemctl enable dhcpcd.service
 systemctl enable avahi-daemon.service
-systemctl enable docker.service
 systemctl enable iptables.service
 # enable qemu for arm
 echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:' > /etc/binfmt.d/arm.conf
