@@ -65,12 +65,6 @@ def add_args(argparser):
         default=""
     )
     provision_parser.add_argument(
-        '--wlan-country', 
-        help="""Wifi country (Default: same as the connection currently used by the thin client)""",
-        required=False,
-        default=""
-    )
-    provision_parser.add_argument(
         '--image', 
         help="""Image path or URL""",
         required=True, # TODO: make optional when `tower` image will be online
@@ -110,10 +104,6 @@ def check_args(args, parser_error):
         if re.match(r'^[a-zA-Z-\ ]+\/[a-zA-Z-\ ]+$', args.timezone) is None:
             parser_error(message="Timezone invalide. Must be in <Area>/<City> format. eg. Europe/Paris.")
     
-    if args.wlan_country:
-        if re.match(r'^[a-zA-Z]{2}$', args.wlan_country) is None:
-            parser_error(message="Wlan country invalid. Must be 2 chars.")
-    
     if args.image:
         if not os.path.exists(args.image) and not hosts.is_valid_https_url(args.image):
             parser_error(message="Invalid path or url for the image.")
@@ -125,9 +115,8 @@ def check_args(args, parser_error):
 
 def execute(args):
     try:
-        image_path, sd_card, firstrun_env, private_key_path = hosts.prepare_provision(args)
-        hosts.provision(args.name[0], image_path, sd_card, firstrun_env, private_key_path)
+        image_path, sd_card, host_config, private_key_path = hosts.prepare_provision(args)
+        hosts.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
     except hosts.MissingEnvironmentValue as e:
         logger.error(e)
         sys.exit(1)
-    

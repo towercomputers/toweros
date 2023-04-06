@@ -26,9 +26,11 @@ class MissingEnvironmentValue(Exception):
 class UnkownHost(Exception):
     pass
 
+
 def check_environment_value(key, value):
     if not value:
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
+
 
 def is_valid_https_url(str):
     try:
@@ -48,7 +50,7 @@ def generate_key_pair(name):
     return f'{key_path}.pub', key_path
 
 
-def prepare_firstrun_env(args):
+def prepare_host_config(args):
     logger.info("Generating environment...")
     name = args.name[0]
     
@@ -65,13 +67,14 @@ def prepare_firstrun_env(args):
         online = 'true'
         wlan_ssid = args.wlan_ssid or utils.get_connected_ssid()
         check_environment_value('wlan-ssid', wlan_ssid)
-        wlan_password = args.wlan_password or utils.get_ssid_password(wlan_ssid)
+        if args.wlan_password:
+            wlan_password = utils.derive_wlan_key(wlan_ssid, args.wlan_password)
+        else:
+            wlan_password = utils.get_ssid_presharedkey(wlan_ssid)
         check_environment_value('wlan-password', wlan_password)
-        wlan_country = args.wlan_country or utils.find_wlan_country(wlan_ssid)
-        check_environment_value('wlan-country', wlan_country)
     else:
         online = 'false'
-        wlan_ssid, wlan_password, wlan_country = '', '', ''
+        wlan_ssid, wlan_password = '', '', ''
     
     wired_interfaces = utils.get_wired_interfaces()
     if not wired_interfaces:
@@ -94,67 +97,52 @@ def prepare_firstrun_env(args):
         'ONLINE': online,
         'WLAN_SSID': wlan_ssid,
         'WLAN_SHARED_KEY': wlan_password,
-        'WLAN_COUNTRY': wlan_country,
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
     }
 
 
-def download_image(url, archive_hash=None):
-    if not os.path.exists(".cache"):
-        os.makedirs(".cache")
+@utils.clitask("Decompressing {0}...")
+def decompress_image(image_path):
+    xz('-d', image_path)
+    return image_path.replace('.xz', '')
 
-    xz_filename = f".cache/{url.split('/').pop()}"
-    img_filename = xz_filename.replace(".xz", "")
 
-    if not os.path.exists(img_filename):
-        if not os.path.exists(xz_filename):
-            logger.info(f"Downloading {url}...")
-            with requests.get(url, stream=True) as resp:
-                resp.raise_for_status()
-                with open(xz_filename, "wb") as f:
-                    for chunk in resp.iter_content(chunk_size=4096):
-                        f.write(chunk)
-        if archive_hash:
-            logger.info(f"Verifying image hash...")
-            sha256_hash = hashlib.sha256()
-            with open(xz_filename, "rb") as f:
-                for byte_block in iter(lambda: f.read(4096),b""):
-                    sha256_hash.update(byte_block)
-                xz_hash = sha256_hash.hexdigest()
-            if xz_hash != archive_hash:
-                sys.exit("Invalid image hash")
-        
-        logger.info("Decompressing image...")
-        xz('-d', xz_filename)
+def find_host_image(image_arg):
+    image_path = None
+    if image_arg and os.path.isfile(image_arg):
+        image_path = image_arg
     else:
-        logger.info("Using image in cache.")
-
-    logger.info("Image ready to burn.")
-    return img_filename
+        builds_dirs = [
+            os.path.join(os.getcwd(), 'builds'),
+            builds_dir = os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+        ]
+        for builds_dir in builds_dirs:
+            if os.path.isdir(builds_dir):
+                host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
+                if host_images:
+                    image_path = host_images.pop()
+                    break
+    if image_path:
+        ext = image_path.split(".").pop()
+        if ext == 'xz': # TODO: support more formats
+            image_path = decompress_image(image_path)
+    return image_path
 
 
 def prepare_provision(args):
     if not args.public_key_path:
         args.public_key_path, private_key_path = generate_key_pair(args.name[0])
 
-    firstrun_env = prepare_firstrun_env(args)
+    host_config = prepare_host_config(args)
     
     sd_card = args.sd_card or utils.select_sdcard_device()
     check_environment_value('sd-card', sd_card)
 
-    if args.image:
-        image_path = download_image(args.image) if is_valid_https_url(args.image) else args.image
-    else:
-        image_path = download_image(defaults.DEFAULT_OS_IMAGE, defaults.DEFAULT_OS_SHA256)
-    
-    ext = image_path.split(".").pop()
-    if ext == 'xz': # TODO: support more formats
-        logger.info("Decompressing image...")
-        xz('-d', image_path)
-        image_path = image_path.replace('.xz', '')
+    image_path = find_host_image(args.image)
+    check_environment_value('image', image_path)
 
-    return image_path, sd_card, firstrun_env, private_key_path
+    return image_path, sd_card, host_config, private_key_path
 
 
 def insert_include_directive():
@@ -293,9 +281,9 @@ def run_application(host, port, username, key_filename, command):
     cli.suspend_session(s_uuid)
 
 
-def provision(name, image_path, sd_card, firstrun_env, private_key_path):
+def provision(name, image_path, sd_card, host_config, private_key_path):
     utils.write_image(image_path, sd_card)
-    pigen.configure_image(sd_card, firstrun_env)
+    pigen.configure_image(sd_card, host_config)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
     # TODO: check network
     ip = discover_ip(name)

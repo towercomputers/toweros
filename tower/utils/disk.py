@@ -7,7 +7,7 @@ from io import StringIO
 import sys
 
 import sh
-from sh import lsblk, mount as _mount, umount, dd as _dd
+from sh import lsblk, mount as _mount, umount, dd as _dd, ErrorReturnCode
 
 logger = logging.getLogger('tower')
 
@@ -34,6 +34,14 @@ def unmount_all(device):
                     logger.debug("Unmount: device is busy. Retrying in 5 seconds.")
                     time.sleep(5)
                     umount(partition['mountpoints'][0])
+
+def lazy_umount(path, retry=0):
+    if not os.path.exists(path):
+        return
+    try:
+        umount('-l', path, _out=logger.debug)
+    except ErrorReturnCode:
+        pass
 
 def mountpoint(device, partition_index=0):
     buf = StringIO()

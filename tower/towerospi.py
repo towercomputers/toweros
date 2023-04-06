@@ -18,34 +18,37 @@ mkfs_ext4 = Command('mkfs.ext4')
 fsck_ext4 = Command('fsck.ext4')
 
 from tower import utils
+from tower.utils import clitask
 
 logger = logging.getLogger('tower')
 
 ARCHLINUX_ARM_URL = "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz"
-
-WORKING_DIR = os.path.join(os.getcwd(), 'buildtowerpi-work')
+WORKING_DIR = os.path.join(os.getcwd(), 'build-towerospi-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'towerospi')
-
-def withinfo(message):
-    def decorator(function):
-        def new_function(*args, **kwargs):
-            start_time = time.time()
-            logger.info(message)
-            ret = function(*args, **kwargs)
-            duration = timedelta(seconds=time.time() - start_time)
-            logger.info(f"Done in {duration}.")
-            return ret
-        return new_function
-    return decorator
 
 def wd(path):
     return os.path.join(WORKING_DIR, path)
 
 def prepare_working_dir():
-    rm('-rf', WORKING_DIR)
+    if os.path.exists(WORKING_DIR):
+        raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
 
-@withinfo("Preparing Arch Linux system...")
+def find_archlinux_arm(builds_dir):
+    archlinux_tar_path = os.path.join(builds_dir, 'ArchLinuxARM-rpi-armv7-latest.tar.gz')
+    if not os.path.isfile(archlinux_tar_path):
+        logger.info("Arch Linux tar not found in builds directory.")
+        utils.download_file(ARCHLINUX_ARM_URL, archlinux_tar_path)
+    return archlinux_tar_path
+
+def find_nx_build(builds_dir):
+    nx_tar_path = os.path.join(builds_dir, 'nx-armv7h.tar.gz')
+    if not os.path.isfile(nx_tar_path):
+        # TODO: build after user confirmation or/and download from trused repo
+        raise Exception("NX build not found")
+    return nx_tar_path
+
+@clitask("Preparing Arch Linux system...")
 def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
     # prepare disk image
     mkfs_ext4(
@@ -70,12 +73,12 @@ def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
     # clean installation files
     rm(wd("EXPORT_ROOTFS_DIR/00_install_towerospi.sh"))
     rm(wd("EXPORT_ROOTFS_DIR/usr/bin/qemu-arm-static"))
-    nx_tar_name = os.path.basename(archlinux_tar_path).split(".")[0]
+    nx_tar_name = os.path.basename(nx_tar_path).split(".")[0]
     rm('-rf', wd(f"EXPORT_ROOTFS_DIR/{nx_tar_name}"))
     # synchronize folder
     sync(wd("EXPORT_ROOTFS_DIR"))
 
-@withinfo("Creating RPI partitions...")
+@clitask("Creating RPI partitions...")
 def create_rpi_partitions():
     image_file = wd("toweros-pi.img")
     # caluclate sizes
@@ -114,7 +117,7 @@ def create_loop_device(image_file):
         return loop_dev
     raise Exception("losetup failed; exiting")
 
-@withinfo("Copying Arch Linux system in RPI partitions...")
+@clitask("Copying Arch Linux system in RPI partitions...")
 def prepare_rpi_partitions(loop_dev):
     boot_dev = f"{loop_dev}p1"
     root_dev = f"{loop_dev}p2"
@@ -128,7 +131,7 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-aHAXxv', '--exclude', '/boot', wd("EXPORT_ROOTFS_DIR/"), wd("ROOTFS_DIR/"), _out=logger.debug)
     rsync('-rtxv', wd("EXPORT_ROOTFS_DIR/boot/"), wd("ROOTFS_DIR/boot/"), _out=logger.debug)
 
-@withinfo("Compressing image with xz...")
+@clitask("Compressing image with xz...")
 def compress_image(builds_dir, owner):
     image_path = os.path.join(builds_dir, datetime.now().strftime('towerospi-%Y%m%d%H%M%S.img.xz'))
     xz(
@@ -141,86 +144,73 @@ def compress_image(builds_dir, owner):
     logger.info(f"Image ready: {image_path}")
     return image_path
 
-def force_umount(path, retry=0):
-    if not os.path.exists(path):
-        return
-    try:
-        umount('-l', path, _out=logger.debug)
-    except ErrorReturnCode:
-        pass
-
 def unmount_all():
-    force_umount(wd("ROOTFS_DIR/boot/"))
-    force_umount(wd("ROOTFS_DIR"))
-    force_umount(wd("EXPORT_ROOTFS_DIR"))
+    utils.lazy_umount(wd("ROOTFS_DIR/boot/"))
+    utils.lazy_umount(wd("ROOTFS_DIR"))
+    utils.lazy_umount(wd("EXPORT_ROOTFS_DIR"))
     losetup('-D')
 
-@withinfo("Cleaning up...")
+@clitask("Cleaning up...")
 def cleanup():
     unmount_all()
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
-@withinfo("Building TowserOS PI image...")
+@clitask("Building TowserOS PI image...", sudo=True)
 def build_image(builds_dir):
-    archlinux_tar_path = os.path.join(builds_dir, 'ArchLinuxARM-rpi-armv7-latest.tar.gz')
-    if not os.path.isfile(archlinux_tar_path):
-        logger.info("Arch Linux tar not found in builds directory. Downloading the latest...")
-        utils.download_file(ARCHLINUX_ARM_URL, archlinux_tar_path)
-    nx_tar_path = os.path.join(builds_dir, 'nx-armv7h.tar.gz')
+    archlinux_tar_path = find_archlinux_arm(builds_dir)
+    nx_tar_path = find_nx_build(builds_dir)
     user = os.getlogin()
-    with sh.contrib.sudo(password="", _with=True):
-        try:
-            prepare_working_dir()
-            prepare_chroot_image(archlinux_tar_path, nx_tar_path)
-            create_rpi_partitions()
-            loop_dev = create_loop_device(wd("toweros-pi.img"))
-            prepare_rpi_partitions(loop_dev)
-            unmount_all()
-            image_path = compress_image(builds_dir, user)
-        finally:
-            cleanup()
+    try:
+        prepare_working_dir()
+        prepare_chroot_image(archlinux_tar_path, nx_tar_path)
+        create_rpi_partitions()
+        loop_dev = create_loop_device(wd("toweros-pi.img"))
+        prepare_rpi_partitions(loop_dev)
+        unmount_all()
+        image_path = compress_image(builds_dir, user)
+    finally:
+        cleanup()
     return image_path
 
-@withinfo("Configuring TowserOS PI image...")
+@clitask("Configuring TowserOS PI image...", sudo=True)
 def configure_image(device, config):
     logger.info("\n".join([f'{key}="{value}"' for key, value in config.items()]))
-    with sh.contrib.sudo(password="", _with=True):
-        chroot_process = None
-        try:
-            utils.unmount_all(device)
-            prepare_working_dir()
-            boot_part = Command('sh')('-c', f'ls {device}*1').strip()
-            root_part = Command('sh')('-c', f'ls {device}*2').strip()
-            if not boot_part or not root_part:
-                raise Exception("Invalid partitions")
-            # extend root partition
-            parted(device, 'resizepart', 2, '100%')
-            resize2fs(root_part)
-            # mount partions
-            mount('--mkdir', root_part, wd("ROOTFS_DIR"), '-t', 'ext4')
-            mount('--mkdir', boot_part, wd("ROOTFS_DIR/boot/"), '-t', 'vfat')
-            # put cross platform emulator
-            cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
-            # put configuration scripts
-            cp(f'{INSTALLER_DIR}/00_configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
-            cp(f'{INSTALLER_DIR}/files/towerospi-iptables.rules', wd("ROOTFS_DIR/root/"))
-            # run configuration script
-            args_key = [
-                "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
-                "KEYMAP", "TIMEZONE", "LANG",
-                "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY", "WLAN_COUNTRY",
-                "THIN_CLIENT_IP", "TOWER_NETWORK"
-            ]
-            args = [config[key] for key in args_key]
-            chroot_process = arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/00_configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
-            # update fstab
-            #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
-            Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
-            # clean configuration files
-            rm(wd("ROOTFS_DIR/root/00_configure_towerospi.sh"))
-            rm(wd("ROOTFS_DIR/root/towerospi_iptables.rules"))
-            rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static"))            
-        finally:
-            if chroot_process:
-                chroot_process.terminate()
-            cleanup()
+    chroot_process = None
+    try:
+        utils.unmount_all(device)
+        prepare_working_dir()
+        boot_part = Command('sh')('-c', f'ls {device}*1').strip()
+        root_part = Command('sh')('-c', f'ls {device}*2').strip()
+        if not boot_part or not root_part:
+            raise Exception("Invalid partitions")
+        # extend root partition
+        parted(device, 'resizepart', 2, '100%')
+        resize2fs(root_part)
+        # mount partions
+        mount('--mkdir', root_part, wd("ROOTFS_DIR"), '-t', 'ext4')
+        mount('--mkdir', boot_part, wd("ROOTFS_DIR/boot/"), '-t', 'vfat')
+        # put cross platform emulator
+        cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
+        # put configuration scripts
+        cp(f'{INSTALLER_DIR}/00_configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
+        cp(f'{INSTALLER_DIR}/files/towerospi-iptables.rules', wd("ROOTFS_DIR/root/"))
+        # run configuration script
+        args_key = [
+            "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
+            "KEYMAP", "TIMEZONE", "LANG",
+            "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY",
+            "THIN_CLIENT_IP", "TOWER_NETWORK"
+        ]
+        args = [config[key] for key in args_key]
+        chroot_process = arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/00_configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
+        # update fstab
+        #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
+        Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
+        # clean configuration files
+        rm(wd("ROOTFS_DIR/root/00_configure_towerospi.sh"))
+        rm(wd("ROOTFS_DIR/root/towerospi_iptables.rules"))
+        rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static"))            
+    finally:
+        if chroot_process:
+            chroot_process.terminate()
+        cleanup()

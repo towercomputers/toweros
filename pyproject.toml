@@ -17,6 +17,7 @@ dependencies = [
     "requests==2.27.1",
     "sh==1.14.3",
     "passlib==1.7.4",
+    "backports.pbkdf2==0.1",
     "sshconf==0.2.5",
     "hatchling",
     "wheel"

@@ -13,9 +13,8 @@ LANG="$7"
 ONLINE="$8"
 WLAN_SSID="$9"
 WLAN_SHARED_KEY="${10}"
-WLAN_COUNTRY="${11}"
-THIN_CLIENT_IP="${12}"
-TOWER_NETWORK="${13}"
+THIN_CLIENT_IP="${11}"
+TOWER_NETWORK="${12}"
 
 # change root password
 usermod --password "$ENCRYPTED_PASSWORD" root
