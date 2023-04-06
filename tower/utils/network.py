@@ -8,6 +8,7 @@ import socket
 import ipaddress
 import array
 
+import requests
 import sh
 from sh import iw, cat
 
@@ -129,3 +130,11 @@ def get_wired_interfaces():
 
 def get_wireless_interfaces():
     return [i[1] for i in socket.if_nameindex() if i[1].startswith('w')]
+
+
+def download_file(url, dest_path):
+    with requests.get(url, stream=True) as resp:
+        resp.raise_for_status()
+        with open(dest_path, "wb") as f:
+            for chunk in resp.iter_content(chunk_size=4096):
+                f.write(chunk)

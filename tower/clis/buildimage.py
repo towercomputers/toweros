@@ -4,8 +4,33 @@ import os
 from tower import toweros, towerospi
 from tower.clis import clilogger
 
+def get_builds_dir(args):
+    builds_dir = args.builds_dir
+    # if not provided check if builds is in ./ or ~/.cache/tower/
+    if not builds_dir:
+        builds_dir = os.path.join(os.getcwd(), 'builds')
+        if os.path.isdir(builds_dir):
+            return builds_dir
+        builds_dir = os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+        if os.path.isdir(builds_dir):
+            return builds_dir
+    return builds_dir
+
+def check_builds_dir(args, parser_error):
+    builds_dir = get_builds_dir(args)
+    if not builds_dir or not os.path.isdir(builds_dir):
+        parser_error("Can't find builds dir, please use the flag --builds-dir")
+    # check requirement for thinclient
+    if args.image_name == 'thinclient':
+        if not os.path.isfile(os.path.join(builds_dir, 'nx-x86_64.tar.gz')):
+            parser_error(f"Can't find nx-x86_64.tar.gz in {builds_dir}")
+    # check requirement for host
+    if args.image_name == 'host':
+        if not os.path.isfile(os.path.join(builds_dir, 'nx-armv7h.tar.gz')):
+            parser_error(f"Can't find nx-armv7h.tar.gz in {builds_dir}")
+
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="""Generate Raspberry Pi OS image compatible with `tower`""")
+    parser = argparse.ArgumentParser(description="""Generate TowerOS and TowerOS PI images""")
     parser.add_argument(
         '-v', '--verbose',
         help="""Set log level to DEBUG.""",
@@ -20,6 +45,11 @@ def parse_arguments():
         action='store_true',
         default=False
     )
+    parser.add_argument(
+        '--builds-dir',
+        help="""Directory containing builds necessary to build an image.""",
+        required=False,
+    )
     subparser = parser.add_subparsers(
         dest='image_name', 
         required=True, 
@@ -29,65 +59,21 @@ def parse_arguments():
         'thinclient',
         help="""Command used to generate thinclient image"""
     )
-    thinclient_parser.add_argument(
-        '--nx-path',
-        help="""Skip `nx` compilation and use packages in provided folder path.""",
-        required=False
-    )
-    thinclient_parser.add_argument(
-        '--host-image-path',
-        help="""Skip host image building and use provided image path.""",
-        required=False
-    )
-    thinclient_parser.add_argument(
-        '--tower-tools-wheel-path',
-        help="""Tower tools wheel package path.""",
-        required=False
-    )
     host_parser = subparser.add_parser(
         'host',
         help="""Command used to generate host image."""
     )
-    host_parser.add_argument(
-        '--nx-tar-path',
-        help="""`nx` compiled package path.""",
-        required=True
-    )
-    host_parser.add_argument(
-        '--archlinux-tar-path',
-        help="""Arch Linux Arm packages.""",
-        required=True
-    )
-
     args = parser.parse_args()
-    if args.image_name == 'thinclient':
-        if args.host_image_path:
-            if not os.path.exists(args.host_image_path):
-                parser.error("Invalid host image path. File not found.")
-            if args.host_image_path.split(".").pop() != "xz":
-                parser.error("Invalid image path. Must be an xz archive.")
-        if args.nx_path and not os.path.isdir(args.nx_path):
-            parser.error("Invalid nx path. Must be a folder containing zst files.")
-    if args.image_name == 'host':
-        if args.nx_tar_path:
-            if not os.path.exists(args.nx_tar_path):
-                parser.error("Invalid nx tar path. File not found.")
-            if args.nx_tar_path.split(".")[-2:] != ["tar", "gz"]:
-                parser.error("Invalid nx tar path. Must be an tar.gz archive.")
-        if args.archlinux_tar_path:
-            if not os.path.exists(args.archlinux_tar_path):
-                parser.error("Invalid Arch Linux tar path. File not found.")
-            if args.archlinux_tar_path.split(".")[-2:] != ["tar", "gz"]:
-                parser.error("Invalid Arch Linux tar path. Must be an tar.gz archive.")
-        
+    check_builds_dir(args, parser.error)
     return args
 
 def main():
     args = parse_arguments()
     clilogger.initialize(args.verbose, args.quiet)
+    builds_dir = get_builds_dir(args)
     if args.image_name == 'host':
-        towerospi.build_image(args.archlinux_tar_path, args.nx_tar_path)
+        towerospi.build_image(builds_dir)
     elif args.image_name == 'thinclient':
-        toweros.build_image(args.nx_path, args.host_image_path, args.tower_tools_wheel_path)
+        toweros.build_image(builds_dir)
 
 

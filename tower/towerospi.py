@@ -3,6 +3,7 @@ import time
 from datetime import datetime, timedelta
 import logging
 import math
+import glob
 
 import sh
 from sh import (
@@ -19,6 +20,8 @@ fsck_ext4 = Command('fsck.ext4')
 from tower import utils
 
 logger = logging.getLogger('tower')
+
+ARCHLINUX_ARM_URL = "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz"
 
 WORKING_DIR = os.path.join(os.getcwd(), 'buildtowerpi-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'towerospi')
@@ -126,16 +129,17 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-rtxv', wd("EXPORT_ROOTFS_DIR/boot/"), wd("ROOTFS_DIR/boot/"), _out=logger.debug)
 
 @withinfo("Compressing image with xz...")
-def compress_image(owner):
-    image_name = os.path.join(os.getcwd(), datetime.now().strftime('towerospi-%Y%m%d%H%M%S.img.xz'))
+def compress_image(builds_dir, owner):
+    image_path = os.path.join(builds_dir, datetime.now().strftime('towerospi-%Y%m%d%H%M%S.img.xz'))
     xz(
         '--compress', '--force', 
         '--threads', 0, '--memlimit-compress=90%', '--best',
 	    '--stdout', wd("toweros-pi.img"),
-        _out=image_name
+        _out=image_path
     )
-    chown(f"{owner}:{owner}", image_name)
-    logger.info(f"Image ready: {image_name}") 
+    chown(f"{owner}:{owner}", image_path)
+    logger.info(f"Image ready: {image_path}")
+    return image_path
 
 def force_umount(path, retry=0):
     if not os.path.exists(path):
@@ -157,7 +161,12 @@ def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
 @withinfo("Building TowserOS PI image...")
-def build_image(archlinux_tar_path, nx_tar_path):
+def build_image(builds_dir):
+    archlinux_tar_path = os.path.join(builds_dir, 'ArchLinuxARM-rpi-armv7-latest.tar.gz')
+    if not os.path.isfile(archlinux_tar_path):
+        logger.info("Arch Linux tar not found in builds directory. Downloading the latest...")
+        utils.download_file(ARCHLINUX_ARM_URL, archlinux_tar_path)
+    nx_tar_path = os.path.join(builds_dir, 'nx-armv7h.tar.gz')
     user = os.getlogin()
     with sh.contrib.sudo(password="", _with=True):
         try:
@@ -167,9 +176,10 @@ def build_image(archlinux_tar_path, nx_tar_path):
             loop_dev = create_loop_device(wd("toweros-pi.img"))
             prepare_rpi_partitions(loop_dev)
             unmount_all()
-            compress_image(user)
+            image_path = compress_image(builds_dir, user)
         finally:
             cleanup()
+    return image_path
 
 @withinfo("Configuring TowserOS PI image...")
 def configure_image(device, config):
@@ -194,14 +204,13 @@ def configure_image(device, config):
             # put configuration scripts
             cp(f'{INSTALLER_DIR}/00_configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
             cp(f'{INSTALLER_DIR}/files/towerospi-iptables.rules', wd("ROOTFS_DIR/root/"))
-
+            # run configuration script
             args_key = [
                 "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
                 "KEYMAP", "TIMEZONE", "LANG",
                 "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY", "WLAN_COUNTRY",
                 "THIN_CLIENT_IP", "TOWER_NETWORK"
             ]
-            # run configuration script
             args = [config[key] for key in args_key]
             chroot_process = arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/00_configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
             # update fstab
