@@ -223,19 +223,15 @@ def exists(name):
 
 def is_online(name):
     if exists(name):
-        buf = StringIO()
-        ssh(name, 'sudo', 'ifconfig', _out=buf)
-        result = buf.getvalue()
+        result = ssh(name, 'sudo', 'ifconfig')
         return "wlan0" in result
     raise UnkownHost(f"Unknown host: {name}")
 
 
 def discover_ip(host_name):
-    buf = StringIO()
-    avahi_resolve('-4', '-n', f'{host_name}.local', _out=buf)
-    res = buf.getvalue()
-    if res != "":
-        ip = res.strip().split("\t").pop()
+    result = avahi_resolve('-4', '-n', f'{host_name}.local')
+    if result != "":
+        ip = result.strip().split("\t").pop()
         logger.info(f"IP found: {ip}")
         return ip
     logger.info(f"Fail to discover the IP for {host_name}. Retrying in 10 seconds with avahi")

@@ -3,7 +3,7 @@
 *.img
 *.iso
 ArchLinuxARM*.tar.gz
-buildtower*/
+build-toweros*-work/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

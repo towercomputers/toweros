@@ -6,8 +6,8 @@ set -x
 USERNAME=$1
 
 # install tower-tools
-cp -r pippackages /mnt
-arch-chroot /mnt runuser -u $USERNAME -- pip install --no-index --find-links=/pippackages tower-tools
+cp -r pip-packages /mnt
+arch-chroot /mnt runuser -u $USERNAME -- pip install --no-index --find-links=/pip-packages tower-tools
 
 # put builds directory in `tower` cache
 mkdir -p /mnt/home/$USERNAME/.cache/tower
@@ -18,4 +18,4 @@ cp 07_install_dev.sh /mnt/home/$USERNAME/
 arch-chroot /mnt chown -R $USERNAME:$USERNAME /home/$USERNAME/
 
 # clean cache
-rm -rf /mnt/pippackages
+rm -rf /mnt/pip-packages

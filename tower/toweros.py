@@ -11,78 +11,112 @@ import getpass
 import re
 
 import sh
-from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown, bsdtar
+from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown, bsdtar, Command, mkdir
 
 from tower import towerospi
+from tower.utils import clitask
 
 logger = logging.getLogger('tower')
 
+ARCHLINUX_ARM_URL = "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz"
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 
-def clean_folders(folders):
-    with sh.contrib.sudo(password="", _with=True):
-        for folder in folders:
-            rm('-rf', folder)
+WORKING_DIR = os.path.join(os.getcwd(), 'build-toweros-work')
+INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros')
 
-def download_pacman_packages(blankdb_path, towerpackages_path, installer_path):
-    with open(os.path.join(installer_path, 'files', 'packages.x86_64'), 'r') as fp:
+def wd(path):
+    return os.path.join(WORKING_DIR, path)
+
+def prepare_working_dir():
+    if os.path.exists(WORKING_DIR):
+        raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+    os.makedirs(WORKING_DIR)
+    os.makedirs(wd('blankdb'))
+
+@clitask("Cleaning up...")
+def cleanup():
+    rm('-rf', WORKING_DIR, _out=logger.debug)
+
+@clitask("Compiling NX package. Be patient...")
+def compile_nx_package():
+    nx_path = os.path.join(WORKING_DIR, 'nx')
+    nx_zst_path = os.path.join(nx_path, '*.zst')
+    git("clone",  "https://aur.archlinux.org/nx.git", _cwd=WORKING_DIR, _out=logger.debug)
+    makepkg('-c', '-s', '-r', '--noconfirm', _cwd=nx_path, _out=logger.debug)
+
+def find_nx_build(builds_dir):
+    nx_tar_path = os.path.join(builds_dir, 'nx-x86_64.tar.gz')
+    if not os.path.isfile(nx_tar_path):
+        # TODO: build after user confirmation or/and download from trused repo
+        raise Exception("NX build not found")
+    return nx_tar_path
+
+def find_host_image(builds_dir):
+    host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
+    if not host_images:
+        logger.info("Host image not found in builds directory. Building a new image.")
+        rpi_image_path = towerospi.build_image(builds_dir)
+    else:
+        rpi_image_path = host_images.pop()
+        logger.info(f"Using host image {rpi_image_path}")
+    return rpi_image_path
+
+def find_tower_tools(builds_dir):
+    wheels = glob.glob(os.path.join(builds_dir, 'tower_tools-*.whl'))
+    tower_tools_wheel_path = f"file://{wheels.pop()}" if wheels else TOWER_TOOLS_URL
+    return tower_tools_wheel_path
+
+@clitask("Downloading pacman packages...")
+def download_pacman_packages():
+    with open(os.path.join(INSTALLER_DIR, 'files', 'packages.x86_64'), 'r') as fp:
         packages_str = fp.read()
         # remove nx packages
         packages = re.sub(r'\nnx[^\n]+', "", packages_str).split("\n")
-    with sh.contrib.sudo(password="", _with=True):
-        pacman('-Suy', _out=logger.debug)
-        pacman('-Syw', '--cachedir', towerpackages_path, '--dbpath', blankdb_path, '--noconfirm', *packages, _out=logger.debug)
+    pacman('-Suy', _out=logger.debug)
+    pacman('-Syw', '--cachedir', wd('pacman-packages'), '--dbpath', wd('blankdb'), '--noconfirm', *packages, _out=logger.debug)
 
-def compile_nx_packages(working_dir, blankdb_path, towerpackages_path, nx_tar_path=None):
-    if nx_tar_path:
-        logger.info("Using NX build in builds directory.")
-        bsdtar('-xpf', nx_tar_path, '-C', working_dir, _out=logger.debug)
-        nx_path = os.path.join(working_dir, 'nx-x86_64')
-        nx_zst_path = os.path.join(nx_path, '*.zst')
-    else:
-        logger.info("NX build not found. Build a new one. Be patient...")
-        nx_path = os.path.join(working_dir, 'nx')
-        nx_zst_path = os.path.join(nx_path, '*.zst')
-        git("clone",  "https://aur.archlinux.org/nx.git", _cwd=working_dir, _out=logger.debug)
-        makepkg('-c', '-s', '-r', '--noconfirm', _cwd=nx_path, _out=logger.debug)
+@clitask("Preparing nx packages...")
+def prepare_nx_packages(nx_tar_path):
+    bsdtar('-xpf', nx_tar_path, '-C', WORKING_DIR, _out=logger.debug)
+    nx_path = os.path.join(WORKING_DIR, 'nx-x86_64')
+    nx_zst_path = os.path.join(nx_path, '*.zst')
+    nx_packages = glob.glob(nx_zst_path)
+    pacman('-Uw', '--cachedir', wd('pacman-packages'), '--dbpath', wd('blankdb'), '--noconfirm', *nx_packages, _out=logger.debug)
+    for pkg in nx_packages:
+        cp(pkg, wd('pacman-packages'))
 
-    with sh.contrib.sudo(password="", _with=True):
-        nx_packages = glob.glob(nx_zst_path)
-        pacman('-Uw', '--cachedir', towerpackages_path, '--dbpath', blankdb_path, '--noconfirm', *nx_packages, _out=logger.debug)
-        for pkg in nx_packages:
-            cp(pkg, towerpackages_path)
+@clitask("Preparing pacman database...")
+def create_pacman_db():
+    zsts = [f for f in glob.glob(f"{wd('pacman-packages')}/*") if f.split('.').pop() != 'sig']
+    repo_add(os.path.join(wd('pacman-packages'), 'towerpackages.db.tar.gz'), *zsts, _out=logger.debug)
 
-def create_pacman_db(towerpackages_path):
-    with sh.contrib.sudo(password="", _with=True):     
-        zsts = [f for f in glob.glob(f'{towerpackages_path}/*') if f.split('.').pop() != 'sig']
-        repo_add(os.path.join(towerpackages_path, 'towerpackages.db.tar.gz'), *zsts, _out=logger.debug)
+@clitask("Downloading pip packages...")
+def download_pip_packages(tower_tools_wheel_path):
+    pip("download", f"tower-tools @ {tower_tools_wheel_path or TOWER_TOOLS_URL}", '-d', wd('pip-packages'), _out=logger.debug)
 
-def download_pip_packages(pippackages_path, tower_tools_wheel_path):
-    pip("download", f"tower-tools @ {tower_tools_wheel_path or TOWER_TOOLS_URL}", '-d', pippackages_path, _out=logger.debug)
-
-def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path, rpi_image_path, builds_dir):
+@clitask("Preparing archiso folder..")
+def prepare_archiso(rpi_image_path, builds_dir):
     # copy installer, pacman and pip packages
-    cp('-r', '/usr/share/archiso/configs/releng/', archiso_path)
-    root_path = os.path.join(archiso_path, 'airootfs', 'root')
-    with sh.contrib.sudo(password="", _with=True):
-        installer_files = glob.glob(os.path.join(installer_path, '*.sh'))
-        installer_files += glob.glob(os.path.join(installer_path, 'files', '*'))
-        for f in installer_files:
-            cp(f, root_path)
-        cp('-r', towerpackages_path, root_path)
-        cp('-r', pippackages_path, root_path)
-        cp(os.path.join(installer_path, 'files', 'grub.cfg'), os.path.join(archiso_path, 'grub'))
+    cp('-r', '/usr/share/archiso/configs/releng/', wd('archiso'))
+    root_path = os.path.join(wd('archiso'), 'airootfs', 'root')
+    installer_files = glob.glob(os.path.join(INSTALLER_DIR, '*.sh'))
+    installer_files += glob.glob(os.path.join(INSTALLER_DIR, 'files', '*'))
+    for f in installer_files:
+        cp(f, root_path)
+    cp('-r', wd('pacman-packages'), root_path)
+    cp('-r', wd('pip-packages'), root_path)
+    cp(os.path.join(INSTALLER_DIR, 'files', 'grub.cfg'), os.path.join(wd('archiso'), 'grub'))
     # add packages
-    with open(os.path.join(archiso_path, 'packages.x86_64'), "a") as f:
-        f.write("xorg-server\n")
-        f.write("xorg-xinit\n")
-        f.write("yad\n")
+    package_list = os.path.join(wd('archiso'), 'packages.x86_64')
+    add_packages = ["xorg-server", "xorg-xinit", "yad"]
+    for pkg in add_packages:
+        Command('sh')('-c', f'echo "{pkg}" >>  {package_list}')
     # start installer on login
-    with open(os.path.join(archiso_path, 'airootfs', 'root', '.zlogin'), "w") as f:
-        f.write("sh ~/00_install_toweros.sh\n")
+    zlogin = os.path.join(wd('archiso'), 'airootfs', 'root', '.zlogin')
+    Command('sh')('-c', f'echo "sh ~/00_install_toweros.sh" >>  {zlogin}')
     # prepare builds dir
     builds_path = os.path.join(root_path, 'builds')
-    os.makedirs(builds_path)
+    mkdir('-p', builds_path)
     cp(rpi_image_path, builds_path)
     cp(os.path.join(builds_dir, 'nx-x86_64.tar.gz'), builds_path)
     cp(os.path.join(builds_dir, 'nx-armv7h.tar.gz'), builds_path)
@@ -90,54 +124,28 @@ def prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackage
     if wheels:
         cp(wheels.pop(), builds_path)
 
-def make_archiso(archiso_path, working_dir, builds_dir):
-    archiso_out_path = os.path.join(working_dir, 'out')
+@clitask("Building image file with mkarchiso...")
+def make_archiso(builds_dir):
+    archiso_out_path = os.path.join(WORKING_DIR, 'out')
     image_src_path = os.path.join(archiso_out_path, datetime.now().strftime('archlinux-%Y.%m.%d-x86_64.iso'))
     image_dest_path = os.path.join(builds_dir, datetime.now().strftime('toweros-%Y%m%d%H%M%S-x86_64.iso'))
-    with sh.contrib.sudo(password="", _with=True):
-        mkarchiso('-v', archiso_path, _cwd=working_dir, _out=logger.debug)
-        cp(image_src_path, image_dest_path)
-        chown(getpass.getuser(), image_dest_path)
+    mkarchiso('-v', wd('archiso'), _cwd=WORKING_DIR, _out=logger.debug)
+    cp(image_src_path, image_dest_path)
+    chown(getpass.getuser(), image_dest_path)
     return image_dest_path
 
+@clitask("Building TowserOS image...", timer_message="TowserOS image built in {0}.", sudo=True)
 def build_image(builds_dir):
-    start_time = time.time()
-
-    wheels = glob.glob(os.path.join(builds_dir, 'tower_tools-*.whl'))
-    tower_tools_wheel_path = f"file://{wheels.pop()}" if wheels else TOWER_TOOLS_URL
-
-    nx_tar_path = os.path.join(builds_dir, 'nx-x86_64.tar.gz')
-
-    working_dir = os.path.join(os.getcwd(), datetime.now().strftime('buildtower%Y%m%d%H%M%S'))
-    blankdb_path = os.path.join(working_dir, 'blankdb')
-    towerpackages_path = os.path.join(working_dir, 'towerpackages')
-    pippackages_path = os.path.join(working_dir, 'pippackages')
-    archiso_path = os.path.join(working_dir, 'archtower')
-    installer_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros')
-
-    clean_folders([working_dir])
-    os.makedirs(blankdb_path)
-    logger.info("Downloading pacman packages...")
-    download_pacman_packages(blankdb_path, towerpackages_path, installer_path)
-    logger.info("Prepare nx packages...")
-    compile_nx_packages(working_dir, blankdb_path, towerpackages_path, nx_tar_path)
-    logger.info("Preparing pacman database...")
-    create_pacman_db(towerpackages_path)
-    logger.info("Downloading pip packages...")
-    download_pip_packages(pippackages_path, tower_tools_wheel_path)
-    logger.info("Preparing host Rasperry PI OS image...")
-    host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
-    if not host_images:
-        logger.info("Host image not found in builds directory. Building a new image...")
-        rpi_image_path = towerospi.build_image(builds_dir)
-    else:
-        rpi_image_path = host_images.pop()
-        logger.info(f"Using host image found in builds directory: {rpi_image_path}")
-    logger.info("Preparing archiso folder..")
-    prepare_archiso(archiso_path, installer_path, towerpackages_path, pippackages_path, rpi_image_path, builds_dir)
-    logger.info("Building image file...")
-    image_dest_path = make_archiso(archiso_path, working_dir, builds_dir)
-    clean_folders([working_dir])
-
-    duration = timedelta(seconds=time.time() - start_time)
-    logger.info(f"Image {image_dest_path} created in {duration}.")
+    try:
+        prepare_working_dir()
+        tower_tools_wheel_path = find_tower_tools(builds_dir)
+        nx_tar_path = find_nx_build(builds_dir)
+        rpi_image_path = find_host_image(builds_dir)
+        download_pacman_packages()
+        prepare_nx_packages(nx_tar_path)
+        create_pacman_db()
+        download_pip_packages(tower_tools_wheel_path)
+        prepare_archiso(rpi_image_path, builds_dir)
+        make_archiso(builds_dir)
+    finally:
+        cleanup()
