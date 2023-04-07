@@ -46,6 +46,12 @@ def add_args(argparser):
         default=""
     )
     provision_parser.add_argument(
+        '--lang', 
+        help="""Language of the host (Default: same as the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
         '--online', 
         help="""Set wifi connection (Default: False)""",
         required=False,
@@ -67,7 +73,7 @@ def add_args(argparser):
     provision_parser.add_argument(
         '--image', 
         help="""Image path or URL""",
-        required=True, # TODO: make optional when `tower` image will be online
+        required=False,
     )
 
 def check_args(args, parser_error):
@@ -103,6 +109,8 @@ def check_args(args, parser_error):
     if args.timezone:
         if re.match(r'^[a-zA-Z-\ ]+\/[a-zA-Z-\ ]+$', args.timezone) is None:
             parser_error(message="Timezone invalide. Must be in <Area>/<City> format. eg. Europe/Paris.")
+    
+    # TODO: check args.lang validity
     
     if args.image:
         if not os.path.exists(args.image) and not hosts.is_valid_https_url(args.image):

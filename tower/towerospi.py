@@ -9,7 +9,7 @@ import sh
 from sh import (
     Command, ErrorReturnCode,
     mount, umount, parted, mkdosfs,
-    cp, rm, sync, rsync, chown, truncate, mkdir, ls, tee, genfstab, resize2fs,
+    cp, rm, sync, rsync, chown, truncate, mkdir, ls, dd, genfstab, resize2fs,
     arch_chroot, 
     bsdtar, xz,
     losetup, 
@@ -155,7 +155,7 @@ def cleanup():
     unmount_all()
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
-@clitask("Building TowserOS PI image...", sudo=True)
+@clitask("Building TowserOS PI image...", timer_message="TowserOS PI image built in {0}.", sudo=True)
 def build_image(builds_dir):
     archlinux_tar_path = find_archlinux_arm(builds_dir)
     nx_tar_path = find_nx_build(builds_dir)
@@ -172,45 +172,51 @@ def build_image(builds_dir):
         cleanup()
     return image_path
 
-@clitask("Configuring TowserOS PI image...", sudo=True)
-def configure_image(device, config):
-    logger.info("\n".join([f'{key}="{value}"' for key, value in config.items()]))
-    chroot_process = None
+@clitask("Copying image {0} in device {1}")
+def copy_image(image_file, device):
+    utils.unmount_all(device)
+    dd(f"if={image_file}", f"of={device}", "bs=8M", "conv=sync", "status=progress", _out=logger.debug)
+    boot_part = Command('sh')('-c', f'ls {device}*1').strip()
+    root_part = Command('sh')('-c', f'ls {device}*2').strip()
+    if not boot_part or not root_part:
+        raise Exception("Invalid partitions")
+    # extend root partition
+    parted(device, 'resizepart', 2, '100%')
+    resize2fs(root_part)
+    return boot_part, root_part
+
+@clitask("Configuring image with {0}")
+def configure_image(config):
+    # put cross platform emulator
+    cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
+    # put configuration scripts
+    cp(f'{INSTALLER_DIR}/01_configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
+    cp(f'{INSTALLER_DIR}/files/towerospi_iptables.rules', wd("ROOTFS_DIR/root/"))
+    # run configuration script
+    args_key = [
+        "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
+        "KEYMAP", "TIMEZONE", "LANG",
+        "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY",
+        "THIN_CLIENT_IP", "TOWER_NETWORK"
+    ]
+    args = [config[key] for key in args_key]
+    arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/01_configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
+    # update fstab
+    #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
+    Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
+    # clean configuration files
+    rm(wd("ROOTFS_DIR/root/01_configure_towerospi.sh"))
+    rm(wd("ROOTFS_DIR/root/towerospi_iptables.rules"))
+    rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static")) 
+
+@clitask("Installing TowserOS PI in {1}...", timer_message="TowserOS PI installed in {0}.", sudo=True)
+def burn_image(image_file, device, config):
     try:
-        utils.unmount_all(device)
         prepare_working_dir()
-        boot_part = Command('sh')('-c', f'ls {device}*1').strip()
-        root_part = Command('sh')('-c', f'ls {device}*2').strip()
-        if not boot_part or not root_part:
-            raise Exception("Invalid partitions")
-        # extend root partition
-        parted(device, 'resizepart', 2, '100%')
-        resize2fs(root_part)
+        boot_part, root_part = copy_image(image_file, device)
         # mount partions
         mount('--mkdir', root_part, wd("ROOTFS_DIR"), '-t', 'ext4')
         mount('--mkdir', boot_part, wd("ROOTFS_DIR/boot/"), '-t', 'vfat')
-        # put cross platform emulator
-        cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
-        # put configuration scripts
-        cp(f'{INSTALLER_DIR}/00_configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
-        cp(f'{INSTALLER_DIR}/files/towerospi-iptables.rules', wd("ROOTFS_DIR/root/"))
-        # run configuration script
-        args_key = [
-            "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
-            "KEYMAP", "TIMEZONE", "LANG",
-            "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY",
-            "THIN_CLIENT_IP", "TOWER_NETWORK"
-        ]
-        args = [config[key] for key in args_key]
-        chroot_process = arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/00_configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
-        # update fstab
-        #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
-        Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
-        # clean configuration files
-        rm(wd("ROOTFS_DIR/root/00_configure_towerospi.sh"))
-        rm(wd("ROOTFS_DIR/root/towerospi_iptables.rules"))
-        rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static"))            
+        configure_image(config)       
     finally:
-        if chroot_process:
-            chroot_process.terminate()
         cleanup()

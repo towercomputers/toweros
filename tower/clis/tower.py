@@ -23,15 +23,15 @@ def parse_arguments():
         default=False
     )
     subparser = parser.add_subparsers(dest='command', required=True, help="Use `tower {provision|install|run|status} --help` to get options list for each command.")
-    tower.commands.provision.add_args(subparser)
-    tower.commands.install.add_args(subparser)
-    tower.commands.run.add_args(subparser)
-    tower.commands.status.add_args(subparser)
+    tower.clis.commands.provision.add_args(subparser)
+    tower.clis.commands.install.add_args(subparser)
+    tower.clis.commands.run.add_args(subparser)
+    tower.clis.commands.status.add_args(subparser)
     args = parser.parse_args()
-    getattr(tower.commands, args.command).check_args(args, parser.error)
+    getattr(tower.clis.commands, args.command).check_args(args, parser.error)
     return args
 
 def main():
     args = parse_arguments()
     clilogger.initialize(args.verbose, args.quiet)
-    getattr(tower.commands, args.command).execute(args)
+    getattr(tower.clis.commands, args.command).execute(args)

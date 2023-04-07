@@ -6,6 +6,7 @@ import time
 import logging
 from urllib.parse import urlparse
 import hashlib
+import glob
 
 import requests
 from passlib.hash import sha512_crypt
@@ -15,8 +16,9 @@ from sh import Command, ErrorReturnCode_1, ErrorReturnCode
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from tower import utils
-from tower import defaults
-from tower.archlinux import pigen
+from tower import towerospi
+
+DEFAULT_SSH_USER = "tower"
 
 logger = logging.getLogger('tower')
 
@@ -51,7 +53,7 @@ def generate_key_pair(name):
 
 
 def prepare_host_config(args):
-    logger.info("Generating environment...")
+    logger.info("Preparing host configuration...")
     name = args.name[0]
     
     check_environment_value('public-key-path', args.public_key_path)
@@ -62,6 +64,7 @@ def prepare_host_config(args):
     
     keymap = args.keymap or utils.get_keymap()
     timezone = args.timezone or utils.get_timezone()
+    lang = args.lang or utils.get_lang()
 
     if args.online:
         online = 'true'
@@ -88,12 +91,12 @@ def prepare_host_config(args):
   
     return {
         'HOSTNAME': name,
-        'USERNAME': defaults.DEFAULT_SSH_USER,
+        'USERNAME': DEFAULT_SSH_USER,
         'PUBLIC_KEY': public_key,
         'ENCRYPTED_PASSWORD': sha512_crypt.hash(password),
         'KEYMAP': keymap,
         'TIMEZONE': timezone,
-        'LANG': 'en_US.UTF_8',
+        'LANG': lang,
         'ONLINE': online,
         'WLAN_SSID': wlan_ssid,
         'WLAN_SHARED_KEY': wlan_password,
@@ -115,11 +118,12 @@ def find_host_image(image_arg):
     else:
         builds_dirs = [
             os.path.join(os.getcwd(), 'builds'),
-            builds_dir = os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+            os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
         ]
         for builds_dir in builds_dirs:
             if os.path.isdir(builds_dir):
                 host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
+                host_images += glob.glob(os.path.join(builds_dir, 'towerospi-*.img'))
                 if host_images:
                     image_path = host_images.pop()
                     break
@@ -199,7 +203,7 @@ def update_config(name, ip, private_key_path):
     
     config.add(name,
         Hostname=ip,
-        User=defaults.DEFAULT_SSH_USER,
+        User=DEFAULT_SSH_USER,
         IdentityFile=private_key_path,
         # TODO: clean known_hosts
         #StrictHostKeyChecking="no",
@@ -282,10 +286,8 @@ def run_application(host, port, username, key_filename, command):
 
 
 def provision(name, image_path, sd_card, host_config, private_key_path):
-    utils.write_image(image_path, sd_card)
-    pigen.configure_image(sd_card, host_config)
+    towerospi.burn_image(image_path, sd_card, host_config)
     print(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
-    # TODO: check network
     ip = discover_ip(name)
     update_config(name, ip, private_key_path)
 

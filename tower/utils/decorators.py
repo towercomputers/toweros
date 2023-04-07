@@ -6,7 +6,7 @@ import sh
 
 logger = logging.getLogger('tower')
 
-def clitask(message, timer=True, timer_message="Done in %s", sudo=False):
+def clitask(message, timer=True, timer_message="Done in {0}", sudo=False):
     def decorator(function):
         def new_function(*args, **kwargs):
             if timer:
@@ -20,7 +20,7 @@ def clitask(message, timer=True, timer_message="Done in %s", sudo=False):
                 ret = function(*args, **kwargs)
             if timer:
                 duration = timedelta(seconds=time.time() - start_time)
-                logger.info(timer_message % duration)
+                logger.info(timer_message.format(duration))
             return ret
         return new_function
     return decorator
