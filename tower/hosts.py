@@ -117,6 +117,7 @@ def find_host_image(image_arg):
         image_path = image_arg
     else:
         builds_dirs = [
+            os.path.join(os.getcwd(), 'dist'),
             os.path.join(os.getcwd(), 'builds'),
             os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
         ]
@@ -256,29 +257,6 @@ def clean_install_files(host_name, packages, online_host=None):
             ssh(proxy, 'rm', '-f', bundle_filename, _out=logger.debug)
     except ErrorReturnCode_1 as e:
        pass
-
-
-def run_application(host, port, username, key_filename, command):
-    cli = x2go.X2GoClient(use_cache=False, loglevel=x2go.log.loglevel_DEBUG)
-    s_uuid = cli.register_session(
-        host, 
-        port=port,
-        username=username,
-        cmd=command,
-        look_for_keys=False,
-        key_filename=key_filename
-    )
-    cli.connect_session(s_uuid)
-    cli.clean_sessions(s_uuid)
-    cli.start_session(s_uuid)
-
-    try:
-        while cli.session_ok(s_uuid):
-            gevent.sleep(2)
-    except KeyboardInterrupt:
-        pass
-
-    cli.suspend_session(s_uuid)
 
 
 def provision(name, image_path, sd_card, host_config, private_key_path):

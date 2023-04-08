@@ -8,8 +8,8 @@ import glob
 import sh
 from sh import (
     Command, ErrorReturnCode,
-    mount, umount, parted, mkdosfs,
-    cp, rm, sync, rsync, chown, truncate, mkdir, ls, dd, genfstab, resize2fs,
+    mount, umount, parted, mkdosfs, dd, genfstab, resize2fs,
+    cp, rm, sync, rsync, chown, truncate, mkdir, ls,
     arch_chroot, 
     bsdtar, xz,
     losetup, 
@@ -22,7 +22,6 @@ from tower.utils import clitask
 
 logger = logging.getLogger('tower')
 
-ARCHLINUX_ARM_URL = "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz"
 WORKING_DIR = os.path.join(os.getcwd(), 'build-towerospi-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'towerospi')
 
@@ -33,20 +32,6 @@ def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
         raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
-
-def find_archlinux_arm(builds_dir):
-    archlinux_tar_path = os.path.join(builds_dir, 'ArchLinuxARM-rpi-armv7-latest.tar.gz')
-    if not os.path.isfile(archlinux_tar_path):
-        logger.info("Arch Linux tar not found in builds directory.")
-        utils.download_file(ARCHLINUX_ARM_URL, archlinux_tar_path)
-    return archlinux_tar_path
-
-def find_nx_build(builds_dir):
-    nx_tar_path = os.path.join(builds_dir, 'nx-armv7h.tar.gz')
-    if not os.path.isfile(nx_tar_path):
-        # TODO: build after user confirmation or/and download from trused repo
-        raise Exception("NX build not found")
-    return nx_tar_path
 
 @clitask("Preparing Arch Linux system...")
 def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
@@ -157,8 +142,8 @@ def cleanup():
 
 @clitask("Building TowserOS PI image...", timer_message="TowserOS PI image built in {0}.", sudo=True)
 def build_image(builds_dir):
-    archlinux_tar_path = find_archlinux_arm(builds_dir)
-    nx_tar_path = find_nx_build(builds_dir)
+    archlinux_tar_path = utils.prepare_required_build("arch-linux-arm", builds_dir)
+    nx_tar_path = utils.prepare_required_build("nx-armv7h", builds_dir)
     user = os.getlogin()
     try:
         prepare_working_dir()

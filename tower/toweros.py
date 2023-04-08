@@ -13,12 +13,11 @@ import re
 import sh
 from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown, bsdtar, Command, mkdir
 
-from tower import towerospi
+from tower import towerospi, utils
 from tower.utils import clitask
 
 logger = logging.getLogger('tower')
 
-ARCHLINUX_ARM_URL = "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz"
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 
 WORKING_DIR = os.path.join(os.getcwd(), 'build-toweros-work')
@@ -36,20 +35,6 @@ def prepare_working_dir():
 @clitask("Cleaning up...")
 def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
-
-@clitask("Compiling NX package. Be patient...")
-def compile_nx_package():
-    nx_path = os.path.join(WORKING_DIR, 'nx')
-    nx_zst_path = os.path.join(nx_path, '*.zst')
-    git("clone",  "https://aur.archlinux.org/nx.git", _cwd=WORKING_DIR, _out=logger.debug)
-    makepkg('-c', '-s', '-r', '--noconfirm', _cwd=nx_path, _out=logger.debug)
-
-def find_nx_build(builds_dir):
-    nx_tar_path = os.path.join(builds_dir, 'nx-x86_64.tar.gz')
-    if not os.path.isfile(nx_tar_path):
-        # TODO: build after user confirmation or/and download from trused repo
-        raise Exception("NX build not found")
-    return nx_tar_path
 
 def find_host_image(builds_dir):
     host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
@@ -95,7 +80,7 @@ def download_pip_packages(tower_tools_wheel_path):
     pip("download", f"tower-tools @ {tower_tools_wheel_path or TOWER_TOOLS_URL}", '-d', wd('pip-packages'), _out=logger.debug)
 
 @clitask("Preparing archiso folder..")
-def prepare_archiso(rpi_image_path, builds_dir):
+def prepare_archiso(builds_dir, rpi_image_path):
     # copy installer, pacman and pip packages
     cp('-r', '/usr/share/archiso/configs/releng/', wd('archiso'))
     root_path = os.path.join(wd('archiso'), 'airootfs', 'root')
@@ -138,14 +123,19 @@ def make_archiso(builds_dir):
 def build_image(builds_dir):
     try:
         prepare_working_dir()
+        # prepare required builds
         tower_tools_wheel_path = find_tower_tools(builds_dir)
-        nx_tar_path = find_nx_build(builds_dir)
+        nx_tar_path = utils.prepare_required_build("nx-x86_64", builds_dir)
+        nx_arm_tar_path = utils.prepare_required_build("nx-armv7h", builds_dir)
         rpi_image_path = find_host_image(builds_dir)
+        # create pacman cache
         download_pacman_packages()
         prepare_nx_packages(nx_tar_path)
         create_pacman_db()
+        # create pip cache
         download_pip_packages(tower_tools_wheel_path)
-        prepare_archiso(rpi_image_path, builds_dir)
+        # prepare and run archiso
+        prepare_archiso(builds_dir, rpi_image_path)
         make_archiso(builds_dir)
     finally:
         cleanup()
