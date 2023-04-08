@@ -1,9 +1,10 @@
 import os
 import logging
 import time
+from ipaddress import ip_address, ip_network
 
 from sshconf import read_ssh_config, empty_ssh_config_file
-from sh import ssh, ErrorReturnCode, avahi_resolve
+from sh import ssh, ErrorReturnCode, avahi_resolve, sed
 
 DEFAULT_SSH_USER = "tower"
 
@@ -38,6 +39,10 @@ def get(name):
     else:
         return None
 
+def clean_known_hosts(ip):
+    known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
+    sed('-i', f'/{ip}/d', known_hosts_path)
+
 def update_config(name, ip, private_key_path):
     insert_include_directive()
     # get existing hosts
@@ -62,8 +67,6 @@ def update_config(name, ip, private_key_path):
         Hostname=ip,
         User=DEFAULT_SSH_USER,
         IdentityFile=private_key_path,
-        # TODO: clean known_hosts
-        #StrictHostKeyChecking="no",
         LogLevel="FATAL"
     )
     config.write(config_path)
@@ -75,18 +78,20 @@ def hosts():
 def exists(name):
     return name in hosts()
 
-def discover_ip(name):
+def discover_ip(name, network):
     result = avahi_resolve('-4', '-n', f'{name}.local')
     if result != "":
         ip = result.strip().split("\t").pop()
-        logger.info(f"IP found: {ip}")
-        return ip
-    logger.info(f"Fail to discover the IP for {name}. Retrying in 10 seconds with avahi")
+        if ip_address(ip) in ip_network(network):
+            logger.info(f"IP found: {ip}")
+            return ip
+    logger.info(f"Fail to discover the IP for {name}. Retrying in 10 seconds.")
     time.sleep(10)
-    return discover_ip(name)
+    return discover_ip(name, network)
 
-def discover_and_update(name, private_key_path):
-    ip = discover_ip(name)
+def discover_and_update(name, private_key_path, network):
+    ip = discover_ip(name, network)
+    clean_known_hosts(ip)
     update_config(name, ip, private_key_path)
 
 def is_online(name):

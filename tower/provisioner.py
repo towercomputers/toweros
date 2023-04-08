@@ -1,6 +1,5 @@
 import os
 import secrets
-from io import StringIO
 import sys
 import time
 import logging
@@ -139,5 +138,5 @@ def prepare_provision(args):
 def provision(name, image_path, sd_card, host_config, private_key_path):
     towerospi.burn_image(image_path, sd_card, host_config)
     logger.info(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
-    sshconf.discover_and_update(name, private_key_path)
+    sshconf.discover_and_update(name, private_key_path, host_config['TOWER_NETWORK'])
 
