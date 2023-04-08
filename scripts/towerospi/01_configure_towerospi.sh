@@ -46,6 +46,7 @@ echo $HOSTNAME > /etc/hostname
 sudo sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
 # disable avahi for wlan
 sudo sed -i 's/#allow-interfaces=eth0/allow-interfaces=end0/' /etc/avahi/avahi-daemon.conf
+sudo sed -i 's/#deny-interfaces=eth1/deny-interfaces=wlan0/' /etc/avahi/avahi-daemon.conf
 # enable services
 systemctl enable dhcpcd.service
 systemctl enable avahi-daemon.service

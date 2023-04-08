@@ -2,7 +2,7 @@ import argparse
 
 import tower
 from tower.clis.commands import provision, install, run, status
-from tower.clis import clilogger
+from tower import utils
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
@@ -33,5 +33,5 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    clilogger.initialize(args.verbose, args.quiet)
+    utils.clilogger.initialize(args.verbose, args.quiet)
     getattr(tower.clis.commands, args.command).execute(args)

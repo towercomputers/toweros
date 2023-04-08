@@ -43,11 +43,10 @@ def ssh_command(hostname, *cmd):
     cmd_uuid = str(uuid.uuid1())
     # protect against data injection via .bashrc files
     ssh_cmd = f'echo SSHBEGIN:{cmd_uuid}; PATH=/usr/local/bin:/usr/bin:/bin sh -c "{" ".join(cmd)}"; echo; echo SSHEND:{cmd_uuid}'
-    buf = StringIO()
-    ssh(hostname, ssh_cmd, _out=buf)
+    ssh_res = ssh(hostname, ssh_cmd)
     sanitized_stdout = ""
     is_ssh_data = False
-    for line in buf.getvalue().split('\n'):
+    for line in str(ssh_res).split('\n'):
         if line.startswith(f'SSHBEGIN:{cmd_uuid}'):
             is_ssh_data = True
             continue

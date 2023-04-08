@@ -2,7 +2,6 @@ import argparse
 import os
 
 from tower import toweros, towerospi, utils
-from tower.clis import clilogger
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""Generate TowerOS and TowerOS PI images""")
@@ -43,7 +42,7 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    clilogger.initialize(args.verbose, args.quiet)
+    utils.clilogger.initialize(args.verbose, args.quiet)
     builds_dir = utils.init_builds_dir(args.builds_dir)
     if args.image_name == 'host':
         towerospi.build_image(builds_dir)

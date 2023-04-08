@@ -1,8 +1,5 @@
 from sh import timedatectl, localectl
 
-class OperatingSystemException(Exception):
-    pass
-
 def get_timezone():
     result = timedatectl()
     return result.split("Time zone:")[1].strip().split(" ")[0].strip()

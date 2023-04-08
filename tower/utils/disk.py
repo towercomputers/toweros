@@ -3,7 +3,6 @@ import logging
 import time
 from datetime import timedelta
 import os
-from io import StringIO
 import sys
 
 import sh
@@ -13,7 +12,7 @@ logger = logging.getLogger('tower')
 
 def unmount_all(device):
     result = lsblk('-J', '-T', device)
-    result = json.loads(result)
+    result = json.loads(str(result))
     if not 'children' in result['blockdevices'][0]:
         return
     for partition in result['blockdevices'][0]['children']:
@@ -29,21 +28,9 @@ def lazy_umount(path, retry=0):
     except ErrorReturnCode:
         pass
 
-def mountpoint(device, partition_index=0):
-    buf = StringIO()
-    lsblk('-J', '-T', device, _out=buf)
-    result = json.loads(buf.getvalue())
-    if not 'children' in result['blockdevices'][0]:
-        return 
-    if partition_index < len(result['blockdevices'][0]['children']):
-        partition = result['blockdevices'][0]['children'][partition_index]
-        return partition['name'], partition['mountpoints'][0]
-    raise OperatingSystemException(f"Invalide partition index `{partition_index}`")
-
 def get_device_list():
-    buf = StringIO()
-    lsblk('-J', '-T', '-d', _out=buf)
-    result = json.loads(buf.getvalue())
+    result = lsblk('-J', '-T', '-d')
+    result = json.loads(str(result))
     return [f"/dev/{e['name']}" for e in result['blockdevices']]
 
 def select_sdcard_device():

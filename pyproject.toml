@@ -34,7 +34,7 @@ include = [
 
 [project.scripts]
 tower = "tower.clis.tower:main"
-build-tower-image = "tower.clis.buildimage:main"
+build-tower-image = "tower.clis.buildtowerimage:main"
 
 [tool.hatch.metadata]
 allow-direct-references=true
