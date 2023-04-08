@@ -8,7 +8,7 @@ import glob
 import sh
 from sh import (
     Command, ErrorReturnCode,
-    mount, umount, parted, mkdosfs, dd, genfstab, resize2fs,
+    mount, umount, parted, mkdosfs, genfstab, resize2fs, tee, cat,
     cp, rm, sync, rsync, chown, truncate, mkdir, ls,
     arch_chroot, 
     bsdtar, xz,
@@ -22,7 +22,7 @@ from tower.utils import clitask
 
 logger = logging.getLogger('tower')
 
-WORKING_DIR = os.path.join(os.getcwd(), 'build-towerospi-work')
+WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-towerospi-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'towerospi')
 
 def wd(path):
@@ -157,10 +157,12 @@ def build_image(builds_dir):
         cleanup()
     return image_path
 
-@clitask("Copying image {0} in device {1}")
+@clitask("Copying image {0} in device {1}...")
 def copy_image(image_file, device):
     utils.unmount_all(device)
-    dd(f"if={image_file}", f"of={device}", "bs=8M", "conv=sync", "status=progress", _out=logger.debug)
+    # burn image
+    tee(device, _in=cat(image_file))
+    # determine partitions names
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     root_part = Command('sh')('-c', f'ls {device}*2').strip()
     if not boot_part or not root_part:

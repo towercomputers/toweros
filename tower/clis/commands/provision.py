@@ -3,7 +3,7 @@ import os
 import re
 import sys
 
-from tower import hosts, utils
+from tower import provisioner, utils, sshconf
 
 logger = logging.getLogger('tower')
 
@@ -72,7 +72,7 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--image', 
-        help="""Image path or URL""",
+        help="""Image path""",
         required=False,
     )
 
@@ -80,7 +80,7 @@ def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
         parser_error(message="Host name invalid. Must be between one and 15 alphanumeric chars.")
 
-    if hosts.exists(args.name[0]):
+    if sshconf.exists(args.name[0]):
         parser_error("Host name already used.")
 
     if args.sd_card:
@@ -113,18 +113,17 @@ def check_args(args, parser_error):
     # TODO: check args.lang validity
     
     if args.image:
-        if not os.path.exists(args.image) and not hosts.is_valid_https_url(args.image):
-            parser_error(message="Invalid path or url for the image.")
+        if not os.path.exists(args.image):
+            parser_error(message="Invalid path for the image.")
         ext = args.image.split(".").pop()
         if os.path.exists(args.image) and ext not in ['img', 'xz']:
             parser_error(message="Invalid extension for image path (only `xz`or `img`).")
-        elif hosts.is_valid_https_url(args.image) and ext not in ['xz']:
-            parser_error(message="Invalid extension for image url (only `xz`).")
+
 
 def execute(args):
     try:
-        image_path, sd_card, host_config, private_key_path = hosts.prepare_provision(args)
-        hosts.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
-    except hosts.MissingEnvironmentValue as e:
+        image_path, sd_card, host_config, private_key_path = provisioner.prepare_provision(args)
+        provisioner.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
+    except provisioner.MissingEnvironmentValue as e:
         logger.error(e)
         sys.exit(1)

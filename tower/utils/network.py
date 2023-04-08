@@ -11,7 +11,7 @@ import logging
 
 import requests
 import sh
-from sh import iw, cat
+from sh import cat
 from backports.pbkdf2 import pbkdf2_hmac
 
 from tower.utils.decorators import clitask

@@ -1,6 +1,6 @@
 import re
 
-from tower import hosts
+from tower import sshconf
 
 def add_args(argparser):
     install_parser = argparser.add_parser(
@@ -26,10 +26,10 @@ def add_args(argparser):
 
 def check_args(args, parser_error):
     name = args.host_name[0]
-    config = hosts.get_config(name)
+    config = sshconf.get(name)
     if config is None:
         parser_error("Unkown host name.")
-    elif not hosts.is_online(name) and args.online_host is None:
+    elif not sshconf.is_online(name) and args.online_host is None:
         parser_error(f"{name} is not online. Please use the flag `--online-host`.")
     
     for pkg_name in args.packages:
@@ -37,11 +37,12 @@ def check_args(args, parser_error):
             parser_error(f"Invalid package name:{pkg_name}")
 
     if args.online_host:
-        config = hosts.get_config(args.online_host)
+        config = sshconf.get(args.online_host)
         if config is None:
             parser_error("Unkown host name for online host.")
-        elif not hosts.is_online(args.online_host):
+        elif not sshconf.is_online(args.online_host):
             parser_error(f"{args.online_host} is not online.")
 
 def execute(args):
-    hosts.install(args.host_name[0], args.packages, args.online_host)
+    pass
+    #install(args.host_name[0], args.packages, args.online_host)

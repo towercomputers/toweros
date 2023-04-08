@@ -1,7 +1,7 @@
 import os
 import sys
 
-from tower import hosts
+from tower import sshconf
 from tower import nxssh
 
 def add_args(argparser):
@@ -22,7 +22,7 @@ def add_args(argparser):
     )    
 
 def check_args(args, parser_error):
-    config = hosts.get_config(args.host_name[0])
+    config = sshconf.get(args.host_name[0])
     if config is None:
         parser_error("Unkown host name.")
 

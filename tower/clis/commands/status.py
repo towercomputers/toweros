@@ -1,6 +1,6 @@
 import json
 
-from tower import hosts
+from tower import sshconf
 
 def add_args(argparser):
     status_parser = argparser.add_parser(
@@ -12,4 +12,4 @@ def check_args(args, parser_error):
     pass
 
 def execute(args):
-    print(json.dumps(hosts.status(), indent=4))
+    print(json.dumps(sshconf.status(), indent=4))

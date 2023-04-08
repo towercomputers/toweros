@@ -24,11 +24,12 @@
 
 FROM archlinux:latest
 
-ARG TOWER_WHEEL_PATH="builds/tower_tools-0.0.1-py3-none-any.whl"
+# hatch build
+ARG TOWER_WHEEL_PATH="dist/tower_tools-0.0.1-py3-none-any.whl"
 
 # install pacman packages
 RUN pacman -Suy --noconfirm 
-RUN pacman -S --noconfirm openssh git python python-pip avahi iw wireless_tools base-devel archiso
+RUN pacman -S --noconfirm openssh git python python-pip avahi iwd base-devel archiso
 
 # create `tower` user
 RUN useradd -m tower -p $(echo $tower | openssl passwd -1 -stdin)
@@ -40,8 +41,8 @@ USER tower
 WORKDIR /home/tower 
 
 # copy and install `tower-tools` at the end so everything above is cached
-COPY --chown=tower:tower $TOWER_WHEEL_PATH ./
-RUN pip install $(basename $TOWER_WHEEL_PATH)
+RUN mkdir -p /home/tower/.cache/tower/builds
+COPY --chown=tower:tower $TOWER_WHEEL_PATH /home/tower/.cache/tower/builds/
+RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_WHEEL_PATH)
 
-ENTRYPOINT ["build-tower-image", \
-            "--tower-tools-wheel-path", "file:///home/tower/tower_tools-0.0.1-py3-none-any.whl"]
+ENTRYPOINT ["build-tower-image"]

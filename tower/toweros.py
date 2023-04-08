@@ -20,7 +20,7 @@ logger = logging.getLogger('tower')
 
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 
-WORKING_DIR = os.path.join(os.getcwd(), 'build-toweros-work')
+WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros')
 
 def wd(path):
@@ -91,7 +91,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
     cp('-r', wd('pacman-packages'), root_path)
     cp('-r', wd('pip-packages'), root_path)
     cp(os.path.join(INSTALLER_DIR, 'files', 'grub.cfg'), os.path.join(wd('archiso'), 'grub'))
-    # add packages
+    # add packages needed by the installer
     package_list = os.path.join(wd('archiso'), 'packages.x86_64')
     add_packages = ["xorg-server", "xorg-xinit", "yad"]
     for pkg in add_packages:
@@ -116,7 +116,9 @@ def make_archiso(builds_dir):
     image_dest_path = os.path.join(builds_dir, datetime.now().strftime('toweros-%Y%m%d%H%M%S-x86_64.iso'))
     mkarchiso('-v', wd('archiso'), _cwd=WORKING_DIR, _out=logger.debug)
     cp(image_src_path, image_dest_path)
-    chown(getpass.getuser(), image_dest_path)
+    owner = getpass.getuser()
+    chown(f"{owner}:{owner}", image_dest_path)
+    logger.info(f"Image ready: {image_dest_path}")
     return image_dest_path
 
 @clitask("Building TowserOS image...", timer_message="TowserOS image built in {0}.", sudo=True)

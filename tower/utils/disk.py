@@ -7,33 +7,19 @@ from io import StringIO
 import sys
 
 import sh
-from sh import lsblk, mount as _mount, umount, dd as _dd, ErrorReturnCode
+from sh import lsblk, umount, ErrorReturnCode
 
 logger = logging.getLogger('tower')
 
-def mount(partition):
-    mountpoint = os.path.expanduser('~/tower-sd-card')
-    if not os.path.exists(mountpoint):
-        os.makedirs(mountpoint)
-    with sh.contrib.sudo(password="", _with=True):
-        _mount('-o', f'gid={os.getgid()},uid={os.getuid()}', partition, mountpoint)
-    return mountpoint
-
 def unmount_all(device):
-    buf = StringIO()
-    lsblk('-J', '-T', device, _out=buf)
-    result = json.loads(buf.getvalue())
+    result = lsblk('-J', '-T', device)
+    result = json.loads(result)
     if not 'children' in result['blockdevices'][0]:
         return
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoints'][0]:
             with sh.contrib.sudo(password="", _with=True):
-                try:
-                    umount(partition['mountpoints'][0])
-                except sh.ErrorReturnCode_32: # target is busy
-                    logger.debug("Unmount: device is busy. Retrying in 5 seconds.")
-                    time.sleep(5)
-                    umount(partition['mountpoints'][0])
+                umount(partition['mountpoints'][0])
 
 def lazy_umount(path, retry=0):
     if not os.path.exists(path):
@@ -53,12 +39,6 @@ def mountpoint(device, partition_index=0):
         partition = result['blockdevices'][0]['children'][partition_index]
         return partition['name'], partition['mountpoints'][0]
     raise OperatingSystemException(f"Invalide partition index `{partition_index}`")
-
-def ensure_partition_is_mounted(device, partition_index=0):
-    name, mountpoint_path = mountpoint(device, partition_index)
-    if mountpoint_path is None:
-        return mount(f"/dev/{name}")
-    return mountpoint_path
 
 def get_device_list():
     buf = StringIO()
