@@ -23,14 +23,26 @@ Note: you can build your own image of TowerOS with command `build-tower-image th
 
 ##### 2.1.1 from Arch Linux
 ```
-$> pacman -S openssh git python python-pip avahi iwd base-devel docker archiso
+$> pacman -S openssh git python python-pip dhcpcd avahi iwd base-devel archiso \
+        xorg-server xorg-xinit qemu-user-static rsync parted
 ```
 
 #### 2.2 Enable services
 
+If necessary enable IP v4 with:
+
 ```
+sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
+```
+
+then
+
+```
+$> systemctl enable dhcpcd.service
 $> systemctl enable avahi-daemon.service
 ```
+
+Important: make sure you are connected to the switch and with `ip ad` check that your first wired interface (starting with the letter `e`) has an assigned IP.
 
 #### 2.3 Install `nxproxy`
 
