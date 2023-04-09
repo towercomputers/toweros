@@ -41,7 +41,8 @@ def get(name):
 
 def clean_known_hosts(ip):
     known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
-    sed('-i', f'/{ip}/d', known_hosts_path)
+    if os.path.exists(known_hosts_path):
+        sed('-i', f'/{ip}/d', known_hosts_path)
 
 def update_config(name, ip, private_key_path):
     insert_include_directive()
