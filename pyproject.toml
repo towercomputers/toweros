@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.14.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -13,14 +13,14 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "setuptools",
+    "setuptools==67.6.1",
     "requests==2.27.1",
     "sh==1.14.3",
     "passlib==1.7.4",
     "backports.pbkdf2==0.1",
     "sshconf==0.2.5",
-    "hatchling",
-    "wheel"
+    "hatchling==1.14.0",
+    "wheel==0.40.0"
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -29,9 +29,3 @@ only-include = ["tower", "scripts"]
 [project.scripts]
 tower = "tower.clis.tower:main"
 build-tower-image = "tower.clis.buildtowerimage:main"
-
-[tool.hatch.metadata]
-allow-direct-references=true
-
-#[tool.hatch.envs.default]
-#python = "/opt/homebrew/opt/python@3.10/bin/python3.10"
