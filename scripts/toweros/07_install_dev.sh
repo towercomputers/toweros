@@ -61,9 +61,9 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     chmod 700 ~/.ssh
     chmod 600 ~/.ssh/*
     if $CONNECTED; then
-        mkdir ~/towercomputing || true
-        cd ~/towercomputing
-        git clone git@github.com:towercomputing/tools.git
+        mkdir ~/towercomputers || true
+        cd ~/towercomputers
+        git clone git@github.com:towercomputers/tools.git
     fi
 fi
 

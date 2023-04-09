@@ -60,14 +60,14 @@ $> python3 -m pip install --upgrade pip
 then:
 
 ```
-$> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputing/tools.git"
+$> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputers/tools.git"
 ```
 
 ## Usage
 
 ### 1. Provision a Host
 
-Note: if you are using TowerOS, you can skip the first step and use the image in `~/.cache/tower`.
+Note: if you are using TowerOS, you can skip the first step.
 
 1.1 Generate an image with `build-image`:
 
@@ -75,18 +75,19 @@ Note: if you are using TowerOS, you can skip the first step and use the image in
 $> build-tower-image host
 ```
 
-This will generate an `img` file compressed with `xz`.
+This will generate an `img` file compressed with `xz` in `~/.cache/tower/builds/`.
+Images in this folder will be used by default by the `provision` command if the `--image` flag is not provided.
 
-1.2 Use this file to prepare the SD card.
+1.2 Prepare the SD card.
 
 ```
-$> tower provision <host> --image <image-path-generated-with-build-tower-image>
+$> tower provision <host> 
 ```
 
 or, for an online host:
 
 ```
-$> tower provision <host> --online --image <generated-image-path>
+$> tower provision <host> --online
 ```
 
 Keyboard, timezone and WiFi parameters are retrieved from the the Thin Client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
@@ -100,7 +101,7 @@ A terminal command line with SSH:
 $> ssh <host> ls ~/
 ```
 
-or a graphical application with `x2go`:
+or a graphical application with `NX` protocol:
 
 ```
 $> tower run <host> <application-name>
@@ -153,7 +154,7 @@ $> tower run office galculator
 ## Use with `hatch`
 
 ```
-$> git clone git@github.com:towercomputing/tools.git
+$> git clone git@github.com:towercomputers/tools.git
 $> cd tools
 $> pip install hatch
 $> hatch run tower --help
