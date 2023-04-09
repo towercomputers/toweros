@@ -41,13 +41,13 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--timezone', 
-        help="""Timezone of the host (Default: same as the thin client)""",
+        help="""Timezone of the host. eg. Europe/Paris (Default: same as the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
         '--lang', 
-        help="""Language of the host (Default: same as the thin client)""",
+        help="""Language of the host. eg. en_US (Default: same as the thin client)""",
         required=False,
         default=""
     )
@@ -73,6 +73,11 @@ def add_args(argparser):
     provision_parser.add_argument(
         '--image', 
         help="""Image path""",
+        required=False,
+    )
+    provision_parser.add_argument(
+        '--ifname', 
+        help="""Network interface (Default: first interface starting by 'e') """,
         required=False,
     )
 
@@ -108,9 +113,11 @@ def check_args(args, parser_error):
     
     if args.timezone:
         if re.match(r'^[a-zA-Z-\ ]+\/[a-zA-Z-\ ]+$', args.timezone) is None:
-            parser_error(message="Timezone invalide. Must be in <Area>/<City> format. eg. Europe/Paris.")
+            parser_error(message="Timezone invalid. Must be in <Area>/<City> format. eg. Europe/Paris.")
     
-    # TODO: check args.lang validity
+    if args.lang:
+        if  re.match(r'^[a-z]{2}_[A-Z]{2}$', args.lang) is None:
+            parser_error(message="Lang invalid. Must be in <lang>_<country> format. eg. en_US.")
     
     if args.image:
         if not os.path.exists(args.image):
@@ -118,6 +125,11 @@ def check_args(args, parser_error):
         ext = args.image.split(".").pop()
         if os.path.exists(args.image) and ext not in ['img', 'xz']:
             parser_error(message="Invalid extension for image path (only `xz`or `img`).")
+    
+    if args.ifname:
+        interaces = utils.get_interfaces()
+        if args.ifname not in interaces:
+            parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}")
 
 
 def execute(args):

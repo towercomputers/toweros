@@ -38,20 +38,8 @@ def generate_key_pair(name):
     ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
     return f'{key_path}.pub', key_path
 
-@utils.clitask("Preparing host configuration...")
-def prepare_host_config(args):
-    name = args.name[0]
-    
-    check_environment_value('public-key-path', args.public_key_path)
-    with open(args.public_key_path) as f:
-        public_key = f.read().strip()
-
-    password = secrets.token_urlsafe(16)
-    
-    keymap = args.keymap or utils.get_keymap()
-    timezone = args.timezone or utils.get_timezone()
-    lang = args.lang or utils.get_lang()
-
+def prepare_wifi_parameters(args):
+    online, wlan_ssid, wlan_password = 'false', '', ''
     if args.online:
         online = 'true'
         wlan_ssid = args.wlan_ssid or utils.get_connected_ssid()
@@ -61,20 +49,35 @@ def prepare_host_config(args):
         else:
             wlan_password = utils.get_ssid_presharedkey(wlan_ssid)
         check_environment_value('wlan-password', wlan_password)
-    else:
-        online = 'false'
-        wlan_ssid, wlan_password = '', '', ''
-    
-    wired_interfaces = utils.get_wired_interfaces()
-    if not wired_interfaces:
-        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to a wired network.")
-    
-    interface = wired_interfaces[0]  # TODO: make the interface configurable ?
+    return online, wlan_ssid, wlan_password
+
+def get_network_infos(args):
+    interface = args.ifname if args.ifname else utils.find_wired_interface()
+    check_environment_value('ifname', interface)
     thin_client_ip = utils.get_interface_ip(interface)
     tower_network = utils.get_interface_network(interface)
     if not thin_client_ip or not tower_network:
         raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `{interface}`.")
-  
+    return thin_client_ip, tower_network
+
+@utils.clitask("Preparing host configuration...")
+def prepare_host_config(args):
+    name = args.name[0]
+    # public key for ssh
+    check_environment_value('public-key-path', args.public_key_path)
+    with open(args.public_key_path) as f:
+        public_key = f.read().strip()
+    # generate random password
+    password = secrets.token_urlsafe(16)
+    # gather locale informations
+    keymap = args.keymap or utils.get_keymap()
+    timezone = args.timezone or utils.get_timezone()
+    lang = args.lang or utils.get_lang()
+    # determine wifi parameters
+    online, wlan_ssid, wlan_password = prepare_wifi_parameters(args)
+    # determine thinclient IP and network
+    thin_client_ip, tower_network = get_network_infos(args)
+    # return complete configuration
     return {
         'HOSTNAME': name,
         'USERNAME': sshconf.DEFAULT_SSH_USER,
@@ -96,23 +99,8 @@ def decompress_image(image_path):
     xz('--stdout', '-d', image_path, _out=out_file)
     return out_file
 
-def find_host_image(image_arg):
-    image_path = None
-    if image_arg and os.path.isfile(image_arg):
-        image_path = image_arg
-    else:
-        builds_dirs = [
-            os.path.join(os.getcwd(), 'dist'),
-            os.path.join(os.getcwd(), 'builds'),
-            os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
-        ]
-        for builds_dir in builds_dirs:
-            if os.path.isdir(builds_dir):
-                host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
-                host_images += glob.glob(os.path.join(builds_dir, 'towerospi-*.img'))
-                if host_images:
-                    image_path = host_images.pop()
-                    break
+def prepare_host_image(image_arg):
+    image_path = image_arg if image_arg and os.path.isfile(image_arg) else utils.find_host_image()
     if image_path:
         ext = image_path.split(".").pop()
         if ext == 'xz': # TODO: support more formats
@@ -129,7 +117,7 @@ def prepare_provision(args):
     sd_card = args.sd_card or utils.select_sdcard_device()
     check_environment_value('sd-card', sd_card)
     # find TowerOS PI image
-    image_path = find_host_image(args.image)
+    image_path = prepare_host_image(args.image)
     check_environment_value('image', image_path)
     # return everything needed to provision the host
     return image_path, sd_card, host_config, private_key_path

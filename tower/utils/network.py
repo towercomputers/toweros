@@ -88,6 +88,15 @@ def get_wired_interfaces():
 def get_wireless_interfaces():
     return [i[1] for i in socket.if_nameindex() if i[1].startswith('w')]
 
+def get_interfaces():
+    return get_wired_interfaces() + get_wireless_interfaces()
+
+def find_wired_interface():
+    wired_interfaces = get_wired_interfaces()
+    if not wired_interfaces:
+        return None
+    return wired_interfaces[0]
+
 @clitask("Downloading {0} in {1}...")
 def download_file(url, dest_path):
     with requests.get(url, stream=True) as resp:

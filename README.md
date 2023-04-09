@@ -23,7 +23,7 @@ Note: you can build your own image of TowerOS with command `build-tower-image th
 
 ##### 2.1.1 from Arch Linux
 ```
-$> pacman -S openssh git python python-pip avahi iw wireless_tools base-devel docker archiso
+$> pacman -S openssh git python python-pip avahi iwd base-devel docker archiso
 ```
 
 #### 2.2 Enable services
@@ -118,7 +118,7 @@ or, if the host is offline, you can tunnel the installation through an online ho
 $> tower install <offline-host> <application-name> --online-host <online-host> 
 ```
 
-### 4. List computers and their status:
+### 4. List hosts and their status:
 
 ```
 $> tower status
@@ -126,19 +126,19 @@ $> tower status
 
 ### 5. Example using two hosts:
 
-provision a first offline computer named `office`
+provision a first offline host named `office`
 
 ```
 $> tower provision office --image=/home/tower/.cache/Raspbian-tower-20230306141627.img.xz
 ```
 
-provision a second online computer named `web`
+provision a second online host named `web`
 
 ```
 $> tower provision web --online --image=/home/tower/.cache/Raspbian-tower-20230306141627.img
 ```
 
-install `galculator` in `office` computer
+install `galculator` in `office` host
 
 ```
 $> tower install office galculator --online-host=web
