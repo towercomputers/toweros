@@ -10,3 +10,4 @@ Execute a terminal command line with SSH:
 
 Or a graphical application with NX protocol:
 \e[7;30;42mtower run <host> <application-nam>\e[0m
+
