@@ -24,12 +24,7 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["tower"]
-
-[tool.hatch.build]
-include = [
-  "scripts",
-]
+only-include = ["tower", "scripts"]
 
 [project.scripts]
 tower = "tower.clis.tower:main"
