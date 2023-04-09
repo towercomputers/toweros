@@ -28,8 +28,7 @@ packages = ["tower"]
 
 [tool.hatch.build]
 include = [
-  "tower/raspberrypios/*.patch",
-  "tower/archlinux/installer/*",
+  "scripts",
 ]
 
 [project.scripts]

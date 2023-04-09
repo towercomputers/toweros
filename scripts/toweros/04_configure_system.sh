@@ -39,6 +39,8 @@ echo "title   TowerOS" > /boot/loader/entries/arch.conf
 echo "linux   /vmlinuz-linux" >> /boot/loader/entries/arch.conf
 echo "initrd  /initramfs-linux.img" >> /boot/loader/entries/arch.conf
 echo "options root=$ROOT_PARTITION rw" >> /boot/loader/entries/arch.conf
+# enable ipv4
+sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
 # enable services
 systemctl enable iwd.service
 systemctl enable dhcpcd.service
