@@ -52,7 +52,8 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     mkdir ~/.ssh || true
     cp $GIT_KEY_PATH ~/.ssh
     KEY_NAME=$(basename $GIT_KEY_PATH)
-    echo "Host github.com" > ~/.ssh/config
+    touch ~/.ssh/config
+    echo "Host github.com" >> ~/.ssh/config
     echo "  HostName github.com" >> ~/.ssh/config
     echo "  IdentityFile ~/.ssh/$KEY_NAME" >> ~/.ssh/config
     echo "  User git" >> ~/.ssh/config
