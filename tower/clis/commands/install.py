@@ -1,6 +1,7 @@
 import re
 
 from tower import sshconf
+from tower import pacman
 
 def add_args(argparser):
     install_parser = argparser.add_parser(
@@ -44,5 +45,7 @@ def check_args(args, parser_error):
             parser_error(f"{args.online_host} is not online.")
 
 def execute(args):
-    pass
-    #install(args.host_name[0], args.packages, args.online_host)
+    if sshconf.is_online(args.host_name[0]):
+        pacman.install_in_online_host(args.host_name[0], args.packages)
+    else:
+        pacman.install_in_offline_host(args.host_name[0], args.online_host, args.packages)
