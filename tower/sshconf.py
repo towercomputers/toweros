@@ -4,7 +4,7 @@ import time
 from ipaddress import ip_address, ip_network
 
 from sshconf import read_ssh_config, empty_ssh_config_file
-from sh import ssh, ErrorReturnCode, avahi_resolve, sed
+from sh import ssh, ErrorReturnCode, avahi_resolve, sed, touch, Command
 
 DEFAULT_SSH_USER = "tower"
 
@@ -39,10 +39,13 @@ def get(name):
     else:
         return None
 
-def clean_known_hosts(ip):
+def update_known_hosts(ip):
     known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
     if os.path.exists(known_hosts_path):
         sed('-i', f'/{ip}/d', known_hosts_path)
+    else:
+        touch(known_hosts_path)
+    Command('sh')('-c', f'ssh-keyscan {ip} >> {known_hosts_path}')
 
 def update_config(name, ip, private_key_path):
     insert_include_directive()
@@ -92,7 +95,7 @@ def discover_ip(name, network):
 
 def discover_and_update(name, private_key_path, network):
     ip = discover_ip(name, network)
-    clean_known_hosts(ip)
+    update_known_hosts(ip)
     update_config(name, ip, private_key_path)
 
 def is_online(name):
