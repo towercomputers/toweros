@@ -2,8 +2,8 @@
 
 `tower-tools` is an implementation of "A Network-Boundary Converged Multi-Level Secure Computing System" as described in the article of the same name by Adam Krellenstein.
 
-* 1. [Installation](#1-installation)
-* 1.1. [Hardware configuration](#11-hardware-configuration)
+* 1.[ Installation](#1-installation)
+  * 1.1. [Hardware configuration](#11-hardware-configuration)
   * 1.2. [TowerOS Thin Client](#12-toweros-thin-client)
   * 1.3. [Custom Thin-Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
@@ -11,7 +11,7 @@
     * 1.3.3. [Install nxproxy](#133-install-nxproxy)
     * 1.3.4. [Update /etc/sudoers](#134-update-etcsudoers)
     * 1.3.5. [Install `tower-tools`](#135-install-tower-tools)
-* 2. [Usage](#2-usage)
+* 2.[ Usage](#2-usage)
   * 2.1. [Provision a Host](#21-provision-a-host)
     * 2.1.1. [Generate an image with build-image](#211-generate-an-image-with-build-image)
     * 2.1.2. [Prepare the SD card](#212-prepare-the-sd-card)
@@ -21,7 +21,7 @@
   * 2.5. [Example using two hosts](#25-example-using-two-hosts)
   * 2.6. [Use with hatch](#26-use-with-hatch)
   * 2.7. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
-* 3. [Description of the main modules](#3-description-of-the-main-modules)
+* 3.[ Description of the main modules](#3-description-of-the-main-modules)
   * 3.1. [TowerOS](#31-toweros)
   * 3.2. [TowerOS PI](#32-toweros-pi)
   * 3.3. [SSHConf](#33-sshconf)
