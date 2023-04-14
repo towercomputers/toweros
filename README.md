@@ -2,6 +2,33 @@
 
 `tower-tools` is an implementation of "A Network-Boundary Converged Multi-Level Secure Computing System" as described in the article of the same name by Adam Krellenstein.
 
+1. (Installation)[#1-installation]
+  1.1. (Hardware configuration)[#11-hardware-configuration]
+  1.2. (TowerOS Thin Client)[#12-toweros-thin-client]
+  1.3. (Custom Thin-Client (Linux))[#13-custom-thin-client-linux]
+    1.3.1. (Install dependencies)[#131-install-dependencies]
+    1.3.2. (Enable services)[#132-enable-services]
+    1.3.3. (Install nxproxy)[#133-install-nxproxy]
+    1.3.4. (Update /etc/sudoers)[#134-update-etcsudoers]
+    1.3.5. (Install `tower-tools`)[#135-install-tower-tools]
+2. Usage[#2-usage]
+  2.1. (Provision a Host)[#21-provision-a-host]
+    2.1.1. (Generate an image with build-image)[#211-generate-an-image-with-build-image]
+    2.1.2. (Prepare the SD card)[#212-prepare-the-sd-card]
+  2.2. (Execute a command in one of the hosts)[#22-execute-a-command-in-one-of-the-hosts]
+  2.3. (Install an APT package on one of the hosts)[#23-install-an-apt-package-on-one-of-the-hosts]
+  2.4. (List hosts and their status)[#24-list-hosts-and-their-status]
+  2.5. (Example using two hosts)[#25-example-using-two-hosts]
+  2.6. (Use with hatch)[#26-use-with-hatch]
+  2.7. (Build a TowerOS image with Docker)[#27-build-a-toweros-image-with-docker]
+3. Description of the main modules[#3-description-of-the-main-modules]
+  3.1. (TowerOS)[#31-toweros]
+  3.2. (TowerOS PI)[#32-toweros-pi]
+  3.3. (SSHConf)[#33-sshconf]
+  3.4. (Provisioner)[#34-provisioner]
+  3.5. (NXSSH)[#35-nxssh]
+  3.6. (pacman.py)[#36-pacmanpy]
+
 ## 1. Installation
 
 ### 1.1. Hardware configuration
@@ -93,13 +120,13 @@ This will generate an img file compressed with xz in ~/.cache/tower/builds/. Ima
 #### 2.1.2. Prepare the SD card
 
 ```
-$> tower provision &lt;host> 
+$> tower provision <host> 
 ```
 
 or, for an online host:
 
 ```
-$> tower provision &lt;host> --online
+$> tower provision <host> --online
 ```
 
 Keyboard, timezone and WiFi parameters are retrieved from the the Thin Client. You can customize them with the appropriate argument (see ./tower.py provision --help).
@@ -109,25 +136,25 @@ Keyboard, timezone and WiFi parameters are retrieved from the the Thin Client. Y
 A terminal command line with SSH:
 
 ```
-$> ssh &lt;host> ls ~/
+$> ssh <host> ls ~/
 ```
 
 or a graphical application with NX protocol:
 
 ```
-$> tower run &lt;host> &lt;application-name>
+$> tower run <host> <application-name>
 ```
 
 ### 2.3. Install an APT package on one of the hosts
 
 ```
-$> tower install &lt;host> &lt;application-name>
+$> tower install <host> <application-name>
 ```
 
 or, if the host is offline, you can tunnel the installation through an online host:
 
 ```
-$> tower install &lt;offline-host> &lt;application-name> --online-host &lt;online-host> 
+$> tower install <offline-host> <application-name> --online-host <online-host> 
 ```
 
 ### 2.4. List hosts and their status
@@ -147,7 +174,7 @@ $> tower provision office
 provision a second online host named web
 
 ```
-$> tower provision web --online –wlan-ssid &lt;ssid> –wlan-password &lt;password>
+$> tower provision web --online –wlan-ssid <ssid> –wlan-password <password>
 ```
 
 install galculator in office host
@@ -290,7 +317,7 @@ Note: A TowerOS PI image is placed in the `~/.cache/tower/builds/` folder by the
 
 ### 3.3. SSHConf
 
-`tower-tools` uses a single configuration file in the same format as an ssh config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh &lt;host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
+`tower-tools` uses a single configuration file in the same format as an ssh config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
 1. to discover the IP of a newly installed host and update `tower.conf`
 2. update `~/.ssh/know_hosts`
@@ -300,7 +327,7 @@ Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/pro
 
 ### 3.4. Provisioner
 
-`provisioner.py` is used by the `tower provision &lt;host>` command to prepare an sd-card directly usable by a Rasbperry PI.
+`provisioner.py` is used by the `tower provision <host>` command to prepare an sd-card directly usable by a Rasbperry PI.
 
 The steps to provision a host are as follows:
 
@@ -314,7 +341,7 @@ Once a host is provisioned it is therefore directly accessible by ssh with `ssh 
 
 ### 3.5. NXSSH
 
-NXSSH is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run &lt;host> &lt;application>`.
+NXSSH is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
 
 `nxagent` must be installed in the host and `nxproxy` in the `thinclient`. Of course both are pre-installed in TowerOS and TowerOS PI.
 
@@ -328,7 +355,7 @@ Here are the steps taken by `nxssh.py` to run an application on one of the hosts
 
 4. Launch `nxproxy` with the cookie generated in step 1 and on the same port as the tunnel opened in step 3.
 
-5. At this stage `nxproxy` and `nxagent` are connected and we have a "virtual screen" on which we run the graphical application with: `ssh &lt;host> DISPLAY=:50 &lt;application>`.
+5. At this stage `nxproxy` and `nxagent` are connected and we have a "virtual screen" on which we run the graphical application with: `ssh <host> DISPLAY=:50 <application-name>application>`.
 
 6. When the application launched in the previous step is closed, `nxssh.py`
 
