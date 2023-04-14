@@ -25,7 +25,7 @@ def insert_include_directive():
                 f.write(directive + '\n\n' + content)
     else:
         with open(master_config_path, 'w') as f:
-            f.write(directive)
+            f.write(directive + '\n\n')
 
 def ssh_config():
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
