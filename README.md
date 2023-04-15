@@ -4,7 +4,7 @@
 
 Technically speaking, Tower is an example of a *converged multi-level secure (MLS) computing system*. In contrast to existing designs, Tower offers theoretically greater security guarantees, better usability, and more flexibility. The downside, of course, is that you need multiple computers to make it work. But with the development of cheap, powerful and small single-board computers (SBCs), it's now quite practical to carry half a dozen computers with you wherever you go. So, instead of having to trust your operating system or hypervisor to be able properly to isolate different security domains all running on shared hardware, you can rely on standard, open-source implementations of widely used networking protocols, to connect multiple independent computers together to form a single, virtual device that functions very much like a normal desktop or laptop.
 
-For a more formal description of the Tower architecture, including a comparison with Qubes OS, please refer to [the whitepaper](docs/A%20Network-Boundary%20Converged%20Multi-Level%20Secure%20Computing%20System.pdf).
+For a more formal description of the Tower architecture, including a comparison with Qubes OS, please refer to [the whitepaper](docs/Tower%20Whitepaper.pdf).
 
 
 This repository represents an OSS implementation of the above design. It includes within it tools for the following purposes:
@@ -53,10 +53,6 @@ The primary disadvantage of the proposed design, of course, is the additional ph
 Fewer Security Domains
 With Qubes OS, each security domain has no hardware footprint, so it is theoretically easier to support a greater number of security domains. However, it is possible to use removable main storage with the application servers (with the minor risk that malware from one application server instance might persist somewhere in the hardware device itself), to mitigate this factor.
 
-<<<<<<< HEAD
-`tower-tools` is an implementation of the Tower Secure Computing System, described in [A Network-Boundary Converged Multi-Level Secure Computing System](docs/A%20Network-Boundary%20Converged%20Multi-Level%20Secure%20Computing%20System.pdf).
-=======
->>>>>>> 304a627 (Writing Intro)
 
 * 1.[ Installation](#1-installation)
   * 1.1. [Hardware configuration](#11-hardware-configuration)
