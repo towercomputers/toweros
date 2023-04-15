@@ -1,6 +1,62 @@
-# tower-tools v0.0.1
+# Tower
 
+**Tower** is a computer system for paranoid individuals and high-value targets that turns the existing paradigm for computer security on its head: Instead of taking a single computer and splitting it into multiple security domains (for example with user/group permissions on a POSIX system, or with a hypervisor abstraction layer á la [QubesOS](https://www.qubes-os.org/)), Tower combines *multiple, independent computers* into a single, unified, virtual system with a shared, composited user interface. Each security domain is regelated to a separate, dedicated *Host* (e.g. a Raspberry Pi), and the user accesses their applications from a *Thin Client* (e.g. a laptop) over a LAN using standard network protocols (SSH and NX), following strict firewall rules that govern all network communication.
+
+Technically speaking, Tower is an example of a *converged multi-level secure (MLS) computing system*. In contrast to existing designs, Tower offers theoretically greater security guarantees, better usability, and more flexibility. The downside, of course, is that you need multiple computers to make it work. But with the development of cheap, powerful and small single-board computers (SBCs), it's now quite practical to carry half a dozen computers with you wherever you go. So, instead of having to trust your operating system or hypervisor to be able properly to isolate different security domains all running on shared hardware, you can rely on standard, open-source implementations of widely used networking protocols, to connect multiple independent computers together to form a single, virtual device that functions very much like a normal desktop or laptop.
+
+For a more formal description of the Tower architecture, including a comparison with Qubes OS, please refer to [the whitepaper](docs/A%20Network-Boundary%20Converged%20Multi-Level%20Secure%20Computing%20System.pdf).
+
+
+This repository represents an OSS implementation of the above design. It includes within it tools for the following purposes:
+
+1. Provisioning and maintaining the Thin Client
+2. Provisioning, maintaining and monitoring the various Hosts
+3. Managing the network layer (provisioning the Switch, enforcing firewall rules, etc.)
+
+
+
+# Comparison to Qubes OS
+We believe that the security properties of this design compare very favorably to Qubes OS, the state of the art in software-boundary multi-level secure systems[1](twitter.com/snowden/status/781493632293605376?s=21).
+
+First and foremost, Qubes OS relies heavily on a large TCB, including not only the (very complex) hypervisor, but also much of the underlying hardware (also very complex!)
+
+In contrast, the network is an ideal security boundary because it was historically designed explicitly for the interconnection of independent devices, often with different security policies. Both the hardware interface and the software compositing layer are small and well understood.
+
+The only data being pushed to the thin client are pixels, clipboard data and audio streams from the application servers (and data are never communicated directly from application server to application server.) As a consequence, so long as the user of the thin client doesn't explicitly pull malware onto the device, say with SSH, the risk of compromising the thin client (and by extension, the other application servers) is practically-speaking limited to the risk of critical input validation errors in the screen-sharing software itself or at the level of the network drivers. That is, even if the UI compositor on the thin-client machine does not enforce any security boundaries between application windows, the primary attack surface is limited to the only application running in those windows, e.g. VNC.
+
+
+Comparison with Qubes OS
+The state-of-the-art in secure computing systems is Qubes OS. Qubes OS is an open-source converged multi-level secure operating system that uses hardware virtualization (with Xen) to isolate security domains. There is a number of major weaknesses inherent in the design of Qubes OS, all of which stem from the fact that it has a very large TCB:
+
+Most importantly, Qubes OS relies heavily on the security guarantees of Xen, which is large, complicated, and has a history of serious security vulnerabilities.
+
+"In recent years, as more and more top notch researchers have begun scrutinizing Xen, a number of security bugs have been discovered. While many of them did not affect the security of Qubes OS, there were still too many that did."
+
+Qubes OS relies on the security properties of the hardware it runs on.
+
+"Other problems arise from the underlying architecture of the x86 platform, where various inter-VM side- and covert-channels are made possible thanks to the aggressively optimized multi-core CPU architecture, most spectacularly demonstrated by the recently published Meltdown and Spectre attacks. Fundamental problems in other areas of the underlying hardware have also been discovered, such as the Row Hammer Attack."
+
+The complexity inherent in the design of Qubes OS makes the operating system difficult both to maintain and to use. Accordingly, Qubes OS development has slowed significantly in recent years: as of December 2022, the last release (v4.1.x, in February 2022) came almost four years after the previous one (v4.0.x in March 2018).
+
+Qubes OS has support only for extremely few hardware configurations. As of December 2022, are only three laptops that are known to be fully compatible with Qubes OS.
+
+A pure network-boundary converged multi-level secure computing system, as described in this document, is simultaneously simpler, more secure and more user-friendly than Qubes OS.  Indeed, this design addresses all of the major problems with QubesOS completely. It has the following advantages and disadvantages:
+(Additional) Advantages of Proposed Design over that of Qubes OS
+Flexibility in Hardware and Operating System 
+With the design in question, there is complete optionality in the choice of hardware for the thin client and for each of the application servers. Any modern operating system may be used on any of the devices, as long as it supports the standard network interfaces required for SSH, etc.
+
+This flexibility can enable the system to run a wide variety of software without being limited to a particular operating system. For example, different application servers can run different operating systems depending upon the user’s needs. For example, one may run a Linux-based operating system, while another may run FreeBSD (for example for providing network-attached storage), while yet another may run Windows (for example, to enable access to desktop versions of popular office or creative applications).
+
+Disadvantages of Proposed Design over that of Qubes OS
+Reduced Portability
+The primary disadvantage of the proposed design, of course, is the additional physical bulk of the computer in comparison to a single laptop running a software-boundary solution such as Qubes OS.
+Fewer Security Domains
+With Qubes OS, each security domain has no hardware footprint, so it is theoretically easier to support a greater number of security domains. However, it is possible to use removable main storage with the application servers (with the minor risk that malware from one application server instance might persist somewhere in the hardware device itself), to mitigate this factor.
+
+<<<<<<< HEAD
 `tower-tools` is an implementation of the Tower Secure Computing System, described in [A Network-Boundary Converged Multi-Level Secure Computing System](docs/A%20Network-Boundary%20Converged%20Multi-Level%20Secure%20Computing%20System.pdf).
+=======
+>>>>>>> 304a627 (Writing Intro)
 
 * 1.[ Installation](#1-installation)
   * 1.1. [Hardware configuration](#11-hardware-configuration)
