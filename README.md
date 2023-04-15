@@ -1,6 +1,6 @@
 # tower-tools v0.0.1
 
-`tower-tools` is an implementation of "A Network-Boundary Converged Multi-Level Secure Computing System" as described in the article of the same name by Adam Krellenstein.
+`tower-tools` is an implementation of the Tower Secure Computing System, described in [A Network-Boundary Converged Multi-Level Secure Computing System](docs/A%20Network-Boundary%20Converged%20Multi-Level%20Secure%20Computing%20System.pdf).
 
 * 1.[ Installation](#1-installation)
   * 1.1. [Hardware configuration](#11-hardware-configuration)
@@ -21,7 +21,7 @@
   * 2.5. [Example using two hosts](#25-example-using-two-hosts)
   * 2.6. [Use with hatch](#26-use-with-hatch)
   * 2.7. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
-* 3.[ Description of the main modules](#3-description-of-the-main-modules)
+* 3.[ Implementation](#3-implementation)
   * 3.1. [TowerOS](#31-toweros)
   * 3.2. [TowerOS PI](#32-toweros-pi)
   * 3.3. [SSHConf](#33-sshconf)
@@ -43,11 +43,11 @@ To install get TowerOS:
 
 1. Download the latest image here: [https://drive.google.com/file/d/1s1SPQ4oOLZnWY4MOqxN-8_RKxcCmabvg/view?usp=share_link](https://drive.google.com/file/d/1s1SPQ4oOLZnWY4MOqxN-8_RKxcCmabvg/view?usp=share_link).
 2. Prepare a bootable USB medium using the above image.
-3. Boot the Thin Client the USB drive and follow the instructions.
+3. Boot the Thin Client with the USB drive and follow the instructions.
 
-Note: you can build your own image of TowerOS with command build-tower-image `thinclient` or with Docker (see below).
+Note: you can build your own image of TowerOS with command `build-tower-image thinclient` or with Docker (see below).
 
-### 1.3. Custom Thin-Client (Linux)
+### 1.3. Custom Thin Client (Linux)
 
 #### 1.3.1. Install dependencies
 
@@ -58,7 +58,7 @@ $> pacman -S openssh git python python-pip dhcpcd avahi iwd base-devel archiso \
 
 #### 1.3.2. Enable services
 
-If necessary enable IP v4 with:
+If necessary, enable IPv4 with:
 
 ```
 sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
@@ -71,7 +71,7 @@ $> systemctl enable dhcpcd.service
 $> systemctl enable avahi-daemon.service
 ```
 
-**Important:** make sure you are connected to the switch and with ip ad check that your first wired interface (starting with the letter e) has an assigned IP.
+**Important:** Make sure you are connected to the switch and check that your first wired interface (starting with the letter `e`) has an assigned IP.
 
 #### 1.3.3. Install nxproxy
 
@@ -81,9 +81,9 @@ $> cd nx
 $> makepkg -s -i -r -c
 ```
 
-#### 1.3.4. Update /etc/sudoers
+#### 1.3.4. Update `/etc/sudoers`
 
-The tower tools assumes that the current user has full sudo access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:
+`tower-tools` assumes that the current user has full `sudo` access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:
 
 ```
 <you_username> ALL=(ALL) NOPASSWD: ALL
@@ -105,9 +105,9 @@ $> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputers/too
 
 ## 2. Usage
 
-### 2.1. Provision a Host
+### 2.1. Provision a host
 
-Note: if you are using TowerOS, you can skip the first step.
+Note: If you are using TowerOS, you can skip the first step.
 
 #### 2.1.1. Generate an image with build-image
 
@@ -115,7 +115,7 @@ Note: if you are using TowerOS, you can skip the first step.
 $> build-tower-image host
 ```
 
-This will generate an img file compressed with xz in ~/.cache/tower/builds/. Images in this folder will be used by default by the provision command if the --image flag is not provided.
+This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command if the `--image` flag is not provided.
 
 #### 2.1.2. Prepare the SD card
 
@@ -129,11 +129,11 @@ or, for an online host:
 $> tower provision <host> --online
 ```
 
-Keyboard, timezone and WiFi parameters are retrieved from the the Thin Client. You can customize them with the appropriate argument (see ./tower.py provision --help).
+Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
 
-### 2.2. Execute a command in one of the hosts
+### 2.2. Execute a command on one of the hosts
 
-A terminal command line with SSH:
+Run a command on a host with SSH:
 
 ```
 $> ssh <host> ls ~/
@@ -145,7 +145,7 @@ or a graphical application with NX protocol:
 $> tower run <host> <application-name>
 ```
 
-### 2.3. Install an APT package on one of the hosts
+### 2.3. Install an application on one of the hosts
 
 ```
 $> tower install <host> <application-name>
@@ -157,7 +157,7 @@ or, if the host is offline, you can tunnel the installation through an online ho
 $> tower install <offline-host> <application-name> --online-host <online-host> 
 ```
 
-### 2.4. List hosts and their status
+### 2.4. List hosts and their statuses
 
 ```
 $> tower status
@@ -165,28 +165,28 @@ $> tower status
 
 ### 2.5. Example using two hosts
 
-provision a first offline host named office
+Provision the first offline host named `office`.
 
 ```
 $> tower provision office
 ```
 
-provision a second online host named web
+Provision a second online host named `web`.
 
 ```
 $> tower provision web --online –wlan-ssid <ssid> –wlan-password <password>
 ```
 
-install galculator in office host
+Install gcalculator on the `office` offline host.
 
 ```
 $> tower install office galculator --online-host=web
 ```
 
-run galculator from office
+Run galculator from `office`.
 
 ```
-$> tower run office galculator
+$> tower run office gcalculator
 ```
 
 ### 2.6. Use with hatch
@@ -213,13 +213,13 @@ Then build the TowerOS image inside a Docker container:
 $> docker run --name towerbuilder --user tower --privileged build-tower-image thinclient
 ```
 
-finally retrieve that image from the container:
+Finally retrieve that image from the container:
 
 ```
 $> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 ```
 
-**Note: **With the ARM64 architecture, you must use buildx and a cross-platform emulator like tonistiigi/binfmt.
+**Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
 
 ```
 $> docker buildx create --use
@@ -229,25 +229,24 @@ $> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileg
               build-tower-image thinclient
 ```
 
-## 3. Description of the main modules
+## 3. Implementation
 
-To date,`tower-tools` includes six main modules: `toweros.py` and `towerospi.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provisioner.py`, `pacman.py`, and `nxssh.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the ` thinclient`.
+To date, `tower-tools` includes six main modules: `toweros.py` and `towerospi.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provisioner.py`, `pacman.py`, and `nxssh.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the ` thinclient`.
 
 ### 3.1. TowerOS
 
-`toweros.py` is the module responsible for generating an image of TowerOS when the `build-tower-image thinclient` command is executed.
+`toweros.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
-TowerOS is based on Arch Linux and `toweros.py` uses the `archiso` tool (see https://wiki.archlinux.org/title/archiso).
+TowerOS is based on Arch Linux, and `toweros.py` uses the `archiso` tool (see https://wiki.archlinux.org/title/archiso).
 
-The installer contains all the pacman and pip packages needed to install the system and `tower-tools` which is ready to use from the first boot. In this way, the installation of the system as well as the provision of a first host does not require an internet connection.
+The installer contains all the pacman and pip packages necessary for installing the base system and `tower-tools`, which is ready to use from the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
 
 Here are the different steps taken by `toweros.py` to generate an image:
 
 1. Gathering the necessary builds.
-The script starts by checking for the existence of a `./dist`, `./builds` or `~/.cache/tower/builds/` folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists the script creates the folder `~/.cache/tower/builds/`.
-Once the `builds` folder is determined:
+The script starts by checking for the existence of a `./dist`, `./builds` or `~/.cache/tower/builds/` folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists, then the script creates the folder `~/.cache/tower/builds/`. Next:
 
-    1. The script checks if it does not contain the NX builds. If not, it downloads it. 
+    1. The script checks if it contains the NX builds. If not, it downloads it. 
     2. The script then verifies that the Tower OS PI image is present. If not, it launches the build of a new image (cf. Tower OS PI). 
     3. Finally the script checks for the existence of a `tower-tools` wheel package. If it does not exist the package is retrieved from Github.
 
@@ -271,8 +270,8 @@ Once the `builds` folder is determined:
 **Notes about the TowerOS installer:**
 
 * The TowerOS install scripts generally follow the official Arch Linux install guide (see [https://wiki.archlinux.org/title/installation_guide](https://wiki.archlinux.org/title/installation_guide)) 
-* The installer set up a firewal with `iptables` as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
-* TowerOS uses `systemd-boot` as boot loader
+* The installer sets up an `iptables` firewall as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
+* TowerOS uses `systemd-boot` as the boot loader.
 
 
 ### 3.2. TowerOS PI
@@ -317,7 +316,7 @@ Note: A TowerOS PI image is placed in the `~/.cache/tower/builds/` folder by the
 
 ### 3.3. SSHConf
 
-`tower-tools` uses a single configuration file in the same format as an ssh config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
+`tower-tools` uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
 1. to discover the IP of a newly installed host and update `tower.conf`
 2. update `~/.ssh/know_hosts`
@@ -327,13 +326,13 @@ Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/pro
 
 ### 3.4. Provisioner
 
-`provisioner.py` is used by the `tower provision <host>` command to prepare an sd-card directly usable by a Rasbperry PI.
+`provisioner.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
 
 The steps to provision a host are as follows:
 
 1. generation of a key pair.
 2. generation of the host configuration, with the values provided on the command line, or with those retrieved from the `thinclient`.
-3. copy of the TowerOS PI image on the sd-card and launch of the configuration script (see TowerOS PI above for detailed configuration steps).
+3. copy of the TowerOS PI image on the SD card and launch of the configuration script (see TowerOS PI above for detailed configuration steps).
 4. waiting for the new host to be detected on the network after the user inserts the sd-card in the RPI and the boot is finished.
 5. updated `ssh`/`tower-tools` configuration file.
 
