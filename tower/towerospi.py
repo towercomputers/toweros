@@ -19,6 +19,7 @@ fsck_ext4 = Command('fsck.ext4')
 
 from tower import utils
 from tower.utils import clitask
+from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
@@ -118,7 +119,7 @@ def prepare_rpi_partitions(loop_dev):
 
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir, owner):
-    image_path = os.path.join(builds_dir, datetime.now().strftime('towerospi-%Y%m%d%H%M%S.img.xz'))
+    image_path = os.path.join(builds_dir, datetime.now().strftime(f'towerospi-{__version__}-%Y%m%d%H%M%S.img.xz'))
     xz(
         '--compress', '--force', 
         '--threads', 0, '--memlimit-compress=90%', '--best',

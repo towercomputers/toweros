@@ -15,6 +15,7 @@ from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown, bs
 
 from tower import towerospi, utils
 from tower.utils import clitask
+from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
@@ -113,7 +114,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
 def make_archiso(builds_dir):
     archiso_out_path = os.path.join(WORKING_DIR, 'out')
     image_src_path = os.path.join(archiso_out_path, datetime.now().strftime('archlinux-%Y.%m.%d-x86_64.iso'))
-    image_dest_path = os.path.join(builds_dir, datetime.now().strftime('toweros-%Y%m%d%H%M%S-x86_64.iso'))
+    image_dest_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-{__version__}-%Y%m%d%H%M%S-x86_64.iso'))
     mkarchiso('-v', wd('archiso'), _cwd=WORKING_DIR, _out=logger.debug)
     cp(image_src_path, image_dest_path)
     owner = getpass.getuser()
