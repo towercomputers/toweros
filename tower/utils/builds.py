@@ -76,8 +76,8 @@ def find_host_image():
     ]
     for builds_dir in builds_dirs:
         if os.path.isdir(builds_dir):
-            host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
-            host_images += glob.glob(os.path.join(builds_dir, 'towerospi-*.img'))
+            host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
+            host_images += glob.glob(os.path.join(builds_dir, 'toweros-host-*.img'))
             if host_images:
                 image_path = host_images.pop()
                 break

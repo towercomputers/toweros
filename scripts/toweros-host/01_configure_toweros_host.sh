@@ -63,4 +63,4 @@ fi
 ESCAPED_TOWER_NETWORK=$(printf '%s\n' "$TOWER_NETWORK" | sed -e 's/[\/&]/\\&/g')
 sed -e "s/THIN_CLIENT_IP/$THIN_CLIENT_IP/g" \
     -e "s/TOWER_NETWORK/$ESCAPED_TOWER_NETWORK/g" \
-    /root/towerospi_iptables.rules > /etc/iptables/iptables.rules
+    /root/toweros_host_iptables.rules > /etc/iptables/iptables.rules

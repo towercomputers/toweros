@@ -13,7 +13,7 @@ import re
 import sh
 from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown, bsdtar, Command, mkdir
 
-from tower import towerospi, utils
+from tower import buildhost, utils
 from tower.utils import clitask
 from tower.__about__ import __version__
 
@@ -21,8 +21,8 @@ logger = logging.getLogger('tower')
 
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 
-WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-work')
-INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros')
+WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-thinclient-work')
+INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-thinclient')
 
 def wd(path):
     return os.path.join(WORKING_DIR, path)
@@ -38,10 +38,10 @@ def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
 def find_host_image(builds_dir):
-    host_images = glob.glob(os.path.join(builds_dir, 'towerospi-*.xz'))
+    host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
     if not host_images:
         logger.info("Host image not found in builds directory. Building a new image.")
-        rpi_image_path = towerospi.build_image(builds_dir)
+        rpi_image_path = buildhost.build_image(builds_dir)
     else:
         rpi_image_path = host_images.pop()
         logger.info(f"Using host image {rpi_image_path}")
@@ -99,7 +99,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
         Command('sh')('-c', f'echo "{pkg}" >>  {package_list}')
     # start installer on login
     zlogin = os.path.join(wd('archiso'), 'airootfs', 'root', '.zlogin')
-    Command('sh')('-c', f'echo "sh ~/00_install_toweros.sh" >>  {zlogin}')
+    Command('sh')('-c', f'echo "sh ~/00_install_toweros_thinclient.sh" >>  {zlogin}')
     # prepare builds dir
     builds_path = os.path.join(root_path, 'builds')
     mkdir('-p', builds_path)
@@ -114,7 +114,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
 def make_archiso(builds_dir):
     archiso_out_path = os.path.join(WORKING_DIR, 'out')
     image_src_path = os.path.join(archiso_out_path, datetime.now().strftime('archlinux-%Y.%m.%d-x86_64.iso'))
-    image_dest_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-{__version__}-%Y%m%d%H%M%S-x86_64.iso'))
+    image_dest_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso'))
     mkarchiso('-v', wd('archiso'), _cwd=WORKING_DIR, _out=logger.debug)
     cp(image_src_path, image_dest_path)
     owner = getpass.getuser()
@@ -122,7 +122,7 @@ def make_archiso(builds_dir):
     logger.info(f"Image ready: {image_dest_path}")
     return image_dest_path
 
-@clitask("Building TowserOS image...", timer_message="TowserOS image built in {0}.", sudo=True)
+@clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", sudo=True)
 def build_image(builds_dir):
     try:
         prepare_working_dir()

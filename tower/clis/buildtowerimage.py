@@ -1,10 +1,10 @@
 import argparse
 import os
 
-from tower import toweros, towerospi, utils
+from tower import buildthinclient, buildhost, utils
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description="""Generate TowerOS and TowerOS PI images""")
+    parser = argparse.ArgumentParser(description="""Generate TowerOS-ThinClient and TowerOS-Host images""")
     parser.add_argument(
         '-v', '--verbose',
         help="""Set log level to DEBUG.""",
@@ -45,8 +45,8 @@ def main():
     utils.clilogger.initialize(args.verbose, args.quiet)
     builds_dir = utils.init_builds_dir(args.builds_dir)
     if args.image_name == 'host':
-        towerospi.build_image(builds_dir)
+        buildhost.build_image(builds_dir)
     elif args.image_name == 'thinclient':
-        toweros.build_image(builds_dir)
+        buildthinclient.build_image(builds_dir)
 
 

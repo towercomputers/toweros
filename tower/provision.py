@@ -14,7 +14,7 @@ from sh import ssh, scp, ssh_keygen, xz, cat, mount, parted
 from sh import Command, ErrorReturnCode_1, ErrorReturnCode
 
 from tower import utils
-from tower import towerospi
+from tower import buildhost
 from tower import sshconf
 
 logger = logging.getLogger('tower')
@@ -116,7 +116,7 @@ def prepare_provision(args):
     # determine target device
     sd_card = args.sd_card or utils.select_sdcard_device()
     check_environment_value('sd-card', sd_card)
-    # find TowerOS PI image
+    # find TowerOS-Host image
     image_path = prepare_host_image(args.image)
     check_environment_value('image', image_path)
     # return everything needed to provision the host
@@ -124,7 +124,7 @@ def prepare_provision(args):
 
 @utils.clitask("Provisioning `{0}`...", timer_message="Host provisioned in {}s")
 def provision(name, image_path, sd_card, host_config, private_key_path):
-    towerospi.burn_image(image_path, sd_card, host_config)
+    buildhost.burn_image(image_path, sd_card, host_config)
     logger.info(f"SD Card ready. Please insert the SD Card into the Host computer, then turn it on and wait for it to be detected on the network.")
     sshconf.discover_and_update(name, private_key_path, host_config['TOWER_NETWORK'])
     print(f"Access the host `web` with the command `$ ssh web`.")

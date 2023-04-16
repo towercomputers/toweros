@@ -1,4 +1,4 @@
-Welcome to TowerOS!
+Welcome to TowerOS-ThinClient!
 
 Here are some useful commands to start the day off right:
 

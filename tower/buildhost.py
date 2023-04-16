@@ -23,8 +23,8 @@ from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
-WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-towerospi-work')
-INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'towerospi')
+WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
+INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-host')
 
 def wd(path):
     return os.path.join(WORKING_DIR, path)
@@ -53,11 +53,11 @@ def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
     bsdtar('-xpf', nx_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
     # put cross platform emulator
     cp('/usr/bin/qemu-arm-static', wd("EXPORT_ROOTFS_DIR/usr/bin"))
-    # put and run towerospi installer
-    cp(f'{INSTALLER_DIR}/00_install_towerospi.sh', wd("EXPORT_ROOTFS_DIR"))
-    arch_chroot(wd("EXPORT_ROOTFS_DIR"), 'sh', '/00_install_towerospi.sh', _out=logger.debug)
+    # put and run toweros-host installer
+    cp(f'{INSTALLER_DIR}/00_install_toweros_host.sh', wd("EXPORT_ROOTFS_DIR"))
+    arch_chroot(wd("EXPORT_ROOTFS_DIR"), 'sh', '/00_install_toweros_host.sh', _out=logger.debug)
     # clean installation files
-    rm(wd("EXPORT_ROOTFS_DIR/00_install_towerospi.sh"))
+    rm(wd("EXPORT_ROOTFS_DIR/00_install_toweros_host.sh"))
     rm(wd("EXPORT_ROOTFS_DIR/usr/bin/qemu-arm-static"))
     nx_tar_name = os.path.basename(nx_tar_path).split(".")[0]
     rm('-rf', wd(f"EXPORT_ROOTFS_DIR/{nx_tar_name}"))
@@ -66,7 +66,7 @@ def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
 
 @clitask("Creating RPI partitions...")
 def create_rpi_partitions():
-    image_file = wd("toweros-pi.img")
+    image_file = wd("toweros-host.img")
     # caluclate sizes
     cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
     root_size = int(Command('sh')('-c', cmd).strip())
@@ -119,11 +119,11 @@ def prepare_rpi_partitions(loop_dev):
 
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir, owner):
-    image_path = os.path.join(builds_dir, datetime.now().strftime(f'towerospi-{__version__}-%Y%m%d%H%M%S.img.xz'))
+    image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz'))
     xz(
         '--compress', '--force', 
         '--threads', 0, '--memlimit-compress=90%', '--best',
-	    '--stdout', wd("toweros-pi.img"),
+	    '--stdout', wd("toweros-host.img"),
         _out=image_path
     )
     chown(f"{owner}:{owner}", image_path)
@@ -141,7 +141,7 @@ def cleanup():
     unmount_all()
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
-@clitask("Building TowserOS PI image...", timer_message="TowserOS PI image built in {0}.", sudo=True)
+@clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
 def build_image(builds_dir):
     archlinux_tar_path = utils.prepare_required_build("arch-linux-arm", builds_dir)
     nx_tar_path = utils.prepare_required_build("nx-armv7h", builds_dir)
@@ -150,7 +150,7 @@ def build_image(builds_dir):
         prepare_working_dir()
         prepare_chroot_image(archlinux_tar_path, nx_tar_path)
         create_rpi_partitions()
-        loop_dev = create_loop_device(wd("toweros-pi.img"))
+        loop_dev = create_loop_device(wd("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         image_path = compress_image(builds_dir, user)
@@ -178,8 +178,8 @@ def configure_image(config):
     # put cross platform emulator
     cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
     # put configuration scripts
-    cp(f'{INSTALLER_DIR}/01_configure_towerospi.sh', wd("ROOTFS_DIR/root/"))
-    cp(f'{INSTALLER_DIR}/files/towerospi_iptables.rules', wd("ROOTFS_DIR/root/"))
+    cp(f'{INSTALLER_DIR}/01_configure_toweros_host.sh', wd("ROOTFS_DIR/root/"))
+    cp(f'{INSTALLER_DIR}/files/toweros_host_iptables.rules', wd("ROOTFS_DIR/root/"))
     # run configuration script
     args_key = [
         "HOSTNAME", "USERNAME", "PUBLIC_KEY", "PASSWORD_HASH",
@@ -188,16 +188,16 @@ def configure_image(config):
         "THIN_CLIENT_IP", "TOWER_NETWORK"
     ]
     args = [config[key] for key in args_key]
-    arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/01_configure_towerospi.sh', *args, _out=logger.debug, _err_to_out=True)
+    arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/01_configure_toweros_host.sh', *args, _out=logger.debug, _err_to_out=True)
     # update fstab
     #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
     Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
     # clean configuration files
-    rm(wd("ROOTFS_DIR/root/01_configure_towerospi.sh"))
-    rm(wd("ROOTFS_DIR/root/towerospi_iptables.rules"))
+    rm(wd("ROOTFS_DIR/root/01_configure_toweros_host.sh"))
+    rm(wd("ROOTFS_DIR/root/toweros_host_iptables.rules"))
     rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static")) 
 
-@clitask("Installing TowserOS PI in {1}...", timer_message="TowserOS PI installed in {0}.", sudo=True)
+@clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True)
 def burn_image(image_file, device, config):
     try:
         prepare_working_dir()

@@ -3,14 +3,14 @@
 # Build docker image with:
 # docker build -t build-tower-image:latest .
 #
-# Build TowerOS image with
+# Build TowerOS-ThinClient image with
 # docker run --name towerbuilder --user tower \
 #       --privileged build-tower-image thinclient
-# docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
+# docker cp towerbuilder:/home/tower/toweros-thinclient-0.0.1-20230318154719-x86_64.iso ./
 #
-# Build hosts image with
+# Build TowerOS-Host image with
 # docker run --name towerbuilder --user tower build-tower-image host
-# docker cp towerbuilder:/home/tower/Raspbian-tower-20230321173402.img.xz ./
+# docker cp towerbuilder:/home/tower/toweros-host-0.0.1-20230321173402.img.xz ./
 #
 # On Apple M1 (arm64):
 #
@@ -19,7 +19,7 @@
 # docker run --privileged --rm tonistiigi/binfmt --install all
 # docker run --platform=linux/amd64 --name towerbuilder --user tower \
 #       --privileged build-tower-image thinclient
-# docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
+# docker cp towerbuilder:/home/tower/toweros-0.0.1-thinclient-20230318154719-x86_64.iso ./
 #
 
 FROM archlinux:latest

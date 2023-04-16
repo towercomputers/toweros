@@ -33,12 +33,12 @@ For a more formal description of the Tower architecture, including a comparison 
   * 2.6. [Use with hatch](#26-use-with-hatch)
   * 2.7. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
 * 3.[ Implementation](#3-implementation)
-  * 3.1. [TowerOS](#31-toweros)
-  * 3.2. [TowerOS PI](#32-toweros-pi)
+  * 3.1. [TowerOS-ThinClient](#31-toweros-thinclient)
+  * 3.2. [TowerOS-Host](#32-toweros-host)
   * 3.3. [SSHConf](#33-sshconf)
-  * 3.4. [Provisioner](#34-provisioner)
-  * 3.5. [NXSSH](#35-nxssh)
-  * 3.6. [pacman.py](#36-pacmanpy)
+  * 3.4. [Provision](#34-provision)
+  * 3.5. [GUI](#35-gui)
+  * 3.6. [Install](#36-install)
 
 ## 1. Installation
 
@@ -48,9 +48,9 @@ You must have a Thin Client (typically a laptop like a Lenovo X270) connected to
 
 ### 1.2. TowerOS Thin Client
 
-The easiest way to use Tower is to run the TowerOS GNU/Linux distribution (based on Arch Linux) on your Thin Client.
+The easiest way to use Tower is to run the TowerOS-ThinClient GNU/Linux distribution (based on Arch Linux) on your Thin Client.
 
-To install get TowerOS:
+To install get TowerOS-ThinClient:
 
 1. Download the latest image here: [https://drive.google.com/file/d/1s1SPQ4oOLZnWY4MOqxN-8_RKxcCmabvg/view?usp=share_link](https://drive.google.com/file/d/1s1SPQ4oOLZnWY4MOqxN-8_RKxcCmabvg/view?usp=share_link).
 2. Prepare a bootable USB medium using the above image.
@@ -242,17 +242,17 @@ $> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileg
 
 ## 3. Implementation
 
-To date, `tower-tools` includes six main modules: `toweros.py` and `towerospi.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provisioner.py`, `pacman.py`, and `nxssh.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the ` thinclient`.
+To date, `tower-tools` includes six main modules: `buildthinclient.py` and `buildhost.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provision.py`, `install.py`, and `gui.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the `thinclient`.
 
-### 3.1. TowerOS
+### 3.1. TowerOS-ThinClient
 
-`toweros.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
+`buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
-TowerOS is based on Arch Linux, and `toweros.py` uses the `archiso` tool (see https://wiki.archlinux.org/title/archiso).
+TowerOS is based on Arch Linux, and `buildthinclient.py` uses the `archiso` tool (see https://wiki.archlinux.org/title/archiso).
 
 The installer contains all the pacman and pip packages necessary for installing the base system and `tower-tools`, which is ready to use from the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
 
-Here are the different steps taken by `toweros.py` to generate an image:
+Here are the different steps taken by `buildthinclient.py` to generate an image:
 
 1. Gathering the necessary builds.
 The script starts by checking for the existence of a `./dist`, `./builds` or `~/.cache/tower/builds/` folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists, then the script creates the folder `~/.cache/tower/builds/`. Next:
@@ -270,7 +270,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
     1. add `pacman` and `pip` cache folders
     2. add  system install bash scripts (see https://github.com/towercomputers/tools/tree/dev/scripts/toweros)
     3. add the list of packages necessary for the installer
-    4. add builds required by `tower-tools` (NX, TowerOS PI, `tower-tools`)
+    4. add builds required by `tower-tools` (NX, TowerOS-Host, `tower-tools`)
 
 5. Launch of `mkarchiso` which takes care of the rest.
 
@@ -278,22 +278,22 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 
 7. Cleaning temporary files.
 
-**Notes about the TowerOS installer:**
+**Notes about the TowerOS-ThinClient installer:**
 
-* The TowerOS install scripts generally follow the official Arch Linux install guide (see [https://wiki.archlinux.org/title/installation_guide](https://wiki.archlinux.org/title/installation_guide)) 
+* The TowerOS-ThinClient install scripts generally follow the official Arch Linux install guide (see [https://wiki.archlinux.org/title/installation_guide](https://wiki.archlinux.org/title/installation_guide)) 
 * The installer sets up an `iptables` firewall as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
-* TowerOS uses `systemd-boot` as the boot loader.
+* TowerOS-ThinClient uses `systemd-boot` as the boot loader.
 
 
-### 3.2. TowerOS PI
+### 3.2. TowerOS-Host
 
-`towerospi.py` is the module responsible for generating an image of TowerOS PI when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
+`buildhost.py` is the module responsible for generating an image of TowerOS-ThinClient when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
 
-`towerospi.py` uses the same method as `pigen` to build an image for a Raspberry PI (see [https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh](https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh)) but unlike `pigen` which uses a Debian-based system, `towerospi.py` uses an Arch Linux-based system (see https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4).
+`buildhost.py` uses the same method as `pigen` to build an image for a Raspberry PI (see [https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh](https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh)) but unlike `pigen` which uses a Debian-based system, `buildhost.py` uses an Arch Linux-based system (see https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4).
 
-TowerOS PI must be used with the `tower provision` command which finalises the configuration of the image which is otherwise neither secure (no firewall in particular) nor ready to be used by `tower-tools`.
+TowerOS-ThinClient must be used with the `tower provision` command which finalises the configuration of the image which is otherwise neither secure (no firewall in particular) nor ready to be used by `tower-tools`.
 
-Here are the different steps taken by `towerospi.py` to generate an image:
+Here are the different steps taken by `buildhost.py` to generate an image:
 
 1. Installing an Arch Linux system in a mounted temporary folder:
 
@@ -309,7 +309,7 @@ Here are the different steps taken by `towerospi.py` to generate an image:
 
 5. Unmounting and cleaning files and temporary folders.
 
-Here are the different steps taken by `towerospi.py` to configure an image when provisioning an host:
+Here are the different steps taken by `buildhost.py` to configure an image when provisioning an host:
 
 1. copy image to sd-card
 
@@ -323,7 +323,7 @@ Here are the different steps taken by `towerospi.py` to configure an image when 
 
 4. unmount the sd-card which is ready to be inserted into the RPI
 
-Note: A TowerOS PI image is placed in the `~/.cache/tower/builds/` folder by the TowerOS installer.
+Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folder by the TowerOS installer.
 
 ### 3.3. SSHConf
 
@@ -335,27 +335,27 @@ Note: A TowerOS PI image is placed in the `~/.cache/tower/builds/` folder by the
 
 Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/project/sshconf/) to manipulate `ssh` config files.
 
-### 3.4. Provisioner
+### 3.4. Provision
 
-`provisioner.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
+`provision.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
 
 The steps to provision a host are as follows:
 
 1. generation of a key pair.
 2. generation of the host configuration, with the values provided on the command line, or with those retrieved from the `thinclient`.
-3. copy of the TowerOS PI image on the SD card and launch of the configuration script (see TowerOS PI above for detailed configuration steps).
+3. copy of the TowerOS-ThinClient image on the SD card and launch of the configuration script (see TowerOS-ThinClient above for detailed configuration steps).
 4. waiting for the new host to be detected on the network after the user inserts the sd-card in the RPI and the boot is finished.
 5. updated `ssh`/`tower-tools` configuration file.
 
 Once a host is provisioned it is therefore directly accessible by ssh with `ssh <host>` or `tower run <host>`.
 
-### 3.5. NXSSH
+### 3.5. GUI
 
-NXSSH is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
+GUI is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
 
-`nxagent` must be installed in the host and `nxproxy` in the `thinclient`. Of course both are pre-installed in TowerOS and TowerOS PI.
+`nxagent` must be installed in the host and `nxproxy` in the `thinclient`. Of course both are pre-installed in TowerOS and TowerOS-ThinClient.
 
-Here are the steps taken by `nxssh.py` to run an application on one of the hosts:
+Here are the steps taken by `gui.py` to run an application on one of the hosts:
 
 1. Generation of a unique cookie which is added in the host with `xauth add`.
 
@@ -367,15 +367,15 @@ Here are the steps taken by `nxssh.py` to run an application on one of the hosts
 
 5. At this stage `nxproxy` and `nxagent` are connected and we have a "virtual screen" on which we run the graphical application with: `ssh <host> DISPLAY=:50 <application-name>application>`.
 
-6. When the application launched in the previous step is closed, `nxssh.py`
+6. When the application launched in the previous step is closed, `gui.py`
 
     1. closes `nxagent` and the tunnel opened in step 2 and 3.
     2. revokes the cookie from step 1 with `xauth remove`
     3. closes `nxproxy`
 
-NXSSH works the same way as X2GO from which it is directly inspired.
+GUI works the same way as X2GO from which it is directly inspired.
 
-### 3.6. pacman.py
+### 3.6. Install
 
 This module allows to use `pacman` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
 
@@ -391,4 +391,4 @@ This module allows to use `pacman` on an offline host through an `ssh` tunnel to
 
 4. Once the installation is finished, clean the `/etc/hosts` file and the `iptables` rules on the offline host and close the ssh tunnels.
 
-Note: when installing each package, `pacman` verifies that it has been signed by the authors and maintainers of Arch Linux. Therefore it is not necessary to trust the online host but above all to initialise the pacman key ring in a trusted environment. This means for us that it is imperative to build the images of TowerOS and TowerOS PI in a trusted environment and to manually verify the keys.
+Note: when installing each package, `pacman` verifies that it has been signed by the authors and maintainers of Arch Linux. Therefore it is not necessary to trust the online host but above all to initialise the pacman key ring in a trusted environment. This means for us that it is imperative to build the images of TowerOS and TowerOS-ThinClient in a trusted environment and to manually verify the keys.

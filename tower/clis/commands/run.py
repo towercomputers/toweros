@@ -2,7 +2,7 @@ import os
 import sys
 
 from tower import sshconf
-from tower import nxssh
+from tower import gui
 
 def add_args(argparser):
     run_parser = argparser.add_parser(
@@ -28,7 +28,7 @@ def check_args(args, parser_error):
 
 def execute(args):
     if os.getenv('DISPLAY'):
-        nxssh.run(args.host_name[0], *args.run_command)
+        gui.run(args.host_name[0], *args.run_command)
     else:
         cmd = " ".join(['xinit'] + sys.argv + ['--', ':0', 'vt1'])
         os.system(cmd)

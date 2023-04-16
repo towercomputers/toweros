@@ -3,7 +3,7 @@ import os
 import re
 import sys
 
-from tower import provisioner, utils, sshconf
+from tower import provision, utils, sshconf
 
 logger = logging.getLogger('tower')
 
@@ -134,8 +134,8 @@ def check_args(args, parser_error):
 
 def execute(args):
     try:
-        image_path, sd_card, host_config, private_key_path = provisioner.prepare_provision(args)
-        provisioner.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
-    except provisioner.MissingEnvironmentValue as e:
+        image_path, sd_card, host_config, private_key_path = provision.prepare_provision(args)
+        provision.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
+    except provision.MissingEnvironmentValue as e:
         logger.error(e)
         sys.exit(1)
