@@ -82,7 +82,7 @@ def prepare_host_config(args):
         'HOSTNAME': name,
         'USERNAME': sshconf.DEFAULT_SSH_USER,
         'PUBLIC_KEY': public_key,
-        'ENCRYPTED_PASSWORD': sha512_crypt.hash(password),
+        'PASSWORD_HASH': sha512_crypt.hash(password),
         'KEYMAP': keymap,
         'TIMEZONE': timezone,
         'LANG': lang,
