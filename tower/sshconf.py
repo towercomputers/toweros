@@ -47,7 +47,7 @@ def update_known_hosts(ip):
         touch(known_hosts_path)
     Command('sh')('-c', f'ssh-keyscan {ip} >> {known_hosts_path}')
 
-def update_config(name, ip, private_key_path):
+def update_config(name, ip, private_key_path, password):
     insert_include_directive()
     # get existing hosts
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
@@ -75,6 +75,9 @@ def update_config(name, ip, private_key_path):
         LogLevel="FATAL"
     )
     config.write(config_path)
+    # add host password in comment below the private key path
+    sed('-i', f's/{private_key_path}/{private_key_path}\n  # {password}/')
+    logger.info(f"WARNING: For debugging purposes the host password is in `{config_path}`. Delete it as soon as you no longer need it.")
 
 def hosts():
     return ssh_config().hosts()
@@ -93,10 +96,10 @@ def discover_ip(name, network):
     time.sleep(10)
     return discover_ip(name, network)
 
-def discover_and_update(name, private_key_path, network):
-    ip = discover_ip(name, network)
+def discover_and_update(name, private_key_path, host_config):
+    ip = discover_ip(name, host_config['TOWER_NETWORK'])
     update_known_hosts(ip)
-    update_config(name, ip, private_key_path)
+    update_config(name, ip, private_key_path, host_config['PASSWORD'])
 
 def is_online(name):
     if exists(name):

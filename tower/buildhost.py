@@ -173,8 +173,9 @@ def copy_image(image_file, device):
     resize2fs(root_part)
     return boot_part, root_part
 
-@clitask("Configuring image with: {0}...")
+@clitask("Configuring image...")
 def configure_image(config):
+    logger.debug(f"Host configuration: {config}")
     # put cross platform emulator
     cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
     # put configuration scripts
