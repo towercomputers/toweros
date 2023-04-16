@@ -188,7 +188,7 @@ Provision a second online host named `web`.
 $> tower provision web --online –wlan-ssid <ssid> –wlan-password <password>
 ```
 
-Install gcalculator on the `office` offline host.
+Install galculator on the `office` offline host.
 
 ```
 $> tower install office galculator --online-host=web
