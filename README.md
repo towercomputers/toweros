@@ -15,8 +15,8 @@ For a more formal description of the Tower architecture, including a comparison 
 
 * 1.[ Installation](#1-installation)
   * 1.1. [Hardware configuration](#11-hardware-configuration)
-  * 1.2. [TowerOS Thin Client](#12-toweros-thin-client)
-  * 1.3. [Custom Thin-Client (Linux)](#13-custom-thin-client-linux)
+  * 1.2. [TowerOS-ThinClient](#12-toweros-thin-client)
+  * 1.3. [Custom Thin Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
     * 1.3.2. [Enable services](#132-enable-services)
     * 1.3.3. [Install nxproxy](#133-install-nxproxy)
@@ -27,7 +27,7 @@ For a more formal description of the Tower architecture, including a comparison 
     * 2.1.1. [Generate an image with build-image](#211-generate-an-image-with-build-image)
     * 2.1.2. [Prepare the SD card](#212-prepare-the-sd-card)
   * 2.2. [Execute a command in one of the hosts](#22-execute-a-command-in-one-of-the-hosts)
-  * 2.3. [Install an APT package on one of the hosts](#23-install-an-apt-package-on-one-of-the-hosts)
+  * 2.3. [Install an application on one of the hosts](#23-install-an-application-on-one-of-the-hosts)
   * 2.4. [List hosts and their status](#24-list-hosts-and-their-status)
   * 2.5. [Example using two hosts](#25-example-using-two-hosts)
   * 2.6. [Use with hatch](#26-use-with-hatch)
@@ -46,7 +46,7 @@ For a more formal description of the Tower architecture, including a comparison 
 
 You must have a Thin Client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
 
-### 1.2. TowerOS Thin Client
+### 1.2. TowerOS-ThinClient
 
 The easiest way to use Tower is to run the TowerOS-ThinClient GNU/Linux distribution (based on Arch Linux) on your Thin Client.
 
