@@ -6,7 +6,7 @@ set -x
 HOSTNAME="$1"
 USERNAME="$2"
 PUBLIC_KEY="$3"
-ENCRYPTED_PASSWORD="$4"
+PASSWORD_HASH="$4"
 KEYMAP="$5"
 TIMEZONE="$6"
 LANG="$7"
@@ -17,9 +17,9 @@ THIN_CLIENT_IP="${11}"
 TOWER_NETWORK="${12}"
 
 # change root password
-usermod --password "$ENCRYPTED_PASSWORD" root
+usermod --password "$PASSWORD_HASH" root
 # create first user
-useradd -m $USERNAME -p "$ENCRYPTED_PASSWORD"
+useradd -m $USERNAME -p "$PASSWORD_HASH"
 echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
 groupadd netdev
 usermod -aG netdev $USERNAME

@@ -182,7 +182,7 @@ def configure_image(config):
     cp(f'{INSTALLER_DIR}/files/towerospi_iptables.rules', wd("ROOTFS_DIR/root/"))
     # run configuration script
     args_key = [
-        "HOSTNAME", "USERNAME", "PUBLIC_KEY", "ENCRYPTED_PASSWORD",
+        "HOSTNAME", "USERNAME", "PUBLIC_KEY", "PASSWORD_HASH",
         "KEYMAP", "TIMEZONE", "LANG",
         "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY",
         "THIN_CLIENT_IP", "TOWER_NETWORK"

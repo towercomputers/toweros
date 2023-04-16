@@ -51,6 +51,7 @@ def update_config(name, ip, private_key_path):
     insert_include_directive()
     # get existing hosts
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
+    logger.info(f"Updating Tower config file at `{config_path}`")
     config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
     existing_hosts = config.hosts()
     # if name already used, update the IP
@@ -74,7 +75,6 @@ def update_config(name, ip, private_key_path):
         LogLevel="FATAL"
     )
     config.write(config_path)
-    logger.info(f"{config_path} updated")
 
 def hosts():
     return ssh_config().hosts()
@@ -87,9 +87,9 @@ def discover_ip(name, network):
     if result != "":
         ip = result.strip().split("\t").pop()
         if ip_address(ip) in ip_network(network):
-            logger.info(f"IP found: {ip}")
+            logger.info(f"Host found at: {ip}")
             return ip
-    logger.info(f"Fail to discover the IP for {name}. Retrying in 10 seconds.")
+    logger.info(f"Failed to discover the IP address for {name}. Retrying in 10 seconds.")
     time.sleep(10)
     return discover_ip(name, network)
 
@@ -112,7 +112,7 @@ def status(host_name = None):
         host_config = get(host_name)
         host_status = 'up'
         try:
-            ssh(host_name, 'ls') # any ssh command sould make the job
+            ssh(host_name, 'ls') # Running a command over SSH command should tell us if the host is up.
         except ErrorReturnCode:
             host_status = 'down'
         online = is_online(host_name) if host_status == 'up' else "N/A"

@@ -82,7 +82,7 @@ def prepare_host_config(args):
         'HOSTNAME': name,
         'USERNAME': sshconf.DEFAULT_SSH_USER,
         'PUBLIC_KEY': public_key,
-        'ENCRYPTED_PASSWORD': sha512_crypt.hash(password),
+        'PASSWORD_HASH': sha512_crypt.hash(password),
         'KEYMAP': keymap,
         'TIMEZONE': timezone,
         'LANG': lang,
@@ -122,9 +122,11 @@ def prepare_provision(args):
     # return everything needed to provision the host
     return image_path, sd_card, host_config, private_key_path
 
-@utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {}")
+@utils.clitask("Provisioning `{0}`...", timer_message="Host provisioned in {}s")
 def provision(name, image_path, sd_card, host_config, private_key_path):
     towerospi.burn_image(image_path, sd_card, host_config)
-    logger.info(f"SD Card ready. Please insert the SD-Card in the Raspberry-PI, turn it on and wait for it to be detected on the network.")
+    logger.info(f"SD Card ready. Please insert the SD Card into the Host computer, then turn it on and wait for it to be detected on the network.")
     sshconf.discover_and_update(name, private_key_path, host_config['TOWER_NETWORK'])
-
+    print(f"Access the host `web` with the command `$ ssh web`.")
+    print(f"Install a package on `web` with the command `$ tower install web <package-name>`")
+    print(f"Run a GUI application on `web` with the command `$ tower run web <package-name>`")
