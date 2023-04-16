@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling==1.14.0"]
 build-backend = "hatchling.build"
 
 [project]
 name = "tower-tools"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Tower tools"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -13,33 +13,22 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "gevent",
-    "x2go @ https://code.x2go.org/releases/source/python-x2go/python-x2go-0.6.1.3.tar.gz",
-    "python-xlib==0.33",
+    "setuptools==67.6.1",
     "requests==2.27.1",
     "sh==1.14.3",
-    "backports.pbkdf2==0.1",
     "passlib==1.7.4",
+    "backports.pbkdf2==0.1",
     "sshconf==0.2.5",
-    "hatchling",
-    "wheel"
+    "hatchling==1.14.0",
+    "wheel==0.40.0"
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["tower"]
-
-[tool.hatch.build]
-include = [
-  "tower/raspberrypios/*.patch",
-  "tower/archlinux/installer/*",
-]
+only-include = ["tower", "scripts"]
 
 [project.scripts]
 tower = "tower.clis.tower:main"
-build-tower-image = "tower.clis.buildimage:main"
+build-tower-image = "tower.clis.buildtowerimage:main"
 
-[tool.hatch.metadata]
-allow-direct-references=true
-
-#[tool.hatch.envs.default]
-#python = "/opt/homebrew/opt/python@3.10/bin/python3.10"
+[tool.hatch.version]
+path = "tower/__about__.py"
