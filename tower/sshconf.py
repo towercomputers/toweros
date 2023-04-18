@@ -10,6 +10,9 @@ DEFAULT_SSH_USER = "tower"
 
 logger = logging.getLogger('tower')
 
+class UnkownHost(Exception):
+    pass
+
 def insert_include_directive():
     config_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
     master_config_path = os.path.join(config_dir, 'config')
@@ -38,6 +41,11 @@ def get(name):
         return config.host(name)
     else:
         return None
+
+def clean_known_hosts(ip):
+    known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
+    if os.path.exists(known_hosts_path):
+        sed('-i', f'/{ip}/d', known_hosts_path)
 
 def update_known_hosts(ip):
     known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
@@ -76,7 +84,7 @@ def update_config(name, ip, private_key_path, password):
     )
     config.write(config_path)
     # add host password in comment below the private key path
-    sed('-i', f's/{private_key_path}/{private_key_path}\n  # {password}/')
+    sed('-i', f's/{private_key_path}/{private_key_path}\n  # {password}/', config_path)
     logger.info(f"WARNING: For debugging purposes the host password is in `{config_path}`. Delete it as soon as you no longer need it.")
 
 def hosts():
@@ -85,20 +93,30 @@ def hosts():
 def exists(name):
     return name in hosts()
 
-def discover_ip(name, network):
+def is_host(ip, private_key_path, network):
+    if ip_address(ip) not in ip_network(network):
+        return False
+    try:
+        update_known_hosts(ip)
+        ssh('-i', private_key_path, f'{DEFAULT_SSH_USER}@{ip}', 'ls') # Running a command over SSH command should tell us if the key is correct.
+    except ErrorReturnCode:
+        clean_known_hosts(ip)
+        return False
+    return True
+
+def discover_ip(name, private_key_path, network):
     result = avahi_resolve('-4', '-n', f'{name}.local')
     if result != "":
         ip = result.strip().split("\t").pop()
-        if ip_address(ip) in ip_network(network):
+        if is_host(ip, private_key_path, network):
             logger.info(f"Host found at: {ip}")
             return ip
     logger.info(f"Failed to discover the IP address for {name}. Retrying in 10 seconds.")
     time.sleep(10)
-    return discover_ip(name, network)
+    return discover_ip(name, private_key_path, network)
 
 def discover_and_update(name, private_key_path, host_config):
-    ip = discover_ip(name, host_config['TOWER_NETWORK'])
-    update_known_hosts(ip)
+    ip = discover_ip(name, private_key_path, host_config['TOWER_NETWORK'])
     update_config(name, ip, private_key_path, host_config['PASSWORD'])
 
 def is_online(name):

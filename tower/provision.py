@@ -22,9 +22,6 @@ logger = logging.getLogger('tower')
 class MissingEnvironmentValue(Exception):
     pass
 
-class UnkownHost(Exception):
-    pass
-
 def check_environment_value(key, value):
     if not value:
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
