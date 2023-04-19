@@ -20,6 +20,7 @@ echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
 groupadd netdev
 usermod -aG netdev $USERNAME
 echo 'export PATH=~/.local/bin:$PATH' >> /home/$USERNAME/.bash_profile
+echo "exec startlxqt" > /home/$USERNAME/.xinitrc
 # set locales
 ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 hwclock --systohc
