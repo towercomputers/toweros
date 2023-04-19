@@ -3,11 +3,10 @@ import os
 import random
 import uuid
 import logging
-import sys
 import time
 
 import sh
-from sh import ssh, nxproxy, xinit
+from sh import ssh, nxproxy
 
 logger = logging.getLogger('tower')
 
