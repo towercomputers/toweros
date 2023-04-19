@@ -1,8 +1,9 @@
 import os
 import logging
+import sys
 from urllib.parse import urlparse
 
-from sh import ssh, scp, rm, Command
+from sh import ssh, scp, rm, Command, ErrorReturnCode
 
 from tower.utils import clitask
 
@@ -61,12 +62,14 @@ def kill_ssh(arch="armv7h"):
     killcmd = f"ps -ef | grep '{LOCAL_TUNNELING_PORT}:{repo_host}:443' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     Command('sh')('-c', killcmd)
 
-@clitask("Cleaning up...")
 def cleanup(host, arch="armv7h"):
+    logger.info("Cleaning up...")
     kill_ssh(arch)
     cleanup_offline_host(host, arch)
 
-@clitask("Installing {2} in {0}...", timer_message="Package(s) installed in {0}.")
+sprint = lambda str: print(str, end='', flush=True)
+
+@clitask("Installing {2} in {0}...")
 def install_in_offline_host(host, online_host, packages):
     try:
         # prepare offline host
@@ -80,12 +83,17 @@ def install_in_offline_host(host, online_host, packages):
         )
         # run pacman in offline host
         logger.info(f"Running pacman in {host}...")
-        ssh(
-            '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-v',
-            host,
-            f"sudo pacman --config ~/pacman.offline.{host}.conf --noconfirm -Suy {' '.join(packages)}",
-            _err_to_out=True, _out=logger.debug
-        )
+        try:
+            ssh(
+                '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
+                host,
+                f"sudo pacman --config ~/pacman.offline.{host}.conf -Suy {' '.join(packages)}",
+                _err=sprint, _out=sprint, _in=sys.stdin,
+                _out_bufsize=0, _err_bufsize=0,
+            )
+            logger.info("Package(s) installed.")
+        except ErrorReturnCode:
+            pass # error in remote host is already displayed
     finally:
         cleanup(host, "armv7h")
 
@@ -93,8 +101,12 @@ def install_in_offline_host(host, online_host, packages):
 @clitask("Installing {1} in {0}...", timer_message="Package(s) installed in {0}.")
 def install_in_online_host(host, packages):
     # we just need to run pacman with ssh...
-    ssh(
-        host,
-        f"sudo pacman --noconfirm -Suy {' '.join(packages)}",
-        _err_to_out=True, _out=logger.debug
-    )
+    try:
+        ssh(
+            '-t', host,
+            f"sudo pacman -Suy {' '.join(packages)}",
+            _err=sprint, _out=sprint, _in=sys.stdin,
+            _out_bufsize=0, _err_bufsize=0,
+        )
+    except ErrorReturnCode:
+        pass # error in remote host is already displayed
