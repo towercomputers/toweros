@@ -34,12 +34,5 @@ def execute(args):
     if os.getenv('DISPLAY'):
         gui.run(args.host_name[0], *args.run_command)
     else:
-        # TODO: find a more elegant way or remove ?
-        clean_startup = "sed -i \'/\\[startup\\]/d\' ~/.fluxbox/apps"
-        run_command = " ".join(sys.argv)
-        startup_line = f'[startup] {{{clean_startup} && {run_command}}}'
-        add_startup = f'echo "{startup_line}" >> ~/.fluxbox/apps'
-        cmd = f"{add_startup} && startx"
-        os.system(cmd)
-        #logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to run the desktop then right click to see all installed application.")
+        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to run the desktop then right click to see all installed application.")
     
