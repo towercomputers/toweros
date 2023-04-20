@@ -33,5 +33,5 @@ def execute(args):
     if os.getenv('DISPLAY'):
         gui.run(args.host_name[0], *args.run_command)
     else:
-        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to run the desktop and retry.")
+        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to run the desktop then right click to see all installed application.")
     

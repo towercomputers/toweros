@@ -2,10 +2,11 @@ import os
 import logging
 import sys
 from urllib.parse import urlparse
+import json
 
 from sh import ssh, scp, rm, Command, ErrorReturnCode
 
-from tower.utils import clitask
+from tower.utils import clitask, add_installed_package
 
 logger = logging.getLogger('tower')
 
@@ -20,6 +21,8 @@ REPOS = {
     'x86_64': ['core', 'extra', 'community'],
 }
 LOCAL_TUNNELING_PORT = 4666
+
+sprint = lambda str: print(str, end='', flush=True)
 
 def prepare_pacman_conf(host, arch="armv7h"):
     file_name = os.path.join(os.path.expanduser('~'), f'pacman.offline.{host}.conf')
@@ -67,8 +70,6 @@ def cleanup(host, arch="armv7h"):
     kill_ssh(arch)
     cleanup_offline_host(host, arch)
 
-sprint = lambda str: print(str, end='', flush=True)
-
 @clitask("Installing {2} in {0}...")
 def install_in_offline_host(host, online_host, packages):
     try:
@@ -91,7 +92,9 @@ def install_in_offline_host(host, online_host, packages):
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
             )
-            logger.info("Package(s) installed.")
+            for package in packages:
+                add_installed_package(host, package)
+            logger.info("Package(s) installed.")   
         except ErrorReturnCode:
             pass # error in remote host is already displayed
     finally:
@@ -108,5 +111,7 @@ def install_in_online_host(host, packages):
             _err=sprint, _out=sprint, _in=sys.stdin,
             _out_bufsize=0, _err_bufsize=0,
         )
+        for package in packages:
+            add_installed_package(host, package)
     except ErrorReturnCode:
         pass # error in remote host is already displayed

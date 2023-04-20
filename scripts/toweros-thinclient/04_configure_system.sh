@@ -23,7 +23,6 @@ echo 'export PATH=~/.local/bin:$PATH' >> /home/$USERNAME/.bash_profile
 # configure fluxbox
 echo "exec startfluxbox" > /home/$USERNAME/.xinitrc
 cp /root/fluxbox_startup /home/$USERNAME/.fluxbox/startup
-sed -i 's/[exec] (xterm) {xterm}/[include] (~\/.fluxbox\/tower-menu)/' /home/$USERNAME/.fluxbox/menu
 sed -i 's/\[exec\] (xterm) {xterm}/\[include\] (~\/\.fluxbox\/tower-menu)/' /home/$USERNAME/.fluxbox/menu
 sed -i '/[exec] (firefox) {}/d' /home/$USERNAME/.fluxbox/menu
 # fix ownership
