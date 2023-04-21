@@ -1,17 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 import os
-import sys
-from pathlib import Path
-import shutil
-import tempfile
-import time
 import glob
 import getpass
 import re
 
-import sh
-from sh import pacman, git, rm, cp, repo_add, makepkg, pip, mkarchiso, chown, bsdtar, Command, mkdir
+from sh import pacman, rm, cp, repo_add, pip, mkarchiso, chown, bsdtar, Command, mkdir
 
 from tower import buildhost, utils
 from tower.utils import clitask

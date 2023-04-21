@@ -15,8 +15,11 @@ base-devel
 archiso
 xorg-server
 xorg-xinit
-lxqt
-breeze-icons
+xorg-xsetroot
+fontconfig
+gnu-free-fonts
+parcellite
+fluxbox
 nx-headers
 nxproxy
 qemu-user-static

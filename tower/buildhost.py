@@ -1,15 +1,12 @@
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
-import math
-import glob
 
-import sh
 from sh import (
-    Command, ErrorReturnCode,
-    mount, umount, parted, mkdosfs, genfstab, resize2fs, tee, cat,
-    cp, rm, sync, rsync, chown, truncate, mkdir, ls,
+    Command,
+    mount, parted, mkdosfs, resize2fs, tee, cat,
+    cp, rm, sync, rsync, chown, truncate,
     arch_chroot, 
     bsdtar, xz,
     losetup, 

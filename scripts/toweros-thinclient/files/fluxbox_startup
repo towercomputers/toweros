@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Change your keymap:
+xmodmap "~/.Xmodmap"
+
+## clipboard manager
+clipmgr=$(type -p parcellite)
+[ -x "$clipmgr" ] && "$clipmgr" &
+
+# And last but not least we start fluxbox.
+exec fluxbox -log "~/.fluxbox/log"

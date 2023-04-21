@@ -1,17 +1,9 @@
 import os
 import secrets
-import sys
-import time
 import logging
-from urllib.parse import urlparse
-import hashlib
-import glob
 
-import requests
 from passlib.hash import sha512_crypt
-import sh
-from sh import ssh, scp, ssh_keygen, xz, cat, mount, parted
-from sh import Command, ErrorReturnCode_1, ErrorReturnCode
+from sh import ssh_keygen, xz
 
 from tower import utils
 from tower import buildhost

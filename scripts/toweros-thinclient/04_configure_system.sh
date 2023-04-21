@@ -20,7 +20,13 @@ echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
 groupadd netdev
 usermod -aG netdev $USERNAME
 echo 'export PATH=~/.local/bin:$PATH' >> /home/$USERNAME/.bash_profile
-echo "exec startlxqt" > /home/$USERNAME/.xinitrc
+# configure fluxbox
+echo "exec startfluxbox" > /home/$USERNAME/.xinitrc
+cp /root/fluxbox_startup /home/$USERNAME/.fluxbox/startup
+sed -i 's/\[exec\] (xterm) {xterm}/\[include\] (~\/\.fluxbox\/tower-menu)/' /home/$USERNAME/.fluxbox/menu
+sed -i '/[exec] (firefox) {}/d' /home/$USERNAME/.fluxbox/menu
+# fix ownership
+chown -R $USERNAME:$USERNAME /home/$USERNAME
 # set locales
 ln -sf /usr/share/zoneinfo/$TIMEZONE /etc/localtime
 hwclock --systohc

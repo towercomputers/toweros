@@ -11,6 +11,7 @@ sh 02_prepare_drive.sh $TARGET_DRIVE
 sh 03_install_pacman_packages.sh
 
 cp 04_configure_system.sh /mnt/root/
+cp fluxbox_startup /mnt/root/
 arch-chroot /mnt sh /root/04_configure_system.sh "$ROOT_PASSWORD" "$USERNAME" "$PASSWORD" "$LANG" "$TIMEZONE" "$KEYMAP" "$TARGET_DRIVE"
 rm /mnt/root/04_configure_system.sh
 
