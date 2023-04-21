@@ -6,7 +6,7 @@ import logging
 import time
 
 import sh
-from sh import ssh, nxproxy
+from sh import ssh, nxproxy, xsetroot
 
 logger = logging.getLogger('tower')
 
@@ -147,10 +147,12 @@ def kill_nx_processes(hostname, display_num):
 def cleanup(hostname, display_num):
     kill_nx_processes(hostname, display_num)
     revoke_cookies(hostname, display_num)
+    xsetroot('-cursor_name', 'left_ptr')
 
 def run(hostname, *cmd):
     app_process = None
     try:
+        xsetroot('-cursor_name', 'watch')
         display_num = get_next_display_num(hostname)
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
@@ -160,8 +162,10 @@ def run(hostname, *cmd):
         logger.info(f"run {' '.join(cmd)}")
         app_process = ssh(
             hostname, f"DISPLAY=:{display_num}", *cmd,
-            _out=logger.info, _err_to_out=True
+            _out=logger.info, _err_to_out=True, _bg=True
         )
+        xsetroot('-cursor_name', 'left_ptr')
+        app_process.wait()
     except NxTimeoutException:
         logger.error("Failed to initialize NX, please check the log above.")
     except KeyboardInterrupt:

@@ -15,6 +15,7 @@ base-devel
 archiso
 xorg-server
 xorg-xinit
+xorg-xsetroot
 fontconfig
 gnu-free-fonts
 parcellite

@@ -1,7 +1,5 @@
 import os
-import sys
 import logging
-import time
 
 from tower import sshconf
 from tower import gui
@@ -34,5 +32,5 @@ def execute(args):
     if os.getenv('DISPLAY'):
         gui.run(args.host_name[0], *args.run_command)
     else:
-        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to run the desktop then right click to see all installed application.")
+        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to start Xorg.")
     

@@ -27,7 +27,7 @@ def generate_fluxbox_menu():
     menu.close()
 
 def get_installed_packages():
-    json_file = os.path.join(os.path.expanduser('~'), '.config', 'tower', 'tower-menu.json')
+    json_file = os.path.join(os.path.expanduser('~'), '.config', 'tower', 'desktop.json')
     if os.path.exists(json_file):
         return json.load(open(json_file, 'r'))
     return {}
@@ -36,7 +36,7 @@ def save_installed_packages(installed_packages):
     conf_dir = os.path.join(os.path.expanduser('~'), '.config', 'tower')
     if not os.path.exists(conf_dir):
         os.makedirs(conf_dir)
-    json_file = os.path.join(conf_dir, 'tower-menu.json')
+    json_file = os.path.join(conf_dir, 'desktop.json')
     json.dump(installed_packages, open(json_file, 'w'))
     generate_fluxbox_menu()
 
