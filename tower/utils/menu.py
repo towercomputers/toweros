@@ -26,6 +26,8 @@ def copy_desktop_files(host, package):
             scp(f"{host}:{desktop_file_path}", locale_file_path)
             # add `tower run <host>` in each Exec line.
             sed('-i', f's/Exec=/Exec=tower run {host} /g', locale_file_path)
+            # prefix application name with host name
+            sed('-i', f's/Name=/Name=[{host}] /g', locale_file_path)
             # with sudo copy .desktop file in the same folder as the host
             with sh.contrib.sudo(password="", _with=True):
                 mkdir('-p', desktop_folder)
