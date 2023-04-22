@@ -91,12 +91,11 @@ def install_in_offline_host(host, online_host, packages):
                 f"sudo pacman --config ~/pacman.offline.{host}.conf -Suy {' '.join(packages)}",
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
-            )
-            for package in packages:
-                add_installed_package(host, package)
-            logger.info("Package(s) installed.")   
+            )  
         except ErrorReturnCode:
             pass # error in remote host is already displayed
+        for package in packages:
+            add_installed_package(host, package)
     finally:
         cleanup(host, "armv7h")
 

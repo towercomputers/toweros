@@ -2,7 +2,11 @@ import os
 import json
 from io import StringIO
 
-from sh import ssh
+import sh
+from sh import ssh, mkdir, sed, scp, mv
+
+from tower.utils import clitask
+
 
 def get_package_binaries(host, package):
     binaries = []
@@ -12,6 +16,23 @@ def get_package_binaries(host, package):
             binaries.append(binary)
     return binaries
 
+@clitask("Copying desktop files from host to thinclient...")
+def copy_desktop_files(host, package):
+    for line in ssh(host, 'sudo', 'pacman', '-Ql', package, _iter=True):
+        if line.strip().endswith('.desktop'):
+            desktop_file_path = line.split(" ").pop().strip()
+            desktop_folder, desktop_file_name = os.path.split(desktop_file_path)
+            locale_file_path = os.path.expanduser(f'~/{desktop_file_name}')
+            # copy desktop file with in user directory
+            scp(f"{host}:{desktop_file_path}", os.path.expanduser('~'))
+            # add `tower run <host>` in each Exec line.
+            sed('-i', f's/Exec=/Exec=tower run {host} /g', locale_file_path)
+            # with sudo copy .desktop file in the same folder as the host
+            with sh.contrib.sudo(password="", _with=True):
+                mkdir('-p', desktop_folder)
+                mv(locale_file_path, desktop_folder)
+
+@clitask("Updating fluxbox menu")
 def generate_fluxbox_menu():
     menu_file = os.path.join(os.path.expanduser('~'), '.fluxbox', 'tower-menu')
     menu = open(menu_file, 'w')
@@ -45,8 +66,8 @@ def add_installed_package(host, package):
     if host not in installed_packages:
         installed_packages[host] = {}
     binaries = get_package_binaries(host, package)
-    if not binaries:
-        raise Exception(f"No binary found for the package `{package}`")
-    installed_packages[host][package] = binaries
-    save_installed_packages(installed_packages)
+    if binaries:
+        installed_packages[host][package] = binaries
+        save_installed_packages(installed_packages)
+        copy_desktop_files(host, package)
     
