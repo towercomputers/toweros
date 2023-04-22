@@ -79,7 +79,8 @@ def prepare_archiso(builds_dir, rpi_image_path):
     # copy installer, pacman and pip packages
     cp('-r', '/usr/share/archiso/configs/releng/', wd('archiso'))
     root_path = os.path.join(wd('archiso'), 'airootfs', 'root')
-    installer_files = glob.glob(os.path.join(INSTALLER_DIR, '*'))
+    installer_files = glob.glob(os.path.join(INSTALLER_DIR, '*.sh'))
+    installer_files += glob.glob(os.path.join(INSTALLER_DIR, '*.py'))
     installer_files += glob.glob(os.path.join(INSTALLER_DIR, 'files', '*'))
     for f in installer_files:
         cp(f, root_path)
