@@ -80,6 +80,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
     cp('-r', '/usr/share/archiso/configs/releng/', wd('archiso'))
     root_path = os.path.join(wd('archiso'), 'airootfs', 'root')
     installer_files = glob.glob(os.path.join(INSTALLER_DIR, '*.sh'))
+    installer_files += glob.glob(os.path.join(INSTALLER_DIR, '*.py'))
     installer_files += glob.glob(os.path.join(INSTALLER_DIR, 'files', '*'))
     for f in installer_files:
         cp(f, root_path)
@@ -88,7 +89,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
     cp(os.path.join(INSTALLER_DIR, 'files', 'grub.cfg'), os.path.join(wd('archiso'), 'grub'))
     # add packages needed by the installer
     package_list = os.path.join(wd('archiso'), 'packages.x86_64')
-    add_packages = ["xorg-server", "xorg-xinit", "yad"]
+    add_packages = ["python", "python-rich", "python-sh", "figlet"]
     for pkg in add_packages:
         Command('sh')('-c', f'echo "{pkg}" >>  {package_list}')
     # start installer on login

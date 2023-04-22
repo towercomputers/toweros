@@ -3,7 +3,7 @@
 set -e
 set -x
 
-sh 01_ask_configuration.sh
+python 01_ask_configuration.py
 . ./tower.env
 
 sh 02_prepare_drive.sh $TARGET_DRIVE
