@@ -1,12 +1,10 @@
 import os
 import json
-from io import StringIO
 
 import sh
 from sh import ssh, mkdir, sed, scp, mv
 
 from tower.utils import clitask
-
 
 def get_package_binaries(host, package):
     binaries = []
@@ -22,9 +20,10 @@ def copy_desktop_files(host, package):
         if line.strip().endswith('.desktop'):
             desktop_file_path = line.split(" ").pop().strip()
             desktop_folder, desktop_file_name = os.path.split(desktop_file_path)
-            locale_file_path = os.path.expanduser(f'~/{desktop_file_name}')
+            # prefix file with the host name
+            locale_file_path = os.path.expanduser(f'~/{host}-{desktop_file_name}')
             # copy desktop file with in user directory
-            scp(f"{host}:{desktop_file_path}", os.path.expanduser('~'))
+            scp(f"{host}:{desktop_file_path}", locale_file_path)
             # add `tower run <host>` in each Exec line.
             sed('-i', f's/Exec=/Exec=tower run {host} /g', locale_file_path)
             # with sudo copy .desktop file in the same folder as the host
