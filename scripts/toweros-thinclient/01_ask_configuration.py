@@ -13,7 +13,9 @@ from rich.console import Console
 
 from sh import lsscsi, figlet
 
-LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files', 'locale.json')
+LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
+if not os.path.exists(LOCALE_FILE):
+    LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files', 'locale.json')
 with open(LOCALE_FILE, "r") as fp:
     LOCALE = json.load(fp)
 
@@ -32,14 +34,19 @@ def print_error(text):
     error_text.stylize("bold red")
     rprint(error_text)
 
-def select_value(values, title, ask, clean_values=''):
+def select_value(values, title, ask, clean_values='', no_columns=False):
     if title:
         print_title(title)
     else:
-        rprint("")
+        print()
     choices = [f"({i + 1}) {r.replace(clean_values, '')}" for i, r in enumerate(values)]
-    columns = Columns(choices, equal=True, expand=True, column_first=True)
-    rprint(columns, "")
+    if no_columns:
+        for value in choices:
+            rprint(value)
+        print()
+    else:
+        columns = Columns(choices, equal=True, expand=True, column_first=True)
+        rprint(columns, "")
     ask_text = Text(f"{ask} [1-{len(choices)}]")
     ask_text.stylize("bold")
     valid_choices = [f"{i + 1}" for i in range(len(choices))]
@@ -95,7 +102,8 @@ def get_target_drive():
     drive = select_value(
         DRIVES,
         "Please select the drive where you want to install TowerOS",
-        "Target drive"
+        "Target drive",
+        no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
@@ -137,7 +145,7 @@ def confirm_config(config):
     print_value("Timezone", config['TIMEZONE'])
     print_value("Keyboard", config['KEYMAP'])
     print_value("Username", config['USERNAME'])
-    return Confirm.ask("\nis the configuration correct?")
+    return Confirm.ask("\nIs the configuration correct?")
 
 def ask_config():
     Console().clear()
