@@ -6,7 +6,7 @@ import logging
 import time
 
 import sh
-from sh import ssh, nxproxy, xsetroot
+from sh import ssh, nxproxy, xsetroot, mcookie
 
 logger = logging.getLogger('tower')
 
@@ -61,7 +61,7 @@ def get_home(hostname):
     return ssh_command(hostname, 'echo', '$HOME')
 
 def generate_magic_cookie():
-    return hex(random.getrandbits(128))[2:]
+    return mcookie()
 
 def authorize_cookie(hostname, cookie, display_num):
     xauthority_path = os.path.join(get_home(hostname), ".Xauthority")
