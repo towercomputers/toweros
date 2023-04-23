@@ -26,6 +26,8 @@ mkdir -p /home/$USERNAME/.fluxbox
 cp /root/fluxbox_startup /home/$USERNAME/.fluxbox/startup
 cp /usr/share/fluxbox/menu /home/$USERNAME/.fluxbox/menu
 sed -i 's/\[exec\] (firefox) {}/\[include\] (~\/\.fluxbox\/tower-menu)/' /home/$USERNAME/.fluxbox/menu
+# put README in home folder
+cp /root/README.md /home/$USERNAME/
 # fix ownership
 chown -R $USERNAME:$USERNAME /home/$USERNAME
 # set locales

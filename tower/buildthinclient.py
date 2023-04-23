@@ -17,6 +17,7 @@ TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 
 WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-thinclient-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-thinclient')
+README_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'README.md')
 
 def wd(path):
     return os.path.join(WORKING_DIR, path)
@@ -82,6 +83,7 @@ def prepare_archiso(builds_dir, rpi_image_path):
     installer_files = glob.glob(os.path.join(INSTALLER_DIR, '*.sh'))
     installer_files += glob.glob(os.path.join(INSTALLER_DIR, '*.py'))
     installer_files += glob.glob(os.path.join(INSTALLER_DIR, 'files', '*'))
+    installer_files += [README_PATH]
     for f in installer_files:
         cp(f, root_path)
     cp('-r', wd('pacman-packages'), root_path)

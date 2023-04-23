@@ -26,3 +26,4 @@ qemu-user-static
 rsync
 parted
 xterm
+net-tools
