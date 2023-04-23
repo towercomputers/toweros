@@ -42,7 +42,7 @@ echo "KEYMAP=$KEYBOARD_LAYOUT" > /etc/vconsole.conf
 echo "XKBLAYOUT=$KEYBOARD_LAYOUT"  >> /etc/vconsole.conf
 echo "XKBVARIANT=$XKBVARIANT"  >> /etc/vconsole.conf
 echo "XKBMODEL=pc105"  >> /etc/vconsole.conf
-cat <<EOF > /mnt//etc/X11/xorg.conf.d/00-keyboard.conf
+cat <<EOF > /etc/X11/xorg.conf.d/00-keyboard.conf
 Section "InputClass"
         Identifier "system-keyboard"
         MatchIsKeyboard "on"

@@ -61,7 +61,7 @@ def get_home(hostname):
     return ssh_command(hostname, 'echo', '$HOME')
 
 def generate_magic_cookie():
-    return mcookie()
+    return mcookie().strip()
 
 def authorize_cookie(hostname, cookie, display_num):
     xauthority_path = os.path.join(get_home(hostname), ".Xauthority")
