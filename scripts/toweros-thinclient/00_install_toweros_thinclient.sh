@@ -13,7 +13,9 @@ sh 03_install_pacman_packages.sh
 cp 04_configure_system.sh /mnt/root/
 cp fluxbox_startup /mnt/root/
 cp README.md /mnt/root/
-arch-chroot /mnt sh /root/04_configure_system.sh "$ROOT_PASSWORD" "$USERNAME" "$PASSWORD" "$LANG" "$TIMEZONE" "$KEYMAP" "$TARGET_DRIVE"
+arch-chroot /mnt sh /root/04_configure_system.sh \
+    "$ROOT_PASSWORD" "$USERNAME" "$PASSWORD" \
+    "$LANG" "$TIMEZONE" "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT" "$TARGET_DRIVE"
 rm /mnt/root/04_configure_system.sh
 
 cp 05_configure_firewall.sh /mnt/root/

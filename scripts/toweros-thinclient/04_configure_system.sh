@@ -6,11 +6,11 @@ set -x
 ROOT_PASSWORD=$1
 USERNAME=$2
 PASSWORD=$3
-
 LANG=$4
 TIMEZONE=$5
-KEYMAP=$6
-TARGET_DRIVE=$7
+KEYBOARD_LAYOUT=$6
+KEYBOARD_VARIANT=$7
+TARGET_DRIVE=$8
 
 # change root password
 usermod --password $(echo $ROOT_PASSWORD | openssl passwd -1 -stdin) root
@@ -37,7 +37,7 @@ cp /etc/locale.gen /etc/locale.gen.list
 echo "$LANG UTF-8" > /etc/locale.gen
 locale-gen
 echo "LANG=$LANG" > /etc/locale.conf
-localectl set-x11-keymap "$KEYMAP"
+localectl set-x11-keymap "$KEYBOARD_LAYOUT" "" "$KEYBOARD_VARIANT"
 # set hostname
 echo "tower" > /etc/hostname
 # install boot loader

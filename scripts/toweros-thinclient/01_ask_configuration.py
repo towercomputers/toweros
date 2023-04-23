@@ -58,10 +58,13 @@ def select_value(values, title, ask, clean_values='', no_columns=False):
 
 def select_sub_value(values, title, ask, sub_values, sub_ask, back_text):
     value1 = select_value(values, title, ask)
-    choices = [*sub_values[value1], f'<-- {back_text}']
-    value2 = select_value(choices, None, sub_ask)
-    if value2 == f'<-- {back_text}':
-        return select_sub_value(values, title, ask, sub_values, sub_ask, back_text)
+    if value1 in sub_values:
+        choices = [*sub_values[value1], f'<-- {back_text}']
+        value2 = select_value(choices, None, sub_ask)
+        if value2 == f'<-- {back_text}':
+            return select_sub_value(values, title, ask, sub_values, sub_ask, back_text)
+    else:
+        value2 = ""
     return [value1, value2]
 
 def select_by_letter(title, ask1, ask2, values):
@@ -126,14 +129,16 @@ def get_timezone():
     ))
 
 def get_keymap():
-    return select_sub_value(
-        KEYBOARDS["families"], 
-        "Please select the family of your keyboard:", 
-        "Enter the number of your keyboard family",
-        KEYBOARDS["keyboardsByFamily"], 
+    layout, variant = select_sub_value(
+        KEYBOARDS["layouts"],
+        "Please select the layout of your keyboard:",
         "Enter the number of your keyboard layout",
-        "Select another family"
-    ).pop()
+        KEYBOARDS["variantsByLayout"],
+        "Enter the number of your keyboard variant",
+        "Select another layout"
+    )
+    variant = "" if variant == "No Variant" else variant
+    return layout, variant
 
 def print_value(label, value):
     rprint(Text.assemble((f"{label}: ", "bold"), value))
@@ -143,7 +148,8 @@ def confirm_config(config):
     print_value("Target drive", config['TARGET_DRIVE'])
     print_value("Language", config['LANG'])
     print_value("Timezone", config['TIMEZONE'])
-    print_value("Keyboard", config['KEYMAP'])
+    print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
+    print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
     print_value("Username", config['USERNAME'])
     return Confirm.ask("\nIs the configuration correct?")
 
@@ -156,7 +162,7 @@ def ask_config():
         config['TARGET_DRIVE'] = get_target_drive()
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
-        config['KEYMAP'] = get_keymap()
+        config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
         config['USERNAME'], config['PASSWORD'] = get_user_information()
         config['ROOT_PASSWORD'] = config['PASSWORD']
         confirmed = confirm_config(config)
