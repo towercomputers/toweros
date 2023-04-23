@@ -55,6 +55,19 @@ def update_known_hosts(ip):
         touch(known_hosts_path)
     Command('sh')('-c', f'ssh-keyscan {ip} >> {known_hosts_path}')
 
+def sed_escape(str):
+    escaped = str
+    for c in "\$.*/[]^":
+        escaped = escaped.replace(c, f'\{c}')
+    return escaped
+
+def insert_password(name, password):
+    config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
+    # add host password in comment below the host name
+    escaped_pwd = sed_escape(password)
+    sed('-i', f's/Host {name}/Host {name}\\n  # {escaped_pwd}/', config_path)
+    logger.info(f"WARNING: For debugging purposes the host password is in `{config_path}`. Delete it as soon as you no longer need it.")
+
 def update_config(name, ip, private_key_path, password):
     insert_include_directive()
     # get existing hosts
@@ -66,6 +79,7 @@ def update_config(name, ip, private_key_path, password):
     if name in existing_hosts:
         config.set(name, Hostname=ip)
         config.save()
+        insert_password(name, password)
         return
     # if IP already used, update the name
     for host_name in existing_hosts:
@@ -74,6 +88,7 @@ def update_config(name, ip, private_key_path, password):
             config.rename(host_name, name)
             config.set(name, IdentityFile=private_key_path)
             config.save()
+            insert_password(name, password)
             return
     # if not exists, create a new host
     config.add(name,
@@ -83,10 +98,8 @@ def update_config(name, ip, private_key_path, password):
         LogLevel="FATAL"
     )
     config.write(config_path)
-    # add host password in comment below the private key path
-    sed('-i', f's/{private_key_path}/{private_key_path}\n  # {password}/', config_path)
-    logger.info(f"WARNING: For debugging purposes the host password is in `{config_path}`. Delete it as soon as you no longer need it.")
-
+    insert_password(name, password)
+    
 def hosts():
     return ssh_config().hosts()
 
