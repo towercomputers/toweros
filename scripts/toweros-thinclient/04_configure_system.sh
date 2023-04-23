@@ -37,7 +37,20 @@ cp /etc/locale.gen /etc/locale.gen.list
 echo "$LANG UTF-8" > /etc/locale.gen
 locale-gen
 echo "LANG=$LANG" > /etc/locale.conf
-localectl set-x11-keymap "$KEYBOARD_LAYOUT" "" "$KEYBOARD_VARIANT"
+# configure keyboard
+echo "KEYMAP=$KEYBOARD_LAYOUT" > /etc/vconsole.conf
+echo "XKBLAYOUT=$KEYBOARD_LAYOUT"  >> /etc/vconsole.conf
+echo "XKBVARIANT=$XKBVARIANT"  >> /etc/vconsole.conf
+echo "XKBMODEL=pc105"  >> /etc/vconsole.conf
+cat <<EOF > /mnt//etc/X11/xorg.conf.d/00-keyboard.conf
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "$KEYBOARD_LAYOUT"
+        Option "XkbModel" "pc105"
+        Option "XkbVariant" "$KEYBOARD_VARIANT"
+EndSection
+EOF
 # set hostname
 echo "tower" > /etc/hostname
 # install boot loader
