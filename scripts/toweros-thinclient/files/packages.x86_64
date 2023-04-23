@@ -25,3 +25,4 @@ nxproxy
 qemu-user-static
 rsync
 parted
+xterm
