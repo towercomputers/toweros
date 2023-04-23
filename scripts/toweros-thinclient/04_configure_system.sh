@@ -26,7 +26,7 @@ mkdir -p /home/$USERNAME/.fluxbox
 cp /root/fluxbox_startup /home/$USERNAME/.fluxbox/startup
 cp /usr/share/fluxbox/menu /home/$USERNAME/.fluxbox/menu
 sed -i 's/\[exec\] (xterm) {xterm}/\[include\] (~\/\.fluxbox\/tower-menu)/' /home/$USERNAME/.fluxbox/menu
-sed -i '/[exec] (firefox) {}/d' /home/$USERNAME/.fluxbox/menu
+sed -i '/\[exec\] (firefox) {}/d' /home/$USERNAME/.fluxbox/menu
 # fix ownership
 chown -R $USERNAME:$USERNAME /home/$USERNAME
 # set locales
