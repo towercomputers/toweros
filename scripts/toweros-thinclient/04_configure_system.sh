@@ -35,7 +35,7 @@ cp /etc/locale.gen /etc/locale.gen.list
 echo "$LANG UTF-8" > /etc/locale.gen
 locale-gen
 echo "LANG=$LANG" > /etc/locale.conf
-echo "KEYMAP=$KEYMAP" > /etc/vconsole.conf
+localectl set-x11-keymap "$KEYMAP"
 # set hostname
 echo "tower" > /etc/hostname
 # install boot loader
