@@ -1,20 +1,21 @@
-:'
-if necessary abuild-keygen -a
-abuild checksum
-abuild -r
+make_tower(){
+	#if necessary abuild-keygen -a
+	abuild checksum
+	abuild -r
 
-cp tools/scripts/toweros-thinclient/mkimg.tower.sh aports/scripts/
-cp tools/scripts/toweros-thinclient/genapkovl-tower.sh aports/scripts/
+	cp tools/scripts/toweros-thinclient/mkimg.tower.sh aports/scripts/
+	cp tools/scripts/toweros-thinclient/genapkovl-tower.sh aports/scripts/
 
 sh aports/scripts/mkimage.sh \
 	--outdir ~/ \
 	--arch x86_64 \
-	--repository  http://mirrors.ircam.fr/pub/alpine/edge/main \
-	--repository  http://mirrors.ircam.fr/pub/alpine/edge/community \
-	--repository  file:///home/tower/packages/toweros-thinclient \
+	--repository http://mirrors.ircam.fr/pub/alpine/edge/main \
+	--repository http://mirrors.ircam.fr/pub/alpine/edge/community \
+	--repository http://mirrors.ircam.fr/pub/alpine/edge/testing \
+	--repository file:///home/tower/packages/toweros-thinclient \
 	--profile tower \
 	--tag v0.0.1
-'
+}
 
 profile_standard() {
 	title="Standard"
@@ -53,11 +54,11 @@ profile_tower() {
 	kernel_addons="xtables-addons zfs"
 	boot_addons="amd-ucode intel-ucode"
 	initrd_ucode="/boot/amd-ucode.img /boot/intel-ucode.img"
-	apkovl="genapkovl-tower.sh"
+	apkovl="./genapkovl-tower.sh"
 	apks="$apks
 		coreutils openssh sudo nano vim curl 
 		net-tools dhcpcd iptables wpa_supplicant avahi
-		parted rsync python3 py3-pip nx-libs nx-libs-dev
+		parted rsync python3 py3-pip py3-rich py3-sh nx-libs nx-libs-dev
 		alpine-sdk build-base apk-tools alpine-conf busybox fakeroot syslinux xorriso squashfs-tools
 		mtools dosfstools grub-efi lsblk abuild
 		"
