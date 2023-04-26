@@ -6,7 +6,14 @@ url="https://github.com/towercomputers/tools"
 arch="all"
 license="GPL-3.0-or-later"
 source="alpine_install.sh"
-options="!check"
+
+build() {
+    return 0
+}
+
+check() {
+    return 0
+}
 
 package() {
     installation_path="$pkgdir"/root/installer
@@ -14,4 +21,6 @@ package() {
     cp -f alpine_install.sh "$installation_path"
 }
 
-sha512sums="b6440171984001ebbeda0df3dfb6cb11a26284a2504f87ab758dabe3ffe9c6bf449a5e17263865ed74b1285bfe83fefcdf46741a847e3429821b02a0614e4230  alpine_install.sh"
+sha512sums="
+58c23a3ac9478eeb9270153cb053a5a4077d615b86ff9ebdcd075ae906d200a163a6237f917bd472782e6d9a10f07c1c65613339aec50b80d17a1fe2a16a5441  alpine_install.sh
+"

@@ -29,11 +29,16 @@ EOF
 
 mkdir -p "$tmp"/etc/local.d/
 makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
-    apk add tower-installer
-	sh /root/installer/alpine_install.sh
-EOF
+    #!/bin/sh
 
-rc_add local default
+	echo "Do you wish to install this program?"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes ) echo "Installation done"; break;;
+			No ) exit;;
+		esac
+	done
+EOF
 
 rc_add devfs sysinit
 rc_add dmesg sysinit
@@ -46,6 +51,7 @@ rc_add modules boot
 rc_add sysctl boot
 rc_add bootmisc boot
 rc_add syslog boot
+rc_add local boot
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown

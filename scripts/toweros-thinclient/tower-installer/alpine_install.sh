@@ -13,6 +13,17 @@ KEYBOARD_LAYOUT=$6
 KEYBOARD_VARIANT=$7
 TARGET_DRIVE=$8
 
+ROOT_PASSWORD="tower"
+USERNAME="tower"
+PASSWORD="tower"
+LANG="us"
+TIMEZONE="Europe/Paris"
+KEYBOARD_LAYOUT="us"
+KEYBOARD_VARIANT="us"
+TARGET_DRIVE="/dev/sda"
+
+apk add sudo dhcpcd wpa_supplicant avahi iptables
+
 # change root password
 echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd root
 # create first user
@@ -23,8 +34,31 @@ setup-timezone "$TIMEZONE"
 setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
 setup-hostname -n tower
 
-apk add wpa_supplicant
+rc-update add dhcpcd
+rc-update add avahi-daemon
+rc-update add iptables
+rc-update add wpa_supplicant boot
+
 yes | setup-disk -m sys "$TARGET_DRIVE"
+
+ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
+mount "$ROOT_PARTITION" /mnt
+
+mkdir -p "/home/$USERNAME"
+mkdir "/home/$USERNAME/.ssh"
+mkdir "/home/$USERNAME/.cache"
+mkdir "/home/$USERNAME/.config"
+chown -R "$USERNAME:$USERNAME" "/home/$USERNAME"
+
+echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/01_tower_nopasswd
+
+cat <<EOF > /mnt/etc/network/interfaces
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet dhcp
+EOF
 
 # on first boot as root
 # ip link set wlan0 up
@@ -34,6 +68,3 @@ yes | setup-disk -m sys "$TARGET_DRIVE"
 # setup-apkrepos
 # apk update
 # uncomment community repo in /etc/apk/repositories
-# apk add sudo
-# echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-# exit and login as tower
