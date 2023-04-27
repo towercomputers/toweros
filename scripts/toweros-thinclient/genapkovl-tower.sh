@@ -24,14 +24,39 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
+alpine-conf
+agetty
 tower-tools
 EOF
 
-mkdir -p "$tmp"/etc/local.d/
-makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
-    #!/bin/sh
-	apk add tower-tools
-	install-toweros
+makefile root:root 0644 "$tmp"/etc/inittab <<EOF
+# /etc/inittab
+
+::sysinit:/sbin/openrc sysinit
+::sysinit:/sbin/openrc boot
+::wait:/sbin/openrc default
+
+# Set up a couple of getty's
+tty1::respawn:/sbin/agetty --skip-login --nonewline --noissue --autologin root --noclear 38400 tty1
+tty2::respawn:/sbin/getty 38400 tty2
+tty3::respawn:/sbin/getty 38400 tty3
+tty4::respawn:/sbin/getty 38400 tty4
+tty5::respawn:/sbin/getty 38400 tty5
+tty6::respawn:/sbin/getty 38400 tty6
+
+# Put a getty on the serial port
+#ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100
+
+# Stuff to do for the 3-finger salute
+::ctrlaltdel:/sbin/reboot
+
+# Stuff to do before rebooting
+::shutdown:/sbin/openrc shutdown
+EOF
+
+mkdir -p "$tmp"/root/
+makefile root:root 0644 "$tmp"/root/.profile <<EOF
+install-toweros
 EOF
 
 rc_add devfs sysinit
@@ -45,7 +70,6 @@ rc_add modules boot
 rc_add sysctl boot
 rc_add bootmisc boot
 rc_add syslog boot
-rc_add local boot
 
 rc_add mount-ro shutdown
 rc_add killprocs shutdown

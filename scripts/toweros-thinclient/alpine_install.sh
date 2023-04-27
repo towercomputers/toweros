@@ -29,6 +29,8 @@ echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd root
 # create first user
 adduser -D "$USERNAME" "$USERNAME"
 echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
+addgroup abuild || true
+addgroup "$USERNAME" abuild
 
 setup-timezone "$TIMEZONE"
 setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
@@ -44,11 +46,13 @@ yes | setup-disk -m sys "$TARGET_DRIVE"
 ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
 mount "$ROOT_PARTITION" /mnt
 
-mkdir -p "/home/$USERNAME"
-mkdir "/home/$USERNAME/.ssh"
-mkdir "/home/$USERNAME/.cache"
-mkdir "/home/$USERNAME/.config"
-chown -R "$USERNAME:$USERNAME" "/home/$USERNAME"
+mkdir -p "/mnt/home/$USERNAME"
+mkdir "/mnt/home/$USERNAME/.ssh"
+mkdir "/mnt/home/$USERNAME/.cache"
+mkdir "/mnt/home/$USERNAME/.config"
+echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
+
+chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
 echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/01_tower_nopasswd
 
@@ -59,6 +63,8 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 EOF
+
+umount /mnt
 
 # on first boot as root
 # ip link set wlan0 up
