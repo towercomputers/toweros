@@ -12,7 +12,7 @@ sh aports/scripts/mkimage.sh \
 	--repository http://mirrors.ircam.fr/pub/alpine/edge/main \
 	--repository http://mirrors.ircam.fr/pub/alpine/edge/community \
 	--repository http://mirrors.ircam.fr/pub/alpine/edge/testing \
-	--repository file:///home/tower/packages/toweros-thinclient \
+	--repository file:///home/tower/packages/towercomputers \
 	--profile tower \
 	--tag v0.0.1
 }
@@ -45,6 +45,7 @@ profile_standard() {
 	esac
 }
 
+
 profile_tower() {
 	profile_standard
 	profile_abbrev="tower"
@@ -54,14 +55,8 @@ profile_tower() {
 	kernel_addons="xtables-addons zfs"
 	boot_addons="amd-ucode intel-ucode"
 	initrd_ucode="/boot/amd-ucode.img /boot/intel-ucode.img"
-	apkovl="./genapkovl-tower.sh"
-	apks="$apks
-		coreutils openssh sudo nano vim curl 
-		net-tools dhcpcd iptables wpa_supplicant avahi
-		parted rsync python3 py3-pip py3-rich py3-sh nx-libs nx-libs-dev
-		alpine-sdk build-base apk-tools alpine-conf busybox fakeroot syslinux xorriso squashfs-tools
-		mtools dosfstools grub-efi lsblk abuild
-		"
+	apkovl="aports/scripts/genapkovl-tower.sh"
+	apks="$apks tower-tools nano vim net-tools"
 	local _k _a
 	for _k in $kernel_flavors; do
 		apks="$apks linux-$_k"

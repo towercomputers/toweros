@@ -24,20 +24,14 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
-tower-installer
+tower-tools
 EOF
 
 mkdir -p "$tmp"/etc/local.d/
 makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
     #!/bin/sh
-
-	echo "Do you wish to install this program?"
-	select yn in "Yes" "No"; do
-		case $yn in
-			Yes ) echo "Installation done"; break;;
-			No ) exit;;
-		esac
-	done
+	apk add tower-tools
+	install-toweros
 EOF
 
 rc_add devfs sysinit
