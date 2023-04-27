@@ -7,8 +7,8 @@ from sh import (
     Command,
     mount, parted, mkdosfs, resize2fs, tee, cat,
     cp, rm, sync, rsync, chown, truncate,
-    arch_chroot, 
-    bsdtar, xz,
+    #arch_chroot, 
+    tar, xz,
     losetup, 
 )
 mkfs_ext4 = Command('mkfs.ext4')
@@ -45,9 +45,9 @@ def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
     # mount image in temporary folder
     mount('--mkdir', wd("root.img"), wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
     # put arch linux files
-    bsdtar('-xpf', archlinux_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
+    tar('-xpf', archlinux_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
     # put nx packages
-    bsdtar('-xpf', nx_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
+    tar('-xpf', nx_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
     # put cross platform emulator
     cp('/usr/bin/qemu-arm-static', wd("EXPORT_ROOTFS_DIR/usr/bin"))
     # put and run toweros-host installer
