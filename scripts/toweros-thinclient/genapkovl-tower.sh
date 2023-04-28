@@ -59,6 +59,13 @@ makefile root:root 0644 "$tmp"/root/.profile <<EOF
 install-toweros
 EOF
 
+mkdir -p "$tmp"/etc/local.d/
+makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
+    apk add tower-tools
+EOF
+
+rc_add local default
+
 rc_add devfs sysinit
 rc_add dmesg sysinit
 rc_add mdev sysinit
