@@ -54,8 +54,9 @@ tty6::respawn:/sbin/getty 38400 tty6
 ::shutdown:/sbin/openrc shutdown
 EOF
 
-mkdir -p "$tmp"/root/
-makefile root:root 0644 "$tmp"/root/.profile <<EOF
+mkdir -p "$tmp"/etc/profile.d/
+makefile root:root 0755 "$tmp"/etc/profile.d/install.sh <<EOF
+#!/bin/sh
 install-toweros
 EOF
 
