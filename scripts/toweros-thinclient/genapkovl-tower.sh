@@ -64,9 +64,9 @@ makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
 #!/bin/sh
 apk add tower-tools
 
-for f in ~/pip-cache/*; do
+for f in /etc/pip-cache/*; do
 	if [ -f "$f" ]; then
-		pip install --no-index --find-links=~/pip-cache $f
+		pip install --no-index --find-links=/etc/pip-cache $f
 	fi
 done
 EOF
