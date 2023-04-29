@@ -62,13 +62,14 @@ EOF
 mkdir -p "$tmp"/etc/local.d/
 makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
 #!/bin/sh
-apk add tower-tools
 
-for f in /etc/pip-cache/*; do
-	if [ -f "$f" ]; then
-		pip install --no-index --find-links=/etc/pip-cache $f
+for f in /var/cache/pip/*; do
+	if [ -f "\$f" ]; then
+		pip install --no-index --find-links=/var/cache/pip \$f
 	fi
 done
+
+apk add tower-tools
 EOF
 
 rc_add local default

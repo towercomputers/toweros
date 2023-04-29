@@ -28,7 +28,7 @@ check() {
 }
 
 package() {
-	mkdir -p /etc/pip-cache
-	cp dist/cache/* /etc/pip-cache/
+	mkdir -p "$pkgdir"/var/cache/pip
+	cp dist/cache/* "$pkgdir"/var/cache/pip
 	python3 -m installer -d "$pkgdir" dist/*.whl
 }
