@@ -9,6 +9,16 @@ INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '
 
 def main():
     config = askconfiguration.ask_config()
-    print(config)
-    installer_path = os.path.join(INSTALLER_DIR, 'alpine_install.sh')
-    Command(installer_path)(_out=sys.stdout, _err=sys.stderr)
+    installer_path = os.path.join(INSTALLER_DIR, 'install_thinclient.sh')
+    Command(installer_path)(
+        config["ROOT_PASSWORD"],
+        config["USERNAME"],
+        config["PASSWORD"],
+        config["LANG"],
+        config["TIMEZONE"],
+        config["KEYBOARD_LAYOUT"],
+        config["KEYBOARD_VARIANT"],
+        config["TARGET_DRIVE"],
+        _out=sys.stdout, 
+        _err=sys.stderr
+    )

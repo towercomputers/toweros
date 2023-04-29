@@ -31,8 +31,12 @@ AUTHORIZED_KEY="$6"
 
 CONNECTED=false
 
+sudo apk add openssh git wpa_supplicant
+
 if [ ! -z "$WIFI_SSID" ]; then
-    iwctl --passphrase $WIFI_PASSWORD station wlan0 connect $WIFI_SSID
+    sudo wpa_passphrase "$WIFI_SSID" "$WIFI_PASSWORD" > /etc/wpa_supplicant/wpa_supplicant.conf
+    sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
+    sudo udhcpc -i wlan0
     echo "waiting connection..."
     set +x
     until ping -c1 www.google.com >/dev/null 2>&1; do :; done
@@ -49,7 +53,7 @@ if [ ! -z "$GIT_EMAIL" ]; then
 fi
 
 if [ ! -z "$GIT_KEY_PATH" ]; then
-    mkdir ~/.ssh || true
+    mkdir -p ~/.ssh
     cp $GIT_KEY_PATH ~/.ssh
     KEY_NAME=$(basename $GIT_KEY_PATH)
     touch ~/.ssh/config
@@ -63,7 +67,7 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     chmod 700 ~/.ssh
     chmod 600 ~/.ssh/*
     if $CONNECTED; then
-        mkdir ~/towercomputers || true
+        mkdir -p ~/towercomputers
         cd ~/towercomputers
         git clone git@github.com:towercomputers/tools.git
     fi
@@ -74,14 +78,15 @@ if $CONNECTED; then
 fi
 
 if [ ! -z "$AUTHORIZED_KEY" ]; then
-    sudo sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
-    sudo systemctl restart dhcpcd.service
-    sudo systemctl start sshd.service
-    sudo systemctl enable sshd.service
     sudo iptables -A TCP -p tcp --dport 22 -j ACCEPT
     sudo iptables -D INPUT -j REJECT --reject-with icmp-proto-unreachable
     sudo iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
     sudo iptables-save -f /etc/iptables/iptables.rules
+    sudo rc-update add sshd default
+    sudo rc-service sshd start
+    mkdir -p ~/.ssh
+    touch ~/.ssh/authorized_keys
     echo "$AUTHORIZED_KEY" > ~/.ssh/authorized_keys
+    chmod 700 ~/.ssh
     chmod 600 ~/.ssh/*
 fi

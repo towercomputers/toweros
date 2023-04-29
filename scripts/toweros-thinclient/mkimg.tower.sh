@@ -2,7 +2,7 @@ make_tower(){
 	#if necessary abuild-keygen -a
 	abuild checksum
 	abuild -r
-
+	git clone --depth=1 https://gitlab.alpinelinux.org/alpine/aports.git
 	cp tools/scripts/toweros-thinclient/mkimg.tower.sh aports/scripts/
 	cp tools/scripts/toweros-thinclient/genapkovl-tower.sh aports/scripts/
 

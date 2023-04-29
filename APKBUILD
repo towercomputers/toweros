@@ -4,7 +4,7 @@ pkgrel=1
 pkgdesc="Tower Tools"
 url="https://github.com/towercomputers/tools"
 arch="all"
-src="./dist/"
+src="README.md ./docs/ ./dist/"
 depends="coreutils python3 py3-pip
 		sudo openssh dhcpcd avahi avahi-tools wpa_supplicant rsync
 		git iptables rsync lsblk perl-utils xz musl-locales e2fsprogs-extra
@@ -30,5 +30,10 @@ check() {
 package() {
 	mkdir -p "$pkgdir"/var/cache/pip
 	cp dist/cache/* "$pkgdir"/var/cache/pip
+
+	mkdir -p "$pkgdir"/var/towercomputers/docs
+	cp README.md "$pkgdir"/var/towercomputers/docs/
+	cp docs/* "$pkgdir"/var/towercomputers/docs/
+
 	python3 -m installer -d "$pkgdir" dist/*.whl
 }

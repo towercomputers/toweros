@@ -24,8 +24,11 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
-agetty
 tower-tools
+EOF
+
+makefile root:root 0644 "$tmp"/etc/motd <<EOF
+Welcome to TowerOS-ThinClient!
 EOF
 
 makefile root:root 0644 "$tmp"/etc/inittab <<EOF
@@ -37,14 +40,6 @@ makefile root:root 0644 "$tmp"/etc/inittab <<EOF
 
 # Set up a couple of getty's
 tty1::respawn:/sbin/agetty --skip-login --nonewline --noissue --autologin root --noclear 38400 tty1
-tty2::respawn:/sbin/getty 38400 tty2
-tty3::respawn:/sbin/getty 38400 tty3
-tty4::respawn:/sbin/getty 38400 tty4
-tty5::respawn:/sbin/getty 38400 tty5
-tty6::respawn:/sbin/getty 38400 tty6
-
-# Put a getty on the serial port
-#ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100
 
 # Stuff to do for the 3-finger salute
 ::ctrlaltdel:/sbin/reboot
@@ -56,23 +51,14 @@ EOF
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/install.sh <<EOF
 #!/bin/sh
-install-toweros
-EOF
-
-mkdir -p "$tmp"/etc/local.d/
-makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
-#!/bin/sh
-
+echo "Preparing TowerOS-ThinClient installer..."
 for f in /var/cache/pip/*; do
 	if [ -f "\$f" ]; then
-		pip install --no-index --find-links=/var/cache/pip \$f
+		pip install --no-index --find-links=/var/cache/pip \$f &>/dev/null
 	fi
 done
-
-apk add tower-tools
+install-toweros
 EOF
-
-rc_add local default
 
 rc_add devfs sysinit
 rc_add dmesg sysinit
