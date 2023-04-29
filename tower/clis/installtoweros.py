@@ -5,12 +5,13 @@ from sh import Command
 
 from tower.utils import askconfiguration
 
-INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-thinclient')
+INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'scripts', 'toweros-thinclient')
 
 def main():
     config = askconfiguration.ask_config()
     installer_path = os.path.join(INSTALLER_DIR, 'install_thinclient.sh')
-    Command(installer_path)(
+    Command('sh')(
+        installer_path,
         config["ROOT_PASSWORD"],
         config["USERNAME"],
         config["PASSWORD"],

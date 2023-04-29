@@ -135,7 +135,7 @@ def get_keymap():
         "Enter the number of your keyboard variant",
         "Select another layout"
     )
-    variant = "" if variant == "No Variant" else variant
+    variant = layout if variant == "No Variant" else variant
     return layout, variant
 
 def print_value(label, value):
