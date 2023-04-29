@@ -63,6 +63,12 @@ mkdir -p "$tmp"/etc/local.d/
 makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
 #!/bin/sh
 apk add tower-tools
+
+for f in ~/pip-cache/*; do
+	if [ -f "$f" ]; then
+		pip install --no-index --find-links=~/pip-cache $f
+	fi
+done
 EOF
 
 rc_add local default

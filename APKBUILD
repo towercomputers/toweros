@@ -28,6 +28,7 @@ check() {
 }
 
 package() {
-	pip install dist/cache/*
+	mkdir -p ~/pip-cache
+	cp dist/cache/* ~/pip-cache/
 	python3 -m installer -d "$pkgdir" dist/*.whl
 }
