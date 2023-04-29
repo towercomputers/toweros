@@ -24,8 +24,6 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
-alpine-conf
-agetty
 tower-tools
 EOF
 
@@ -62,7 +60,8 @@ EOF
 
 mkdir -p "$tmp"/etc/local.d/
 makefile root:root 0644 "$tmp"/etc/local.d/installer.start <<EOF
-    apk add tower-tools
+#!/bin/sh
+apk add tower-tools
 EOF
 
 rc_add local default

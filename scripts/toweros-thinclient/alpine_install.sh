@@ -3,7 +3,6 @@
 set -e
 set -x
 
-
 ROOT_PASSWORD=$1
 USERNAME=$2
 PASSWORD=$3
@@ -66,11 +65,3 @@ EOF
 
 umount /mnt
 
-# on first boot as root
-# ip link set wlan0 up
-# wpa_passphrase 'ExampleWifiSSID' 'ExampleWifiPassword' > /etc/wpa_supplicant/wpa_supplicant.conf
-# wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
-# udhcpc -i wlan0
-# setup-apkrepos
-# apk update
-# uncomment community repo in /etc/apk/repositories
