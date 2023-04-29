@@ -12,7 +12,7 @@ KEYBOARD_LAYOUT=$6
 KEYBOARD_VARIANT=$7
 TARGET_DRIVE=$8
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 apk add sudo dhcpcd wpa_supplicant avahi iptables
 
