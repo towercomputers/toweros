@@ -20,7 +20,8 @@ dependencies = [
     "backports.pbkdf2==0.1",
     "sshconf==0.2.5",
     "hatchling==1.14.0",
-    "wheel==0.40.0"
+    "wheel==0.40.0",
+    "rich==13.3.5",
 ]
 
 [tool.hatch.build.targets.wheel]

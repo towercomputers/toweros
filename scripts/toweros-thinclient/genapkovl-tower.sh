@@ -24,6 +24,7 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
+agetty
 tower-tools
 EOF
 
