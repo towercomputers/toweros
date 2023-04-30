@@ -81,7 +81,7 @@ if [ ! -z "$AUTHORIZED_KEY" ]; then
     sudo iptables -A TCP -p tcp --dport 22 -j ACCEPT
     sudo iptables -D INPUT -j REJECT --reject-with icmp-proto-unreachable
     sudo iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
-    sudo iptables-save -f /etc/iptables/iptables.rules
+    sudo /etc/init.d/iptables save
     sudo rc-update add sshd default
     sudo rc-service sshd start
     mkdir -p ~/.ssh

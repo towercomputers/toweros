@@ -30,7 +30,6 @@ only-include = ["tower", "scripts", "docs"]
 [project.scripts]
 tower = "tower.clis.tower:main"
 build-tower-image = "tower.clis.buildtowerimage:main"
-install-toweros = "tower.clis.installtoweros:main"
 
 [tool.hatch.version]
 path = "tower/__about__.py"

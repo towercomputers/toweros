@@ -5,22 +5,28 @@ pkgdesc="Tower Tools"
 url="https://github.com/towercomputers/tools"
 arch="all"
 src="README.md ./docs/ ./dist/"
-depends="coreutils python3 py3-pip
+depends="coreutils python3 py3-pip py3-sh py3-rich
 		sudo openssh dhcpcd avahi avahi-tools wpa_supplicant rsync
 		git iptables rsync lsblk perl-utils xz musl-locales e2fsprogs-extra
 		nx-libs xsetroot mcookie parted lsscsi figlet
-		alpine-sdk build-base apk-tools alpine-conf sfdisk busybox fakeroot=1.31-r1 syslinux xorriso squashfs-tools
-		mtools dosfstools grub-efi abuild agetty"
+		alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox fakeroot=1.31-r1 syslinux xorriso squashfs-tools
+		mtools dosfstools grub-efi abuild agetty runuser"
 makedepends="py3-gpep517 py3-pip py3-hatchling py3-wheel python3-dev"
 license="none"
 
 build() {
 	rm -rf dist/
-	gpep517 build-wheel \
-		--wheel-dir dist \
-		--output-fd 3 3>&1 >&2
-	mkdir -p dist/cache
-	pip download -d dist/cache dist/tower_tools*.whl
+	pip install hatch
+	~/.local/bin/hatch build -t wheel
+	mkdir -p dist/pip-packages
+	pip download -d dist/pip-packages dist/tower_tools*.whl
+	mv dist/tower_tools*.whl dist/pip-packages
+
+	cp -r scripts/toweros-thinclient/installer dist/
+	
+	mkdir -p dist/docs
+	mv docs/* dist/docs/
+	mv README.md dist/docs/
 }
 
 check() {
@@ -28,12 +34,11 @@ check() {
 }
 
 package() {
-	mkdir -p "$pkgdir"/var/cache/pip
-	cp dist/cache/* "$pkgdir"/var/cache/pip
+	mkdir -p "$pkgdir"/var/cache
+	cp -r dist/pip-packages "$pkgdir"/var/cache/
 
-	mkdir -p "$pkgdir"/var/towercomputers/docs
-	cp README.md "$pkgdir"/var/towercomputers/docs/
-	cp docs/* "$pkgdir"/var/towercomputers/docs/
+	cp -r dist/installer "$pkgdir"/var/towercomputers/
 
-	python3 -m installer -d "$pkgdir" dist/*.whl
+	mkdir -p "$pkgdir"/var/towercomputers
+	cp -r dist/docs "$pkgdir"/var/towercomputers/
 }

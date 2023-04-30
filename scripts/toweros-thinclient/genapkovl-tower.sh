@@ -40,6 +40,11 @@ makefile root:root 0644 "$tmp"/etc/inittab <<EOF
 
 # Set up a couple of getty's
 tty1::respawn:/sbin/agetty --skip-login --nonewline --noissue --autologin root --noclear 38400 tty1
+tty2::respawn:/sbin/getty 38400 tty2
+tty3::respawn:/sbin/getty 38400 tty3
+tty4::respawn:/sbin/getty 38400 tty4
+tty5::respawn:/sbin/getty 38400 tty5
+tty6::respawn:/sbin/getty 38400 tty6
 
 # Stuff to do for the 3-finger salute
 ::ctrlaltdel:/sbin/reboot
@@ -51,13 +56,8 @@ EOF
 mkdir -p "$tmp"/etc/profile.d/
 makefile root:root 0755 "$tmp"/etc/profile.d/install.sh <<EOF
 #!/bin/sh
-echo "Preparing TowerOS-ThinClient installer..."
-for f in /var/cache/pip/*; do
-	if [ -f "\$f" ]; then
-		pip install --no-index --find-links=/var/cache/pip \$f &>/dev/null
-	fi
-done
-install-toweros
+
+sh /var/towercomputers/installer/install-thinclient.sh
 EOF
 
 rc_add devfs sysinit

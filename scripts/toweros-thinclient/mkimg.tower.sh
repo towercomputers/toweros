@@ -1,5 +1,5 @@
 make_tower(){
-	#if necessary abuild-keygen -a
+	#if necessary abuild-keygen -i -a
 	abuild checksum
 	abuild -r
 	git clone --depth=1 https://gitlab.alpinelinux.org/alpine/aports.git

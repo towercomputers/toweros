@@ -38,3 +38,6 @@ iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j REJECT
 iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
 # open port for avahi
 iptables -I UDP -p udp -m udp --dport 5353 -j ACCEPT
+
+# save rules
+/etc/init.d/iptables save

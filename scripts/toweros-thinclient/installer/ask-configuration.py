@@ -168,7 +168,7 @@ def ask_config():
 
 def main():
     config = "\n".join([f'{key}="{value}"' for key, value in ask_config().items()])
-    with open("./tower.env", 'w') as fp:
+    with open("/root/tower.env", 'w') as fp:
         fp.write(config)
         fp.write("\n")
     return 0
