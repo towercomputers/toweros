@@ -25,8 +25,8 @@ build() {
 	cp -r scripts/toweros-thinclient/installer dist/
 	
 	mkdir -p dist/docs
-	mv docs/* dist/docs/
-	mv README.md dist/docs/
+	cp docs/* dist/docs/
+	cp README.md dist/docs/
 }
 
 check() {
@@ -37,8 +37,7 @@ package() {
 	mkdir -p "$pkgdir"/var/cache
 	cp -r dist/pip-packages "$pkgdir"/var/cache/
 
-	cp -r dist/installer "$pkgdir"/var/towercomputers/
-
 	mkdir -p "$pkgdir"/var/towercomputers
+	cp -r dist/installer "$pkgdir"/var/towercomputers/
 	cp -r dist/docs "$pkgdir"/var/towercomputers/
 }
