@@ -1,22 +1,3 @@
-make_tower(){
-	#if necessary abuild-keygen -i -a
-	abuild checksum
-	abuild -r
-	git clone --depth=1 https://gitlab.alpinelinux.org/alpine/aports.git
-	cp tools/scripts/toweros-thinclient/mkimg.tower.sh aports/scripts/
-	cp tools/scripts/toweros-thinclient/genapkovl-tower.sh aports/scripts/
-
-sh aports/scripts/mkimage.sh \
-	--outdir ~/ \
-	--arch x86_64 \
-	--repository http://mirrors.ircam.fr/pub/alpine/edge/main \
-	--repository http://mirrors.ircam.fr/pub/alpine/edge/community \
-	--repository http://mirrors.ircam.fr/pub/alpine/edge/testing \
-	--repository file:///home/tower/packages/towercomputers \
-	--profile tower \
-	--tag v0.0.1
-}
-
 profile_tower() {
 	profile_base
 	profile_abbrev="tower"
@@ -25,6 +6,7 @@ profile_tower() {
 	image_ext="iso"
 	output_format="iso"
 	arch="x86 x86_64"
+	kernel_addons="xtables-addons zfs"
 	boot_addons="amd-ucode intel-ucode"
 	initrd_ucode="/boot/amd-ucode.img /boot/intel-ucode.img"
 	apkovl="aports/scripts/genapkovl-tower.sh"
