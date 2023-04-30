@@ -24,7 +24,7 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
-tower-tools
+toweros-thinclient-installer
 EOF
 
 makefile root:root 0644 "$tmp"/etc/motd <<EOF

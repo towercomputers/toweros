@@ -17,8 +17,6 @@ SCRIPT_DIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 python $SCRIPT_DIR/ask-configuration.py
 source /root/tower.env
 
-apk add sudo dhcpcd wpa_supplicant avahi iptables
-
 # change root password
 echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd root
 # create first user
@@ -87,6 +85,12 @@ tty6::respawn:/sbin/getty 38400 tty6
 ::shutdown:/sbin/openrc shutdown
 EOF
 
+cat <<EOF > /etc/apk/repositories
+http://dl-cdn.alpinelinux.org/alpine/edge/main
+http://dl-cdn.alpinelinux.org/alpine/edge/community
+http://dl-cdn.alpinelinux.org/alpine/edge/testing
+EOF
+
 rm -f /etc/profile.d/install.sh
 
 yes | setup-disk -m sys "$TARGET_DRIVE"
@@ -94,7 +98,9 @@ yes | setup-disk -m sys "$TARGET_DRIVE"
 ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
 mount "$ROOT_PARTITION" /mnt
 
-cp -r "home/$USERNAME" "/mnt/home/"
+cp -r "/home/$USERNAME" "/mnt/home/"
 chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
 umount /mnt
+
+reboot

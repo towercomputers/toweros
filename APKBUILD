@@ -1,16 +1,18 @@
-pkgname=tower-tools
+pkgname=toweros-thinclient-installer
 pkgver=0.1.0
 pkgrel=1
-pkgdesc="Tower Tools"
+pkgdesc="TowerOS ThinClient installer"
 url="https://github.com/towercomputers/tools"
 arch="all"
-src="README.md ./docs/ ./dist/"
+src="./dist/"
 depends="coreutils python3 py3-pip py3-sh py3-rich
 		sudo openssh dhcpcd avahi avahi-tools wpa_supplicant rsync
 		git iptables rsync lsblk perl-utils xz musl-locales e2fsprogs-extra
 		nx-libs xsetroot mcookie parted lsscsi figlet
-		alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox fakeroot=1.31-r1 syslinux xorriso squashfs-tools
-		mtools dosfstools grub-efi abuild agetty runuser"
+		alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox 
+		fakeroot=1.31-r1 syslinux xorriso squashfs-tools
+		mtools dosfstools grub-efi abuild agetty runuser
+		nano vim net-tools"
 makedepends="py3-gpep517 py3-pip py3-hatchling py3-wheel python3-dev"
 license="none"
 
