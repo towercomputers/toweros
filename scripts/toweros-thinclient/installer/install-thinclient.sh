@@ -56,12 +56,14 @@ auto eth0
 iface eth0 inet dhcp
 EOF
 
-cat <<EOF > /etc/motd
+cat <<EOF > /etc/issue
 Welcome to TowerOS-ThinClient!
 
 Please see the ~/README.md file to know how to get started with TowerOS-ThinClient.
 
 EOF
+
+echo "" > /etc/motd
 
 cat <<EOF > /etc/inittab
 # /etc/inittab
