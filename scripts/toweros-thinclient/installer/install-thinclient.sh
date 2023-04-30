@@ -27,6 +27,9 @@ echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
 addgroup abuild || true
 addgroup "$USERNAME" abuild
 
+mkdir -p /etc/sudoers.d
+echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+
 # TODO: set LANG
 setup-timezone "$TIMEZONE"
 setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
@@ -39,42 +42,30 @@ rc-update add wpa_supplicant boot
 
 sh $SCRIPT_DIR/configure-firewall.sh
 
-runuser -u $USERNAME -- pip install --no-index --find-links=/var/cache/pip-packages tower-tools
-
-yes | setup-disk -m sys "$TARGET_DRIVE"
-
-ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
-mount "$ROOT_PARTITION" /mnt
-
-mkdir -p "/mnt/home/$USERNAME"
-mkdir -p "/mnt/home/$USERNAME/.ssh"
-mkdir -p "/mnt/home/$USERNAME/.cache"
-mkdir -p "/mnt/home/$USERNAME/.config"
+mv /var/cache/pip-packages "/home/$USERNAME/"
+chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/pip-packages"
+runuser -u $USERNAME -- pip install --no-index --find-links="/home/$USERNAME/pip-packages" tower-tools
 echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
-cp /var/towercomputers/docs/* /mnt/home/$USERNAME/
-cp $SCRIPT_DIR/install_dev.sh /mnt/home/$USERNAME/
 
-chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
+cp /var/towercomputers/docs/* /home/$USERNAME/
+cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
 
-mkdir -p /mnt/etc/sudoers.d
-echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /mnt/etc/sudoers.d/01_tower_nopasswd
-
-mkdir -p /mnt/etc/network
-cat <<EOF > /mnt/etc/network/interfaces
+mkdir -p /etc/network
+cat <<EOF > /etc/network/interfaces
 auto lo
 iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 EOF
 
-cat <<EOF > /mnt/etc/motd
+cat <<EOF > /etc/motd
 Welcome to TowerOS-ThinClient!
 
 Please see the ~/README.md file to know how to get started with TowerOS-ThinClient.
 
 EOF
 
-cat <<EOF > /mnt/etc/inittab <<EOF
+cat <<EOF > /etc/inittab
 # /etc/inittab
 
 ::sysinit:/sbin/openrc sysinit
@@ -96,7 +87,14 @@ tty6::respawn:/sbin/getty 38400 tty6
 ::shutdown:/sbin/openrc shutdown
 EOF
 
-rm -f /mnt/etc/profile.d/install.sh
+rm -f /etc/profile.d/install.sh
+
+yes | setup-disk -m sys "$TARGET_DRIVE"
+
+ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
+mount "$ROOT_PARTITION" /mnt
+
+cp -r "home/$USERNAME" "/mnt/home/"
+chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
 umount /mnt
-
