@@ -34,7 +34,7 @@ CONNECTED=false
 sudo apk add openssh git wpa_supplicant
 
 if [ ! -z "$WIFI_SSID" ]; then
-    sudo wpa_passphrase "$WIFI_SSID" "$WIFI_PASSWORD" > /etc/wpa_supplicant/wpa_supplicant.conf
+    sudo wpa_passphrase "$WIFI_SSID" "$WIFI_PASSWORD" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf
     sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
     sudo udhcpc -i wlan0
     echo "waiting connection..."
