@@ -85,12 +85,6 @@ tty6::respawn:/sbin/getty 38400 tty6
 ::shutdown:/sbin/openrc shutdown
 EOF
 
-cat <<EOF > /etc/apk/repositories
-http://dl-cdn.alpinelinux.org/alpine/edge/main
-http://dl-cdn.alpinelinux.org/alpine/edge/community
-http://dl-cdn.alpinelinux.org/alpine/edge/testing
-EOF
-
 rm -f /etc/profile.d/install.sh
 
 yes | setup-disk -m sys "$TARGET_DRIVE"

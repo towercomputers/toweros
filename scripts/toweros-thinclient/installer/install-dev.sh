@@ -40,6 +40,9 @@ if [ ! -z "$WIFI_SSID" ]; then
     until ping -c1 www.google.com >/dev/null 2>&1; do :; done
     set -x
     CONNECTED=true
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" | sudo tee /etc/apk/repositories
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" | sudo tee -a /etc/apk/repositories
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" | sudo tee -a /etc/apk/repositories
 fi
 
 if [ ! -z "$GIT_NAME" ]; then
