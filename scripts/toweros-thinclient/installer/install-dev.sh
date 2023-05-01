@@ -53,11 +53,11 @@ fi
 
 # update Git configuration
 if [ ! -z "$GIT_NAME" ]; then
-    git config --global user.email "$GIT_NAME"
+    git config --global user.name "$GIT_NAME"
 fi
 
 if [ ! -z "$GIT_EMAIL" ]; then
-    git config --global user.name "$GIT_EMAIL"
+    git config --global user.email "$GIT_EMAIL"
 fi
 
 # download tower-tools sources

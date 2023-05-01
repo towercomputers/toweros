@@ -25,7 +25,10 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["tower", "scripts", "docs"]
+include = ["tower", "scripts", "docs"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"README.md" = "docs/README.md"
 
 [project.scripts]
 tower = "tower.clis.tower:main"

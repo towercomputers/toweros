@@ -47,6 +47,18 @@ def find_host_image(builds_dir):
         logger.info(f"Using host image {rpi_image_path}")
     return rpi_image_path
 
+def find_readme():
+    readme_path = os.path.join(HOME_PATH, 'README.md')
+    if os.path.exists(readme_path):
+        return readme_path
+    readme_path = os.path.join(HOME_PATH, 'docs', 'README.md')
+    if os.path.exists(readme_path):
+        return readme_path
+    readme_path = "/var/towercomputers/docs/README.md"
+    if os.path.exists(readme_path):
+        return readme_path
+    raise Exception("README.md not found!")
+
 def check_abuild_key():
     abuild_folder = os.path.join(os.path.expanduser('~'), '.abuild')
     abuild_conf = os.path.join(abuild_folder, 'abuild.conf')
@@ -74,7 +86,8 @@ def prepare_installer():
 
 def prepare_docs():
     os.makedirs(wd('dist/docs'))
-    shutil.copy(os.path.join(HOME_PATH, 'README.md'), wd('dist/docs'))
+    readme_path = find_readme()
+    shutil.copy(readme_path, wd('dist/docs'))
     shutil.copy(os.path.join(HOME_PATH, 'docs', 'Tower Whitepaper.pdf'), wd('dist/docs'))
 
 def prepare_host_image(builds_dir):
