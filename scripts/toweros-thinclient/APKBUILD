@@ -25,11 +25,14 @@ check() {
 }
 
 package() {
+	# copy pip packages
 	mkdir -p "$pkgdir"/var/cache
 	cp -r pip-packages "$pkgdir"/var/cache/
-
+	# copy installer
 	mkdir -p "$pkgdir"/var/towercomputers
 	cp -r installer "$pkgdir"/var/towercomputers/
+	# copy docs
 	cp -r docs "$pkgdir"/var/towercomputers/
+	# copy image host
 	#cp -r builds "$pkgdir"/var/towercomputers/
 }

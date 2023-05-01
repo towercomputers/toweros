@@ -3,6 +3,7 @@ import logging
 import os
 import glob
 import shutil
+import sys
 
 from sh import rm, git, pip, abuild, Command
 
@@ -45,6 +46,13 @@ def find_host_image(builds_dir):
         rpi_image_path = host_images.pop()
         logger.info(f"Using host image {rpi_image_path}")
     return rpi_image_path
+
+def check_abuild_key():
+    abuild_folder = os.path.join(os.path.expanduser('~'), '.abuild')
+    abuild_conf = os.path.join(abuild_folder, 'abuild.conf')
+    if not os.path.exists(abuild_folder) or not os.path.exists(abuild_conf):
+        logger.error("ERROR: You must have an abuild key to build the image. Please use `abuild-keygen -a -i`.")
+        sys.exit()
 
 @clitask("Downloading pip packages...")
 def prepare_pip_packages(builds_dir):
@@ -112,6 +120,7 @@ def prepare_image(builds_dir):
 @clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.")
 def build_image(builds_dir):
     try:
+        check_abuild_key()
         prepare_working_dir()
         prepare_pip_packages(builds_dir)
         prepare_installer()

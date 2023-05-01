@@ -31,6 +31,7 @@ AUTHORIZED_KEY="$6"
 
 CONNECTED=false
 
+# connect to wifi
 if [ ! -z "$WIFI_SSID" ]; then
     sudo wpa_passphrase "$WIFI_SSID" "$WIFI_PASSWORD" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf
     sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
@@ -39,13 +40,18 @@ if [ ! -z "$WIFI_SSID" ]; then
     set +x
     until ping -c1 www.google.com >/dev/null 2>&1; do :; done
     set -x
-    CONNECTED=true
+    CONNECTED=true  
+fi
+
+# udpate APK repositories
+if $CONNECTED; then
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" | sudo tee /etc/apk/repositories
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" | sudo tee -a /etc/apk/repositories
     echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" | sudo tee -a /etc/apk/repositories
     sudo apk update
 fi
 
+# update Git configuration
 if [ ! -z "$GIT_NAME" ]; then
     git config --global user.email "$GIT_NAME"
 fi
@@ -54,6 +60,7 @@ if [ ! -z "$GIT_EMAIL" ]; then
     git config --global user.name "$GIT_EMAIL"
 fi
 
+# download tower-tools sources
 if [ ! -z "$GIT_KEY_PATH" ]; then
     mkdir -p ~/.ssh
     cp $GIT_KEY_PATH ~/.ssh
@@ -75,10 +82,12 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     fi
 fi
 
+# install hatch
 if $CONNECTED; then
     pip install hatch
 fi
 
+# start sshd and open firewall access
 if [ ! -z "$AUTHORIZED_KEY" ]; then
     sudo iptables -A TCP -p tcp --dport 22 -j ACCEPT
     sudo iptables -D INPUT -j REJECT --reject-with icmp-proto-unreachable
