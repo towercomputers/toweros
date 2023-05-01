@@ -34,6 +34,7 @@ echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
 cp /var/towercomputers/docs/* /home/$USERNAME/
 cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
 # put tower-tools wheel in user's tower cache dir
+mkdir -p /home/$USERNAME/.cache/tower/builds
 cp /home/$USERNAME/pip-packages/tower_tools-*.whl /home/$USERNAME/.cache/tower/builds/
 
 # configure default network
