@@ -18,16 +18,6 @@ REQUIRED_BUILDS = {
         "url": "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz",
         "checksum": "65472324ff51bde690379c67b7c5e299e532e63747bf1f71d20552c63708e1b0"
     },
-    "nx-armv7h": {
-        "filename": "nx-armv7h.tar.gz",
-        "url": "https://drive.google.com/uc?export=download&confirm=yes&id=17jHstO67SGuZoINPBcU16StwsJlZ0gpC",
-        "checksum": "1fca33faa926d03bcdd52d0f0d5cbe2bd16a5f3b1cddcf7d1747c82bacebde1c"
-    },
-    "nx-x86_64": {
-        "filename": "nx-x86_64.tar.gz",
-        "url": "https://drive.google.com/uc?export=download&confirm=yes&id=1xuieznP6xCAxspWY9acOyIFEH21U8YRT",
-        "checksum": "c3528a4b494260ab6473a9af6b5e95546310f84ca51cdc21127b029e3d0b4d6a"
-    }
 }
 
 def init_builds_dir(args_builds_dir):

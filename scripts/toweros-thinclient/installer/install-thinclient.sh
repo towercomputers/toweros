@@ -10,8 +10,12 @@ SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 python $SCRIPT_DIR/ask-configuration.py
 source /root/tower.env
 
+# set hostname
+setup-hostname -n tower
+
 # change root password
 echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd root
+
 # create first user
 adduser -D "$USERNAME" "$USERNAME"
 echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
@@ -21,21 +25,6 @@ addgroup "$USERNAME" abuild
 # add user to sudoers
 mkdir -p /etc/sudoers.d
 echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-
-# set locales
-# TODO: set LANG
-setup-timezone "$TIMEZONE"
-setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
-# set hostname
-setup-hostname -n tower
-# start services
-rc-update add dhcpcd
-rc-update add avahi-daemon
-rc-update add iptables
-rc-update add wpa_supplicant boot
-# configure firewall
-sh $SCRIPT_DIR/configure-firewall.sh
-
 # install tower-tools with pip
 mv /var/cache/pip-packages "/home/$USERNAME/"
 chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/pip-packages"
@@ -44,6 +33,8 @@ echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
 # put documentation and install-dev.sh in user's home
 cp /var/towercomputers/docs/* /home/$USERNAME/
 cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
+# put tower-tools wheel in user's tower cache dir
+cp /home/$USERNAME/pip-packages/tower_tools-*.whl /home/$USERNAME/.cache/tower/builds/
 
 # configure default network
 mkdir -p /etc/network
@@ -62,13 +53,25 @@ Please see the ~/README.md file to know how to get started with TowerOS-ThinClie
 EOF
 rm -f /etc/motd
 touch /etc/motd
-
 # remove autologin from tty1
 old_tty1='tty1::respawn:\/sbin\/agetty --skip-login --nonewline --noissue --autologin root --noclear 38400 tty1'
 new_tty1='tty1::respawn:\/sbin\/getty 38400 tty1'
 sed -i "s/$old_tty1/$new_tty1/g" /etc/inittab
 # disable installer auto-start
 rm -f /etc/profile.d/install.sh
+# set locales
+# TODO: set LANG
+setup-timezone "$TIMEZONE"
+setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
+
+# start services
+rc-update add dhcpcd
+rc-update add avahi-daemon
+rc-update add iptables
+rc-update add wpa_supplicant boot
+
+# configure firewall
+sh $SCRIPT_DIR/configure-firewall.sh
 
 # launch setup-disk
 yes | setup-disk -m sys "$TARGET_DRIVE"
