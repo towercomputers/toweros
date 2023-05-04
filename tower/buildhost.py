@@ -56,11 +56,13 @@ def prepare_chroot_image(alpine_tar_path):
         'fetch', '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), 
         '--arch', 'armv7', '-R', '--url', '--root', wd("EXPORT_ROOTFS_DIR/boot"), "--no-cache",
         '--allow-untrusted',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/community',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/main',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/community',
+        '--repository', 'http://mirrors.ircam.fr/pub/alpine/edge/main',
         'alpine-base', 'openssl', 'nx-libs', 'dosfstools', 'e2fsprogs', 'sfdisk',
         'avahi', 'avahi-tools', 'iptables', 'sudo', 'dhcpcd', 'openssh', 'xauth',
-        'nano',
+        'nano', 'kbd-bkeymaps', 'parted', 'e2fsprogs-extra', 'lsblk', 'tzdata',
+        'acct', 'linux-rpi4', 'raspberrypi-bootloader',
         _out=print
     )
     apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))

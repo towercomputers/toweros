@@ -29,7 +29,8 @@ alpine-base
 openssl
 nx-libs
 dosfstools
-e2fsprogs
+e2fsprogs=1.47.0-r2
+e2fsprogs-extra=1.47.0-r2
 sfdisk
 avahi
 avahi-tools
@@ -39,6 +40,10 @@ dhcpcd
 openssh
 xauth
 nano
+kbd-bkeymaps
+parted
+lsblk
+tzdata
 EOF
 
 
@@ -68,12 +73,41 @@ touch "$tmp"/etc/motd
 
 # auto-start installer
 mkdir -p "$tmp"/etc/local.d/
-makefile root:root 0755 "$tmp"/etc/local.d/install.sh <<EOF
+makefile root:root 0755 "$tmp"/etc/local.d/install.start <<EOF
 #!/bin/sh
 
-echo 'INSTALL'
-#apk add nx-libs dosfstools e2fsprogs sfdisk avahi avahi-tools \
-#	iptables sudo dhcpcd openssh xauth
+parted /dev/mmcblk0 resizepart 2 100%
+resize2fs /dev/mmcblk0p2
+
+mkdir -p /mnt
+mount /dev/mmcblk0p2 /mnt
+
+setup-hostname -n office
+setup-keymap fr fr
+setup-timezone Europe/Paris
+
+export FORCE_BOOTFS=1
+yes | setup-disk -m sys /mnt
+mount -o remount,rw /media/mmcblk0p1
+
+rm -f /media/mmcblk0p1/boot/* 
+
+rm /mnt/boot/boot
+
+mv /mnt/boot/* /media/mmcblk0p1/boot/
+rm -Rf /mnt/boot
+mkdir /mnt/media/mmcblk0p1
+ln -s /mnt/media/mmcblk0p1/boot /mnt/boot || true
+
+echo "/dev/mmcblk0p1 /media/mmcblk0p1 vfat defaults 0 0" >> /mnt/etc/fstab
+sed -i '/cdrom/d' /mnt/etc/fstab 
+sed -i '/floppy/d' /mnt/etc/fstab
+
+sed -i 's/$/ root=\/dev\/mmcblk0p2 /' /media/mmcblk0p1/cmdline.txt
+
+mv /mnt/etc/local.d/install.start /mnt/etc/local.d/install.bak
+
+reboot
 EOF
 
 # set auto-login
@@ -100,20 +134,27 @@ tty6::respawn:/sbin/getty 38400 tty6
 EOF
 
 # install services
-rc_add local default
 rc_add devfs sysinit
 rc_add dmesg sysinit
 rc_add mdev sysinit
 rc_add hwdrivers sysinit
 rc_add modloop sysinit
+
 rc_add hwclock boot
 rc_add modules boot
 rc_add sysctl boot
 rc_add bootmisc boot
 rc_add syslog boot
+
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
 rc_add savecache shutdown
+
+rc_add local default
+rc_add dhcpcd default
+rc_add avahi-daemon default
+rc_add iptables default
+rc_add wpa_supplicant boot
 
 # generate apk overlay
 tar -c -C "$tmp" etc | gzip -9n > headless.apkovl.tar.gz
