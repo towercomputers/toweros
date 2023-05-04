@@ -13,10 +13,10 @@ class InvalidChecksum(Exception):
     pass
 
 REQUIRED_BUILDS = {
-    "arch-linux-arm": {
-        "filename": "ArchLinuxARM-rpi-armv7-latest.tar.gz",
-        "url": "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz",
-        "checksum": "65472324ff51bde690379c67b7c5e299e532e63747bf1f71d20552c63708e1b0"
+    "alpine-rpi": {
+        "filename": "alpine-rpi-3.17.3-armv7.tar.gz",
+        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz",
+        "checksum": "d623a05183164cc2280e6f934b2153761691ade62f67b03ec0b877d9f4ff6171"
     },
 }
 

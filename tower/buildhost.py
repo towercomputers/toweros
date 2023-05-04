@@ -2,14 +2,15 @@ import os
 import time
 from datetime import datetime
 import logging
+import glob
 
+import sh
 from sh import (
     Command,
-    mount, parted, mkdosfs, resize2fs, tee, cat,
-    cp, rm, sync, rsync, chown, truncate,
-    #arch_chroot, 
-    tar, xz,
-    losetup, 
+    mount, parted, mkdosfs, resize2fs, tee, cat, echo,
+    mv, cp, rm, sync, rsync, chown, truncate, mkdir, ls,
+    tar, xz, apk,
+    losetup, abuild_sign,
 )
 mkfs_ext4 = Command('mkfs.ext4')
 fsck_ext4 = Command('fsck.ext4')
@@ -20,7 +21,8 @@ from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
-WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
+#WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
+WORKING_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-host')
 
 def wd(path):
@@ -31,8 +33,8 @@ def prepare_working_dir():
         raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
 
-@clitask("Preparing Arch Linux system...")
-def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
+@clitask("Preparing Alpine Linux system...")
+def prepare_chroot_image(alpine_tar_path):
     # prepare disk image
     mkfs_ext4(
         '-O', '^has_journal,^resize_inode', 
@@ -43,23 +45,48 @@ def prepare_chroot_image(archlinux_tar_path, nx_tar_path):
         _out=logger.debug
     )
     # mount image in temporary folder
-    mount('--mkdir', wd("root.img"), wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
-    # put arch linux files
-    tar('-xpf', archlinux_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
-    # put nx packages
-    tar('-xpf', nx_tar_path, '-C', wd("EXPORT_ROOTFS_DIR"), _out=logger.debug)
-    # put cross platform emulator
-    cp('/usr/bin/qemu-arm-static', wd("EXPORT_ROOTFS_DIR/usr/bin"))
-    # put and run toweros-host installer
-    cp(f'{INSTALLER_DIR}/00_install_toweros_host.sh', wd("EXPORT_ROOTFS_DIR"))
-    arch_chroot(wd("EXPORT_ROOTFS_DIR"), 'sh', '/00_install_toweros_host.sh', _out=logger.debug)
-    # clean installation files
-    rm(wd("EXPORT_ROOTFS_DIR/00_install_toweros_host.sh"))
-    rm(wd("EXPORT_ROOTFS_DIR/usr/bin/qemu-arm-static"))
-    nx_tar_name = os.path.basename(nx_tar_path).split(".")[0]
-    rm('-rf', wd(f"EXPORT_ROOTFS_DIR/{nx_tar_name}"))
+    mkdir('-p', wd("EXPORT_ROOTFS_DIR"))
+    mount(wd("root.img"), wd("EXPORT_ROOTFS_DIR"))
+    # put alpine linux files
+    mkdir(wd("EXPORT_ROOTFS_DIR/boot"))
+    tar('-xpf', alpine_tar_path, '-C', wd("EXPORT_ROOTFS_DIR/boot"))
+    rm('-rf', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"))
+    mkdir('-p', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"))
+    apk(
+        'fetch', '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), 
+        '--arch', 'armv7', '-R', '--url', '--root', wd("EXPORT_ROOTFS_DIR/boot"), "--no-cache",
+        '--allow-untrusted',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/community',
+        'alpine-base', 'openssl', 'nx-libs', 'dosfstools', 'e2fsprogs', 'sfdisk',
+        'avahi', 'avahi-tools', 'iptables', 'sudo', 'dhcpcd', 'openssh', 'xauth',
+        'nano',
+        _out=print
+    )
+    apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
+    apk(
+        'index', 
+        '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
+        '--allow-untrusted',
+        '--arch', 'armv7', '--rewrite-arch', 'armv7',
+        *apks,
+        _out=print
+    )
+    abuild_sign(
+        '-k', '/home/tower/.abuild/ouziel@gmail.com-644fe6fa.rsa',
+        wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
+        _out=print
+    )
+    Command('sh')(os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'), _cwd=wd("EXPORT_ROOTFS_DIR/boot"))
+
+    ls('-alh', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), _out=print)
+    ls('-alh', wd("EXPORT_ROOTFS_DIR/boot/apks/"), _out=print)
+    ls('-alh', wd("EXPORT_ROOTFS_DIR/boot"), _out=print)
+    cat(wd("EXPORT_ROOTFS_DIR/boot/cmdline.txt"), _out=print)
+    
     # synchronize folder
     sync(wd("EXPORT_ROOTFS_DIR"))
+   
 
 @clitask("Creating RPI partitions...")
 def create_rpi_partitions():
@@ -67,6 +94,7 @@ def create_rpi_partitions():
     # caluclate sizes
     cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
     root_size = int(Command('sh')('-c', cmd).strip())
+    root_size = 2 * root_size
     boot_size = 256 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
@@ -100,7 +128,7 @@ def create_loop_device(image_file):
         return loop_dev
     raise Exception("losetup failed; exiting")
 
-@clitask("Copying Arch Linux system in RPI partitions...")
+@clitask("Copying Alpine Linux system in RPI partitions...")
 def prepare_rpi_partitions(loop_dev):
     boot_dev = f"{loop_dev}p1"
     root_dev = f"{loop_dev}p2"
@@ -108,8 +136,10 @@ def prepare_rpi_partitions(loop_dev):
     mkdosfs('-n', 'bootfs', '-F', 32, '-s', 4, '-v', boot_dev, _out=logger.debug)
     mkfs_ext4('-L', 'rootfs', '-O', "^huge_file", root_dev, _out=logger.debug)
     # mount partitions
-    mount('--mkdir', '-v', root_dev, wd("ROOTFS_DIR"), '-t', 'ext4')
-    mount('--mkdir', '-v', boot_dev, wd("ROOTFS_DIR/boot"), '-t', 'vfat')
+    mkdir('-p', wd("ROOTFS_DIR"), _out=logger.debug)
+    mount('-v', root_dev, wd("ROOTFS_DIR"), '-t', 'ext4')
+    mkdir('-p', wd("ROOTFS_DIR/boot"), _out=logger.debug)
+    mount('-v', boot_dev, wd("ROOTFS_DIR/boot"), '-t', 'vfat')
     # copy system in partitions
     rsync('-aHAXxv', '--exclude', '/boot', wd("EXPORT_ROOTFS_DIR/"), wd("ROOTFS_DIR/"), _out=logger.debug)
     rsync('-rtxv', wd("EXPORT_ROOTFS_DIR/boot/"), wd("ROOTFS_DIR/boot/"), _out=logger.debug)
@@ -127,6 +157,14 @@ def compress_image(builds_dir, owner):
     logger.info(f"Image ready: {image_path}")
     return image_path
 
+@clitask("Copying image...")
+def copy_image(builds_dir, owner):
+    image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
+    cp(wd("toweros-host.img"), image_path)
+    chown(f"{owner}:{owner}", image_path)
+    logger.info(f"Image ready: {image_path}")
+    return image_path
+
 def unmount_all():
     utils.lazy_umount(wd("ROOTFS_DIR/boot/"))
     utils.lazy_umount(wd("ROOTFS_DIR"))
@@ -140,21 +178,25 @@ def cleanup():
 
 @clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
 def build_image(builds_dir):
-    archlinux_tar_path = utils.prepare_required_build("arch-linux-arm", builds_dir)
-    nx_tar_path = utils.prepare_required_build("nx-armv7h", builds_dir)
+    alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
     user = os.getlogin()
+    loop_dev = None
     try:
         prepare_working_dir()
-        prepare_chroot_image(archlinux_tar_path, nx_tar_path)
+        prepare_chroot_image(alpine_tar_path)
         create_rpi_partitions()
         loop_dev = create_loop_device(wd("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
-        image_path = compress_image(builds_dir, user)
+        #image_path = compress_image(builds_dir, user)
+        image_path = copy_image(builds_dir, user)
     finally:
         cleanup()
     return image_path
 
+
+
+""" 
 @clitask("Copying image {0} in device {1}...")
 def copy_image(image_file, device):
     utils.unmount_all(device)
@@ -206,3 +248,4 @@ def burn_image(image_file, device, config):
         configure_image(config)       
     finally:
         cleanup()
+ """
