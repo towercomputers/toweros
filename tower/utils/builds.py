@@ -66,9 +66,23 @@ def find_host_image():
     ]
     for builds_dir in builds_dirs:
         if os.path.isdir(builds_dir):
-            host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
-            host_images += glob.glob(os.path.join(builds_dir, 'toweros-host-*.img'))
-            if host_images:
-                image_path = host_images.pop()
+            compressed_host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.img'))
+            compressed_host_images.sort()
+            uncompressed_host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
+            uncompressed_host_images.sort()
+            if compressed_host_images and uncompressed_host_images:
+                compressed_name = os.path.basename(compressed_host_images[-1]).replace('.img.xz', '')
+                uncompressed_name = os.path.basename(uncompressed_host_images[-1]).replace('.img', '')
+                if compressed_name > uncompressed_name:
+                    image_path = compressed_host_images.pop()
+                    break
+                else:
+                    image_path = uncompressed_host_images.pop()
+                    break
+            elif compressed_host_images:
+                image_path = compressed_host_images.pop()
+                break
+            elif uncompressed_host_images:
+                image_path = uncompressed_host_images.pop()
                 break
     return image_path

@@ -9,7 +9,7 @@ from sh import (
     Command,
     mount, parted, mkdosfs, resize2fs, tee, cat, echo,
     mv, cp, rm, sync, rsync, chown, truncate, mkdir, ls,
-    tar, xz, apk,
+    tar, xz, apk, dd,
     losetup, abuild_sign,
 )
 mkfs_ext4 = Command('mkfs.ext4')
@@ -56,14 +56,22 @@ def prepare_chroot_image(alpine_tar_path):
         'fetch', '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), 
         '--arch', 'armv7', '-R', '--url', '--root', wd("EXPORT_ROOTFS_DIR/boot"), "--no-cache",
         '--allow-untrusted',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/community',
+        'alpine-base', 'openssl', 'nx-libs', 'dosfstools', 'sfdisk',
+        'avahi', 'avahi-tools', 'iptables', 'sudo', 'dhcpcd', 'openssh', 'xauth',
+        'nano', 'kbd-bkeymaps', 'parted', 'lsblk', 'tzdata',
+        'acct', 'linux-rpi4', 'raspberrypi-bootloader', 'wpa_supplicant', 'dbus',
+        _out=logger.debug
+    )
+    apk(
+        'fetch', '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), 
+        '--arch', 'armv7', '-R', '--url', '--root', wd("EXPORT_ROOTFS_DIR/boot"), "--no-cache",
+        '--allow-untrusted',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/main',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/community',
-        '--repository', 'http://mirrors.ircam.fr/pub/alpine/edge/main',
-        'alpine-base', 'openssl', 'nx-libs', 'dosfstools', 'e2fsprogs', 'sfdisk',
-        'avahi', 'avahi-tools', 'iptables', 'sudo', 'dhcpcd', 'openssh', 'xauth',
-        'nano', 'kbd-bkeymaps', 'parted', 'e2fsprogs-extra', 'lsblk', 'tzdata',
-        'acct', 'linux-rpi4', 'raspberrypi-bootloader',
-        _out=print
+        'e2fsprogs', 'e2fsprogs-extra',
+        _out=logger.debug
     )
     apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
     apk(
@@ -72,19 +80,18 @@ def prepare_chroot_image(alpine_tar_path):
         '--allow-untrusted',
         '--arch', 'armv7', '--rewrite-arch', 'armv7',
         *apks,
-        _out=print
+        _out=logger.debug
     )
     abuild_sign(
         '-k', '/home/tower/.abuild/ouziel@gmail.com-644fe6fa.rsa',
         wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
+        _out=logger.debug
+    )
+    Command('sh')(
+        os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'), 
+        _cwd=wd("EXPORT_ROOTFS_DIR/boot"),
         _out=print
     )
-    Command('sh')(os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'), _cwd=wd("EXPORT_ROOTFS_DIR/boot"))
-
-    ls('-alh', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), _out=print)
-    ls('-alh', wd("EXPORT_ROOTFS_DIR/boot/apks/"), _out=print)
-    ls('-alh', wd("EXPORT_ROOTFS_DIR/boot"), _out=print)
-    cat(wd("EXPORT_ROOTFS_DIR/boot/cmdline.txt"), _out=print)
     
     # synchronize folder
     sync(wd("EXPORT_ROOTFS_DIR"))
@@ -94,9 +101,9 @@ def prepare_chroot_image(alpine_tar_path):
 def create_rpi_partitions():
     image_file = wd("toweros-host.img")
     # caluclate sizes
-    cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
-    root_size = int(Command('sh')('-c', cmd).strip())
-    root_size = 2 * root_size
+    #cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
+    #root_size = int(Command('sh')('-c', cmd).strip())
+    root_size = 4 * 1024 * 1024
     boot_size = 256 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
@@ -171,6 +178,7 @@ def unmount_all():
     utils.lazy_umount(wd("ROOTFS_DIR/boot/"))
     utils.lazy_umount(wd("ROOTFS_DIR"))
     utils.lazy_umount(wd("EXPORT_ROOTFS_DIR"))
+    utils.lazy_umount(wd("BOOTFS_DIR"))
     losetup('-D')
 
 @clitask("Cleaning up...")
@@ -190,20 +198,18 @@ def build_image(builds_dir):
         loop_dev = create_loop_device(wd("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
-        #image_path = compress_image(builds_dir, user)
-        image_path = copy_image(builds_dir, user)
+        image_path = compress_image(builds_dir, user)
+        #image_path = copy_image(builds_dir, user)
     finally:
         cleanup()
     return image_path
 
 
-
-""" 
 @clitask("Copying image {0} in device {1}...")
-def copy_image(image_file, device):
+def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
     # burn image
-    tee(device, _in=cat(image_file))
+    dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=logger.debug)
     # determine partitions names
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     root_part = Command('sh')('-c', f'ls {device}*2').strip()
@@ -215,39 +221,20 @@ def copy_image(image_file, device):
     return boot_part, root_part
 
 @clitask("Configuring image...")
-def configure_image(config):
-    logger.debug(f"Host configuration: {config}")
-    # put cross platform emulator
-    cp('/usr/bin/qemu-arm-static', wd("ROOTFS_DIR/usr/bin"))
-    # put configuration scripts
-    cp(f'{INSTALLER_DIR}/01_configure_toweros_host.sh', wd("ROOTFS_DIR/root/"))
-    cp(f'{INSTALLER_DIR}/files/toweros_host_iptables.rules', wd("ROOTFS_DIR/root/"))
-    # run configuration script
-    args_key = [
-        "HOSTNAME", "USERNAME", "PUBLIC_KEY", "PASSWORD_HASH",
-        "KEYMAP", "TIMEZONE", "LANG",
-        "ONLINE", "WLAN_SSID", "WLAN_SHARED_KEY",
-        "THIN_CLIENT_IP", "TOWER_NETWORK"
-    ]
-    args = [config[key] for key in args_key]
-    arch_chroot(wd("ROOTFS_DIR"), 'sh', '/root/01_configure_toweros_host.sh', *args, _out=logger.debug, _err_to_out=True)
-    # update fstab
-    #tee(wd("ROOTFS_DIR/etc/fstab"), _in=genfstab('-U', wd("ROOTFS_DIR")))
-    Command('sh')('-c', f'genfstab -U {wd("ROOTFS_DIR")} | sed "/swap/d" | sed "/#/d" > {wd("ROOTFS_DIR/etc/fstab")}')
-    # clean configuration files
-    rm(wd("ROOTFS_DIR/root/01_configure_toweros_host.sh"))
-    rm(wd("ROOTFS_DIR/root/toweros_host_iptables.rules"))
-    rm(wd("ROOTFS_DIR/usr/bin/qemu-arm-static")) 
+def insert_tower_env(boot_part, config):
+    mkdir('-p', wd("BOOTFS_DIR/"))
+    mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
+    str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
+    logger.info(f"Host configuration:\n{str_env}")
+    tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
+    #ls('-al', wd("BOOTFS_DIR/"), _out=print)
+    
 
 @clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True)
 def burn_image(image_file, device, config):
     try:
         prepare_working_dir()
-        boot_part, root_part = copy_image(image_file, device)
-        # mount partions
-        mount('--mkdir', root_part, wd("ROOTFS_DIR"), '-t', 'ext4')
-        mount('--mkdir', boot_part, wd("ROOTFS_DIR/boot/"), '-t', 'vfat')
-        configure_image(config)       
+        boot_part, root_part = copy_image_in_device(image_file, device)
+        insert_tower_env(boot_part, config)       
     finally:
         cleanup()
- """

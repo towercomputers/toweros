@@ -34,8 +34,14 @@ def add_args(argparser):
         required=False
     )
     provision_parser.add_argument(
-        '--keymap', 
+        '--keyboard-layout', 
         help="""Keyboard layout code (Default: same as the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
+        '--keyboard-variant', 
+        help="""Keyboard variant code (Default: same as the thin client)""",
         required=False,
         default=""
     )
@@ -114,9 +120,13 @@ def check_args(args, parser_error):
         if not os.path.exists(args.private_key_path):
             parser_error("private_key path invalid.")
 
-    if args.keymap:
-        if re.match(r'^[a-zA-Z]{2}$', args.keymap) is None:
-            parser_error(message="Keymap invalid. Must be 2 chars.")
+    if args.keyboard_layout:
+        if re.match(r'^[a-zA-Z]{2}$', args.keyboard_layout) is None:
+            parser_error(message="Keyboard layout invalid. Must be 2 chars.")
+    
+    if args.keyboard_variant:
+        if re.match(r'^[a-zA-Z0-9-_]{2,32}$', args.keyboard_variant) is None:
+            parser_error(message="Keyboard layout invalid. Must be alphanumeric between 2 and 32 chars.")
 
     if args.timezone:
         if re.match(r'^[a-zA-Z-\ ]+\/[a-zA-Z-\ ]+$', args.timezone) is None:

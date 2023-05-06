@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
+
 cleanup() {
 	rm -rf "$tmp"
 }
@@ -44,8 +46,9 @@ kbd-bkeymaps
 parted
 lsblk
 tzdata
+wpa_supplicant
+dbus
 EOF
-
 
 mkdir -p "$tmp"/etc/apk/keys
 makefile root:root 0644 "$tmp"/etc/apk/keys/ouziel@gmail.com-644fe6fa.rsa.pub <<EOF
@@ -67,48 +70,15 @@ EOF
 
 # welcome messages
 makefile root:root 0644 "$tmp"/etc/issue <<EOF
-Welcome to TowerOS-ThinClient Installer!
+Welcome to TowerOS-Host!
 EOF
 touch "$tmp"/etc/motd
 
 # auto-start installer
 mkdir -p "$tmp"/etc/local.d/
-makefile root:root 0755 "$tmp"/etc/local.d/install.start <<EOF
-#!/bin/sh
-
-parted /dev/mmcblk0 resizepart 2 100%
-resize2fs /dev/mmcblk0p2
-
-mkdir -p /mnt
-mount /dev/mmcblk0p2 /mnt
-
-setup-hostname -n office
-setup-keymap fr fr
-setup-timezone Europe/Paris
-
-export FORCE_BOOTFS=1
-yes | setup-disk -m sys /mnt
-mount -o remount,rw /media/mmcblk0p1
-
-rm -f /media/mmcblk0p1/boot/* 
-
-rm /mnt/boot/boot
-
-mv /mnt/boot/* /media/mmcblk0p1/boot/
-rm -Rf /mnt/boot
-mkdir /mnt/media/mmcblk0p1
-ln -s /mnt/media/mmcblk0p1/boot /mnt/boot || true
-
-echo "/dev/mmcblk0p1 /media/mmcblk0p1 vfat defaults 0 0" >> /mnt/etc/fstab
-sed -i '/cdrom/d' /mnt/etc/fstab 
-sed -i '/floppy/d' /mnt/etc/fstab
-
-sed -i 's/$/ root=\/dev\/mmcblk0p2 /' /media/mmcblk0p1/cmdline.txt
-
-mv /mnt/etc/local.d/install.start /mnt/etc/local.d/install.bak
-
-reboot
-EOF
+cat $SCRIPT_DIR/install-host.sh | makefile root:root 0755 "$tmp"/etc/local.d/install.start
+#cat $SCRIPT_DIR/install-host.sh | makefile root:root 0755 "$tmp"/etc/local.d/install.sh
+cat $SCRIPT_DIR/configure-firewall.sh | makefile root:root 0755 "$tmp"/etc/local.d/configure-firewall.sh
 
 # set auto-login
 makefile root:root 0644 "$tmp"/etc/inittab <<EOF
@@ -133,6 +103,14 @@ tty6::respawn:/sbin/getty 38400 tty6
 ::shutdown:/sbin/openrc shutdown
 EOF
 
+mkdir -p "$tmp"/etc/network
+makefile root:root 0644 "$tmp"/etc/network/interfaces <<EOF
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet dhcp
+EOF
+
 # install services
 rc_add devfs sysinit
 rc_add dmesg sysinit
@@ -140,7 +118,7 @@ rc_add mdev sysinit
 rc_add hwdrivers sysinit
 rc_add modloop sysinit
 
-rc_add hwclock boot
+#rc_add hwclock boot
 rc_add modules boot
 rc_add sysctl boot
 rc_add bootmisc boot
@@ -152,9 +130,12 @@ rc_add savecache shutdown
 
 rc_add local default
 rc_add dhcpcd default
+rc_add dbus default
 rc_add avahi-daemon default
 rc_add iptables default
+rc_add sshd default
 rc_add wpa_supplicant boot
+rc_add networking boot
 
 # generate apk overlay
 tar -c -C "$tmp" etc | gzip -9n > headless.apkovl.tar.gz
