@@ -5,7 +5,7 @@ pkgdesc="TowerOS ThinClient installer"
 url="https://github.com/towercomputers/tools"
 arch="all"
 src="./"
-depends="coreutils python3 py3-pip py3-sh py3-rich
+depends="coreutils python3 py3-pip py3-rich
 		sudo openssh dhcpcd avahi avahi-tools wpa_supplicant rsync
 		git iptables rsync lsblk perl-utils xz musl-locales e2fsprogs-extra
 		nx-libs xsetroot mcookie parted lsscsi figlet
@@ -26,13 +26,14 @@ check() {
 
 package() {
 	# copy pip packages
-	mkdir -p "$pkgdir"/var/cache
-	cp -r pip-packages "$pkgdir"/var/cache/
+	#mkdir -p "$pkgdir"/var/cache
+	#cp -r pip-packages "$pkgdir"/var/cache/
 	# copy installer
-	mkdir -p "$pkgdir"/var/towercomputers
-	cp -r installer "$pkgdir"/var/towercomputers/
+	#mkdir -p "$pkgdir"/var/towercomputers
+	#cp -r installer "$pkgdir"/var/towercomputers/
 	# copy docs
-	cp -r docs "$pkgdir"/var/towercomputers/
+	#cp -r docs "$pkgdir"/var/towercomputers/
 	# copy image host
 	#cp -r builds "$pkgdir"/var/towercomputers/
+	return 0
 }

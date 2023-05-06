@@ -5,7 +5,7 @@ import glob
 import shutil
 import sys
 
-from sh import rm, git, pip, abuild, Command
+from sh import rm, git, pip, abuild, Command, apk, mkdir
 
 from tower.utils import clitask
 from tower import buildhost
@@ -108,18 +108,18 @@ def build_apk():
 def prepare_image(builds_dir):
     git('clone', '--depth=1', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     shutil.copy(os.path.join(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
-    shutil.copy(os.path.join(INSTALLER_DIR, 'genapkovl-tower.sh'), wd('aports/scripts'))
-    tower_repo = wd(f"apk-packages/{WORKING_DIR_NAME}")
+    shutil.copy(os.path.join(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
+    #tower_repo = wd(f"apk-packages/{WORKING_DIR_NAME}")
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/main',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/community',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/testing',
-        '--repository', f'file://{tower_repo}',
+        #'--repository', f'file://{tower_repo}',
         '--profile', 'tower',
         '--tag', __version__,
-         _err_to_out=True, _out=logger.debug,
+         _err_to_out=True, _out=logger.info,
          _cwd=WORKING_DIR
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
@@ -139,7 +139,7 @@ def build_image(builds_dir):
         prepare_installer()
         prepare_docs()
         # prepare_host_image(builds_dir) # TODO
-        build_apk()
+        # build_apk()
         prepare_image(builds_dir)
     finally:
         cleanup()

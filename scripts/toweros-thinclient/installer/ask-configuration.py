@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import subprocess
 
 from rich import print as rprint
 from rich.columns import Columns
@@ -11,7 +12,7 @@ from rich.text import Text
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
-from sh import lsscsi, figlet
+#from sh import lsscsi, figlet
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
 with open(LOCALE_FILE, "r") as fp:
@@ -20,7 +21,8 @@ with open(LOCALE_FILE, "r") as fp:
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
-DRIVES = lsscsi('-s').strip().split("\n")
+#DRIVES = lsscsi('-s').strip().split("\n")
+DRIVES = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
 
 def print_title(title):
     title_text = Text(f"\n{title}\n")
@@ -153,7 +155,12 @@ def confirm_config(config):
 
 def ask_config():
     Console().clear()
-    figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
+    title = subprocess.run(
+        ['figlet', '-w', '160', 'TowerOS-ThinClient'], 
+        capture_output=True, encoding="UTF-8"
+    ).stdout
+    print(title)
+    #figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
     confirmed = False
     config = {}
     while not confirmed:

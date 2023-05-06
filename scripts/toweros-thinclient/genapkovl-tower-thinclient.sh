@@ -1,5 +1,12 @@
 #!/bin/sh -e
 
+
+echo "GEN APK OVERLAY: $OUTDIR"
+ls -al ./
+pwd
+WORKING_DIR=~/build-toweros-thinclient-work
+ls -al $WORKING_DIR
+
 cleanup() {
 	rm -rf "$tmp"
 }
@@ -26,7 +33,53 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/apk
 makefile root:root 0644 "$tmp"/etc/apk/world <<EOF
 alpine-base
-toweros-thinclient-installer
+coreutils
+python3
+py3-pip
+py3-rich
+sudo
+openssh
+dhcpcd
+avahi
+avahi-tools
+wpa_supplicant
+rsync
+git
+iptables
+rsync
+lsblk
+perl-utils
+xz
+musl-locales
+e2fsprogs-extra
+nx-libs
+xsetroot
+mcookie
+parted
+lsscsi
+figlet
+alpine-sdk
+build-base
+apk-tools
+acct
+acct-openrc
+alpine-conf
+sfdisk
+busybox
+fakeroot
+syslinux
+xorriso
+squashfs-tools
+mtools
+dosfstools
+grub-efi
+abuild
+agetty
+runuser
+nano
+vim
+net-tools
+losetup
 EOF
 
 # temporary welcome messahe
@@ -56,6 +109,12 @@ tty6::respawn:/sbin/getty 38400 tty6
 # Stuff to do before rebooting
 ::shutdown:/sbin/openrc shutdown
 EOF
+
+mkdir -p "$tmp"/var/towercomputers
+cp -r $WORKING_DIR/dist/installer "$tmp"/var/towercomputers/
+cp -r $WORKING_DIR/dist/docs "$tmp"/var/towercomputers/
+mkdir -p "$tmp"/var/cache
+cp -r $WORKING_DIR/dist/pip-packages "$tmp"/var/cache/
 
 # auto-start installer
 mkdir -p "$tmp"/etc/profile.d/
