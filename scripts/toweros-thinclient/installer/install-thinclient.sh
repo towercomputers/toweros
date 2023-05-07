@@ -3,6 +3,10 @@
 set -e
 set -x
 
+chmod 755 /
+chmod 755 /bin
+chmod 755 /lib
+
 SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 
 # initialize coniguration variables:

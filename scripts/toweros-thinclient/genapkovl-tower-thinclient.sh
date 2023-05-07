@@ -140,4 +140,6 @@ rc_add killprocs shutdown
 rc_add savecache shutdown
 
 # generate apk overlay
-tar -c -C "$tmp" etc | gzip -9n > $HOSTNAME.apkovl.tar.gz
+tar -c -C "$tmp" ./ | gzip -9n > $HOSTNAME.apkovl.tar.gz
+
+cp $HOSTNAME.apkovl.tar.gz /home/tower/$HOSTNAME.apkovl.tar.gz
