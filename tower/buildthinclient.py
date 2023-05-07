@@ -68,58 +68,70 @@ def check_abuild_key():
 
 @clitask("Downloading pip packages...")
 def prepare_pip_packages(builds_dir):
-    os.makedirs(wd('dist/pip-packages'))
+    os.makedirs(wd('overlay/var/cache/pip-packages'))
     tower_tools_wheel_path = TOWER_TOOLS_URL
     wheels = glob.glob(os.path.join(builds_dir, 'tower_tools-*.whl'))
     if wheels:
         wheel = wheels.pop()
         tower_tools_wheel_path = f"file://{wheel}"
-        shutil.copy(wheel, wd('dist/pip-packages'))
+        shutil.copy(wheel, wd('overlay/var/cache/pip-packages'))
     pip(
-        "download", f"tower-tools @ {tower_tools_wheel_path or TOWER_TOOLS_URL}", 
-        '-d', wd('dist/pip-packages'),
+        "download", f"tower-tools @ {tower_tools_wheel_path}", 
+        '-d', wd('overlay/var/cache/pip-packages'),
         _err_to_out=True, _out=logger.debug
     )
 
 def prepare_installer():
-    shutil.copytree(os.path.join(INSTALLER_DIR, 'installer'), wd('dist/installer'))
+    os.makedirs(wd('overlay/var/towercomputers/'))
+    shutil.copytree(os.path.join(INSTALLER_DIR, 'installer'), wd('overlay/var/towercomputers/installer'))
 
 def prepare_docs():
-    os.makedirs(wd('dist/docs'))
+    os.makedirs(wd('overlay/var/towercomputers/docs'))
     readme_path = find_readme()
-    shutil.copy(readme_path, wd('dist/docs'))
-    shutil.copy(os.path.join(HOME_PATH, 'docs', 'Tower Whitepaper.pdf'), wd('dist/docs'))
+    shutil.copy(readme_path, wd('overlay/var/towercomputers/docs'))
+    shutil.copy(os.path.join(HOME_PATH, 'docs', 'Tower Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
 
-def prepare_host_image(builds_dir):
-    os.makedirs(wd('dist/builds'))
+def prepare_build(builds_dir):
+    os.makedirs(wd('overlay/var/towercomputers/builds'))
     host_image_path = find_host_image(builds_dir)
-    shutil.copy(host_image_path, wd('dist/builds'))
+    shutil.copy(host_image_path, wd('overlay/var/towercomputers/builds'))
+    wheels = glob.glob(os.path.join(wd('overlay/var/cache/pip-packages'), 'tower_tools-*.whl'))
+    shutil.copy(wheels[0], wd('overlay/var/towercomputers/builds'))
 
-@clitask("Building apk...")
-def build_apk():
-    shutil.copy(os.path.join(INSTALLER_DIR, 'APKBUILD'), wd('dist'))
-    abuild(
-        '-r', '-P', wd('apk-packages'), 
-        _cwd=wd('dist'),
-        _err_to_out=True, _out=logger.debug
-    )
+def prepare_etc_folder():
+    os.makedirs(wd('overlay/etc/apk/'))
+    shutil.copy(os.path.join(INSTALLER_DIR, 'installer', 'files', 'world'), wd('overlay/etc/apk/'))
+    os.chmod(wd('overlay/etc/apk/world'), 0o644)
+    os.makedirs(wd('overlay/etc/profile.d'))
+    shutil.copy(os.path.join(INSTALLER_DIR, 'installer', 'files', 'install.sh'), wd('overlay/etc/profile.d/'))
+    os.chmod(wd('overlay/etc/profile.d/install.sh'), 0o755)
+    shutil.copy(os.path.join(INSTALLER_DIR, 'installer', 'files', 'issue'), wd('overlay/etc/'))
+    os.chmod(wd('overlay/etc/issue'), 0o644)
+    shutil.copy(os.path.join(INSTALLER_DIR, 'installer', 'files', 'inittab'), wd('overlay/etc/'))
+    os.chmod(wd('overlay/etc/inittab'), 0o644)
+
+def prepare_overlay(builds_dir):
+    prepare_pip_packages(builds_dir)
+    prepare_installer()
+    prepare_docs()
+    prepare_etc_folder()
+    prepare_build(builds_dir)
 
 @clitask("Building image, be patient...")
 def prepare_image(builds_dir):
     git('clone', '--depth=1', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     shutil.copy(os.path.join(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     shutil.copy(os.path.join(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
-    #tower_repo = wd(f"apk-packages/{WORKING_DIR_NAME}")
+    shutil.copy(os.path.join(INSTALLER_DIR, 'installer', 'files', 'world'), wd('aports/scripts'))
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/main',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/community',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/testing',
-        #'--repository', f'file://{tower_repo}',
         '--profile', 'tower',
         '--tag', __version__,
-         _err_to_out=True, _out=logger.info,
+         _err_to_out=True, _out=logger.debug,
          _cwd=WORKING_DIR
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
@@ -135,11 +147,7 @@ def build_image(builds_dir):
     try:
         check_abuild_key()
         prepare_working_dir()
-        prepare_pip_packages(builds_dir)
-        prepare_installer()
-        prepare_docs()
-        # prepare_host_image(builds_dir) # TODO
-        # build_apk()
+        prepare_overlay(builds_dir)
         prepare_image(builds_dir)
     finally:
         cleanup()

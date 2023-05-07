@@ -10,14 +10,7 @@ profile_tower() {
 	boot_addons="amd-ucode intel-ucode"
 	initrd_ucode="/boot/amd-ucode.img /boot/intel-ucode.img"
 	apkovl="aports/scripts/genapkovl-tower-thinclient.sh"
-	apks="$apks coreutils python3 py3-pip py3-rich
-		sudo openssh dhcpcd avahi avahi-tools wpa_supplicant rsync
-		git iptables rsync lsblk perl-utils xz musl-locales e2fsprogs-extra
-		nx-libs xsetroot mcookie parted lsscsi figlet
-		alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox 
-		fakeroot syslinux xorriso squashfs-tools
-		mtools dosfstools grub-efi abuild agetty runuser
-		nano vim net-tools losetup"
+	apks="$apks $(cat aports/scripts/world)"
 	local _k _a
 	for _k in $kernel_flavors; do
 		apks="$apks linux-$_k"

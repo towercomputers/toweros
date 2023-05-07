@@ -83,7 +83,7 @@ def prepare_chroot_image(alpine_tar_path):
         _out=logger.debug
     )
     abuild_sign(
-        '-k', '/home/tower/.abuild/ouziel@gmail.com-644fe6fa.rsa',
+        '-k', '/home/tower/.abuild/ouziel@gmail.com-64576a65.rsa',
         wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
         _out=logger.debug
     )
