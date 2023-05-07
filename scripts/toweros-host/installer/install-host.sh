@@ -47,6 +47,13 @@ chmod 600 /home/$USERNAME/.ssh/*
 
 sh $SCRIPT_DIR/configure-firewall.sh $THIN_CLIENT_IP $TOWER_NETWORK
 
+cat <<EOF > /etc/network/interfaces
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet dhcp
+EOF
+
 # enable connection
 if "$ONLINE" == "true"; then
 mkdir -p /etc/wpa_supplicant
@@ -60,6 +67,14 @@ wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
 echo "auto wlan0" >> /etc/network/interfaces
 echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
 fi
+
+rc-update add iptables default
+rc-update add dhcpcd default
+rc-update add dbus default
+rc-update add avahi-daemon default
+rc-update add sshd default
+rc-update add wpa_supplicant boot
+rc-update add networking boot
 
 export FORCE_BOOTFS=1
 yes | setup-disk -m sys /mnt
@@ -80,7 +95,7 @@ sed -i '/floppy/d' /mnt/etc/fstab
 
 sed -i 's/$/ root=\/dev\/mmcblk0p2 /' /media/mmcblk0p1/cmdline.txt
 
-mv /mnt/etc/local.d/install.start /mnt/etc/local.d/install.bak || true
+mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
 
 mkdir -p "/mnt/home/"
 cp -r "/home/$USERNAME" "/mnt/home/"

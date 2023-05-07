@@ -21,8 +21,7 @@ from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
-#WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
-WORKING_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'build-toweros-host-work')
+WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-host')
 
 def wd(path):
@@ -34,7 +33,7 @@ def prepare_working_dir():
     os.makedirs(WORKING_DIR)
 
 @clitask("Preparing Alpine Linux system...")
-def prepare_chroot_image(alpine_tar_path):
+def prepare_system_image(alpine_tar_path, private_key_path):
     # prepare disk image
     mkfs_ext4(
         '-O', '^has_journal,^resize_inode', 
@@ -58,10 +57,12 @@ def prepare_chroot_image(alpine_tar_path):
         '--allow-untrusted',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
         '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/community',
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
         'alpine-base', 'openssl', 'nx-libs', 'dosfstools', 'sfdisk',
         'avahi', 'avahi-tools', 'iptables', 'sudo', 'dhcpcd', 'openssh', 'xauth',
         'nano', 'kbd-bkeymaps', 'parted', 'lsblk', 'tzdata',
         'acct', 'linux-rpi4', 'raspberrypi-bootloader', 'wpa_supplicant', 'dbus',
+        'e2fsprogs', 'e2fsprogs-extra',
         _out=logger.debug
     )
     apk(
@@ -83,19 +84,26 @@ def prepare_chroot_image(alpine_tar_path):
         _out=logger.debug
     )
     abuild_sign(
-        '-k', '/home/tower/.abuild/ouziel@gmail.com-64576a65.rsa',
+        '-k', private_key_path,
         wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
         _out=logger.debug
     )
-    Command('sh')(
-        os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'), 
-        _cwd=wd("EXPORT_ROOTFS_DIR/boot"),
-        _out=print
-    )
-    
     # synchronize folder
     sync(wd("EXPORT_ROOTFS_DIR"))
-   
+
+def prepare_overlay(pub_key_path):
+    mkdir('-p', wd("overlay"))
+    cp('-r', os.path.join(INSTALLER_DIR, 'etc'), wd("overlay/"))
+    cp(os.path.join(INSTALLER_DIR, 'installer', 'install-host.sh'), wd("overlay/etc/local.d/install-host.start"))
+    cp(os.path.join(INSTALLER_DIR, 'installer', 'configure-firewall.sh'), wd("overlay/etc/local.d/configure-firewall.sh"))
+    cp(pub_key_path, wd(f"overlay/etc/apk/keys/{os.path.basename(pub_key_path)}"))
+    Command('sh')(
+        os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'),
+        wd("overlay"),
+        _cwd=wd("EXPORT_ROOTFS_DIR/boot/"),
+        _out=print
+    )
+    cp(wd("EXPORT_ROOTFS_DIR/boot/headless.apkovl.tar.gz"), "/home/tower/")
 
 @clitask("Creating RPI partitions...")
 def create_rpi_partitions():
@@ -103,7 +111,7 @@ def create_rpi_partitions():
     # caluclate sizes
     #cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
     #root_size = int(Command('sh')('-c', cmd).strip())
-    root_size = 4 * 1024 * 1024
+    root_size = 4 * 1024 * 1024 # empty partition
     boot_size = 256 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
@@ -189,17 +197,20 @@ def cleanup():
 @clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
 def build_image(builds_dir):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
+    private_key_path = '/home/tower/.abuild/ouziel@gmail.com-6457de54.rsa'
+    public_key_path = '/home/tower/.abuild/ouziel@gmail.com-6457de54.rsa.pub'
     user = os.getlogin()
     loop_dev = None
     try:
         prepare_working_dir()
-        prepare_chroot_image(alpine_tar_path)
+        prepare_system_image(alpine_tar_path, private_key_path)
+        prepare_overlay(public_key_path)
         create_rpi_partitions()
         loop_dev = create_loop_device(wd("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
-        image_path = compress_image(builds_dir, user)
-        #image_path = copy_image(builds_dir, user)
+        #image_path = compress_image(builds_dir, user)
+        image_path = copy_image(builds_dir, user)
     finally:
         cleanup()
     return image_path
