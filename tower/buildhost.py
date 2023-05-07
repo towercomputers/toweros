@@ -10,7 +10,7 @@ from sh import (
     mount, parted, mkdosfs, resize2fs, tee, cat, echo,
     mv, cp, rm, sync, rsync, chown, truncate, mkdir, ls,
     tar, xz, apk, dd,
-    losetup, abuild_sign,
+    losetup, abuild_sign, openssl
 )
 mkfs_ext4 = Command('mkfs.ext4')
 fsck_ext4 = Command('fsck.ext4')
@@ -186,15 +186,22 @@ def cleanup():
     unmount_all()
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
+def prepare_apk_key():
+    mkdir('-p', wd("apk-keys"))
+    private_key_path = wd("apk-keys/tower.rsa")
+    public_key_path = wd("apk-keys/tower.rsa.pub")
+    openssl('genrsa', '-out', private_key_path, '2048')
+    openssl('rsa', '-in', private_key_path, '-pubout', '-out', public_key_path)
+    return private_key_path, public_key_path
+
 @clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
 def build_image(builds_dir):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
-    private_key_path = '/home/tower/.abuild/ouziel@gmail.com-6457de54.rsa'
-    public_key_path = '/home/tower/.abuild/ouziel@gmail.com-6457de54.rsa.pub'
     user = os.getlogin()
     loop_dev = None
     try:
         prepare_working_dir()
+        private_key_path, public_key_path = prepare_apk_key()
         prepare_system_image(alpine_tar_path, private_key_path)
         prepare_overlay(public_key_path)
         create_rpi_partitions()
