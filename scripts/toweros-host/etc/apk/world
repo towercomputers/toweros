@@ -19,3 +19,6 @@ lsblk
 tzdata
 wpa_supplicant
 dbus
+acct
+linux-rpi4
+raspberrypi-bootloader

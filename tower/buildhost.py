@@ -32,6 +32,36 @@ def prepare_working_dir():
         raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
 
+def fetch_apk_packages(repo_path, branch, packages):
+    apk(
+        'fetch', '--arch', 'armv7', '-R', '--url', '--no-cache', '--allow-untrusted',
+        '--root', wd("EXPORT_ROOTFS_DIR/boot"),
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/main',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/community',
+        '-o', repo_path, *packages, _out=logger.debug
+    )
+
+def prepare_apk_repos(private_key_path):
+    repo_path = wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/")
+    rm('-rf', repo_path)
+    mkdir('-p',repo_path)
+    world_path = os.path.join(INSTALLER_DIR, 'etc', 'apk', 'world')
+    # TODO: remove this and switch to latest-stable on Alpine v3.18 release
+    stable_apks, edge_apks = [], []
+    for line in cat(world_path, _iter=True):
+        package = line.strip()
+        if "=" in package:
+            edge_apks.append(package.split("=")[0])
+        else:
+            stable_apks.append(package)
+    fetch_apk_packages(repo_path, "latest-stable", stable_apks)
+    fetch_apk_packages(repo_path, "edge", edge_apks)
+    apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
+    apk_index_path = wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz")
+    apk_index_opts = ['index', '--arch', 'armv7', '--rewrite-arch', 'armv7', '--allow-untrusted']
+    apk(*apk_index_opts, '-o', apk_index_path, *apks, _out=logger.debug)
+    abuild_sign('-k', private_key_path, apk_index_path, _out=logger.debug)
+
 @clitask("Preparing Alpine Linux system...")
 def prepare_system_image(alpine_tar_path, private_key_path):
     # prepare disk image
@@ -49,45 +79,7 @@ def prepare_system_image(alpine_tar_path, private_key_path):
     # put alpine linux files
     mkdir(wd("EXPORT_ROOTFS_DIR/boot"))
     tar('-xpf', alpine_tar_path, '-C', wd("EXPORT_ROOTFS_DIR/boot"))
-    rm('-rf', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"))
-    mkdir('-p', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"))
-    apk(
-        'fetch', '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), 
-        '--arch', 'armv7', '-R', '--url', '--root', wd("EXPORT_ROOTFS_DIR/boot"), "--no-cache",
-        '--allow-untrusted',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/community',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/latest-stable/main',
-        'alpine-base', 'openssl', 'nx-libs', 'dosfstools', 'sfdisk',
-        'avahi', 'avahi-tools', 'iptables', 'sudo', 'dhcpcd', 'openssh', 'xauth',
-        'nano', 'kbd-bkeymaps', 'parted', 'lsblk', 'tzdata',
-        'acct', 'linux-rpi4', 'raspberrypi-bootloader', 'wpa_supplicant', 'dbus',
-        'e2fsprogs', 'e2fsprogs-extra',
-        _out=logger.debug
-    )
-    apk(
-        'fetch', '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/"), 
-        '--arch', 'armv7', '-R', '--url', '--root', wd("EXPORT_ROOTFS_DIR/boot"), "--no-cache",
-        '--allow-untrusted',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/main',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/community',
-        'e2fsprogs', 'e2fsprogs-extra',
-        _out=logger.debug
-    )
-    apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
-    apk(
-        'index', 
-        '-o', wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
-        '--allow-untrusted',
-        '--arch', 'armv7', '--rewrite-arch', 'armv7',
-        *apks,
-        _out=logger.debug
-    )
-    abuild_sign(
-        '-k', private_key_path,
-        wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz"),
-        _out=logger.debug
-    )
+    prepare_apk_repos(private_key_path)
     # synchronize folder
     sync(wd("EXPORT_ROOTFS_DIR"))
 

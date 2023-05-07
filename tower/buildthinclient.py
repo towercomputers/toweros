@@ -117,6 +117,7 @@ def prepare_image(builds_dir):
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
+    # TODO: switch to latest-stable on Alpine v3.18 release
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
