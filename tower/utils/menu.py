@@ -11,6 +11,8 @@ def get_package_binaries(host, package):
     for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
         if '/bin/' in line and not line.strip().endswith('/'):
             binary = line.split(" ").pop().strip()
+            if not binary.startswith('/'):
+                binary = f"/{binary}"
             binaries.append(binary)
     return binaries
 
@@ -19,6 +21,8 @@ def copy_desktop_files(host, package):
     for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
         if line.strip().endswith('.desktop'):
             desktop_file_path = line.split(" ").pop().strip()
+            if not desktop_file_path.startswith('/'):
+                desktop_file_path = f"/{desktop_file_path}"
             desktop_folder, desktop_file_name = os.path.split(desktop_file_path)
             # prefix file with the host name
             locale_file_path = os.path.expanduser(f'~/{host}-{desktop_file_name}')

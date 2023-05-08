@@ -54,7 +54,6 @@ def cleanup_offline_host(host, arch="armv7h"):
 
 def kill_ssh(arch="armv7h"):
     killcmd = f"ps -ef | grep '{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
-    print(killcmd)
     Command('sh')('-c', killcmd)
 
 def cleanup(host, arch="armv7h"):
@@ -99,7 +98,7 @@ def install_in_online_host(host, packages):
     try:
         ssh(
             '-t', host,
-            f"sudo apk add {' '.join(packages)}",
+            f"sudo apk add --progress {' '.join(packages)}",
             _err=sprint, _out=sprint, _in=sys.stdin,
             _out_bufsize=0, _err_bufsize=0,
         )
