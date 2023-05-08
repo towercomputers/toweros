@@ -22,3 +22,7 @@ dbus
 acct
 linux-rpi4
 raspberrypi-bootloader
+xorg-server
+xf86-input-libinput
+xinit
+udev

@@ -208,8 +208,8 @@ def build_image(builds_dir):
         loop_dev = create_loop_device(wd("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
-        #image_path = compress_image(builds_dir, user)
-        image_path = copy_image(builds_dir, user)
+        image_path = compress_image(builds_dir, user)
+        #image_path = copy_image(builds_dir, user)
     finally:
         cleanup()
     return image_path
