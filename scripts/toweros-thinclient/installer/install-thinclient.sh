@@ -78,6 +78,7 @@ echo "KEYMAP=$KEYBOARD_LAYOUT" > /etc/vconsole.conf
 echo "XKBLAYOUT=$KEYBOARD_LAYOUT"  >> /etc/vconsole.conf
 echo "XKBVARIANT=$KEYBOARD_VARIANT"  >> /etc/vconsole.conf
 echo "XKBMODEL=pc105"  >> /etc/vconsole.conf
+mkdir -p /etc/X11/xorg.conf.d
 cat <<EOF > /etc/X11/xorg.conf.d/00-keyboard.conf
 Section "InputClass"
         Identifier "system-keyboard"
