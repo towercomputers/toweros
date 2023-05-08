@@ -73,6 +73,7 @@ setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
 rc-update add dhcpcd
 rc-update add avahi-daemon
 rc-update add iptables
+rc-update add networking
 rc-update add wpa_supplicant boot
 
 # configure firewall

@@ -68,6 +68,9 @@ echo "auto wlan0" >> /etc/network/interfaces
 echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
 fi
 
+# TODO: more sshd configuration
+sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
+
 rc-update add iptables default
 rc-update add dhcpcd default
 rc-update add dbus default
