@@ -26,6 +26,10 @@ echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
 # add user to abuild group (necessary for building packages)
 addgroup abuild || true
 addgroup "$USERNAME" abuild
+# add user to groups needed by xorg
+addgroup "$USERNAME" video
+addgroup "$USERNAME" audio
+addgroup "$USERNAME" input
 # add user to sudoers
 mkdir -p /etc/sudoers.d
 echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
@@ -69,12 +73,31 @@ rm -f /etc/profile.d/install.sh
 setup-timezone "$TIMEZONE"
 setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
 
+# configure keyboard
+echo "KEYMAP=$KEYBOARD_LAYOUT" > /etc/vconsole.conf
+echo "XKBLAYOUT=$KEYBOARD_LAYOUT"  >> /etc/vconsole.conf
+echo "XKBVARIANT=$KEYBOARD_VARIANT"  >> /etc/vconsole.conf
+echo "XKBMODEL=pc105"  >> /etc/vconsole.conf
+cat <<EOF > /etc/X11/xorg.conf.d/00-keyboard.conf
+Section "InputClass"
+        Identifier "system-keyboard"
+        MatchIsKeyboard "on"
+        Option "XkbLayout" "$KEYBOARD_LAYOUT"
+        Option "XkbModel" "pc105"
+        Option "XkbVariant" "$KEYBOARD_VARIANT"
+EndSection
+EOF
+
 # start services
 rc-update add dhcpcd
 rc-update add avahi-daemon
 rc-update add iptables
 rc-update add networking
 rc-update add wpa_supplicant boot
+rc-update add dbus
+
+# enabling udev service
+setup-devd udev
 
 # configure firewall
 sh $SCRIPT_DIR/configure-firewall.sh

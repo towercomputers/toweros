@@ -46,3 +46,13 @@ nano
 vim
 net-tools
 losetup
+xorg-server
+xf86-input-libinput
+xinit
+udev
+xfce4
+xfce4-terminal
+xfce4-screensaver
+adw-gtk3
+adwaita-xfce-icon-theme
+setxkbmap
