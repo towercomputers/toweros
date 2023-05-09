@@ -84,10 +84,11 @@ def prepare_system_image(alpine_tar_path, private_key_path):
     sync(wd("EXPORT_ROOTFS_DIR"))
 
 def prepare_overlay(pub_key_path):
-    mkdir('-p', wd("overlay"))
+    mkdir('-p', wd("overlay/etc/local.d/"))
     cp('-r', os.path.join(INSTALLER_DIR, 'etc'), wd("overlay/"))
     cp(os.path.join(INSTALLER_DIR, 'installer', 'install-host.sh'), wd("overlay/etc/local.d/install-host.start"))
     cp(os.path.join(INSTALLER_DIR, 'installer', 'configure-firewall.sh'), wd("overlay/etc/local.d/configure-firewall.sh"))
+    mkdir('-p', wd("overlay/etc/apk/keys/"))
     cp(pub_key_path, wd(f"overlay/etc/apk/keys/{os.path.basename(pub_key_path)}"))
     Command('sh')(
         os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'),
