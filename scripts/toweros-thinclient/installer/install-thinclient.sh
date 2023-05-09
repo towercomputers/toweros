@@ -89,6 +89,13 @@ Section "InputClass"
 EndSection
 EOF
 
+mkdir -p /etc/apk
+cat <<EOF > /etc/apk/repositories 
+http://dl-cdn.alpinelinux.org/alpine/edge/main
+http://dl-cdn.alpinelinux.org/alpine/edge/community
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
+EOF
+
 # start services
 rc-update add dhcpcd
 rc-update add avahi-daemon

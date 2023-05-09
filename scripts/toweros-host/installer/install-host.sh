@@ -68,6 +68,13 @@ echo "auto wlan0" >> /etc/network/interfaces
 echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
 fi
 
+mkdir -p /etc/apk
+cat <<EOF > /etc/apk/repositories 
+http://dl-cdn.alpinelinux.org/alpine/latest-stable/main
+http://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+#http://dl-cdn.alpinelinux.org/alpine/latest-stable/testing
+EOF
+
 # TODO: more sshd configuration
 sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
 
