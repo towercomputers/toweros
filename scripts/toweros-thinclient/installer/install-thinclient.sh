@@ -44,6 +44,8 @@ cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
 # put tower-tools wheel in user's tower cache dir
 mkdir -p /home/$USERNAME/.cache/tower/builds
 cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
+# create .Xauthority file
+touch /home/$USERNAME/.Xauthority
 
 # configure default network
 mkdir -p /etc/network
