@@ -22,6 +22,7 @@ source /media/mmcblk0p1/tower.env
 SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 
 mkdir -p /mnt
+e2fsck -y /dev/mmcblk0p2 || true
 mount /dev/mmcblk0p2 /mnt
 
 # TODO: set locale
@@ -68,12 +69,6 @@ echo "auto wlan0" >> /etc/network/interfaces
 echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
 fi
 
-mkdir -p /etc/apk
-cat <<EOF > /etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/latest-stable/main
-http://dl-cdn.alpinelinux.org/alpine/latest-stable/community
-#http://dl-cdn.alpinelinux.org/alpine/latest-stable/testing
-EOF
 
 # TODO: more sshd configuration
 sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
@@ -110,5 +105,14 @@ mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
 mkdir -p "/mnt/home/"
 cp -r "/home/$USERNAME" "/mnt/home/"
 chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
+
+if "$ONLINE" == "true"; then
+mkdir -p /mnt/etc/apk
+cat <<EOF > /mnt/etc/apk/repositories 
+http://dl-cdn.alpinelinux.org/alpine/latest-stable/main
+http://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+#http://dl-cdn.alpinelinux.org/alpine/latest-stable/testing
+EOF
+fi
 
 reboot

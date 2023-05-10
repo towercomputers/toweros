@@ -43,7 +43,7 @@ cp /var/towercomputers/docs/* /home/$USERNAME/
 cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
 # put tower-tools wheel in user's tower cache dir
 mkdir -p /home/$USERNAME/.cache/tower/builds
-cp /home/$USERNAME/pip-packages/tower_tools-*.whl /home/$USERNAME/.cache/tower/builds/
+cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
 
 # configure default network
 mkdir -p /etc/network
@@ -89,13 +89,6 @@ Section "InputClass"
 EndSection
 EOF
 
-mkdir -p /etc/apk
-cat <<EOF > /etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/edge/main
-http://dl-cdn.alpinelinux.org/alpine/edge/community
-#http://dl-cdn.alpinelinux.org/alpine/edge/testing
-EOF
-
 # start services
 rc-update add dhcpcd
 rc-update add avahi-daemon
@@ -118,6 +111,13 @@ ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
 mount "$ROOT_PARTITION" /mnt
 cp -r "/home/$USERNAME" "/mnt/home/"
 chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
+
+mkdir -p /mnt/etc/apk
+cat <<EOF > /mnt/etc/apk/repositories 
+http://dl-cdn.alpinelinux.org/alpine/edge/main
+http://dl-cdn.alpinelinux.org/alpine/edge/community
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
+EOF
 
 # unmount and reboot
 umount /mnt

@@ -104,7 +104,7 @@ def create_rpi_partitions():
     # caluclate sizes
     #cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
     #root_size = int(Command('sh')('-c', cmd).strip())
-    root_size = 4 * 1024 * 1024 # empty partition
+    root_size = 16 * 1024 * 1024 # empty partition
     boot_size = 256 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
