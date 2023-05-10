@@ -24,6 +24,9 @@ logger = logging.getLogger('tower')
 WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-host')
 
+ALPINE_BRANCH_FOR_UNVERSIONED = "v3.17"
+ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
+
 def wd(path):
     return os.path.join(WORKING_DIR, path)
 
@@ -46,16 +49,16 @@ def prepare_apk_repos(private_key_path):
     rm('-rf', repo_path)
     mkdir('-p',repo_path)
     world_path = os.path.join(INSTALLER_DIR, 'etc', 'apk', 'world')
-    # TODO: remove this and switch to latest-stable on Alpine v3.18 release
-    stable_apks, edge_apks = [], []
+    # TODO: test and remove this on Alpine v3.19 release
+    unversioned_apks, versioned_apks = [], []
     for line in cat(world_path, _iter=True):
         package = line.strip()
         if "=" in package:
-            edge_apks.append(package.split("=")[0])
+            versioned_apks.append(package.split("=")[0])
         else:
-            stable_apks.append(package)
-    fetch_apk_packages(repo_path, "latest-stable", stable_apks)
-    fetch_apk_packages(repo_path, "edge", edge_apks)
+            unversioned_apks.append(package)
+    fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_UNVERSIONED, unversioned_apks)
+    fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_VERSIONED, versioned_apks)
     apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
     apk_index_path = wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz")
     apk_index_opts = ['index', '--arch', 'armv7', '--rewrite-arch', 'armv7', '--allow-untrusted']

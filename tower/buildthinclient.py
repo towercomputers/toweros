@@ -17,6 +17,8 @@ from tower.__about__ import __version__
 logger = logging.getLogger('tower')
 
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
+# TODO: test v3.19 on release
+ALPINE_BRANCH = "v3.18"
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
@@ -117,13 +119,11 @@ def prepare_image(builds_dir):
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
-    # TODO: switch to latest-stable on Alpine v3.18 release
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/main',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/community',
-        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/testing',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{ALPINE_BRANCH}/main',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{ALPINE_BRANCH}/community',
         '--profile', 'tower',
         '--tag', __version__,
          _err_to_out=True, _out=logger.debug,
