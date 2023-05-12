@@ -114,16 +114,11 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     )
     authorize_cookie(hostname, cookie, display_num)
     buf = StringIO()
-    """ ssh(hostname, 
-        '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
-        f'DISPLAY={display}',
-        'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
-        _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
-    ) """
-    # TODO: switch to nxagent when it will be fixed
     ssh(hostname, 
         '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
-        'nxproxy', '-C', display,
+        f'DISPLAY={display}',
+        'LD_LIBRARY_PATH=/usr/lib/nx/X11/',
+        'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
     wait_for_output(buf, "Waiting for connection")     
