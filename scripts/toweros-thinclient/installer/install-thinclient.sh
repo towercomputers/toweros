@@ -41,6 +41,8 @@ echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
 # put documentation and install-dev.sh in user's home
 cp /var/towercomputers/docs/* /home/$USERNAME/
 cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
+# put setup-wifi script in $PATH
+cp $SCRIPT_DIR/setup-wifi /home/$USERNAME/.local/bin/
 # put tower-tools wheel in user's tower cache dir
 mkdir -p /home/$USERNAME/.cache/tower/builds
 cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
@@ -116,9 +118,9 @@ chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
 mkdir -p /mnt/etc/apk
 cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/edge/main
-http://dl-cdn.alpinelinux.org/alpine/edge/community
-#http://dl-cdn.alpinelinux.org/alpine/edge/testing
+http://dl-cdn.alpinelinux.org/alpine/v3.18/main
+http://dl-cdn.alpinelinux.org/alpine/v3.18/community
+#http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
 
 # unmount and reboot

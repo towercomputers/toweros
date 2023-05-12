@@ -21,35 +21,13 @@
 set -e
 set -x
 
-WIFI_SSID="$1"
-WIFI_PASSWORD="$2"
 GIT_NAME="$3"
 GIT_EMAIL="$4"
 GIT_KEY_PATH="$5"
 # set this variable if you need to connect with ssh from another host
 AUTHORIZED_KEY="$6"
 
-CONNECTED=false
-
-# connect to wifi
-if [ ! -z "$WIFI_SSID" ]; then
-    sudo wpa_passphrase "$WIFI_SSID" "$WIFI_PASSWORD" | sudo tee /etc/wpa_supplicant/wpa_supplicant.conf
-    sudo wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
-    sudo udhcpc -i wlan0
-    echo "waiting connection..."
-    set +x
-    until ping -c1 www.google.com >/dev/null 2>&1; do :; done
-    set -x
-    CONNECTED=true  
-fi
-
-# udpate APK repositories
-if $CONNECTED; then
-    echo "http://dl-cdn.alpinelinux.org/alpine/edge/main" | sudo tee /etc/apk/repositories
-    echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" | sudo tee -a /etc/apk/repositories
-    echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" | sudo tee -a /etc/apk/repositories
-    sudo apk update
-fi
+pip install hatch
 
 # update Git configuration
 if [ ! -z "$GIT_NAME" ]; then
@@ -75,17 +53,11 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     echo "$GITHUB_KEY" >> ~/.ssh/known_hosts
     chmod 700 ~/.ssh
     chmod 600 ~/.ssh/*
-    if $CONNECTED; then
-        mkdir -p ~/towercomputers
-        cd ~/towercomputers
-        git clone git@github.com:towercomputers/tools.git
-    fi
+    mkdir -p ~/towercomputers
+    cd ~/towercomputers
+    git clone git@github.com:towercomputers/tools.git
 fi
 
-# install hatch
-if $CONNECTED; then
-    pip install hatch
-fi
 
 # start sshd and open firewall access
 if [ ! -z "$AUTHORIZED_KEY" ]; then
