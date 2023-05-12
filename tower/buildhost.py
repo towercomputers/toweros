@@ -57,12 +57,15 @@ def prepare_apk_repos(private_key_path):
             versioned_apks.append(package.split("=")[0])
         else:
             unversioned_apks.append(package)
+    # download packages
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_UNVERSIONED, unversioned_apks)
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_VERSIONED, versioned_apks)
+    # prepare index
     apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
     apk_index_path = wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz")
     apk_index_opts = ['index', '--arch', 'armv7', '--rewrite-arch', 'armv7', '--allow-untrusted']
     apk(*apk_index_opts, '-o', apk_index_path, *apks, _out=logger.debug)
+    # sign index
     abuild_sign('-k', private_key_path, apk_index_path, _out=logger.debug)
 
 @clitask("Preparing Alpine Linux system...")
@@ -87,19 +90,21 @@ def prepare_system_image(alpine_tar_path, private_key_path):
     sync(wd("EXPORT_ROOTFS_DIR"))
 
 def prepare_overlay(pub_key_path):
+    # put installer in local.d
     mkdir('-p', wd("overlay/etc/local.d/"))
     cp('-r', os.path.join(INSTALLER_DIR, 'etc'), wd("overlay/"))
     cp(os.path.join(INSTALLER_DIR, 'installer', 'install-host.sh'), wd("overlay/etc/local.d/install-host.start"))
     cp(os.path.join(INSTALLER_DIR, 'installer', 'configure-firewall.sh'), wd("overlay/etc/local.d/configure-firewall.sh"))
+    # put public key used to signe apk index
     mkdir('-p', wd("overlay/etc/apk/keys/"))
     cp(pub_key_path, wd(f"overlay/etc/apk/keys/{os.path.basename(pub_key_path)}"))
+    # generate the overlay in the boot folder
     Command('sh')(
         os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'),
         wd("overlay"),
         _cwd=wd("EXPORT_ROOTFS_DIR/boot/"),
         _out=print
     )
-    cp(wd("EXPORT_ROOTFS_DIR/boot/headless.apkovl.tar.gz"), "/home/tower/")
 
 @clitask("Creating RPI partitions...")
 def create_rpi_partitions():
@@ -213,11 +218,11 @@ def build_image(builds_dir):
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         image_path = compress_image(builds_dir, user)
+        # TODO: add `--no-compress` option
         #image_path = copy_image(builds_dir, user)
     finally:
         cleanup()
     return image_path
-
 
 @clitask("Copying image {0} in device {1}...")
 def copy_image_in_device(image_file, device):
@@ -236,13 +241,13 @@ def copy_image_in_device(image_file, device):
 
 @clitask("Configuring image...")
 def insert_tower_env(boot_part, config):
+    # mount boot partition
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     logger.info(f"Host configuration:\n{str_env}")
-    tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
-    #ls('-al', wd("BOOTFS_DIR/"), _out=print)
-    
+    # insert tower.env file in boot partition
+    tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))    
 
 @clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True)
 def burn_image(image_file, device, config):

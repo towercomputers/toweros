@@ -3,6 +3,7 @@
 set -e
 set -x
 
+# make sure /bin and /lib are executable
 chmod 755 /
 chmod 755 /bin
 chmod 755 /lib
@@ -19,7 +20,6 @@ setup-hostname -n tower
 
 # change root password
 echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd root
-
 # create first user
 adduser -D "$USERNAME" "$USERNAME"
 echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
@@ -33,13 +33,9 @@ addgroup "$USERNAME" input
 # add user to sudoers
 mkdir -p /etc/sudoers.d
 echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-# install tower-tools with pip
-mv /var/cache/pip-packages "/home/$USERNAME/"
-chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/pip-packages"
-runuser -u $USERNAME -- pip install --no-index --find-links="/home/$USERNAME/pip-packages" tower-tools
-echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
+
 # put documentation and install-dev.sh in user's home
-cp /var/towercomputers/docs/* /home/$USERNAME/
+cp -r /var/towercomputers/docs /home/$USERNAME/
 cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
 # put setup-wifi script in $PATH
 cp $SCRIPT_DIR/setup-wifi /home/$USERNAME/.local/bin/
@@ -49,6 +45,12 @@ cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
 # create .Xauthority file
 touch /home/$USERNAME/.Xauthority
 
+# install tower-tools with pip
+mv /var/cache/pip-packages "/home/$USERNAME/"
+chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/pip-packages"
+runuser -u $USERNAME -- pip install --no-index --find-links="/home/$USERNAME/pip-packages" tower-tools
+echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
+
 # configure default network
 mkdir -p /etc/network
 cat <<EOF > /etc/network/interfaces
@@ -57,21 +59,19 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet dhcp
 EOF
+
 # configure welcome messages
 cat <<EOF > /etc/issue
 Welcome to TowerOS-ThinClient!
 
-Please see the ~/README.md file to know how to get started with TowerOS-ThinClient.
+Connect to internet with the following command:
+
+    setup-wifi <wifi-ssid> <wifi-password>
+
+Please see the ~/docs/README.md file to know how to get started with TowerOS-ThinClient.
 
 EOF
-rm -f /etc/motd
-touch /etc/motd
-# remove autologin from tty1
-old_tty1='tty1::respawn:\/sbin\/agetty --skip-login --nonewline --noissue --autologin root --noclear 38400 tty1'
-new_tty1='tty1::respawn:\/sbin\/getty 38400 tty1'
-sed -i "s/$old_tty1/$new_tty1/g" /etc/inittab
-# disable installer auto-start
-rm -f /etc/profile.d/install.sh
+
 # set locales
 # TODO: set LANG
 setup-timezone "$TIMEZONE"
@@ -106,6 +106,13 @@ setup-devd udev
 
 # configure firewall
 sh $SCRIPT_DIR/configure-firewall.sh
+
+# remove autologin from tty1
+old_tty1='tty1::respawn:\/sbin\/agetty --skip-login --nonewline --noissue --autologin root --noclear 38400 tty1'
+new_tty1='tty1::respawn:\/sbin\/getty 38400 tty1'
+sed -i "s/$old_tty1/$new_tty1/g" /etc/inittab
+# disable installer auto-start
+rm -f /etc/profile.d/install.sh
 
 # launch setup-disk
 yes | setup-disk -m sys "$TARGET_DRIVE"
