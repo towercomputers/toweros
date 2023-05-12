@@ -7,7 +7,8 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-from sh import rm, git, pip, Command
+import sh
+from sh import rm, git, pip, Command, apk
 
 
 from tower.utils import clitask
@@ -18,7 +19,7 @@ logger = logging.getLogger('tower')
 
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
 # TODO: test v3.19 on release
-ALPINE_BRANCH = "v3.18"
+ALPINE_BRANCH = "3.18"
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
@@ -115,15 +116,17 @@ def prepare_overlay(builds_dir):
 
 @clitask("Building image, be patient...")
 def prepare_image(builds_dir):
-    git('clone', '--depth=1', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
+    git('clone', '--depth=1', f'--branch={ALPINE_BRANCH}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
+    with sh.contrib.sudo(password="", _with=True):
+        apk('update')
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
-        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{ALPINE_BRANCH}/main',
-        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{ALPINE_BRANCH}/community',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/main',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/community',
         '--profile', 'tower',
         '--tag', __version__,
          _err_to_out=True, _out=logger.debug,

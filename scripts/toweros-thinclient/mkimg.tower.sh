@@ -1,3 +1,5 @@
+set -x
+
 profile_tower() {
 	profile_base
 	profile_abbrev="tower"

@@ -124,6 +124,7 @@ mount "$ROOT_PARTITION" /mnt
 cp -r "/home/$USERNAME" "/mnt/home/"
 chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
+# Get branch from buildthinclient.py
 mkdir -p /mnt/etc/apk
 cat <<EOF > /mnt/etc/apk/repositories 
 http://dl-cdn.alpinelinux.org/alpine/v3.18/main

@@ -103,6 +103,7 @@ mkdir -p "/mnt/home/"
 cp -r "/home/$USERNAME" "/mnt/home/"
 chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
+# Get branch from buildhost.py
 # configure apk repositories if host is online
 if "$ONLINE" == "true"; then
 mkdir -p /mnt/etc/apk
