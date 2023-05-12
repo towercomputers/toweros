@@ -21,11 +21,11 @@
 set -e
 set -x
 
-GIT_NAME="$3"
-GIT_EMAIL="$4"
-GIT_KEY_PATH="$5"
+GIT_NAME="$1"
+GIT_EMAIL="$2"
+GIT_KEY_PATH="$3"
 # set this variable if you need to connect with ssh from another host
-AUTHORIZED_KEY="$6"
+AUTHORIZED_KEY="$4"
 
 pip install hatch
 

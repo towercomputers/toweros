@@ -38,6 +38,7 @@ echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
 cp -r /var/towercomputers/docs /home/$USERNAME/
 cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
 # put setup-wifi script in $PATH
+mkdir -p /home/$USERNAME/.local/bin
 cp $SCRIPT_DIR/setup-wifi /home/$USERNAME/.local/bin/
 # put tower-tools wheel in user's tower cache dir
 mkdir -p /home/$USERNAME/.cache/tower/builds
@@ -47,7 +48,7 @@ touch /home/$USERNAME/.Xauthority
 
 # install tower-tools with pip
 mv /var/cache/pip-packages "/home/$USERNAME/"
-chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/pip-packages"
+chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
 runuser -u $USERNAME -- pip install --no-index --find-links="/home/$USERNAME/pip-packages" tower-tools
 echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
 
