@@ -1,44 +1,32 @@
-# On amd64:
-#  
-# Build docker image with:
-# docker build -t build-tower-image:latest .
-#
-# Build TowerOS-ThinClient image with
-# docker run --name towerbuilder --user tower \
-#       --privileged build-tower-image thinclient
-# docker cp towerbuilder:/home/tower/toweros-thinclient-0.0.1-20230318154719-x86_64.iso ./
-#
-# Build TowerOS-Host image with
-# docker run --name towerbuilder --user tower build-tower-image host
-# docker cp towerbuilder:/home/tower/toweros-host-0.0.1-20230321173402.img.xz ./
-#
-# On Apple M1 (arm64):
-#
-# docker buildx create --use
-# docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
-# docker run --privileged --rm tonistiigi/binfmt --install all
-# docker run --platform=linux/amd64 --name towerbuilder --user tower \
-#       --privileged build-tower-image thinclient
-# docker cp towerbuilder:/home/tower/toweros-0.0.1-thinclient-20230318154719-x86_64.iso ./
-#
+FROM alpine:3.18
 
-FROM archlinux:latest
-
-# hatch build
+# hatch build -t wheel
 ARG TOWER_WHEEL_PATH="dist/tower_tools-0.0.1-py3-none-any.whl"
 
-# install pacman packages
-RUN pacman -Suy --noconfirm 
-RUN pacman -S --noconfirm openssh git python python-pip avahi iwd base-devel archiso
+# install apk packages
+RUN apk update 
+RUN apk add alpine-base coreutils python3 py3-pip rsync git lsblk perl-utils xz \
+      e2fsprogs-extra parted musl-locales sudo openssh \ 
+      alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
+      fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
+      agetty runuser nano vim net-tools losetup
 
 # create `tower` user
-RUN useradd -m tower -p $(echo $tower | openssl passwd -1 -stdin)
+RUN adduser -D tower tower
+# add user to abuild group (necessary for building packages)
+RUN addgroup tower abuild
+# add `tower` user to sudoers
+RUN mkdir -p /etc/sudoers.d
 RUN echo "tower ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+# update path
 ENV PATH="$PATH:/home/tower/.local/bin"
 
 # change default user
 USER tower
-WORKDIR /home/tower 
+WORKDIR /home/tower
+
+# generate abuild keys
+RUN abuild-keygen -a -i -n
 
 # copy and install `tower-tools` at the end so everything above is cached
 RUN mkdir -p /home/tower/.cache/tower/builds

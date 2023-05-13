@@ -223,19 +223,28 @@ $> hatch run build-tower-image --help
 Build the Docker image with:
 
 ```
+$> git clone git@github.com:towercomputers/tools.git
+$> cd tools
+$> hatch build -t wheel
 $> docker build -t build-tower-image:latest .
 ```
 
 Then build the TowerOS image inside a Docker container:
 
 ```
-$> docker run --name towerbuilder --user tower --privileged build-tower-image thinclient
+$> docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
 ```
 
-Finally retrieve that image from the container:
+Retrieve that image from the container:
 
 ```
-$> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
+$> docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
+```
+
+Finally delete the container with:
+
+```
+$> docker rm towerbuilder
 ```
 
 **Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
@@ -244,7 +253,7 @@ $> docker cp towerbuilder:/home/tower/toweros-20230318154719-x86_64.iso ./
 $> docker buildx create --use
 $> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
 $> docker run --privileged --rm tonistiigi/binfmt --install all
-$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged \
+$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
               build-tower-image thinclient
 ```
 

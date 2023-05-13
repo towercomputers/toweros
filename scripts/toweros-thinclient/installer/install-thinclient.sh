@@ -49,7 +49,7 @@ touch /home/$USERNAME/.Xauthority
 # install tower-tools with pip
 mv /var/cache/pip-packages "/home/$USERNAME/"
 chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
-runuser -u $USERNAME -- pip install --no-index --find-links="/home/$USERNAME/pip-packages" tower-tools
+runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-tools
 echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
 
 # configure default network

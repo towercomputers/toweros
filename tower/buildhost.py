@@ -3,12 +3,13 @@ import time
 from datetime import datetime
 import logging
 import glob
+import getpass
 
 import sh
 from sh import (
     Command,
     mount, parted, mkdosfs, resize2fs, tee, cat, echo,
-    mv, cp, rm, sync, rsync, chown, truncate, mkdir, ls,
+    cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl
 )
@@ -206,7 +207,7 @@ def prepare_apk_key():
 @clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
 def build_image(builds_dir):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
-    user = os.getlogin()
+    user = getpass.getuser()
     loop_dev = None
     try:
         prepare_working_dir()

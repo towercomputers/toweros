@@ -12,7 +12,6 @@ wpa_supplicant
 rsync
 git
 iptables
-rsync
 lsblk
 perl-utils
 xz
