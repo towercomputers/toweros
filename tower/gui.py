@@ -24,7 +24,8 @@ DEFAULTS_NXAGENT_ARGS=dict(
     menu="0",
     keyboard="clone",
     composite="1",
-    autodpi="1"
+    autodpi="1",
+    rootless="1",
 )
 
 DEFAULTS_NXPROXY_ARGS = dict(
@@ -116,6 +117,7 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     ssh(hostname, 
         '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
         f'DISPLAY={display}',
+        'LD_LIBRARY_PATH=/usr/lib/nx/X11/',
         'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
@@ -133,15 +135,18 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
         '-S', display, 
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    wait_for_output(buf, "Established X server connection")  
+    #wait_for_output(buf, "Established X server connection") 
+    wait_for_output(buf, "Session started")  
     logger.info("nxproxy connected to nxagent.")
 
 def kill_nx_processes(hostname, display_num):
     logger.info("closing nxproxy and nxagent..")
-    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
+    # TODO: update when switching to Alpine v3.18 fot host: {print $2}
+    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
     # nxagent in host
     ssh(hostname, killcmd)
     # ssh tunnel and nxproxy in thinclient
+    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     sh.Command('sh')('-c', killcmd)
 
 def cleanup(hostname, display_num):

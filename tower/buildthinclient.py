@@ -1,39 +1,50 @@
 from datetime import datetime
 import logging
 import os
+from os import makedirs
+from os.path import join as join_path
 import glob
-import getpass
-import re
+from shutil import copytree, copy as copyfile
+import sys
 
-from sh import pacman, rm, cp, repo_add, pip, mkarchiso, chown, bsdtar, Command, mkdir
+import sh
+from sh import rm, git, pip, Command, apk
 
-from tower import buildhost, utils
+
 from tower.utils import clitask
+from tower import buildhost
 from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
 TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
+# TODO: test v3.19 on release
+ALPINE_BRANCH = "3.18"
 
-WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-thinclient-work')
-INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-thinclient')
-README_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'README.md')
+WORKING_DIR_NAME = 'build-toweros-thinclient-work'
+WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
+INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-thinclient')
+HOME_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..')
 
 def wd(path):
-    return os.path.join(WORKING_DIR, path)
+    return join_path(WORKING_DIR, path)
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
         raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
-    os.makedirs(WORKING_DIR)
-    os.makedirs(wd('blankdb'))
+    makedirs(WORKING_DIR)
 
 @clitask("Cleaning up...")
 def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
+def find_tower_tools(builds_dir):
+    wheels = glob.glob(join_path(builds_dir, 'tower_tools-*.whl'))
+    tower_tools_wheel_path = f"file://{wheels.pop()}" if wheels else TOWER_TOOLS_URL
+    return tower_tools_wheel_path
+
 def find_host_image(builds_dir):
-    host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
+    host_images = glob.glob(join_path(builds_dir, 'toweros-host-*.xz'))
     if not host_images:
         logger.info("Host image not found in builds directory. Building a new image.")
         rpi_image_path = buildhost.build_image(builds_dir)
@@ -42,100 +53,99 @@ def find_host_image(builds_dir):
         logger.info(f"Using host image {rpi_image_path}")
     return rpi_image_path
 
-def find_tower_tools(builds_dir):
-    wheels = glob.glob(os.path.join(builds_dir, 'tower_tools-*.whl'))
-    tower_tools_wheel_path = f"file://{wheels.pop()}" if wheels else TOWER_TOOLS_URL
-    return tower_tools_wheel_path
+def find_readme():
+    readme_path = join_path(HOME_PATH, 'README.md')
+    if os.path.exists(readme_path):
+        return readme_path
+    readme_path = join_path(HOME_PATH, 'docs', 'README.md')
+    if os.path.exists(readme_path):
+        return readme_path
+    readme_path = "/var/towercomputers/docs/README.md"
+    if os.path.exists(readme_path):
+        return readme_path
+    raise Exception("README.md not found!")
 
-@clitask("Downloading pacman packages...")
-def download_pacman_packages():
-    with open(os.path.join(INSTALLER_DIR, 'files', 'packages.x86_64'), 'r') as fp:
-        packages_str = fp.read()
-        # remove nx packages
-        packages = re.sub(r'\nnx[^\n]+', "", packages_str).split("\n")
-    pacman('-Suy', _out=logger.debug)
-    pacman('-Syw', '--cachedir', wd('pacman-packages'), '--dbpath', wd('blankdb'), '--noconfirm', *packages, _out=logger.debug)
-
-@clitask("Preparing nx packages...")
-def prepare_nx_packages(nx_tar_path):
-    bsdtar('-xpf', nx_tar_path, '-C', WORKING_DIR, _out=logger.debug)
-    nx_path = os.path.join(WORKING_DIR, 'nx-x86_64')
-    nx_zst_path = os.path.join(nx_path, '*.zst')
-    nx_packages = glob.glob(nx_zst_path)
-    pacman('-Uw', '--cachedir', wd('pacman-packages'), '--dbpath', wd('blankdb'), '--noconfirm', *nx_packages, _out=logger.debug)
-    for pkg in nx_packages:
-        cp(pkg, wd('pacman-packages'))
-
-@clitask("Preparing pacman database...")
-def create_pacman_db():
-    zsts = [f for f in glob.glob(f"{wd('pacman-packages')}/*") if f.split('.').pop() != 'sig']
-    repo_add(os.path.join(wd('pacman-packages'), 'towerpackages.db.tar.gz'), *zsts, _out=logger.debug)
+def check_abuild_key():
+    abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
+    abuild_conf = join_path(abuild_folder, 'abuild.conf')
+    if not os.path.exists(abuild_folder) or not os.path.exists(abuild_conf):
+        logger.error("ERROR: You must have an abuild key to build the image. Please use `abuild-keygen -a -i`.")
+        sys.exit()
 
 @clitask("Downloading pip packages...")
-def download_pip_packages(tower_tools_wheel_path):
-    pip("download", f"tower-tools @ {tower_tools_wheel_path or TOWER_TOOLS_URL}", '-d', wd('pip-packages'), _out=logger.debug)
-
-@clitask("Preparing archiso folder..")
-def prepare_archiso(builds_dir, rpi_image_path):
-    # copy installer, pacman and pip packages
-    cp('-r', '/usr/share/archiso/configs/releng/', wd('archiso'))
-    root_path = os.path.join(wd('archiso'), 'airootfs', 'root')
-    installer_files = glob.glob(os.path.join(INSTALLER_DIR, '*.sh'))
-    installer_files += glob.glob(os.path.join(INSTALLER_DIR, '*.py'))
-    installer_files += glob.glob(os.path.join(INSTALLER_DIR, 'files', '*'))
-    installer_files += [README_PATH]
-    for f in installer_files:
-        cp(f, root_path)
-    cp('-r', wd('pacman-packages'), root_path)
-    cp('-r', wd('pip-packages'), root_path)
-    cp(os.path.join(INSTALLER_DIR, 'files', 'grub.cfg'), os.path.join(wd('archiso'), 'grub'))
-    # add packages needed by the installer
-    package_list = os.path.join(wd('archiso'), 'packages.x86_64')
-    add_packages = ["python", "python-rich", "python-sh", "figlet"]
-    for pkg in add_packages:
-        Command('sh')('-c', f'echo "{pkg}" >>  {package_list}')
-    # start installer on login
-    zlogin = os.path.join(wd('archiso'), 'airootfs', 'root', '.zlogin')
-    Command('sh')('-c', f'echo "sh ~/00_install_toweros_thinclient.sh" >>  {zlogin}')
-    # prepare builds dir
-    builds_path = os.path.join(root_path, 'builds')
-    mkdir('-p', builds_path)
-    cp(rpi_image_path, builds_path)
-    cp(os.path.join(builds_dir, 'nx-x86_64.tar.gz'), builds_path)
-    cp(os.path.join(builds_dir, 'nx-armv7h.tar.gz'), builds_path)
-    wheels = glob.glob(os.path.join(builds_dir, 'tower_tools-*.whl'))
+def prepare_pip_packages(builds_dir):
+    makedirs(wd('overlay/var/cache/pip-packages'))
+    tower_tools_wheel_path = TOWER_TOOLS_URL
+    wheels = glob.glob(join_path(builds_dir, 'tower_tools-*.whl'))
     if wheels:
-        cp(wheels.pop(), builds_path)
+        wheel = wheels.pop()
+        tower_tools_wheel_path = f"file://{wheel}"
+        copyfile(wheel, wd('overlay/var/cache/pip-packages'))
+    pip(
+        "download", f"tower-tools @ {tower_tools_wheel_path}", 
+        '-d', wd('overlay/var/cache/pip-packages'),
+        _err_to_out=True, _out=logger.debug
+    )
 
-@clitask("Building image file with mkarchiso...")
-def make_archiso(builds_dir):
-    archiso_out_path = os.path.join(WORKING_DIR, 'out')
-    image_src_path = os.path.join(archiso_out_path, datetime.now().strftime('archlinux-%Y.%m.%d-x86_64.iso'))
-    image_dest_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso'))
-    mkarchiso('-v', wd('archiso'), _cwd=WORKING_DIR, _out=logger.debug)
-    cp(image_src_path, image_dest_path)
-    owner = getpass.getuser()
-    chown(f"{owner}:{owner}", image_dest_path)
-    logger.info(f"Image ready: {image_dest_path}")
-    return image_dest_path
+def prepare_installer():
+    makedirs(wd('overlay/var/towercomputers/'))
+    copytree(join_path(INSTALLER_DIR, 'installer'), wd('overlay/var/towercomputers/installer'))
 
-@clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", sudo=True)
+def prepare_docs():
+    makedirs(wd('overlay/var/towercomputers/docs'))
+    readme_path = find_readme()
+    copyfile(readme_path, wd('overlay/var/towercomputers/docs'))
+    copyfile(join_path(HOME_PATH, 'docs', 'Tower Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
+
+def prepare_build(builds_dir):
+    makedirs(wd('overlay/var/towercomputers/builds'))
+    host_image_path = find_host_image(builds_dir)
+    copyfile(host_image_path, wd('overlay/var/towercomputers/builds'))
+    wheels = glob.glob(join_path(wd('overlay/var/cache/pip-packages'), 'tower_tools-*.whl'))
+    copyfile(wheels[0], wd('overlay/var/towercomputers/builds'))
+
+def prepare_etc_folder():
+    copytree(join_path(INSTALLER_DIR, 'etc'), wd('overlay/etc'))
+
+def prepare_overlay(builds_dir):
+    prepare_pip_packages(builds_dir)
+    prepare_installer()
+    prepare_docs()
+    prepare_etc_folder()
+    prepare_build(builds_dir)
+
+@clitask("Building image, be patient...")
+def prepare_image(builds_dir):
+    git('clone', '--depth=1', f'--branch={ALPINE_BRANCH}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
+    copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
+    copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
+    copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
+    with sh.contrib.sudo(password="", _with=True):
+        apk('update')
+    Command('sh')(
+        wd('aports/scripts/mkimage.sh'),
+        '--outdir', WORKING_DIR,
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/main',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/community',
+        '--profile', 'tower',
+        '--tag', __version__,
+         _err_to_out=True, _out=logger.debug,
+         _cwd=WORKING_DIR
+    )
+    image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
+    image_dest_path = join_path(
+        builds_dir, 
+        datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
+    )
+    copyfile(image_src_path, image_dest_path)
+    logger.info(f"Image built: {image_dest_path}")
+
+@clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.")
 def build_image(builds_dir):
     try:
+        check_abuild_key()
         prepare_working_dir()
-        # prepare required builds
-        tower_tools_wheel_path = find_tower_tools(builds_dir)
-        nx_tar_path = utils.prepare_required_build("nx-x86_64", builds_dir)
-        nx_arm_tar_path = utils.prepare_required_build("nx-armv7h", builds_dir)
-        rpi_image_path = find_host_image(builds_dir)
-        # create pacman cache
-        download_pacman_packages()
-        prepare_nx_packages(nx_tar_path)
-        create_pacman_db()
-        # create pip cache
-        download_pip_packages(tower_tools_wheel_path)
-        # prepare and run archiso
-        prepare_archiso(builds_dir, rpi_image_path)
-        make_archiso(builds_dir)
+        prepare_overlay(builds_dir)
+        prepare_image(builds_dir)
     finally:
         cleanup()

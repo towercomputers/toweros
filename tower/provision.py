@@ -36,7 +36,7 @@ def prepare_wifi_parameters(args):
         if args.wlan_password:
             wlan_password = utils.derive_wlan_key(wlan_ssid, args.wlan_password)
         else:
-            wlan_password = utils.get_ssid_presharedkey(wlan_ssid)
+            wlan_password = utils.get_wpa_psk()
         check_environment_value('wlan-password', wlan_password)
     return online, wlan_ssid, wlan_password
 
@@ -59,7 +59,11 @@ def prepare_host_config(args):
     # generate random password
     password = secrets.token_urlsafe(16)
     # gather locale informations
-    keymap = args.keymap or utils.get_keymap()
+    keyboard_layout, keyboard_variant = utils.get_keymap()
+    if args.keyboard_layout:
+        keyboard_layout = args.keyboard_layout
+    if args.keyboard_variant:
+        keyboard_variant = args.keyboard_variant
     timezone = args.timezone or utils.get_timezone()
     lang = args.lang or utils.get_lang()
     # determine wifi parameters
@@ -73,7 +77,8 @@ def prepare_host_config(args):
         'PUBLIC_KEY': public_key,
         'PASSWORD': password,
         'PASSWORD_HASH': sha512_crypt.hash(password),
-        'KEYMAP': keymap,
+        'KEYBOARD_LAYOUT': keyboard_layout,
+        'KEYBOARD_VARIANT': keyboard_variant,
         'TIMEZONE': timezone,
         'LANG': lang,
         'ONLINE': online,

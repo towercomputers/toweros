@@ -19,9 +19,8 @@ For a more formal description of the Tower architecture, including a comparison 
   * 1.3. [Custom Thin Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
     * 1.3.2. [Enable services](#132-enable-services)
-    * 1.3.3. [Install nxproxy](#133-install-nxproxy)
-    * 1.3.4. [Update /etc/sudoers](#134-update-etcsudoers)
-    * 1.3.5. [Install `tower-tools`](#135-install-tower-tools)
+    * 1.3.3. [Update /etc/sudoers](#134-update-etcsudoers)
+    * 1.3.4. [Install `tower-tools`](#135-install-tower-tools)
 * 2.[ Usage](#2-usage)
   * 2.1. [Provision a Host](#21-provision-a-host)
     * 2.1.1. [Generate an image with build-image](#211-generate-an-image-with-build-image)
@@ -48,11 +47,11 @@ You must have a Thin Client (typically a laptop like a Lenovo X270) connected to
 
 ### 1.2. TowerOS-ThinClient
 
-The easiest way to use Tower is to run the TowerOS-ThinClient GNU/Linux distribution (based on Arch Linux) on your Thin Client.
+The easiest way to use Tower is to run the TowerOS-ThinClient GNU/Linux distribution (based on Alpine Linux) on your Thin Client.
 
 To install get TowerOS-ThinClient:
 
-1. Download the latest image here: [https://drive.google.com/file/d/1s1SPQ4oOLZnWY4MOqxN-8_RKxcCmabvg/view?usp=share_link](https://drive.google.com/file/d/1s1SPQ4oOLZnWY4MOqxN-8_RKxcCmabvg/view?usp=share_link).
+1. Download the latest image here: [https://drive.google.com/file/d/1xpC7BlrOa0LaHNuQ4-SQUiOGassmMb-x/view?usp=sharing](https://drive.google.com/file/d/1xpC7BlrOa0LaHNuQ4-SQUiOGassmMb-x/view?usp=sharing).
 2. Prepare a bootable USB medium using the above image.
 3. Boot the Thin Client with the USB drive and follow the instructions.
 
@@ -63,8 +62,14 @@ Note: you can build your own image of TowerOS with command `build-tower-image th
 #### 1.3.1. Install dependencies
 
 ```
-$> pacman -S openssh git python python-pip dhcpcd avahi iwd base-devel archiso \
-    xorg-server xorg-xinit qemu-user-static rsync parted
+$> apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
+      avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
+      musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
+      alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
+      fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
+      agetty runuser nano vim net-tools losetup xorg-server xf86-input-libinput \
+      xinit udev xfce4 xfce4-terminal xfce4-screensaver adw-gtk3 \
+      adwaita-xfce-icon-theme setxkbmap
 ```
 
 #### 1.3.2. Enable services
@@ -78,21 +83,17 @@ sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
 then
 
 ```
-$> systemctl enable dhcpcd.service
-$> systemctl enable avahi-daemon.service
+$> rc-update add dhcpcd
+$> rc-update add avahi-daemon
+$> rc-update add iptables
+$> rc-update add networking
+$> rc-update add wpa_supplicant boot
+$> rc-update add dbus
 ```
 
 **Important:** Make sure you are connected to the switch and check that your first wired interface (starting with the letter `e`) has an assigned IP.
 
-#### 1.3.3. Install nxproxy
-
-```
-$> git clone https://aur.archlinux.org/nx.git
-$> cd nx
-$> makepkg -s -i -r -c
-```
-
-#### 1.3.4. Update `/etc/sudoers`
+#### 1.3.3. Update `/etc/sudoers` and groups
 
 `tower-tools` assumes that the current user has full `sudo` access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:
 
@@ -100,7 +101,13 @@ $> makepkg -s -i -r -c
 <you_username> ALL=(ALL) NOPASSWD: ALL
 ```
 
-#### 1.3.5. Install `tower-tools`
+To build an image with `build-tower-image` you need to add the current user in the `abuild` group:
+
+```
+addgroup <you_username> abuild
+```
+
+#### 1.3.4. Install `tower-tools`
 
 Update pip to the latest version:
 
@@ -131,7 +138,7 @@ This will generate an image file compressed with xz in `~/.cache/tower/builds/`.
 #### 2.1.2. Prepare the SD card
 
 ```
-$> tower provision <host> 
+$> tower provision <host> --offline
 ```
 
 or, for an online host:
@@ -140,7 +147,7 @@ or, for an online host:
 $> tower provision <host> --online
 ```
 
-Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `./tower.py provision --help`).
+Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
 
 ### 2.2. Execute a command on one of the hosts
 
@@ -197,6 +204,7 @@ $> tower install office galculator --online-host=web
 Run galculator from `office`.
 
 ```
+$> startx
 $> tower run office gcalculator
 ```
 
@@ -248,31 +256,29 @@ To date, `tower-tools` includes six main modules: `buildthinclient.py` and `buil
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
-TowerOS is based on Arch Linux, and `buildthinclient.py` uses the `archiso` tool (see https://wiki.archlinux.org/title/archiso).
+TowerOS is based on Alpine Linux, and `buildthinclient.py` uses the `mkimage` tool (see https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage).
 
-The installer contains all the pacman and pip packages necessary for installing the base system and `tower-tools`, which is ready to use from the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
+The installer contains all the apk and pip packages necessary for installing the base system and `tower-tools`, which is ready to use from the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
 
 Here are the different steps taken by `buildthinclient.py` to generate an image:
 
 1. Gathering the necessary builds.
 The script starts by checking for the existence of a `./dist`, `./builds` or `~/.cache/tower/builds/` folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists, then the script creates the folder `~/.cache/tower/builds/`. Next:
 
-    1. The script checks if it contains the NX builds. If not, it downloads it. 
-    2. The script then verifies that the Tower OS PI image is present. If not, it launches the build of a new image (cf. Tower OS PI). 
-    3. Finally the script checks for the existence of a `tower-tools` wheel package. If it does not exist the package is retrieved from Github.
+    1. The script then verifies that the TowerOS-Host image is present. If not, it launches the build of a new image (cf. TowerOS-Host). 
+    2. The script checks for the existence of a `tower-tools` wheel package. If it does not exist the package is retrieved from Github.
 
-2. Downloading pacman packages with `pacman -Syw` in a cache folder and creating a pacman database with `add-repo` (see https://wiki.archlinux.org/title/Offline_installation).
+2. Downloading pip packages with `pip download` in a cache folder
 
-3. Downloading pip packages with `pip download` in a cache folder
+4. Creating and updating an Alpine APK overlay folder with mainly:
 
-4. Creating and updating an `archiso` folder with mainly:
+    1. `pip` cache folder
+    2. add  system install bash scripts (see https://github.com/towercomputers/tools/tree/dev/scripts/toweros-thinclient)
+    3. add the Towercomputers documentation
+    4. Add /etc configuration files
+    5. add builds required by `tower-tools` (TowerOS-Host, `tower-tools`)
 
-    1. add `pacman` and `pip` cache folders
-    2. add  system install bash scripts (see https://github.com/towercomputers/tools/tree/dev/scripts/toweros)
-    3. add the list of packages necessary for the installer
-    4. add builds required by `tower-tools` (NX, TowerOS-Host, `tower-tools`)
-
-5. Launch of `mkarchiso` which takes care of the rest.
+5. Launch of `mkimage` which takes care of the rest.
 
 6. Renaming and copying the image into the `builds` folder.
 
@@ -280,26 +286,26 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 
 **Notes about the TowerOS-ThinClient installer:**
 
-* The TowerOS-ThinClient install scripts generally follow the official Arch Linux install guide (see [https://wiki.archlinux.org/title/installation_guide](https://wiki.archlinux.org/title/installation_guide)) 
+* The TowerOS-ThinClient install scripts generally follow the official Alpine Linux install guide (see [https://wiki.alpinelinux.org/wiki/Installation](https://wiki.alpinelinux.org/wiki/Installation)) 
 * The installer sets up an `iptables` firewall as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
-* TowerOS-ThinClient uses `systemd-boot` as the boot loader.
+* TowerOS-ThinClient uses `Syslinux` as the boot loader.
 
 
 ### 3.2. TowerOS-Host
 
 `buildhost.py` is the module responsible for generating an image of TowerOS-ThinClient when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
 
-`buildhost.py` uses the same method as `pigen` to build an image for a Raspberry PI (see [https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh](https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh)) but unlike `pigen` which uses a Debian-based system, `buildhost.py` uses an Arch Linux-based system (see https://archlinuxarm.org/platforms/armv8/broadcom/raspberry-pi-4).
+`buildhost.py` uses the same method as `pigen` to build an image for a Raspberry PI (see [https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh](https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh)) but unlike `pigen` which uses a Debian-based system, `buildhost.py` uses an Alpine Linux-based system (see https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi).
 
 TowerOS-ThinClient must be used with the `tower provision` command which finalises the configuration of the image which is otherwise neither secure (no firewall in particular) nor ready to be used by `tower-tools`.
 
 Here are the different steps taken by `buildhost.py` to generate an image:
 
-1. Installing an Arch Linux system in a mounted temporary folder:
+1. Installing an Alpine Linux system in a mounted temporary folder:
 
     1. creating an image file with `mkfs.ext4`
     2. mount this image with `mount`
-    3. installation of a minimalist Arch Linux system and NX in the mounted folder ([http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz](http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz))
+    3. installation of a minimalist Alpine Linux system and NX in the mounted folder ([https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz](https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz))
 
 2. creation with `parted`, in an image file, of the partitions necessary for a Raspberry PI with the size adapted for the system installed in step 1.
 
@@ -315,11 +321,7 @@ Here are the different steps taken by `buildhost.py` to configure an image when 
 
 2. expand root partition to occupy entire sd-card
 
-3. execution of the configuration script with `arch-chroot`, which takes care of:
-    1. configure language, keyboard and time zone
-    2. configure the firewall
-    3. configure SSH access from the `thinclient`.
-    4. possibly configure the wifi
+3. places a `tower.env` file in the root of the boot partition. This file contains all the variables needed to install the system on first boot (HOSTNAME, USERNAME, PUBLIC_KEY, ...).
 
 4. unmount the sd-card which is ready to be inserted into the RPI
 
@@ -342,10 +344,10 @@ Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/pro
 The steps to provision a host are as follows:
 
 1. generation of a key pair.
-2. generation of the host configuration, with the values provided on the command line, or with those retrieved from the `thinclient`.
-3. copy of the TowerOS-ThinClient image on the SD card and launch of the configuration script (see TowerOS-ThinClient above for detailed configuration steps).
+2. generation of the host configuration (`tower.env` file), with the values provided on the command line, or with those retrieved from the `thinclient`.
+3. copy of the TowerOS-ThinClient image on the SD card and insertion of the configuration file.
 4. waiting for the new host to be detected on the network after the user inserts the sd-card in the RPI and the boot is finished.
-5. updated `ssh`/`tower-tools` configuration file.
+5. updated `ssh` and `tower-tools` configuration file.
 
 Once a host is provisioned it is therefore directly accessible by ssh with `ssh <host>` or `tower run <host>`.
 
@@ -377,18 +379,18 @@ GUI works the same way as X2GO from which it is directly inspired.
 
 ### 3.6. Install
 
-This module allows to use `pacman` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
+This module allows to use `apk` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
 
-1. Preparing the offline host to redirect requests to the `pacman` repository to the `thinclient`:
-    1. Added a `127.0.0.1 <pacman_repo_host>` entry in the `/etc/hosts` file
-    2. Added an `iptables` rule to redirect requests on port 443 to port 4443 (so you don't need to open the tunnel in `root` because port 443 is protected).
-    3. Preparation of a pacman.conf file containing only the `pacman_repo_host`.
+1. Preparing the offline host to redirect requests to the `apk` repository to the `thinclient`:
+    1. Added a `127.0.0.1 <apk_repo_host>` entry in the `/etc/hosts` file
+    2. Added an `iptables` rule to redirect requests on port 80 to port 4443 (so you don't need to open the tunnel in `root` because port 80 is protected).
+    3. Preparation of a pacman.conf file containing only the `apk_repo_host`.
     4. Opening a tunnel to redirect port 4443 of the offline host to port 4666 of the `thinclient`.
 
-2. Open a tunnel to redirect port 4666 from `thinclient` to the pacman repository host on the online host with: `ssh -R 4666:<pacman_repo_host>:443 <online-host>`.
+2. Open a tunnel to redirect port 4666 from `thinclient` to the apk repository host on the online host with: `ssh -R 4666:<apk_repo_host>:80 <online-host>`.
 
-3. At this point the module can normally use `pacman` with `ssh` on the offline host to install the desired packages.
+3. At this point the module can normally use `apk` with `ssh` on the offline host to install the desired packages.
 
 4. Once the installation is finished, clean the `/etc/hosts` file and the `iptables` rules on the offline host and close the ssh tunnels.
 
-Note: when installing each package, `pacman` verifies that it has been signed by the authors and maintainers of Arch Linux. Therefore it is not necessary to trust the online host but above all to initialise the pacman key ring in a trusted environment. This means for us that it is imperative to build the images of TowerOS and TowerOS-ThinClient in a trusted environment and to manually verify the keys.
+Note: when installing each package, `apk` verifies that it has been signed by the authors and maintainers of Alpine Linux. Therefore it is not necessary to trust the online host but above all to initialise the apk keys in a trusted environment. This means for us that it is imperative to build the images of TowerOS and TowerOS-ThinClient in a trusted environment and to manually verify the keys.

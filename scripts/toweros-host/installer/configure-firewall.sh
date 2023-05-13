@@ -1,3 +1,12 @@
+
+#!/bin/bash
+
+set +e
+set -x
+
+THIN_CLIENT_IP=$1
+TOWER_NETWORK=$2
+
 # based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
 # create user defined chains
@@ -37,7 +46,12 @@ iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j REJECT
 # reject all remaining incoming traffic with icmp protocol unreachable messages
 iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
 # open port for avahi
-iptables -I UDP -p udp -m udp --dport 5353 -j ACCEPT
+iptables -I UDP -i eth0 -s $THIN_CLIENT_IP -p udp -m udp --dport 5353 -j ACCEPT
+# open port for ssh connection from thin client
+iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j ACCEPT
+# reject traffic from computers to thin client and other computers
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -d $TOWER_NETWORK -j DROP
 
 # save rules
-iptables-save -f /etc/iptables/iptables.rules
+/etc/init.d/iptables save

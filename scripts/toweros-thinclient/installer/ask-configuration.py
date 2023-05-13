@@ -4,6 +4,7 @@ import json
 import os
 import re
 import sys
+import subprocess
 
 from rich import print as rprint
 from rich.columns import Columns
@@ -11,18 +12,17 @@ from rich.text import Text
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
-from sh import lsscsi, figlet
+#from sh import lsscsi, figlet
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
-if not os.path.exists(LOCALE_FILE):
-    LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'files', 'locale.json')
 with open(LOCALE_FILE, "r") as fp:
     LOCALE = json.load(fp)
 
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
-DRIVES = lsscsi('-s').strip().split("\n")
+#DRIVES = lsscsi('-s').strip().split("\n")
+DRIVES = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
 
 def print_title(title):
     title_text = Text(f"\n{title}\n")
@@ -137,7 +137,7 @@ def get_keymap():
         "Enter the number of your keyboard variant",
         "Select another layout"
     )
-    variant = "" if variant == "No Variant" else variant
+    variant = layout if variant == "No Variant" else variant
     return layout, variant
 
 def print_value(label, value):
@@ -155,7 +155,12 @@ def confirm_config(config):
 
 def ask_config():
     Console().clear()
-    figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
+    title = subprocess.run(
+        ['figlet', '-w', '160', 'TowerOS-ThinClient'], 
+        capture_output=True, encoding="UTF-8"
+    ).stdout
+    print(title)
+    #figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
     confirmed = False
     config = {}
     while not confirmed:
@@ -166,11 +171,11 @@ def ask_config():
         config['USERNAME'], config['PASSWORD'] = get_user_information()
         config['ROOT_PASSWORD'] = config['PASSWORD']
         confirmed = confirm_config(config)
-    return "\n".join([f'{key}="{value}"' for key, value in config.items()])
+    return config
 
 def main():
-    config = ask_config()
-    with open("./tower.env", 'w') as fp:
+    config = "\n".join([f'{key}="{value}"' for key, value in ask_config().items()])
+    with open("/root/tower.env", 'w') as fp:
         fp.write(config)
         fp.write("\n")
     return 0

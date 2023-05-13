@@ -8,17 +8,21 @@ from tower.utils import clitask
 
 def get_package_binaries(host, package):
     binaries = []
-    for line in ssh(host, 'sudo', 'pacman', '-Ql', package, _iter=True):
+    for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
         if '/bin/' in line and not line.strip().endswith('/'):
             binary = line.split(" ").pop().strip()
+            if not binary.startswith('/'):
+                binary = f"/{binary}"
             binaries.append(binary)
     return binaries
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
-    for line in ssh(host, 'sudo', 'pacman', '-Ql', package, _iter=True):
+    for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
         if line.strip().endswith('.desktop'):
             desktop_file_path = line.split(" ").pop().strip()
+            if not desktop_file_path.startswith('/'):
+                desktop_file_path = f"/{desktop_file_path}"
             desktop_folder, desktop_file_name = os.path.split(desktop_file_path)
             # prefix file with the host name
             locale_file_path = os.path.expanduser(f'~/{host}-{desktop_file_name}')
@@ -33,21 +37,6 @@ def copy_desktop_files(host, package):
                 mkdir('-p', desktop_folder)
                 mv(locale_file_path, desktop_folder)
 
-@clitask("Updating fluxbox menu")
-def generate_fluxbox_menu():
-    menu_file = os.path.join(os.path.expanduser('~'), '.fluxbox', 'tower-menu')
-    menu = open(menu_file, 'w')
-    installed_packages = get_installed_packages()
-    for host in installed_packages:
-        menu.write(f"[submenu] ({host})\n")
-        for package in installed_packages[host]:
-            binaries = installed_packages[host][package]
-            for binary in binaries:
-                name = package if len(binaries) == 1 else os.path.basename(binary)
-                menu.write(f"      [exec] ({name}) {{tower run {host} {binary}}}\n")
-        menu.write("[end]\n")
-    menu.close()
-
 def get_installed_packages():
     json_file = os.path.join(os.path.expanduser('~'), '.config', 'tower', 'desktop.json')
     if os.path.exists(json_file):
@@ -60,7 +49,6 @@ def save_installed_packages(installed_packages):
         os.makedirs(conf_dir)
     json_file = os.path.join(conf_dir, 'desktop.json')
     json.dump(installed_packages, open(json_file, 'w'))
-    generate_fluxbox_menu()
 
 def add_installed_package(host, package):
     installed_packages = get_installed_packages()

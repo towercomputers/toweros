@@ -20,11 +20,15 @@ dependencies = [
     "backports.pbkdf2==0.1",
     "sshconf==0.2.5",
     "hatchling==1.14.0",
-    "wheel==0.40.0"
+    "wheel==0.40.0",
+    "rich==13.3.5",
 ]
 
 [tool.hatch.build.targets.wheel]
-only-include = ["tower", "scripts"]
+include = ["tower", "scripts", "docs"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"README.md" = "docs/README.md"
 
 [project.scripts]
 tower = "tower.clis.tower:main"
