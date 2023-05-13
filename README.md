@@ -16,6 +16,7 @@ For a more formal description of the Tower architecture, including a comparison 
 * 1.[ Installation](#1-installation)
   * 1.1. [Hardware configuration](#11-hardware-configuration)
   * 1.2. [TowerOS-ThinClient](#12-toweros-thin-client)
+    * 1.2.1. [First-boot instructions](#121-first-boot-instructions)
   * 1.3. [Custom Thin Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
     * 1.3.2. [Enable services](#132-enable-services)
@@ -56,6 +57,15 @@ To install get TowerOS-ThinClient:
 3. Boot the Thin Client with the USB drive and follow the instructions.
 
 Note: you can build your own image of TowerOS with command `build-tower-image thinclient` or with Docker (see below).
+
+#### 1.2.1. First-boot instructions
+
+From the first start `tower-tools` can be used offline to provision a host (see [Usage](#2-usage)). 
+If you need to connect the thin client to the internet you can use:
+
+```
+$> setup-wifi <wifi-ssid> <wifi-password>
+```
 
 ### 1.3. Custom Thin Client (Linux)
 
@@ -141,7 +151,13 @@ This will generate an image file compressed with xz in `~/.cache/tower/builds/`.
 $> tower provision <host> --offline
 ```
 
-or, for an online host:
+and for an online host:
+
+```
+$> tower provision <host> --online --wlan-ssid <ssid> --wlan-password <password>
+```
+
+or, if the thin client is already connected to internet:
 
 ```
 $> tower provision <host> --online
