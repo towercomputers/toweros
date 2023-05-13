@@ -131,7 +131,7 @@ This will generate an image file compressed with xz in `~/.cache/tower/builds/`.
 #### 2.1.2. Prepare the SD card
 
 ```
-$> tower provision <host> 
+$> tower provision <host> --offline
 ```
 
 or, for an online host:
