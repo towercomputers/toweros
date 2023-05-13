@@ -11,6 +11,8 @@ def get_keymap():
             keymap_name = line.split("=")[1].strip().split("/").pop().strip()
             keymap = keymap_name.split(".")[0]
             result = keymap.split("-")
+            if len(result) > 2:
+                result = [result[0], "-".join(result[1:])]
             if len(result) == 1:
                 result.append(keymap)
             return result
