@@ -27,7 +27,7 @@ rc_add modloop sysinit
 rc_add modules boot
 rc_add sysctl boot
 rc_add bootmisc boot
-rc_add syslog boot
+rc_add syslog-ng boot
 rc_add mount-ro shutdown
 rc_add killprocs shutdown
 rc_add savecache shutdown

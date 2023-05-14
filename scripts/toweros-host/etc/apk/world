@@ -26,3 +26,4 @@ xorg-server
 xf86-input-libinput
 xinit
 udev
+syslog-ng

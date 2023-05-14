@@ -205,7 +205,7 @@ def prepare_apk_key():
     return private_key_path, public_key_path
 
 @clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
-def build_image(builds_dir):
+def build_image(builds_dir, uncompressed=False):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
     user = getpass.getuser()
     loop_dev = None
@@ -218,9 +218,10 @@ def build_image(builds_dir):
         loop_dev = create_loop_device(wd("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
-        image_path = compress_image(builds_dir, user)
-        # TODO: add `--no-compress` option
-        #image_path = copy_image(builds_dir, user)
+        if uncompressed:
+            image_path = copy_image(builds_dir, user)
+        else:
+            image_path = compress_image(builds_dir, user)
     finally:
         cleanup()
     return image_path

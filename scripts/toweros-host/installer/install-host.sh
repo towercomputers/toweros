@@ -38,7 +38,7 @@ chmod 700 /home/$USERNAME/.ssh
 chmod 600 /home/$USERNAME/.ssh/*
 
 # configure firewall
-sh $SCRIPT_DIR/configure-firewall.sh $THIN_CLIENT_IP $TOWER_NETWORK
+sh $SCRIPT_DIR/configure-firewall.sh "$THIN_CLIENT_IP" "$TOWER_NETWORK" "$ONLINE"
 
 # configure default network
 cat <<EOF > /etc/network/interfaces
