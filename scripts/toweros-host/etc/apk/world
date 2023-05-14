@@ -24,6 +24,10 @@ linux-rpi4
 raspberrypi-bootloader
 xorg-server
 xf86-input-libinput
+font-dejavu
+adw-gtk3
+adwaita-xfce-icon-theme
+mesa-dri-gallium
 xinit
 udev
 syslog-ng
