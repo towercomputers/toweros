@@ -132,28 +132,43 @@ def discover_and_update(name, private_key_path, host_config):
     ip = discover_ip(name, private_key_path, host_config['TOWER_NETWORK'])
     update_config(name, ip, private_key_path, host_config['PASSWORD'])
 
-def is_online(name):
+def is_connected(name):
+    if exists(name):
+        status = ssh(name, 'cat', '/sys/class/net/wlan0/operstate').strip()
+        if status == "up":
+            return True
+        return False
+    raise UnkownHost(f"Unknown host: {name}")
+
+def is_online_host(name):
     if exists(name):
         try:
-            ssh(name, 'ping', '-c', '1', '8.8.8.8')
+            ssh(name, 'ls', '/etc/wpa_supplicant/wpa_supplicant.conf')
             return True
         except ErrorReturnCode:
             return False
     raise UnkownHost(f"Unknown host: {name}")
 
+def is_up(name):
+    if exists(name):
+        try:
+            ssh(name, 'ls') # Running a command over SSH command should tell us if the host is up.
+        except ErrorReturnCode:
+            return False
+        return True
+    raise UnkownHost(f"Unknown host: {name}")
+
 def status(host_name = None):
     if host_name:
         host_config = get(host_name)
-        host_status = 'up'
-        try:
-            ssh(host_name, 'ls') # Running a command over SSH command should tell us if the host is up.
-        except ErrorReturnCode:
-            host_status = 'down'
-        online = is_online(host_name) if host_status == 'up' else "N/A"
+        host_status = 'up' if is_up(host_name) else 'down'
+        online = is_online_host(host_name) if host_status == 'up' else "N/A"
+        connected = is_connected(host_name) if online else False
         return {
             'name': host_name,
             'status': host_status,
             'online-host': online,
+            'connected': connected,
             'ip': host_config['hostname']
         }
     return [status(host_name) for host_name in hosts()]
