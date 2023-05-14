@@ -61,6 +61,8 @@ wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
 # update network configuration
 echo "auto wlan0" >> /etc/network/interfaces
 echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
+# enable chrony
+rc-update add chronyd default
 fi
 
 # TODO: more sshd configuration

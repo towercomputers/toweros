@@ -31,3 +31,4 @@ mesa-dri-gallium
 xinit
 udev
 syslog-ng
+chrony
