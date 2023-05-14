@@ -17,6 +17,7 @@ For a more formal description of the Tower architecture, including a comparison 
   * 1.1. [Hardware configuration](#11-hardware-configuration)
   * 1.2. [TowerOS-ThinClient](#12-toweros-thin-client)
     * 1.2.1. [First-boot instructions](#121-first-boot-instructions)
+    * 1.2.2. [Notes about TowerOS-ThinClient](#122-notes-about-toweros-thinclient)
   * 1.3. [Custom Thin Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
     * 1.3.2. [Enable services](#132-enable-services)
@@ -66,6 +67,13 @@ If you need to connect the thin client to the internet you can use:
 ```
 $> setup-wifi <wifi-ssid> <wifi-password>
 ```
+
+#### 1.2.2. Notes about TowerOS-ThinClient
+
+* The TowerOS-ThinClient install scripts generally follow the official Alpine Linux install guide (see [https://wiki.alpinelinux.org/wiki/Installation](https://wiki.alpinelinux.org/wiki/Installation)) 
+* The installer sets up an `iptables` firewall as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
+* `syslog-ng` is configured to log `iptables` events in /var/log/iptables.log 
+* TowerOS-ThinClient uses `Syslinux` as the boot loader.
 
 ### 1.3. Custom Thin Client (Linux)
 
@@ -308,12 +316,6 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 6. Renaming and copying the image into the `builds` folder.
 
 7. Cleaning temporary files.
-
-**Notes about the TowerOS-ThinClient installer:**
-
-* The TowerOS-ThinClient install scripts generally follow the official Alpine Linux install guide (see [https://wiki.alpinelinux.org/wiki/Installation](https://wiki.alpinelinux.org/wiki/Installation)) 
-* The installer sets up an `iptables` firewall as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
-* TowerOS-ThinClient uses `Syslinux` as the boot loader.
 
 
 ### 3.2. TowerOS-Host
