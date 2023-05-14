@@ -114,4 +114,7 @@ http://dl-cdn.alpinelinux.org/alpine/v3.17/community
 EOF
 fi
 
+# remove configuration file
+rm /media/mmcblk0p1/tower.env
+
 reboot
