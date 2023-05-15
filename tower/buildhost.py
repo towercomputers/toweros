@@ -111,9 +111,6 @@ def prepare_overlay(pub_key_path):
 def create_rpi_partitions():
     image_file = wd("toweros-host.img")
     # caluclate sizes
-    #cmd = f'du --apparent-size -s {wd("EXPORT_ROOTFS_DIR")} --exclude boot --block-size=1 | cut -f 1'
-    #root_size = int(Command('sh')('-c', cmd).strip())
-    root_size = 16 * 1024 * 1024 # empty partition
     boot_size = 256 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
@@ -121,20 +118,15 @@ def create_rpi_partitions():
     # some overhead (since actual space usage is usually rounded up to the
     # filesystem block size) and gives some free space on the resulting
     # image.
-    root_margin = int(root_size * 0.2 + 200 * 1024 * 1024)
     boot_part_start = align
     boot_part_size = int((boot_size + align - 1) / align) * align
     boot_part_end = boot_part_start + boot_part_size - 1
-    root_part_start = boot_part_start + boot_part_size
-    root_part_size = int((root_size + root_margin + align  - 1) / align) * align
-    root_part_end = root_part_start + root_part_size - 1
-    image_size = boot_part_start + boot_part_size + root_part_size
+    image_size = boot_part_start + boot_part_size
     # create image file
     truncate('-s', image_size, image_file)
     # make partitions
     parted('--script', image_file, 'mklabel', 'msdos', _out=logger.debug)
     parted('--script', image_file, 'unit', 'B', 'mkpart', 'primary', 'fat32', boot_part_start, boot_part_end, _out=logger.debug)
-    parted('--script', image_file, 'unit', 'B', 'mkpart', 'primary', 'ext4', root_part_start, root_part_end, _out=logger.debug)
 
 def create_loop_device(image_file):
     loop_dev = losetup('--show', '--find', '--partscan', image_file).strip()
@@ -153,14 +145,10 @@ def prepare_rpi_partitions(loop_dev):
     root_dev = f"{loop_dev}p2"
     # format partitions
     mkdosfs('-n', 'bootfs', '-F', 32, '-s', 4, '-v', boot_dev, _out=logger.debug)
-    mkfs_ext4('-L', 'rootfs', '-O', "^huge_file", root_dev, _out=logger.debug)
     # mount partitions
-    mkdir('-p', wd("ROOTFS_DIR"), _out=logger.debug)
-    mount('-v', root_dev, wd("ROOTFS_DIR"), '-t', 'ext4')
     mkdir('-p', wd("ROOTFS_DIR/boot"), _out=logger.debug)
     mount('-v', boot_dev, wd("ROOTFS_DIR/boot"), '-t', 'vfat')
     # copy system in partitions
-    rsync('-aHAXxv', '--exclude', '/boot', wd("EXPORT_ROOTFS_DIR/"), wd("ROOTFS_DIR/"), _out=logger.debug)
     rsync('-rtxv', wd("EXPORT_ROOTFS_DIR/boot/"), wd("ROOTFS_DIR/boot/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
@@ -231,15 +219,11 @@ def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
     # burn image
     dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=logger.debug)
-    # determine partitions names
+    # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
-    root_part = Command('sh')('-c', f'ls {device}*2').strip()
-    if not boot_part or not root_part:
+    if not boot_part:
         raise Exception("Invalid partitions")
-    # extend root partition
-    parted(device, 'resizepart', 2, '100%')
-    resize2fs(root_part)
-    return boot_part, root_part
+    return boot_part
 
 @clitask("Configuring image...")
 def insert_tower_env(boot_part, config):
@@ -255,7 +239,7 @@ def insert_tower_env(boot_part, config):
 def burn_image(image_file, device, config):
     try:
         prepare_working_dir()
-        boot_part, root_part = copy_image_in_device(image_file, device)
+        boot_part = copy_image_in_device(image_file, device)
         insert_tower_env(boot_part, config)       
     finally:
         cleanup()

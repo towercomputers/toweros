@@ -1,7 +1,7 @@
 #!/bin/sh
 
 set -e
-set +x
+set -x
 
 # tower.env MUST contains the following variables:
 # HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
@@ -12,8 +12,16 @@ SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 
 # create mount point
 mkdir -p /mnt
-# fix root partition if necessary
-e2fsck -y /dev/mmcblk0p2 || true
+# create the new partition with the free space
+start_boot=$(cat /sys/block/mmcblk0/mmcblk0p1/start)
+end_boot=$(($start_boot + $(cat /sys/block/mmcblk0/mmcblk0p1/size)))
+start_root=$(($end_boot + 1))
+# align start_root on 2048 sectors
+start_root=$(($start_root / 2048 + 1))
+start_root=$(($start_root * 2048))
+parted --script -a optimal /dev/mmcblk0 unit s mkpart primary ext4 $start_root 100%
+# create the ext4 filesystem in the new partition     
+mkfs.ext4 -F /dev/mmcblk0p2
 # mount root partition
 mount /dev/mmcblk0p2 /mnt
 
