@@ -15,6 +15,8 @@ def get_keymap():
                 result = [result[0], "-".join(result[1:])]
             if len(result) == 1:
                 result.append(keymap)
+            if result[0] != result[1]:
+                result[1] = f"{result[0]}-{result[1]}"
             return result
     return None
 
