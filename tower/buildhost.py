@@ -231,7 +231,7 @@ def insert_tower_env(boot_part, config):
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
-    logger.info(f"Host configuration:\n{str_env}")
+    logger.debug(f"Host configuration:\n{str_env}")
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))    
 
