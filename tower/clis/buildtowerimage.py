@@ -1,5 +1,4 @@
 import argparse
-import os
 
 from tower import buildhost, buildthinclient, utils
 
