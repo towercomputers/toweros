@@ -1,13 +1,15 @@
 # based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
+set -x
+
 # clean everything
-iptables -P INPUT ACCEPT
-iptables -P FORWARD ACCEPT
-iptables -P OUTPUT ACCEPT
-iptables -t nat -F
-iptables -t mangle -F
 iptables -F
 iptables -X
+iptables -Z
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
 
 # log and drop packets
 iptables -N logdrop
@@ -37,12 +39,12 @@ iptables -A logaccept -j ACCEPT
 # create user defined chains
 iptables -N TCP
 iptables -N UDP
+
 # reject all forward traffic
-iptables -P FORWARD DROP
+iptables -A FORWARD -j logdrop
 # allow all outbound traffic
-iptables -P OUTPUT ACCEPT
-# drop all input traffic by default
-iptables -P INPUT DROP
+iptables -A OUTPUT -j logaccept
+
 # allow ICMP messages
 iptables -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j logaccept
 # allow local traffic
@@ -72,6 +74,8 @@ iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j logrej
 iptables -A INPUT -j logreject-icmpproto
 # open port for avahi
 iptables -I UDP -p udp -m udp --dport 5353 -j logaccept
+# drop all other traffic
+iptables -A INPUT -j logdrop
 
 # save rules
 /etc/init.d/iptables save

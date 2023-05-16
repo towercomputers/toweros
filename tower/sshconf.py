@@ -163,7 +163,7 @@ def status(host_name = None):
         host_config = get(host_name)
         host_status = 'up' if is_up(host_name) else 'down'
         online = is_online_host(host_name) if host_status == 'up' else "N/A"
-        connected = is_connected(host_name) if online else False
+        connected = is_connected(host_name) if online == True else False
         return {
             'name': host_name,
             'status': host_status,

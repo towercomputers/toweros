@@ -61,9 +61,9 @@ fi
 
 # start sshd and open firewall access
 if [ ! -z "$AUTHORIZED_KEY" ]; then
-    sudo iptables -A TCP -p tcp --dport 22 -j ACCEPT
-    sudo iptables -D INPUT -j REJECT --reject-with icmp-proto-unreachable
-    sudo iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
+    iptables -A TCP -p tcp --dport 22 -j ACCEPT
+    iptables -D INPUT -j logreject-icmpproto
+    iptables -A INPUT -j logreject-icmpproto
     sudo /etc/init.d/iptables save
     sudo rc-update add sshd default
     sudo rc-service sshd start
