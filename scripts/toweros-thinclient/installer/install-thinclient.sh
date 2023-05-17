@@ -61,18 +61,6 @@ auto eth0
 iface eth0 inet dhcp
 EOF
 
-# configure welcome messages
-cat <<EOF > /etc/issue
-Welcome to TowerOS-ThinClient!
-
-Connect to internet with the following command:
-
-    setup-wifi <wifi-ssid> <wifi-password>
-
-Please see the ~/docs/README.md file to know how to get started with TowerOS-ThinClient.
-
-EOF
-
 # set locales
 # TODO: set LANG
 setup-timezone "$TIMEZONE"
@@ -101,6 +89,7 @@ rc-update add iptables
 rc-update add networking
 rc-update add wpa_supplicant boot
 rc-update add dbus
+rc-update add local
 
 # enabling udev service
 setup-devd udev
