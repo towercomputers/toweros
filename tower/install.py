@@ -57,12 +57,12 @@ def kill_ssh(arch="armv7h"):
     #print(killcmd)
     Command('sh')('-c', killcmd)
 
+@clitask("Cleaning up...")
 def cleanup(host, arch="armv7h"):
-    logger.info("Cleaning up...")
     kill_ssh(arch)
     cleanup_offline_host(host, arch)
 
-@clitask("Installing {2} in {0}...")
+@clitask("Installing {2} in {0}...", task_parent=True)
 def install_in_offline_host(host, online_host, packages):
     try:
         # prepare offline host
@@ -93,7 +93,7 @@ def install_in_offline_host(host, online_host, packages):
         cleanup(host, "armv7h")
 
 
-@clitask("Installing {1} in {0}...", timer_message="Package(s) installed in {0}.")
+@clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_online_host(host, packages):
     # we just need to run apk with ssh...
     try:
