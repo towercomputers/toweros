@@ -161,7 +161,6 @@ def compress_image(builds_dir, owner):
         _out=image_path
     )
     chown(f"{owner}:{owner}", image_path)
-    logger.info(f"Image ready: {image_path}")
     return image_path
 
 @clitask("Copying image...")
@@ -169,7 +168,6 @@ def copy_image(builds_dir, owner):
     image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wd("toweros-host.img"), image_path)
     chown(f"{owner}:{owner}", image_path)
-    logger.info(f"Image ready: {image_path}")
     return image_path
 
 def unmount_all():
@@ -192,11 +190,12 @@ def prepare_apk_key():
     openssl('rsa', '-in', private_key_path, '-pubout', '-out', public_key_path)
     return private_key_path, public_key_path
 
-@clitask("Building TowserOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True)
+@clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
 def build_image(builds_dir, uncompressed=False):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
     user = getpass.getuser()
     loop_dev = None
+    image_path = None
     try:
         prepare_working_dir()
         private_key_path, public_key_path = prepare_apk_key()
@@ -212,9 +211,11 @@ def build_image(builds_dir, uncompressed=False):
             image_path = compress_image(builds_dir, user)
     finally:
         cleanup()
+    if image_path:
+        logger.info(f"Image ready: {image_path}")
     return image_path
 
-@clitask("Copying image {0} in device {1}...")
+@clitask("Copying image in {1}...")
 def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
     # burn image
@@ -235,7 +236,9 @@ def insert_tower_env(boot_part, config):
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))    
 
-@clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True)
+@clitask("Installing TowserOS-Host in {1}...", 
+         timer_message="TowserOS-Host installed in {0}.\nPlease insert the SD Card into the Host computer, then turn it on and wait for it to be discover on the network.", 
+         sudo=True, task_parent=True)
 def burn_image(image_file, device, config):
     try:
         prepare_working_dir()

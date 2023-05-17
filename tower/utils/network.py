@@ -99,7 +99,7 @@ def find_wired_interface():
         return None
     return wired_interfaces[0]
 
-@clitask("Downloading {0} in {1}...")
+@clitask("Downloading {0}...")
 def download_file(url, dest_path):
     with requests.get(url, stream=True) as resp:
         resp.raise_for_status()

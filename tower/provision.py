@@ -117,11 +117,14 @@ def prepare_provision(args):
     # return everything needed to provision the host
     return image_path, sd_card, host_config, private_key_path
 
-@utils.clitask("Provisioning `{0}`...", timer_message="Host provisioned in {}s")
-def provision(name, image_path, sd_card, host_config, private_key_path):
+@utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
+def provision(name, args):
+    image_path, sd_card, host_config, private_key_path = prepare_provision(args)
     buildhost.burn_image(image_path, sd_card, host_config)
-    logger.info("SD Card ready. Please insert the SD Card into the Host computer, then turn it on and wait for it to be detected on the network.")
-    sshconf.discover_and_update(name, private_key_path, host_config)
+    #logger.info("SD Card ready. Please insert the SD Card into the Host computer, then turn it on and wait for it to be detected on the network.")
+    ip = sshconf.discover_and_update(name, private_key_path, host_config)
+    logger.info(f"Host found at: {ip}")
+    logger.info(f"WARNING: For debugging purposes the host password is in `~/.ssh/tower.conf`. Delete it as soon as you no longer need it.")
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
     logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")

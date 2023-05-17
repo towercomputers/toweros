@@ -138,14 +138,18 @@ def prepare_image(builds_dir):
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
     copyfile(image_src_path, image_dest_path)
-    logger.info(f"Image built: {image_dest_path}")
+    return image_dest_path
+    
 
-@clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.")
+@clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
 def build_image(builds_dir):
+    image_path = None
     try:
         check_abuild_key()
         prepare_working_dir()
         prepare_overlay(builds_dir)
-        prepare_image(builds_dir)
+        image_path = prepare_image(builds_dir)
     finally:
         cleanup()
+    if image_path:
+        logger.info(f"Image ready: {image_path}")
