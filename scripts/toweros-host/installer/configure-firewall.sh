@@ -49,17 +49,21 @@ iptables -N TCP
 iptables -N UDP
 
 # reject all forward traffic
+iptables -A FORWARD -o lo -j logaccept
 iptables -A FORWARD -j logdrop
 
 if "$ONLINE" == "true"; then
     # reject traffic from computers to thin client and other computers
     iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
+    iptables -A OUTPUT -p udp -m udp --dport 5353 -j logaccept
     iptables -A OUTPUT -d $TOWER_NETWORK -j logdrop
      # allow all outbound traffic
     iptables -A OUTPUT -j logaccept
 else
     # drop all outbound traffic except established and related connections (for ssh from thin client)
+    iptables -A OUTPUT -o lo -j logaccept
     iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
+    iptables -A OUTPUT -p udp -m udp --dport 5353 -j logaccept
     iptables -A OUTPUT -j logdrop
 fi
 
