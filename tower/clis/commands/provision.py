@@ -154,8 +154,7 @@ def check_args(args, parser_error):
 
 def execute(args):
     try:
-        image_path, sd_card, host_config, private_key_path = provision.prepare_provision(args)
-        provision.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
+        provision.provision(args.name[0], args)
     except provision.MissingEnvironmentValue as e:
         logger.error(e)
         sys.exit(1)

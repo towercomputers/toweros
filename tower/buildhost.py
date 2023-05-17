@@ -215,7 +215,7 @@ def build_image(builds_dir, uncompressed=False):
         logger.info(f"Image ready: {image_path}")
     return image_path
 
-@clitask("Copying image {0} in device {1}...")
+@clitask("Copying image in {1}...")
 def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
     # burn image
@@ -236,7 +236,9 @@ def insert_tower_env(boot_part, config):
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))    
 
-@clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True)
+@clitask("Installing TowserOS-Host in {1}...", 
+         timer_message="TowserOS-Host installed in {0}.\nPlease insert the SD Card into the Host computer, then turn it on and wait for it to be discover on the network.", 
+         sudo=True, task_parent=True)
 def burn_image(image_file, device, config):
     try:
         prepare_working_dir()

@@ -6,6 +6,8 @@ from ipaddress import ip_address, ip_network
 from sshconf import read_ssh_config, empty_ssh_config_file
 from sh import ssh, ErrorReturnCode, avahi_resolve, sed, touch, Command
 
+from tower.utils import clitask
+
 DEFAULT_SSH_USER = "tower"
 
 logger = logging.getLogger('tower')
@@ -66,13 +68,12 @@ def insert_password(name, password):
     # add host password in comment below the host name
     escaped_pwd = sed_escape(password)
     sed('-i', f's/Host {name}/Host {name}\\n  # {escaped_pwd}/', config_path)
-    logger.info(f"WARNING: For debugging purposes the host password is in `{config_path}`. Delete it as soon as you no longer need it.")
-
+    
+@clitask("Updating Tower config file ~/.ssh/tower.conf...")
 def update_config(name, ip, private_key_path, password):
     insert_include_directive()
     # get existing hosts
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
-    logger.info(f"Updating Tower config file at `{config_path}`")
     config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
     existing_hosts = config.hosts()
     # if name already used, update the IP
@@ -117,20 +118,24 @@ def is_host(ip, private_key_path, network):
         return False
     return True
 
+
 def discover_ip(name, private_key_path, network):
     result = avahi_resolve('-4', '-n', f'{name}.local')
     if result != "":
         ip = result.strip().split("\t").pop()
         if is_host(ip, private_key_path, network):
-            logger.info(f"Host found at: {ip}")
             return ip
-    logger.info(f"Failed to discover the IP address for {name}. Retrying in 10 seconds.")
-    time.sleep(10)
+    time.sleep(1)
+    return discover_ip(name, private_key_path, network)
+
+@clitask("Discovering {0}...")
+def discover(name, private_key_path, network):
     return discover_ip(name, private_key_path, network)
 
 def discover_and_update(name, private_key_path, host_config):
-    ip = discover_ip(name, private_key_path, host_config['TOWER_NETWORK'])
+    ip = discover(name, private_key_path, host_config['TOWER_NETWORK'])
     update_config(name, ip, private_key_path, host_config['PASSWORD'])
+    return ip
 
 def is_connected(name):
     if exists(name):
