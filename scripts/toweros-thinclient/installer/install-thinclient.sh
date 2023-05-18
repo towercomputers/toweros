@@ -82,6 +82,10 @@ Section "InputClass"
 EndSection
 EOF
 
+# remove unistalled packages from xfce menu
+rm /usr/share/applications/xfce4-web-browser.desktop
+rm /usr/share/applications/xfce4-mail-reader.desktop
+
 # start services
 rc-update add dhcpcd
 rc-update add avahi-daemon
