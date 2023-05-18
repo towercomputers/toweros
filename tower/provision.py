@@ -120,6 +120,7 @@ def prepare_provision(args):
 
 @utils.clitask("Saving host configuration in {0}...")
 def save_config_file(config_path, config_str):
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, 'w') as f:
         f.write(config_str)
 
