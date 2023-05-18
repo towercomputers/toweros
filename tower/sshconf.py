@@ -62,15 +62,9 @@ def sed_escape(str):
     for c in "\$.*/[]^":
         escaped = escaped.replace(c, f'\{c}')
     return escaped
-
-def insert_password(name, password):
-    config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
-    # add host password in comment below the host name
-    escaped_pwd = sed_escape(password)
-    sed('-i', f's/Host {name}/Host {name}\\n  # {escaped_pwd}/', config_path)
     
 @clitask("Updating Tower config file ~/.ssh/tower.conf...")
-def update_config(name, ip, private_key_path, password):
+def update_config(name, ip, private_key_path):
     insert_include_directive()
     # get existing hosts
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
@@ -80,7 +74,6 @@ def update_config(name, ip, private_key_path, password):
     if name in existing_hosts:
         config.set(name, Hostname=ip)
         config.save()
-        insert_password(name, password)
         return
     # if IP already used, update the name
     for host_name in existing_hosts:
@@ -89,7 +82,6 @@ def update_config(name, ip, private_key_path, password):
             config.rename(host_name, name)
             config.set(name, IdentityFile=private_key_path)
             config.save()
-            insert_password(name, password)
             return
     # if not exists, create a new host
     config.add(name,
@@ -99,7 +91,6 @@ def update_config(name, ip, private_key_path, password):
         LogLevel="FATAL"
     )
     config.write(config_path)
-    insert_password(name, password)
     
 def hosts():
     return ssh_config().hosts()
@@ -118,7 +109,6 @@ def is_host(ip, private_key_path, network):
         return False
     return True
 
-
 def discover_ip(name, private_key_path, network):
     result = avahi_resolve('-4', '-n', f'{name}.local')
     if result != "":
@@ -134,7 +124,7 @@ def discover(name, private_key_path, network):
 
 def discover_and_update(name, private_key_path, host_config):
     ip = discover(name, private_key_path, host_config['TOWER_NETWORK'])
-    update_config(name, ip, private_key_path, host_config['PASSWORD'])
+    update_config(name, ip, private_key_path)
     return ip
 
 def is_connected(name):
