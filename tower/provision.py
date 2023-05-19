@@ -1,17 +1,10 @@
 import os
 import secrets
-import sys
-import time
 import logging
-from urllib.parse import urlparse
-import hashlib
-import glob
+from datetime import datetime
 
-import requests
 from passlib.hash import sha512_crypt
-import sh
-from sh import ssh, scp, ssh_keygen, xz, cat, mount, parted
-from sh import Command, ErrorReturnCode_1, ErrorReturnCode
+from sh import ssh_keygen, xz
 
 from tower import utils
 from tower import buildhost
@@ -20,9 +13,6 @@ from tower import sshconf
 logger = logging.getLogger('tower')
 
 class MissingEnvironmentValue(Exception):
-    pass
-
-class UnkownHost(Exception):
     pass
 
 def check_environment_value(key, value):
@@ -47,7 +37,7 @@ def prepare_wifi_parameters(args):
         if args.wlan_password:
             wlan_password = utils.derive_wlan_key(wlan_ssid, args.wlan_password)
         else:
-            wlan_password = utils.get_ssid_presharedkey(wlan_ssid)
+            wlan_password = utils.get_wpa_psk()
         check_environment_value('wlan-password', wlan_password)
     return online, wlan_ssid, wlan_password
 
@@ -70,7 +60,11 @@ def prepare_host_config(args):
     # generate random password
     password = secrets.token_urlsafe(16)
     # gather locale informations
-    keymap = args.keymap or utils.get_keymap()
+    keyboard_layout, keyboard_variant = utils.get_keymap()
+    if args.keyboard_layout:
+        keyboard_layout = args.keyboard_layout
+    if args.keyboard_variant:
+        keyboard_variant = args.keyboard_variant
     timezone = args.timezone or utils.get_timezone()
     lang = args.lang or utils.get_lang()
     # determine wifi parameters
@@ -82,8 +76,10 @@ def prepare_host_config(args):
         'HOSTNAME': name,
         'USERNAME': sshconf.DEFAULT_SSH_USER,
         'PUBLIC_KEY': public_key,
+        'PASSWORD': password,
         'PASSWORD_HASH': sha512_crypt.hash(password),
-        'KEYMAP': keymap,
+        'KEYBOARD_LAYOUT': keyboard_layout,
+        'KEYBOARD_VARIANT': keyboard_variant,
         'TIMEZONE': timezone,
         'LANG': lang,
         'ONLINE': online,
@@ -122,11 +118,25 @@ def prepare_provision(args):
     # return everything needed to provision the host
     return image_path, sd_card, host_config, private_key_path
 
-@utils.clitask("Provisioning `{0}`...", timer_message="Host provisioned in {}s")
-def provision(name, image_path, sd_card, host_config, private_key_path):
+@utils.clitask("Saving host configuration in {0}...")
+def save_config_file(config_path, config_str):
+    os.makedirs(os.path.dirname(config_path), exist_ok=True)
+    with open(config_path, 'w') as f:
+        f.write(config_str)
+
+def save_host_config(config):
+    config_filename = f"{config['HOSTNAME']}-{datetime.now().strftime('%Y%m%d%H%M%S')}.env"
+    config_path = os.path.join(os.path.expanduser('~'), '.config', 'tower', config_filename)
+    config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
+    save_config_file(config_path, config_str)
+
+@utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
+def provision(name, args):
+    image_path, sd_card, host_config, private_key_path = prepare_provision(args)
+    save_host_config(host_config)
     buildhost.burn_image(image_path, sd_card, host_config)
-    logger.info(f"SD Card ready. Please insert the SD Card into the Host computer, then turn it on and wait for it to be detected on the network.")
-    sshconf.discover_and_update(name, private_key_path, host_config['TOWER_NETWORK'])
-    print(f"Access the host `web` with the command `$ ssh web`.")
-    print(f"Install a package on `web` with the command `$ tower install web <package-name>`")
-    print(f"Run a GUI application on `web` with the command `$ tower run web <package-name>`")
+    ip = sshconf.discover_and_update(name, private_key_path, host_config)
+    logger.info(f"Host found at: {ip}")
+    logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
+    logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
+    logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")

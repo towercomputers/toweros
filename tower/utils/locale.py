@@ -1,13 +1,27 @@
-from sh import timedatectl, localectl
+from sh import ls, cat, locale as getlocale
 
 def get_timezone():
-    result = timedatectl()
-    return result.split("Time zone:")[1].strip().split(" ")[0].strip()
+    zone = ls('--color=no', '/etc/zoneinfo/').strip()
+    area = ls('--color=no', f"/etc/zoneinfo/{zone}").strip()
+    return f"{zone}/{area}"
 
 def get_keymap():
-    result = localectl()
-    return result.split("VC Keymap:")[1].strip().split(" ")[0].strip()
+    for line in cat("/etc/conf.d/loadkmap", _iter=True):
+        if line.startswith("KEYMAP="):
+            keymap_name = line.split("=")[1].strip().split("/").pop().strip()
+            keymap = keymap_name.split(".")[0]
+            result = keymap.split("-")
+            if len(result) > 2:
+                result = [result[0], "-".join(result[1:])]
+            if len(result) == 1:
+                result.append(keymap)
+            if result[0] != result[1]:
+                result[1] = f"{result[0]}-{result[1]}"
+            return result
+    return None
 
 def get_lang():
-    result = localectl()
-    return result.split("System Locale:")[1].strip().split("LANG=")[1].split("\n")[0].strip()
+    for line in getlocale(_iter=True):
+        if line.startswith("LANG="):
+            return line.split("=")[1].strip()
+    return None

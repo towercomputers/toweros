@@ -13,21 +13,11 @@ class InvalidChecksum(Exception):
     pass
 
 REQUIRED_BUILDS = {
-    "arch-linux-arm": {
-        "filename": "ArchLinuxARM-rpi-armv7-latest.tar.gz",
-        "url": "http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-armv7-latest.tar.gz",
-        "checksum": "65472324ff51bde690379c67b7c5e299e532e63747bf1f71d20552c63708e1b0"
+    "alpine-rpi": {
+        "filename": "alpine-rpi-3.17.3-armv7.tar.gz",
+        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz",
+        "checksum": "d623a05183164cc2280e6f934b2153761691ade62f67b03ec0b877d9f4ff6171"
     },
-    "nx-armv7h": {
-        "filename": "nx-armv7h.tar.gz",
-        "url": "https://drive.google.com/uc?export=download&confirm=yes&id=17jHstO67SGuZoINPBcU16StwsJlZ0gpC",
-        "checksum": "1fca33faa926d03bcdd52d0f0d5cbe2bd16a5f3b1cddcf7d1747c82bacebde1c"
-    },
-    "nx-x86_64": {
-        "filename": "nx-x86_64.tar.gz",
-        "url": "https://drive.google.com/uc?export=download&confirm=yes&id=1xuieznP6xCAxspWY9acOyIFEH21U8YRT",
-        "checksum": "c3528a4b494260ab6473a9af6b5e95546310f84ca51cdc21127b029e3d0b4d6a"
-    }
 }
 
 def init_builds_dir(args_builds_dir):
@@ -76,9 +66,23 @@ def find_host_image():
     ]
     for builds_dir in builds_dirs:
         if os.path.isdir(builds_dir):
-            host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
-            host_images += glob.glob(os.path.join(builds_dir, 'toweros-host-*.img'))
-            if host_images:
-                image_path = host_images.pop()
+            compressed_host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.img'))
+            compressed_host_images.sort()
+            uncompressed_host_images = glob.glob(os.path.join(builds_dir, 'toweros-host-*.xz'))
+            uncompressed_host_images.sort()
+            if compressed_host_images and uncompressed_host_images:
+                compressed_name = os.path.basename(compressed_host_images[-1]).replace('.img.xz', '')
+                uncompressed_name = os.path.basename(uncompressed_host_images[-1]).replace('.img', '')
+                if compressed_name > uncompressed_name:
+                    image_path = compressed_host_images.pop()
+                    break
+                else:
+                    image_path = uncompressed_host_images.pop()
+                    break
+            elif compressed_host_images:
+                image_path = compressed_host_images.pop()
+                break
+            elif uncompressed_host_images:
+                image_path = uncompressed_host_images.pop()
                 break
     return image_path

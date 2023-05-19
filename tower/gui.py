@@ -3,11 +3,10 @@ import os
 import random
 import uuid
 import logging
-import sys
 import time
 
 import sh
-from sh import ssh, nxproxy, xinit
+from sh import ssh, nxproxy, xsetroot, mcookie
 
 logger = logging.getLogger('tower')
 
@@ -25,7 +24,8 @@ DEFAULTS_NXAGENT_ARGS=dict(
     menu="0",
     keyboard="clone",
     composite="1",
-    autodpi="1"
+    autodpi="1",
+    rootless="1",
 )
 
 DEFAULTS_NXPROXY_ARGS = dict(
@@ -62,7 +62,7 @@ def get_home(hostname):
     return ssh_command(hostname, 'echo', '$HOME')
 
 def generate_magic_cookie():
-    return hex(random.getrandbits(128))[2:]
+    return mcookie().strip()
 
 def authorize_cookie(hostname, cookie, display_num):
     xauthority_path = os.path.join(get_home(hostname), ".Xauthority")
@@ -117,6 +117,7 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     ssh(hostname, 
         '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
         f'DISPLAY={display}',
+        'LD_LIBRARY_PATH=/usr/lib/nx/X11/',
         'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
@@ -134,24 +135,29 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
         '-S', display, 
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    wait_for_output(buf, "Established X server connection")  
+    #wait_for_output(buf, "Established X server connection") 
+    wait_for_output(buf, "Session started")  
     logger.info("nxproxy connected to nxagent.")
 
 def kill_nx_processes(hostname, display_num):
     logger.info("closing nxproxy and nxagent..")
-    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
+    # TODO: update when switching to Alpine v3.18 fot host: {print $2}
+    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
     # nxagent in host
     ssh(hostname, killcmd)
     # ssh tunnel and nxproxy in thinclient
+    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     sh.Command('sh')('-c', killcmd)
 
 def cleanup(hostname, display_num):
     kill_nx_processes(hostname, display_num)
     revoke_cookies(hostname, display_num)
+    xsetroot('-cursor_name', 'left_ptr')
 
 def run(hostname, *cmd):
     app_process = None
     try:
+        xsetroot('-cursor_name', 'watch')
         display_num = get_next_display_num(hostname)
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
@@ -161,8 +167,10 @@ def run(hostname, *cmd):
         logger.info(f"run {' '.join(cmd)}")
         app_process = ssh(
             hostname, f"DISPLAY=:{display_num}", *cmd,
-            _out=logger.info, _err_to_out=True
+            _out=logger.info, _err_to_out=True, _bg=True
         )
+        xsetroot('-cursor_name', 'left_ptr')
+        app_process.wait()
     except NxTimeoutException:
         logger.error("Failed to initialize NX, please check the log above.")
     except KeyboardInterrupt:

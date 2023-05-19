@@ -34,8 +34,14 @@ def add_args(argparser):
         required=False
     )
     provision_parser.add_argument(
-        '--keymap', 
+        '--keyboard-layout', 
         help="""Keyboard layout code (Default: same as the thin client)""",
+        required=False,
+        default=""
+    )
+    provision_parser.add_argument(
+        '--keyboard-variant', 
+        help="""Keyboard variant code (Default: same as the thin client)""",
         required=False,
         default=""
     )
@@ -54,6 +60,13 @@ def add_args(argparser):
     provision_parser.add_argument(
         '--online', 
         help="""Set wifi connection (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    provision_parser.add_argument(
+        '--offline',
+        help="""Don't set wifi connection (Default: False)""",
         required=False,
         action='store_true',
         default=False
@@ -94,48 +107,54 @@ def check_args(args, parser_error):
             parser_error("sd-card path invalid.") 
         elif len(disk_list) == 1:
             parser_error("sd-card path invalid.") # can't right on the only disk
-    
+
     if args.public_key_path:
         if not arg.private_key_path :
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.public_key_path):
             parser_error("public_key path invalid.")
-    
+
     if args.private_key_path:
         if not arg.public_key_path :
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.private_key_path):
             parser_error("private_key path invalid.")
+
+    if args.keyboard_layout:
+        if re.match(r'^[a-zA-Z]{2}$', args.keyboard_layout) is None:
+            parser_error(message="Keyboard layout invalid. Must be 2 chars.")
     
-    if args.keymap:
-        if re.match(r'^[a-zA-Z]{2}$', args.keymap) is None:
-            parser_error(message="Keymap invalid. Must be 2 chars.")
-    
+    if args.keyboard_variant:
+        if re.match(r'^[a-zA-Z0-9-_]{2,32}$', args.keyboard_variant) is None:
+            parser_error(message="Keyboard layout invalid. Must be alphanumeric between 2 and 32 chars.")
+
     if args.timezone:
         if re.match(r'^[a-zA-Z-\ ]+\/[a-zA-Z-\ ]+$', args.timezone) is None:
             parser_error(message="Timezone invalid. Must be in <Area>/<City> format. eg. Europe/Paris.")
-    
+
     if args.lang:
         if  re.match(r'^[a-z]{2}_[A-Z]{2}$', args.lang) is None:
             parser_error(message="Lang invalid. Must be in <lang>_<country> format. eg. en_US.")
-    
+
     if args.image:
         if not os.path.exists(args.image):
             parser_error(message="Invalid path for the image.")
         ext = args.image.split(".").pop()
         if os.path.exists(args.image) and ext not in ['img', 'xz']:
             parser_error(message="Invalid extension for image path (only `xz`or `img`).")
-    
+
     if args.ifname:
         interaces = utils.get_interfaces()
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}")
 
+    if args.online == args.offline:
+        parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
+
 
 def execute(args):
     try:
-        image_path, sd_card, host_config, private_key_path = provision.prepare_provision(args)
-        provision.provision(args.name[0], image_path, sd_card, host_config, private_key_path)
+        provision.provision(args.name[0], args)
     except provision.MissingEnvironmentValue as e:
         logger.error(e)
         sys.exit(1)

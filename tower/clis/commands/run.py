@@ -1,8 +1,10 @@
 import os
-import sys
+import logging
 
 from tower import sshconf
 from tower import gui
+
+logger = logging.getLogger('tower')
 
 def add_args(argparser):
     run_parser = argparser.add_parser(
@@ -30,6 +32,5 @@ def execute(args):
     if os.getenv('DISPLAY'):
         gui.run(args.host_name[0], *args.run_command)
     else:
-        cmd = " ".join(['xinit'] + sys.argv + ['--', ':0', 'vt1'])
-        os.system(cmd)
+        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to start Xorg.")
     

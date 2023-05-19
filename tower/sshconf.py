@@ -6,9 +6,14 @@ from ipaddress import ip_address, ip_network
 from sshconf import read_ssh_config, empty_ssh_config_file
 from sh import ssh, ErrorReturnCode, avahi_resolve, sed, touch, Command
 
+from tower.utils import clitask
+
 DEFAULT_SSH_USER = "tower"
 
 logger = logging.getLogger('tower')
+
+class UnkownHost(Exception):
+    pass
 
 def insert_include_directive():
     config_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
@@ -39,6 +44,11 @@ def get(name):
     else:
         return None
 
+def clean_known_hosts(ip):
+    known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
+    if os.path.exists(known_hosts_path):
+        sed('-i', f'/{ip}/d', known_hosts_path)
+
 def update_known_hosts(ip):
     known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
     if os.path.exists(known_hosts_path):
@@ -47,11 +57,17 @@ def update_known_hosts(ip):
         touch(known_hosts_path)
     Command('sh')('-c', f'ssh-keyscan {ip} >> {known_hosts_path}')
 
+def sed_escape(str):
+    escaped = str
+    for c in "\$.*/[]^":
+        escaped = escaped.replace(c, f'\{c}')
+    return escaped
+    
+@clitask("Updating Tower config file ~/.ssh/tower.conf...")
 def update_config(name, ip, private_key_path):
     insert_include_directive()
     # get existing hosts
     config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
-    logger.info(f"Updating Tower config file at `{config_path}`")
     config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
     existing_hosts = config.hosts()
     # if name already used, update the IP
@@ -75,51 +91,79 @@ def update_config(name, ip, private_key_path):
         LogLevel="FATAL"
     )
     config.write(config_path)
-
+    
 def hosts():
     return ssh_config().hosts()
 
 def exists(name):
     return name in hosts()
 
-def discover_ip(name, network):
+def is_host(ip, private_key_path, network):
+    if ip_address(ip) not in ip_network(network):
+        return False
+    try:
+        update_known_hosts(ip)
+        ssh('-i', private_key_path, f'{DEFAULT_SSH_USER}@{ip}', 'ls') # Running a command over SSH command should tell us if the key is correct.
+    except ErrorReturnCode:
+        clean_known_hosts(ip)
+        return False
+    return True
+
+def discover_ip(name, private_key_path, network):
     result = avahi_resolve('-4', '-n', f'{name}.local')
     if result != "":
         ip = result.strip().split("\t").pop()
-        if ip_address(ip) in ip_network(network):
-            logger.info(f"Host found at: {ip}")
+        if is_host(ip, private_key_path, network):
             return ip
-    logger.info(f"Failed to discover the IP address for {name}. Retrying in 10 seconds.")
-    time.sleep(10)
-    return discover_ip(name, network)
+    time.sleep(1)
+    return discover_ip(name, private_key_path, network)
 
-def discover_and_update(name, private_key_path, network):
-    ip = discover_ip(name, network)
-    update_known_hosts(ip)
+@clitask("Discovering {0}...")
+def discover(name, private_key_path, network):
+    return discover_ip(name, private_key_path, network)
+
+def discover_and_update(name, private_key_path, host_config):
+    ip = discover(name, private_key_path, host_config['TOWER_NETWORK'])
     update_config(name, ip, private_key_path)
+    return ip
 
-def is_online(name):
+def is_connected(name):
+    if exists(name):
+        status = ssh(name, 'cat', '/sys/class/net/wlan0/operstate').strip()
+        if status == "up":
+            return True
+        return False
+    raise UnkownHost(f"Unknown host: {name}")
+
+def is_online_host(name):
     if exists(name):
         try:
-            ssh(name, 'ping', '-c', '1', '8.8.8.8')
+            ssh(name, 'ls', '/etc/wpa_supplicant/wpa_supplicant.conf')
             return True
         except ErrorReturnCode:
             return False
     raise UnkownHost(f"Unknown host: {name}")
 
+def is_up(name):
+    if exists(name):
+        try:
+            ssh(name, 'ls') # Running a command over SSH command should tell us if the host is up.
+        except ErrorReturnCode:
+            return False
+        return True
+    raise UnkownHost(f"Unknown host: {name}")
+
 def status(host_name = None):
     if host_name:
         host_config = get(host_name)
-        host_status = 'up'
-        try:
-            ssh(host_name, 'ls') # Running a command over SSH command should tell us if the host is up.
-        except ErrorReturnCode:
-            host_status = 'down'
-        online = is_online(host_name) if host_status == 'up' else "N/A"
+        host_status = 'up' if is_up(host_name) else 'down'
+        online = is_online_host(host_name) if host_status == 'up' else "N/A"
+        connected = is_connected(host_name) if online == True else False
         return {
             'name': host_name,
             'status': host_status,
             'online-host': online,
+            'connected': connected,
             'ip': host_config['hostname']
         }
     return [status(host_name) for host_name in hosts()]

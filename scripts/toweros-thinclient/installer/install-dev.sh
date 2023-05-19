@@ -21,35 +21,26 @@
 set -e
 set -x
 
-WIFI_SSID="$1"
-WIFI_PASSWORD="$2"
-GIT_NAME="$3"
-GIT_EMAIL="$4"
-GIT_KEY_PATH="$5"
+GIT_NAME="$1"
+GIT_EMAIL="$2"
+GIT_KEY_PATH="$3"
 # set this variable if you need to connect with ssh from another host
-AUTHORIZED_KEY="$6"
+AUTHORIZED_KEY="$4"
 
-CONNECTED=false
+pip install hatch
 
-if [ ! -z "$WIFI_SSID" ]; then
-    iwctl --passphrase $WIFI_PASSWORD station wlan0 connect $WIFI_SSID
-    echo "waiting connection..."
-    set +x
-    until ping -c1 www.google.com >/dev/null 2>&1; do :; done
-    set -x
-    CONNECTED=true
-fi
-
+# update Git configuration
 if [ ! -z "$GIT_NAME" ]; then
-    git config --global user.email "$GIT_NAME"
+    git config --global user.name "$GIT_NAME"
 fi
 
 if [ ! -z "$GIT_EMAIL" ]; then
-    git config --global user.name "$GIT_EMAIL"
+    git config --global user.email "$GIT_EMAIL"
 fi
 
+# download tower-tools sources
 if [ ! -z "$GIT_KEY_PATH" ]; then
-    mkdir ~/.ssh || true
+    mkdir -p ~/.ssh
     cp $GIT_KEY_PATH ~/.ssh
     KEY_NAME=$(basename $GIT_KEY_PATH)
     touch ~/.ssh/config
@@ -58,29 +49,27 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     echo "  IdentityFile ~/.ssh/$KEY_NAME" >> ~/.ssh/config
     echo "  User git" >> ~/.ssh/config
     GITHUB_KEY="github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
-    echo "$GITHUB_KEY" > ~/.ssh/known_hosts
+    touch ~/.ssh/known_hosts
+    echo "$GITHUB_KEY" >> ~/.ssh/known_hosts
     chmod 700 ~/.ssh
     chmod 600 ~/.ssh/*
-    if $CONNECTED; then
-        mkdir ~/towercomputers || true
-        cd ~/towercomputers
-        git clone git@github.com:towercomputers/tools.git
-    fi
+    mkdir -p ~/towercomputers
+    cd ~/towercomputers
+    git clone git@github.com:towercomputers/tools.git
 fi
 
-if $CONNECTED; then
-    pip install hatch
-fi
 
+# start sshd and open firewall access
 if [ ! -z "$AUTHORIZED_KEY" ]; then
-    sudo sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
-    sudo systemctl restart dhcpcd.service
-    sudo systemctl start sshd.service
-    sudo systemctl enable sshd.service
     sudo iptables -A TCP -p tcp --dport 22 -j ACCEPT
-    sudo iptables -D INPUT -j REJECT --reject-with icmp-proto-unreachable
-    sudo iptables -A INPUT -j REJECT --reject-with icmp-proto-unreachable
-    sudo iptables-save -f /etc/iptables/iptables.rules
+    sudo iptables -D INPUT -j logreject-icmpproto
+    sudo iptables -A INPUT -j logreject-icmpproto
+    sudo /etc/init.d/iptables save
+    sudo rc-update add sshd default
+    sudo rc-service sshd start
+    mkdir -p ~/.ssh
+    touch ~/.ssh/authorized_keys
     echo "$AUTHORIZED_KEY" > ~/.ssh/authorized_keys
+    chmod 700 ~/.ssh
     chmod 600 ~/.ssh/*
 fi

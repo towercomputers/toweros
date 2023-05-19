@@ -44,13 +44,15 @@ def get_connected_ssid():
         if e.errno == 19: # No such device
             return None
 
-def get_ssid_presharedkey(ssid):
+def get_wpa_psk():
     try:
-        iwdspot_path = f'/var/lib/iwd/{ssid}.psk'
+        wpa_supplicant_path = '/etc/wpa_supplicant/wpa_supplicant.conf'
         try:
             with sh.contrib.sudo(password="", _with=True):
-                iwdspot_conf = cat(iwdspot_path)
-                return iwdspot_conf.split("PreSharedKey=")[1].split("\n")[0].strip()
+                for spot_conf_line in cat(wpa_supplicant_path, _iter=True):
+                    spot_conf = spot_conf_line.strip()
+                    if spot_conf.startswith("psk="):
+                        return spot_conf.split("=")[1].strip().strip('"')
         except sh.sh.ErrorReturnCode:
             pass
         return None
@@ -97,7 +99,7 @@ def find_wired_interface():
         return None
     return wired_interfaces[0]
 
-@clitask("Downloading {0} in {1}...")
+@clitask("Downloading {0}...")
 def download_file(url, dest_path):
     with requests.get(url, stream=True) as resp:
         resp.raise_for_status()
