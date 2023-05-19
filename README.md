@@ -16,8 +16,7 @@ For a more formal description of the Tower architecture, including a comparison 
 * 1.[ Installation](#1-installation)
   * 1.1. [Hardware configuration](#11-hardware-configuration)
   * 1.2. [TowerOS-ThinClient](#12-toweros-thin-client)
-    * 1.2.1. [First-boot instructions](#121-first-boot-instructions)
-    * 1.2.2. [Notes about TowerOS-ThinClient](#122-notes-about-toweros-thinclient)
+    * 1.2.1. [Notes about TowerOS-ThinClient](#122-notes-about-toweros-thinclient)
   * 1.3. [Custom Thin Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
     * 1.3.2. [Enable services](#132-enable-services)
@@ -58,16 +57,7 @@ To install get TowerOS-ThinClient:
 
 Note: you can build your own image of TowerOS with command `build-tower-image thinclient` or with Docker (see below).
 
-#### 1.2.1. First-boot instructions
-
-From the first start `tower-tools` can be used offline to provision a host (see [Usage](#2-usage)). 
-If you need to connect the thin client to the internet you can use:
-
-```
-$> setup-wifi <wifi-ssid> <wifi-password>
-```
-
-#### 1.2.2. Notes about TowerOS-ThinClient
+#### 1.2.1. Notes about TowerOS-ThinClient
 
 * The TowerOS-ThinClient install scripts generally follow the official Alpine Linux install guide (see [https://wiki.alpinelinux.org/wiki/Installation](https://wiki.alpinelinux.org/wiki/Installation)) 
 * The installer sets up an `iptables` firewall as described here [https://wiki.archlinux.org/title/Simple_stateful_firewall](https://wiki.archlinux.org/title/Simple_stateful_firewall).
