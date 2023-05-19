@@ -31,8 +31,7 @@ For a more formal description of the Tower architecture, including a comparison 
   * 2.3. [Install an application on one of the hosts](#23-install-an-application-on-one-of-the-hosts)
   * 2.4. [List hosts and their status](#24-list-hosts-and-their-status)
   * 2.5. [Example using two hosts](#25-example-using-two-hosts)
-  * 2.6. [Use with hatch](#26-use-with-hatch)
-  * 2.7. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
+  * 2.6. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
 * 3.[ Implementation](#3-implementation)
   * 3.1. [TowerOS-ThinClient](#31-toweros-thinclient)
   * 3.2. [TowerOS-Host](#32-toweros-host)
@@ -232,17 +231,7 @@ $> startx
 $> tower run office gcalculator
 ```
 
-### 2.6. Use with hatch
-
-```
-$> git clone git@github.com:towercomputers/tools.git
-$> cd tools
-$> pip install hatch
-$> hatch run tower --help
-$> hatch run build-tower-image --help
-```
-
-### 2.7. Build a TowerOS image with Docker
+### 2.6. Build a TowerOS image with Docker
 
 Build the Docker image with:
 
