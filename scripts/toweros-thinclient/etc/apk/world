@@ -37,7 +37,6 @@ xorriso
 squashfs-tools
 mtools
 dosfstools
-grub-efi
 abuild
 agetty
 runuser

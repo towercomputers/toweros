@@ -153,19 +153,11 @@ fi
 rm -f /mnt/etc/runlevels/*/modloop
 
 # update fstab
-mkdir /mnt/etc/
+mkdir -p /mnt/etc/
 sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
 # generate mkinitfs.conf
 mkdir -p /mnt/etc/mkinitfs/features.d
 echo 'features="ata base ide scsi usb virtio ext4"' > /mnt/etc/mkinitfs/mkinitfs.conf
-# setup syslinux
-kernel_opts="quiet rootfstype=ext4"
-modules="sd-mod,usb-storage,ext4"
-sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
-    -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
-    -e "s:^modules=.*:modules=$modules:" \
-    /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
-extlinux --install /mnt/boot
 
 # apk reads config from target root so we need to copy the config
 mkdir -p /mnt/etc/apk/keys/
@@ -178,23 +170,31 @@ mkdir -p /mnt/dev
 mount --bind /dev /mnt/dev
 
 # install packages
-local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
-local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world /mnt/var/lib/apk/world 2>/dev/null)"
+apkflags="--initdb --quiet --progress --update-cache --clean-protected"
+pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
 pkgs="$pkgs linux-lts  alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
-local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
-local repoflags=
+repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
+repoflags=
 for i in $repos; do
     repoflags="$repoflags --repository $i"
 done
 apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+
+# setup syslinux
+kernel_opts="quiet rootfstype=ext4"
+modules="sd-mod,usb-storage,ext4"
+sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
+    -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
+    -e "s:^modules=.*:modules=$modules:" \
+    /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
+dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/gptmbr.bin of=/dev/sda
+extlinux --install /mnt/boot
 
 # clean chroot
 umount /mnt/proc
 umount /mnt/dev
 
 # copy user's home to the new system
-ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
-mount "$ROOT_PARTITION" /mnt
 cp -r "/home/$USERNAME" "/mnt/home/"
 chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
