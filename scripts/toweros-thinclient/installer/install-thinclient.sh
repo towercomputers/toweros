@@ -15,6 +15,8 @@ SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 python $SCRIPT_DIR/ask-configuration.py
 source /root/tower.env
 
+
+
 # set hostname
 setup-hostname -n tower
 
@@ -108,8 +110,87 @@ sed -i "s/$old_tty1/$new_tty1/g" /etc/inittab
 # disable installer auto-start
 rm -f /etc/profile.d/install.sh
 
+
+
+
+
+
 # launch setup-disk
-yes | setup-disk -m sys "$TARGET_DRIVE"
+# zeroing hard drive
+dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
+# create boot partition (/dev/sda1)
+parted $TARGET_DRIVE mklabel gpt
+parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
+parted $TARGET_DRIVE set 1 esp on
+# create swap partition (/dev/sda2)
+parted $TARGET_DRIVE mkpart primary linux-swap 1GB 9GB
+# create root partition (/dev/sda3)
+parted $TARGET_DRIVE mkpart primary ext4 9GB 100%
+# get partitions names
+BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
+SWAP_PARTITION=$(ls $TARGET_DRIVE*2)
+ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
+# format partitions
+mkfs.fat -F 32 "$BOOT_PARTITION"
+mkswap "$SWAP_PARTITION"
+mkfs.ext4 -F "$ROOT_PARTITION"
+# mount partitions
+mkdir -p /mnt
+mount "$ROOT_PARTITION" /mnt
+mkdir -p /mnt/boot
+mount "$BOOT_PARTITION" /mnt/boot
+swapon "$SWAP_PARTITION"
+
+# install base system
+ovlfiles=/tmp/ovlfiles
+lbu package - | tar -C "/mnt" -zxv > $ovlfiles
+# comment out local repositories
+if [ -f /mnt/etc/apk/repositories ]; then
+    sed -i -e 's:^/:#/:' /mnt/etc/apk/repositories
+fi
+
+# we should not try start modloop on sys install
+rm -f /mnt/etc/runlevels/*/modloop
+
+# update fstab
+mkdir /mnt/etc/
+sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
+# generate mkinitfs.conf
+mkdir -p /mnt/etc/mkinitfs/features.d
+echo 'features="ata base ide scsi usb virtio ext4"' > /mnt/etc/mkinitfs/mkinitfs.conf
+# setup syslinux
+kernel_opts="quiet rootfstype=ext4"
+modules="sd-mod,usb-storage,ext4"
+sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
+    -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
+    -e "s:^modules=.*:modules=$modules:" \
+    /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
+extlinux --install /mnt/boot
+
+# apk reads config from target root so we need to copy the config
+mkdir -p /mnt/etc/apk/keys/
+cp /etc/apk/keys/* /mnt/etc/apk/keys/
+
+# init chroot
+mkdir -p /mnt/proc
+mount --bind /proc /mnt/proc
+mkdir -p /mnt/dev
+mount --bind /dev /mnt/dev
+
+# install packages
+local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
+local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world /mnt/var/lib/apk/world 2>/dev/null)"
+pkgs="$pkgs linux-lts  alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
+local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
+local repoflags=
+for i in $repos; do
+    repoflags="$repoflags --repository $i"
+done
+apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+
+# clean chroot
+umount /mnt/proc
+umount /mnt/dev
 
 # copy user's home to the new system
 ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
@@ -127,4 +208,4 @@ EOF
 
 # unmount and reboot
 umount /mnt
-reboot
+#reboot
