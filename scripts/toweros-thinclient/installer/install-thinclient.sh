@@ -191,16 +191,16 @@ sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
     -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
     -e "s:^modules=.*:modules=$modules:" \
     /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
-dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/gptmbr.bin of=/dev/sda
+dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=/dev/sda
 extlinux --install /mnt/boot
 
-mkdir -p /mnt/boot/EFI/syslinux
-cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/syslinux
-sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/syslinux/syslinux.cfg
+mkdir -p /mnt/boot/EFI/boot
+cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
+sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
 rm -f /mnt/boot/*.c32
 rm -f /mnt/boot/*.sys
 rm -f /mnt/boot/extlinux.conf
-cp /mnt/boot/EFI/syslinux/syslinux.efi /mnt/boot/EFI/syslinux/bootx64.efi
+cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
 
 # copy user's home to the new system
 cp -r "/home/$USERNAME" "/mnt/home/"
@@ -215,5 +215,6 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 EOF
 
 # unmount and reboot
+umount /mnt/boot
 umount /mnt
 #reboot
