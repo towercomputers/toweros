@@ -1,5 +1,7 @@
+#!/bin/bash
 # based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
+set -e
 set -x
 
 # clean everything
