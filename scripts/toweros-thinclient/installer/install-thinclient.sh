@@ -180,6 +180,10 @@ for i in $repos; do
 done
 apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
 
+# clean chroot
+umount /mnt/proc
+umount /mnt/dev
+
 # setup syslinux
 kernel_opts="quiet rootfstype=ext4"
 modules="sd-mod,usb-storage,ext4"
@@ -190,9 +194,13 @@ sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
 dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/gptmbr.bin of=/dev/sda
 extlinux --install /mnt/boot
 
-# clean chroot
-umount /mnt/proc
-umount /mnt/dev
+mkdir -p /mnt/boot/EFI/syslinux
+cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/syslinux
+sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/syslinux/syslinux.cfg
+rm -f /mnt/boot/*.c32
+rm -f /mnt/boot/*.sys
+rm -f /mnt/boot/extlinux.conf
+cp /mnt/boot/EFI/syslinux/syslinux.efi /mnt/boot/EFI/syslinux/bootx64.efi
 
 # copy user's home to the new system
 cp -r "/home/$USERNAME" "/mnt/home/"
