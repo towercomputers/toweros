@@ -68,11 +68,6 @@ prepare_home_directory() {
 }
 
 update_live_system() {
-    # make sure /bin and /lib are executable
-    chmod 755 /
-    chmod 755 /bin
-    chmod 755 /lib
-
     # set hostname
     setup-hostname -n tower
 
@@ -215,6 +210,11 @@ install_bootloader() {
 }
 
 install_thinclient() {
+    # make sure /bin and /lib are executable
+    chmod 755 /
+    chmod 755 /bin
+    chmod 755 /lib
+    
     prepare_drive
     update_live_system
     clone_live_system_to_disk
