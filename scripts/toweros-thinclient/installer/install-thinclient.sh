@@ -203,6 +203,8 @@ install_bootloader() {
     mkdir -p /mnt/boot/EFI/boot
     cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
     sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
+    sed -i 's/Alpine\/Linux/TowerOS-ThinClient/g' /mnt/boot/EFI/boot/syslinux.cfg
+    sed -i 's/Alpine /TowerOS-ThinClient /g' /mnt/boot/EFI/boot/syslinux.cfg
     rm -f /mnt/boot/*.c32
     rm -f /mnt/boot/*.sys
     rm -f /mnt/boot/extlinux.conf
