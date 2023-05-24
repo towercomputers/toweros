@@ -136,6 +136,7 @@ def provision(name, args):
     save_host_config(host_config)
     buildhost.burn_image(image_path, sd_card, host_config)
     ip = sshconf.discover_and_update(name, private_key_path, host_config)
+    utils.menu.prepare_xfce_menu()
     logger.info(f"Host found at: {ip}")
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")

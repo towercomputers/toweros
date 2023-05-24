@@ -6,7 +6,8 @@ import json
 
 from sh import ssh, scp, rm, Command, ErrorReturnCode
 
-from tower.utils import clitask, add_installed_package
+from tower.utils import clitask
+from tower.utils.menu import add_installed_package
 
 logger = logging.getLogger('tower')
 
