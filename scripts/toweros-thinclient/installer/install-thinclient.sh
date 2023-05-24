@@ -104,10 +104,6 @@ Section "InputClass"
 EndSection
 EOF
 
-    # remove unistalled packages from xfce menu
-    rm /usr/share/applications/xfce4-web-browser.desktop
-    rm /usr/share/applications/xfce4-mail-reader.desktop
-
     # start services
     rc-update add dhcpcd
     rc-update add avahi-daemon
@@ -181,6 +177,10 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/main
 http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
+
+    # remove unistalled packages from xfce menu
+    rm /mnt/usr/share/applications/xfce4-web-browser.desktop
+    rm /mnt/usr/share/applications/xfce4-mail-reader.desktop
 
     # copy user's home to the new system
     cp -r "/home/$USERNAME" "/mnt/home/"
