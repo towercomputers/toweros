@@ -8,7 +8,6 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 from rich import print as rich_print
 
-
 logger = logging.getLogger('tower')
 
 def exec_task(function, sudo, *args, **kwargs):
@@ -47,7 +46,7 @@ def clitask(message=None, timer=True, timer_message="Done in {0}", sudo=False, t
                 with yaspin(Spinners.bouncingBar, text=formated_message, timer=timer) as spinner:
                     ret = exec_task(function, sudo, *args, **kwargs)
                     #spinner.text = get_duration_text(start_time, timer_message, formated_message)
-                    spinner.ok("✅")
+                    spinner.ok("[OK]")
             return ret
         return new_function
     return decorator
