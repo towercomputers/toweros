@@ -93,13 +93,20 @@ def add_args(argparser):
         help="""Network interface (Default: first interface starting by 'e') """,
         required=False,
     )
+    provision_parser.add_argument(
+        '--force', 
+        help="""Overwrite existing host (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
         parser_error(message="Host name invalid. Must be between one and 15 alphanumeric chars.")
 
-    if sshconf.exists(args.name[0]):
-        parser_error("Host name already used.")
+    if sshconf.exists(args.name[0]) and not args.force:
+        parser_error("Host name already used. Please use `--force` to overwrite it.")
 
     if args.sd_card:
         disk_list = utils.get_device_list()
@@ -147,9 +154,18 @@ def check_args(args, parser_error):
         interaces = utils.get_interfaces()
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}")
-
-    if args.online == args.offline:
-        parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
+    
+    if args.name[0] == "router":
+        if not args.wlan_ssid:
+            parser_error(message="You must provide a wifi SSID for the router.")
+        if not args.wlan_password:
+            parser_error(message="You must provide a wifi password for the router.")
+    else:
+        if args.online == args.offline:
+            parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
+        if args.online:
+            if not sshconf.exists('router'):
+                parser_error(message="`router` host not found. Please provision it first.")
 
 
 def execute(args):
