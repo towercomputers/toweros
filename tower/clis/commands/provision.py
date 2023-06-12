@@ -116,13 +116,13 @@ def check_args(args, parser_error):
             parser_error("sd-card path invalid.") # can't right on the only disk
 
     if args.public_key_path:
-        if not arg.private_key_path :
+        if not args.private_key_path :
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.public_key_path):
             parser_error("public_key path invalid.")
 
     if args.private_key_path:
-        if not arg.public_key_path :
+        if not args.public_key_path :
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.private_key_path):
             parser_error("private_key path invalid.")
