@@ -49,6 +49,10 @@ iptables -A logaccept -j ACCEPT
 iptables -N TCP
 iptables -N UDP
 
+# open port for ssh connection from thin client
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
+iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j logaccept
+
 if [ "$HOSTNAME" == "router" ]; then
     # enable ip forwarding
     iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
@@ -97,12 +101,9 @@ iptables -A INPUT -p tcp -m recent --set --rsource --name TCP-PORTSCAN -j logrej
 iptables -I UDP -p udp -m recent --update --rsource --seconds 60 --name UDP-PORTSCAN -j logreject-icmpport
 iptables -D INPUT -p udp -j logreject-icmpport
 iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j logreject-icmpport
-# open port for ssh connection from thin client
-iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
-iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j logaccept
+
 # reject all remaining incoming traffic with icmp protocol unreachable messages
 iptables -A INPUT -j logreject-icmpproto
-
 
 # save rules
 /etc/init.d/iptables save
