@@ -4,9 +4,10 @@
 set +e
 set -x
 
-THIN_CLIENT_IP=$1
-TOWER_NETWORK=$2
-ONLINE=$3
+THIN_CLIENT_IP="$1"
+TOWER_NETWORK="$2"
+HOSTNAME="$3"
+ONLINE="$4"
 
 # based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
@@ -48,23 +49,27 @@ iptables -A logaccept -j ACCEPT
 iptables -N TCP
 iptables -N UDP
 
-# reject all forward traffic
-iptables -A FORWARD -o lo -j logaccept
-iptables -A FORWARD -j logdrop
-
-if "$ONLINE" == "true"; then
-    # reject traffic from computers to thin client and other computers
-    iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
-    iptables -A OUTPUT -p udp -m udp --dport 5353 -j logaccept
-    iptables -A OUTPUT -d $TOWER_NETWORK -j logdrop
-     # allow all outbound traffic
-    iptables -A OUTPUT -j logaccept
+if [ "$HOSTNAME" == "router" ]; then
+    # enable ip forwarding
+    iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+    iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT
 else
-    # drop all outbound traffic except established and related connections (for ssh from thin client)
-    iptables -A OUTPUT -o lo -j logaccept
-    iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
-    iptables -A OUTPUT -p udp -m udp --dport 5353 -j logaccept
-    iptables -A OUTPUT -j logdrop
+    if [ "$ONLINE" == "true" ]; then
+        # reject traffic from computers to thin client and other computers
+        # except router
+        iptables -A OUTPUT -s 192.168.2.1  -j logaccept
+        iptables -A OUTPUT -d $TOWER_NETWORK -j logdrop
+        # allow all outbound traffic
+        iptables -A OUTPUT -j logaccept
+    else
+        # reject all forward traffic
+        iptables -A FORWARD -o lo -j logaccept
+        iptables -A FORWARD -j logdrop
+        # reject all output traffic
+        iptables -A OUTPUT -o lo -j logaccept
+        iptables -A OUTPUT -j logdrop
+    fi
 fi
 
 # allow ICMP messages
@@ -92,12 +97,12 @@ iptables -A INPUT -p tcp -m recent --set --rsource --name TCP-PORTSCAN -j logrej
 iptables -I UDP -p udp -m recent --update --rsource --seconds 60 --name UDP-PORTSCAN -j logreject-icmpport
 iptables -D INPUT -p udp -j logreject-icmpport
 iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j logreject-icmpport
-# open port for avahi
-iptables -I UDP -i eth0 -s $THIN_CLIENT_IP -p udp -m udp --dport 5353 -j logaccept
 # open port for ssh connection from thin client
+iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
 iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j logaccept
 # reject all remaining incoming traffic with icmp protocol unreachable messages
 iptables -A INPUT -j logreject-icmpproto
+
 
 # save rules
 /etc/init.d/iptables save

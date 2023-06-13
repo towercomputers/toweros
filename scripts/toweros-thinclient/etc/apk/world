@@ -5,10 +5,6 @@ py3-pip
 py3-rich
 sudo
 openssh
-dhcpcd
-avahi
-avahi-tools
-wpa_supplicant
 rsync
 git
 iptables

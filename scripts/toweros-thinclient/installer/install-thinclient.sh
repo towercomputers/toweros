@@ -80,7 +80,10 @@ update_live_system() {
 auto lo
 iface lo inet loopback
 auto eth0
-iface eth0 inet dhcp
+iface eth0 inet static
+    address 192.168.2.100/24
+iface eth1 inet static
+    address 192.168.3.100/24
 EOF
 
     # set locales
@@ -105,11 +108,8 @@ EndSection
 EOF
 
     # start services
-    rc-update add dhcpcd
-    rc-update add avahi-daemon
     rc-update add iptables
     rc-update add networking
-    rc-update add wpa_supplicant boot
     rc-update add dbus
     rc-update add local
 
