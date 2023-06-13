@@ -55,15 +55,15 @@ def prepare_host_config(args):
         wlan_shared_key = ""
     # determine thinclient IP and network
     if name == "router" or online == "true":
-        tower_network = "192.168.2.0/24"
-        thin_client_ip = "192.168.2.100"
+        tower_network = sshconf.TOWER_NETWORK_ONLINE
+        thin_client_ip = sshconf.THIN_CLIENT_IP_ETH0
     else:
-        tower_network = "192.168.3.0/24"
-        thin_client_ip = "192.168.3.100"
+        tower_network = sshconf.TOWER_NETWORK_OFFLINE
+        thin_client_ip = sshconf.THIN_CLIENT_IP_ETH1
     if name == "router":
-        host_ip = "192.168.2.1"
+        host_ip =sshconf.ROUTER_IP
     else:
-        host_ip = sshconf.get_next_host_ip(online)
+        host_ip = sshconf.get_next_host_ip(tower_network)
     # return complete configuration
     return {
         'HOSTNAME': name,
@@ -81,6 +81,7 @@ def prepare_host_config(args):
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
         'STATIC_HOST_IP': host_ip,
+        'ROUTER_IP': sshconf.ROUTER_IP
     }
 
 @utils.clitask("Decompressing {0}...")

@@ -8,6 +8,7 @@ THIN_CLIENT_IP="$1"
 TOWER_NETWORK="$2"
 HOSTNAME="$3"
 ONLINE="$4"
+ROUTER_IP="$5"
 
 # based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
@@ -62,7 +63,7 @@ else
     if [ "$ONLINE" == "true" ]; then
         # reject traffic from computers to thin client and other computers
         # except router
-        iptables -A OUTPUT -s 192.168.2.1  -j logaccept
+        iptables -A OUTPUT -s $ROUTER_IP  -j logaccept
         iptables -A OUTPUT -d $TOWER_NETWORK -j logdrop
         # allow all outbound traffic
         iptables -A OUTPUT -j logaccept

@@ -4,11 +4,17 @@ import time
 from ipaddress import ip_address, ip_network
 
 from sshconf import read_ssh_config, empty_ssh_config_file
-from sh import ssh, ErrorReturnCode, avahi_resolve, sed, touch, Command
+from sh import ssh, ErrorReturnCode, sed, touch, Command
 
 from tower.utils import clitask
 
 DEFAULT_SSH_USER = "tower"
+TOWER_NETWORK_ONLINE = "192.168.2.0/24"
+TOWER_NETWORK_OFFLINE = "192.168.3.0/24"
+THIN_CLIENT_IP_ETH0 = "192.168.2.100"
+THIN_CLIENT_IP_ETH1 = "192.168.3.100"
+ROUTER_IP = "192.168.2.1"
+FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
 
 logger = logging.getLogger('tower')
 
@@ -95,7 +101,8 @@ def exists(name):
 def is_online_host(name):
     if exists(name):
         ip = get(name)['hostname']
-        return ip.startswith('192.168.2.')
+        network = ".".join(TOWER_NETWORK_ONLINE.split(".")[0:3]) + "."
+        return ip.startswith(network)
     raise UnkownHost(f"Unknown host: {name}")
 
 def is_up(name):
@@ -120,15 +127,15 @@ def status(host_name = None):
         }
     return [status(host_name) for host_name in hosts()]
 
-def get_next_host_ip(online, first=200):
-    network = "192.168.2." if online == 'true' else "192.168.3."
+def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
+    network = ".".join(tower_network.split(".")[0:3]) + "."
     for host_name in hosts():
         ip = get(host_name)['hostname']
         if ip.startswith(network):
             num = int(ip.split(".").pop())
             if num == first:
                 first += 1
-                return get_next_host_ip(online, first=first + 1)
+                return get_next_host_ip(tower_network, first=first + 1)
     return f"{network}{first}"
 
 def try_to_update_known_hosts_until_success(ip):

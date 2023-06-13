@@ -5,7 +5,8 @@ set -x
 
 # tower.env MUST contains the following variables:
 # HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
-# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, STATIC_HOST_IP
+# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
+# STATIC_HOST_IP, ROUTER_IP
 source /media/mmcblk0p1/tower.env
 
 SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
@@ -46,7 +47,7 @@ chmod 700 /home/$USERNAME/.ssh
 chmod 600 /home/$USERNAME/.ssh/*
 
 # configure firewall
-sh $SCRIPT_DIR/configure-firewall.sh "$THIN_CLIENT_IP" "$TOWER_NETWORK" "$HOSTNAME" "$ONLINE"
+sh $SCRIPT_DIR/configure-firewall.sh "$THIN_CLIENT_IP" "$TOWER_NETWORK" "$HOSTNAME" "$ONLINE" "$ROUTER_IP"
 
 # configure default network
 cat <<EOF > /etc/network/interfaces
@@ -82,7 +83,7 @@ net.ipv6.conf.all.forwarding=1
 EOF
 else
 	if [ "$ONLINE" == "true" ]; then
-		echo "gateway 192.168.2.1" >> /etc/network/interfaces
+		echo "gateway $ROUTER_IP" >> /etc/network/interfaces
 		echo "nameserver 8.8.8.8" > /etc/resolv.conf
 		echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 	fi
