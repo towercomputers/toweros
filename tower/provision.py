@@ -28,28 +28,6 @@ def generate_key_pair(name):
     ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
     return f'{key_path}.pub', key_path
 
-def prepare_wifi_parameters(args):
-    online, wlan_ssid, wlan_password = 'false', '', ''
-    if args.online:
-        online = 'true'
-        wlan_ssid = args.wlan_ssid or utils.get_connected_ssid()
-        check_environment_value('wlan-ssid', wlan_ssid)
-        if args.wlan_password:
-            wlan_password = utils.derive_wlan_key(wlan_ssid, args.wlan_password)
-        else:
-            wlan_password = utils.get_wpa_psk()
-        check_environment_value('wlan-password', wlan_password)
-    return online, wlan_ssid, wlan_password
-
-def get_network_infos(args):
-    interface = args.ifname if args.ifname else utils.find_wired_interface()
-    check_environment_value('ifname', interface)
-    thin_client_ip = utils.get_interface_ip(interface)
-    tower_network = utils.get_interface_network(interface)
-    if not thin_client_ip or not tower_network:
-        raise MissingEnvironmentValue(f"Impossible to determine the thin client IP/Network. Please ensure you are connected to the network on `{interface}`.")
-    return thin_client_ip, tower_network
-
 @utils.clitask("Preparing host configuration...")
 def prepare_host_config(args):
     name = args.name[0]
@@ -67,10 +45,25 @@ def prepare_host_config(args):
         keyboard_variant = args.keyboard_variant
     timezone = args.timezone or utils.get_timezone()
     lang = args.lang or utils.get_lang()
-    # determine wifi parameters
-    online, wlan_ssid, wlan_password = prepare_wifi_parameters(args)
+    # determine if online
+    online = 'true' if args.online or name == "router" else 'false'
+    if name == "router":
+        wlan_ssid = args.wlan_ssid
+        wlan_shared_key = utils.derive_wlan_key(args.wlan_ssid, args.wlan_password)
+    else:
+        wlan_ssid = ""
+        wlan_shared_key = ""
     # determine thinclient IP and network
-    thin_client_ip, tower_network = get_network_infos(args)
+    if name == "router" or online == "true":
+        tower_network = sshconf.TOWER_NETWORK_ONLINE
+        thin_client_ip = sshconf.THIN_CLIENT_IP_ETH0
+    else:
+        tower_network = sshconf.TOWER_NETWORK_OFFLINE
+        thin_client_ip = sshconf.THIN_CLIENT_IP_ETH1
+    if name == "router":
+        host_ip =sshconf.ROUTER_IP
+    else:
+        host_ip = sshconf.get_next_host_ip(tower_network)
     # return complete configuration
     return {
         'HOSTNAME': name,
@@ -84,9 +77,11 @@ def prepare_host_config(args):
         'LANG': lang,
         'ONLINE': online,
         'WLAN_SSID': wlan_ssid,
-        'WLAN_SHARED_KEY': wlan_password,
+        'WLAN_SHARED_KEY': wlan_shared_key,
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
+        'STATIC_HOST_IP': host_ip,
+        'ROUTER_IP': sshconf.ROUTER_IP
     }
 
 @utils.clitask("Decompressing {0}...")
@@ -129,15 +124,17 @@ def save_host_config(config):
     config_path = os.path.join(os.path.expanduser('~'), '.config', 'tower', config_filename)
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
+    
 
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args):
     image_path, sd_card, host_config, private_key_path = prepare_provision(args)
     save_host_config(host_config)
     buildhost.burn_image(image_path, sd_card, host_config)
-    ip = sshconf.discover_and_update(name, private_key_path, host_config)
+    sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
+    sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
     utils.menu.prepare_xfce_menu()
-    logger.info(f"Host found at: {ip}")
+    logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
     logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")

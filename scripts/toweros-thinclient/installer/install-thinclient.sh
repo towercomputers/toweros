@@ -51,9 +51,6 @@ prepare_home_directory() {
     # put documentation and install-dev.sh in user's home
     cp -r /var/towercomputers/docs /home/$USERNAME/
     cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
-    # put setup-wifi script in $PATH
-    mkdir -p /home/$USERNAME/.local/bin
-    cp $SCRIPT_DIR/setup-wifi /home/$USERNAME/.local/bin/
     # put tower-tools wheel in user's tower cache dir
     mkdir -p /home/$USERNAME/.cache/tower/builds
     cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
@@ -80,7 +77,10 @@ update_live_system() {
 auto lo
 iface lo inet loopback
 auto eth0
-iface eth0 inet dhcp
+iface eth0 inet static
+    address 192.168.2.100/24
+iface eth1 inet static
+    address 192.168.3.100/24
 EOF
 
     # set locales
@@ -105,11 +105,8 @@ EndSection
 EOF
 
     # start services
-    rc-update add dhcpcd
-    rc-update add avahi-daemon
     rc-update add iptables
     rc-update add networking
-    rc-update add wpa_supplicant boot
     rc-update add dbus
     rc-update add local
 

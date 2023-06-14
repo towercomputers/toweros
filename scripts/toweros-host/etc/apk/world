@@ -5,11 +5,8 @@ dosfstools
 e2fsprogs=1.47.0-r2
 e2fsprogs-extra=1.47.0-r2
 sfdisk
-avahi
-avahi-tools
 iptables
 sudo
-dhcpcd
 openssh
 xauth
 nano

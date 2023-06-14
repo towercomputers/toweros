@@ -5,7 +5,8 @@ set -x
 
 # tower.env MUST contains the following variables:
 # HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
-# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK
+# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
+# STATIC_HOST_IP, ROUTER_IP
 source /media/mmcblk0p1/tower.env
 
 SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
@@ -46,31 +47,46 @@ chmod 700 /home/$USERNAME/.ssh
 chmod 600 /home/$USERNAME/.ssh/*
 
 # configure firewall
-sh $SCRIPT_DIR/configure-firewall.sh "$THIN_CLIENT_IP" "$TOWER_NETWORK" "$ONLINE"
+sh $SCRIPT_DIR/configure-firewall.sh "$THIN_CLIENT_IP" "$TOWER_NETWORK" "$HOSTNAME" "$ONLINE" "$ROUTER_IP"
 
 # configure default network
 cat <<EOF > /etc/network/interfaces
 auto lo
 iface lo inet loopback
 auto eth0
-iface eth0 inet dhcp
+iface eth0 inet static
+address $STATIC_HOST_IP/24
 EOF
 
+
 # enable connection if requested
-if "$ONLINE" == "true"; then
-mkdir -p /etc/wpa_supplicant
-cat <<EOF > /etc/wpa_supplicant/wpa_supplicant.conf
+if [ "$HOSTNAME" == "router" ]; then
+	mkdir -p /etc/wpa_supplicant
+	cat <<EOF > /etc/wpa_supplicant/wpa_supplicant.conf
 network={
 	ssid="$WLAN_SSID"
 	psk=$WLAN_SHARED_KEY
 }
 EOF
-wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
-# update network configuration
-echo "auto wlan0" >> /etc/network/interfaces
-echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
-# enable chrony
-rc-update add chronyd default
+	wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant/wpa_supplicant.conf
+	# update network configuration
+	echo "auto wlan0" >> /etc/network/interfaces
+	echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
+	# enable services
+	rc-update add chronyd default
+	rc-update add wpa_supplicant boot
+	# enable internet connection sharing
+	cat <<EOF > /etc/sysctl.d/30-ipforward.conf
+net.ipv4.ip_forward=1
+net.ipv6.conf.default.forwarding=1
+net.ipv6.conf.all.forwarding=1
+EOF
+else
+	if [ "$ONLINE" == "true" ]; then
+		echo "gateway $ROUTER_IP" >> /etc/network/interfaces
+		echo "nameserver 8.8.8.8" > /etc/resolv.conf
+		echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+	fi
 fi
 
 # TODO: more sshd configuration
@@ -79,11 +95,8 @@ sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
 
 # setup services
 rc-update add iptables default
-rc-update add dhcpcd default
 rc-update add dbus default
-rc-update add avahi-daemon default
 rc-update add sshd default
-rc-update add wpa_supplicant boot
 rc-update add networking boot
 
 # install alpine system in /mnt
@@ -115,7 +128,7 @@ chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 
 # Get branch from buildhost.py
 # configure apk repositories if host is online
-if "$ONLINE" == "true"; then
+if [ "$HOSTNAME" == "router" ]; then
 mkdir -p /mnt/etc/apk
 cat <<EOF > /mnt/etc/apk/repositories 
 http://dl-cdn.alpinelinux.org/alpine/v3.17/main
