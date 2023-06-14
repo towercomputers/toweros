@@ -51,9 +51,6 @@ prepare_home_directory() {
     # put documentation and install-dev.sh in user's home
     cp -r /var/towercomputers/docs /home/$USERNAME/
     cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
-    # put setup-wifi script in $PATH
-    mkdir -p /home/$USERNAME/.local/bin
-    cp $SCRIPT_DIR/setup-wifi /home/$USERNAME/.local/bin/
     # put tower-tools wheel in user's tower cache dir
     mkdir -p /home/$USERNAME/.cache/tower/builds
     cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
