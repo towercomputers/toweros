@@ -155,7 +155,7 @@ def check_args(args, parser_error):
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}")
     
-    if args.name[0] == "router":
+    if args.name[0] == sshconf.ROUTER_HOSTNAME:
         if not args.wlan_ssid:
             parser_error(message="You must provide a wifi SSID for the router.")
         if not args.wlan_password:
@@ -164,8 +164,8 @@ def check_args(args, parser_error):
         if args.online == args.offline:
             parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
         if args.online:
-            if not sshconf.exists('router'):
-                parser_error(message="`router` host not found. Please provision it first.")
+            if not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+                parser_error(message=f"`{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
 
 
 def execute(args):

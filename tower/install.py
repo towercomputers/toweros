@@ -8,6 +8,7 @@ from sh import ssh, scp, rm, Command, ErrorReturnCode
 
 from tower.utils import clitask
 from tower.utils.menu import add_installed_package
+from tower.sshconf import ROUTER_HOSTNAME, is_online_host
 
 logger = logging.getLogger('tower')
 
@@ -64,14 +65,14 @@ def cleanup(host, arch="armv7h"):
     cleanup_offline_host(host, arch)
 
 @clitask("Installing {2} in {0}...", task_parent=True)
-def install_in_offline_host(host, online_host, packages):
+def install_in_offline_host(host, packages):
     try:
         # prepare offline host
         prepare_offline_host(host)
         # run ssh tunnel with online host in background
         ssh(
             '-L', f"{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80", '-N', '-v',
-            online_host,
+            ROUTER_HOSTNAME,
             _err_to_out=True, _out=logger.debug, _bg=True, _bg_exc=False
         )
         # run apk in offline host
@@ -108,3 +109,10 @@ def install_in_online_host(host, packages):
             add_installed_package(host, package)
     except ErrorReturnCode:
         pass # error in remote host is already displayed
+
+
+def install_packages(host, packages):
+    if is_online_host(host):
+        install_in_online_host(host, packages)
+    else:
+        install_in_offline_host(host, packages)

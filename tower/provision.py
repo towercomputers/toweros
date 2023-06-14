@@ -46,21 +46,21 @@ def prepare_host_config(args):
     timezone = args.timezone or utils.get_timezone()
     lang = args.lang or utils.get_lang()
     # determine if online
-    online = 'true' if args.online or name == "router" else 'false'
-    if name == "router":
+    online = 'true' if args.online or name == sshconf.ROUTER_HOSTNAME else 'false'
+    if name == sshconf.ROUTER_HOSTNAME:
         wlan_ssid = args.wlan_ssid
         wlan_shared_key = utils.derive_wlan_key(args.wlan_ssid, args.wlan_password)
     else:
         wlan_ssid = ""
         wlan_shared_key = ""
     # determine thinclient IP and network
-    if name == "router" or online == "true":
+    if name == sshconf.ROUTER_HOSTNAME or online == "true":
         tower_network = sshconf.TOWER_NETWORK_ONLINE
         thin_client_ip = sshconf.THIN_CLIENT_IP_ETH0
     else:
         tower_network = sshconf.TOWER_NETWORK_OFFLINE
         thin_client_ip = sshconf.THIN_CLIENT_IP_ETH1
-    if name == "router":
+    if name == sshconf.ROUTER_HOSTNAME:
         host_ip =sshconf.ROUTER_IP
     else:
         host_ip = sshconf.get_next_host_ip(tower_network)
