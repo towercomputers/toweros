@@ -102,8 +102,8 @@ def add_args(argparser):
     )
 
 def check_args(args, parser_error):
-    if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
-        parser_error(message="Host name invalid. Must be between one and 15 alphanumeric chars.")
+    if re.match(r'/^(?![0-9]{1,15}$)[a-z0-9-]{1,15}$/', args.name[0]):
+        parser_error(message="Host name invalid. Must be between one and 15 minuscule alphanumeric chars.")
 
     if sshconf.exists(args.name[0]) and not args.force:
         parser_error("Host name already used. Please use `--force` to overwrite it.")
