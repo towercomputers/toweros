@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz
+from sh import ssh_keygen, xz, ssh
 
 from tower import utils
 from tower import buildhost
@@ -138,3 +138,14 @@ def provision(name, args):
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
     logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+
+@utils.clitask("Updating wlan credentials...")
+def wlan_connect(ssid, password):
+    psk = utils.derive_wlan_key(ssid, password)
+    supplicant_path = "/etc/wpa_supplicant/wpa_supplicant.conf"
+    cmd  = f"sudo echo 'network={{' | sudo tee {supplicant_path} && "
+    cmd += f"sudo echo '    ssid=\"{ssid}\"'  | sudo tee -a  {supplicant_path} && "
+    cmd += f"sudo echo '    psk={psk}'  | sudo tee -a {supplicant_path} && "
+    cmd += f"sudo echo '}}' | sudo tee -a {supplicant_path}"
+    ssh(sshconf.ROUTER_HOSTNAME, cmd)
+    ssh(sshconf.ROUTER_HOSTNAME, "sudo rc-service wpa_supplicant restart")

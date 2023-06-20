@@ -183,6 +183,12 @@ The sd-cards of the `router` and online hosts must be inserted in a RPI connecte
 
 Keyboard, timezone and lang are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
 
+To update the wifi settings of the router you can use the command `wlan-connect`:
+
+```
+$> tower provision wlan-connect --ssid <ssid> --password <password>
+```
+
 ### 2.2. Execute a command on one of the hosts
 
 Run a command on a host with SSH:
