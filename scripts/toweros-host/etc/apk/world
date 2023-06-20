@@ -29,3 +29,4 @@ xinit
 udev
 syslog-ng
 chrony
+linux-firmware-brcm
