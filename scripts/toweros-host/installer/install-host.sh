@@ -147,7 +147,7 @@ clone_live_system_to_disk() {
 
 	# Get branch from buildhost.py
 	# configure apk repositories if host is online
-	if [ "$HOSTNAME" == "router" ]; then
+	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		mkdir -p /mnt/etc/apk
 		cat <<EOF > /mnt/etc/apk/repositories 
 http://dl-cdn.alpinelinux.org/alpine/v3.17/main
