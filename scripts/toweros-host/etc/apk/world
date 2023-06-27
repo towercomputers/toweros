@@ -30,3 +30,4 @@ udev
 syslog-ng
 chrony
 linux-firmware-brcm
+restic
