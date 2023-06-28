@@ -141,7 +141,7 @@ clone_live_system_to_disk() {
 
     # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
-    echo 'features="ata base ide scsi usb virtio ext4"' > /mnt/etc/mkinitfs/mkinitfs.conf
+    echo 'features="ata base ide scsi usb virtio ext4 nvme vmd"' > /mnt/etc/mkinitfs/mkinitfs.conf
 
     # apk reads config from target root so we need to copy the config
     mkdir -p /mnt/etc/apk/keys/
@@ -188,7 +188,7 @@ EOF
 install_bootloader() {
     # setup syslinux
     kernel_opts="quiet rootfstype=ext4"
-    modules="sd-mod,usb-storage,ext4"
+    modules="sd-mod,usb-storage,ext4,nvme,vmd"
     sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
         -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
         -e "s:^modules=.*:modules=$modules:" \
