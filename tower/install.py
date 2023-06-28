@@ -64,7 +64,7 @@ def cleanup(host, arch="armv7h"):
     kill_ssh(arch)
     cleanup_offline_host(host, arch)
 
-@clitask("Installing {2} in {0}...", task_parent=True)
+@clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_offline_host(host, packages):
     try:
         # prepare offline host

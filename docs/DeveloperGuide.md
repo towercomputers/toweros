@@ -16,10 +16,20 @@ auto eth0
 iface eth0 inet static
     address 192.168.2.100/24
     gateway 192.168.2.1
+auto eth1
 iface eth1 inet static
     address 192.168.3.100/24
 EOF
 ```
+3. set the DNS server:
+
+The file /etc/resolv.conf must contain the following:
+````
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+```
+
+4. restart network with: `sudo rc-service networking restart`
 
 Configure `git`, download Github repository in `~/towercomputers/tools` and install `hatch` with:
 

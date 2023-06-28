@@ -79,6 +79,7 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet static
     address 192.168.2.100/24
+auto eth1
 iface eth1 inet static
     address 192.168.3.100/24
 EOF
