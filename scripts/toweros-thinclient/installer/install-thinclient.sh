@@ -194,7 +194,7 @@ install_bootloader() {
         -e "s:^modules=.*:modules=$modules:" \
         /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
 
-    dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=/dev/sda
+    dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
 
     extlinux --install /mnt/boot
 
