@@ -24,6 +24,13 @@ def add_args(argparser):
         default=""
     )
     provision_parser.add_argument(
+        '--zero-device', 
+        help="""Zeroing device before copying image (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    provision_parser.add_argument(
         '--public-key-path', 
         help="""Public key path used to access the host (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
         required=False

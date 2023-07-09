@@ -223,12 +223,22 @@ def build_image(builds_dir, uncompressed=False):
 def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
     # burn image
-    dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=logger.debug)
+    try:
+        buf = StringIO()
+        dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
+    except ErrorReturnCode:
+        logger.error(buf.getvalue())
+        logger.error("Error copying image, please check the SD card intergirty or try again with the flag `--zero-device`.")
+        raise Exception("Error copying image")
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     if not boot_part:
         raise Exception("Invalid partitions")
     return boot_part
+
+@clitask("Zeroing {0} please be patient...")
+def zeroing_device(device):
+    dd('if=/dev/zero', f'of={device}', 'bs=8M', _out=logger.debug)
 
 @clitask("Configuring image...")
 def insert_tower_env(boot_part, config):
@@ -260,15 +270,17 @@ def prepare_root_partition(device, boot_part):
         mkfs_ext4('-F', root_part, _out=buf, _err=buf)
     except ErrorReturnCode:
         logger.error(buf.getvalue())
-        logger.error("Error creating root partition, please check the SD card intergirty and try again.")
+        logger.error("Error creating root partition, please check the SD card intergirty or try again with the flag `--zero-device`.")
         raise Exception("Error creating root partition")
     
 @clitask("Installing TowserOS-Host in {1}...", 
          timer_message="TowserOS-Host installed in {0}.\nPlease insert the SD Card into the Host computer, then turn it on and wait for it to be discover on the network.", 
          sudo=True, task_parent=True)
-def burn_image(image_file, device, config):
+def burn_image(image_file, device, config, zero_device=False):
     try:
         prepare_working_dir()
+        if zero_device:
+            zeroing_device(device)
         boot_part = copy_image_in_device(image_file, device)
         insert_tower_env(boot_part, config)
         prepare_root_partition(device, boot_part)

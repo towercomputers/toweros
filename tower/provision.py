@@ -130,7 +130,7 @@ def save_host_config(config):
 def provision(name, args):
     image_path, sd_card, host_config, private_key_path = prepare_provision(args)
     save_host_config(host_config)
-    buildhost.burn_image(image_path, sd_card, host_config)
+    buildhost.burn_image(image_path, sd_card, host_config, args.zero_device)
     sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
     sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
     utils.menu.prepare_xfce_menu()
