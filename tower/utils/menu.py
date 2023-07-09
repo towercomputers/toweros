@@ -89,7 +89,7 @@ def prepare_xfce_menu():
             tower_directory.write('Version=1.0\n')
             tower_directory.write('Type=Directory\n')
             tower_directory.write(f'Icon={host_icon_path}\n')
-            tower_directory.write(f'Name={hostname} apps\n')
+            tower_directory.write(f'Name=Host: {hostname}\n')
             tower_directory.write(f'Comment=Applications installed in {hostname} host\n')
     # prepare tower.menu file
     tower_menu_path = os.path.join(menu_folder, 'tower.menu')
