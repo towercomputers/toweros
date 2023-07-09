@@ -219,7 +219,7 @@ def build_image(builds_dir, uncompressed=False):
         logger.info(f"Image ready: {image_path}")
     return image_path
 
-@clitask("Copying image in {1}...")
+@clitask("Copying {0} in {1}...")
 def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
     # burn image

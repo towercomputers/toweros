@@ -60,7 +60,6 @@ EOF
 		echo "auto wlan0" >> /etc/network/interfaces
 		echo "iface wlan0 inet dhcp" >> /etc/network/interfaces
 		# enable services
-		rc-update add chronyd default
 		rc-update add wpa_supplicant boot
 		# enable internet connection sharing
 		cat <<EOF > /etc/sysctl.d/30-ipforward.conf
@@ -70,7 +69,9 @@ net.ipv6.conf.all.forwarding=1
 EOF
 	else
 		if [ "$ONLINE" == "true" ]; then
+			# update network configuration
 			echo "gateway $ROUTER_IP" >> /etc/network/interfaces
+			# set DNS servers
 			echo "nameserver 8.8.8.8" > /etc/resolv.conf
 			echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 		fi
@@ -85,6 +86,9 @@ EOF
 	rc-update add dbus default
 	rc-update add sshd default
 	rc-update add networking boot
+	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
+		rc-update add chronyd default
+	fi
 }
 
 clone_live_system_to_disk() {
