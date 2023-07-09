@@ -5,6 +5,8 @@ from datetime import datetime
 
 from passlib.hash import sha512_crypt
 from sh import ssh_keygen, xz, ssh
+from rich.prompt import Confirm
+from rich.text import Text
 
 from tower import utils
 from tower import buildhost
@@ -125,19 +127,20 @@ def save_host_config(config):
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
     
-
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args):
     image_path, sd_card, host_config, private_key_path = prepare_provision(args)
-    save_host_config(host_config)
-    buildhost.burn_image(image_path, sd_card, host_config, args.zero_device)
-    sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
-    sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
-    utils.menu.prepare_xfce_menu()
-    logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
-    logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
-    logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
-    logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+    confirmation = Text(f"Are you sure you want to completely wipe {sd_card}?", style='red')
+    if args.no_confirm or Confirm.ask(confirmation):
+        save_host_config(host_config)
+        buildhost.burn_image(image_path, sd_card, host_config, args.zero_device)
+        sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
+        sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+        utils.menu.prepare_xfce_menu()
+        logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
+        logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
+        logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
+        logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
