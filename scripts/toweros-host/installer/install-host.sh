@@ -3,6 +3,12 @@
 set -e
 set -x
 
+update_passord() {
+    REPLACE="$1:$2:"
+    ESCAPED_REPLACE=$(printf '%s\n' "$REPLACE" | sed -e 's/[\/&]/\\&/g')
+    sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
+}
+
 mount_root_partition() {
 	# create mount point
 	mkdir -p /mnt
@@ -13,7 +19,7 @@ mount_root_partition() {
 prepare_home_directory() {
 	# create first user
 	adduser -D "$USERNAME" "$USERNAME"
-	echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
+	update_passord "$USERNAME" "$PASSWORD_HASH"
 	# add user to sudoers
 	mkdir -p /etc/sudoers.d
 	echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
@@ -32,7 +38,7 @@ update_live_system() {
 	setup-timezone $TIMEZONE
 
 	# change root password
-	echo -e "$PASSWORD\n$PASSWORD" | passwd root
+	update_passord "root" "$PASSWORD_HASH"
 
 	# configure firewall
 	sh $SCRIPT_DIR/configure-firewall.sh "$THIN_CLIENT_IP" "$TOWER_NETWORK" "$HOSTNAME" "$ONLINE" "$ROUTER_IP"
@@ -172,7 +178,7 @@ clean_and_reboot() {
 
 init_configuration() {
 	# tower.env MUST contains the following variables:
-	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
+	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
 	# STATIC_HOST_IP, ROUTER_IP
 	source /media/mmcblk0p1/tower.env

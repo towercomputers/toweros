@@ -3,6 +3,12 @@
 set -e
 set -x
 
+update_passord() {
+    REPLACE="$1:$2:"
+    ESCAPED_REPLACE=$(printf '%s\n' "$REPLACE" | sed -e 's/[\/&]/\\&/g')
+    sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
+}
+
 prepare_drive() {
     # zeroing hard drive
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
@@ -36,7 +42,7 @@ prepare_drive() {
 prepare_home_directory() {
     # create first user
     adduser -D "$USERNAME" "$USERNAME"
-    echo -e "$PASSWORD\n$PASSWORD" | passwd "$USERNAME"
+    update_passord "$USERNAME" "$PASSWORD_HASH"
     # add user to abuild group (necessary for building packages)
     addgroup abuild || true
     addgroup "$USERNAME" abuild
@@ -69,7 +75,7 @@ update_live_system() {
     setup-hostname -n tower
 
     # change root password
-    echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD" | passwd root
+    update_passord "root" "$ROOT_PASSWORD_HASH"
 
     # configure default network
     mkdir -p /etc/network

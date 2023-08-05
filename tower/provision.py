@@ -133,6 +133,7 @@ def provision(name, args):
     confirmation = Text(f"Are you sure you want to completely wipe {sd_card}?", style='red')
     if args.no_confirm or Confirm.ask(confirmation):
         save_host_config(host_config)
+        del(host_config['PASSWORD'])
         buildhost.burn_image(image_path, sd_card, host_config, args.zero_device)
         sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
         sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
