@@ -173,9 +173,11 @@ def run(hostname, *cmd):
         app_process.wait()
     except NxTimeoutException:
         logger.error("Failed to initialize NX, please check the log above.")
-    except KeyboardInterrupt:
-        if app_process and app_process.is_alive():
-            app_process.terminate()
     finally:
         # kill bakground processes when done
+        try:
+            if app_process is not None and app_process.is_alive():
+                app_process.terminate()
+        except:
+            pass # we want to cleanup anyway
         cleanup(hostname, display_num)
