@@ -180,7 +180,7 @@ def ask_config():
     return config
 
 def main():
-    config = "\n".join([f'{key}="{value}"' for key, value in ask_config().items()])
+    config = "\n".join([f"{key}='{value}'" for key, value in ask_config().items()])
     with open("/root/tower.env", 'w') as fp:
         fp.write(config)
         fp.write("\n")
