@@ -34,12 +34,13 @@ For a more formal description of the Tower architecture, including a comparison 
   * 2.6. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
 * 3.[ Implementation](#3-implementation)
   * 3.1. [Network architecture](#31-network-architecture)
-  * 3.2. [TowerOS-ThinClient](#32-toweros-thinclient)
-  * 3.3. [TowerOS-Host](#33-toweros-host)
-  * 3.4. [SSHConf](#34-sshconf)
-  * 3.5. [Provision](#35-provision)
-  * 3.6. [GUI](#36-gui)
-  * 3.7. [Install](#37-install)
+  * 3.2. [Firewall Rules](#32-firewall-rules)
+  * 3.3. [TowerOS-ThinClient](#33-toweros-thinclient)
+  * 3.4. [TowerOS-Host](#34-toweros-host)
+  * 3.5. [SSHConf](#35-sshconf)
+  * 3.6. [Provision](#36-provision)
+  * 3.7. [GUI](#37-gui)
+  * 3.8. [Install](#38-install)
 
 ## 1. Installation
 
@@ -304,7 +305,24 @@ THIN_CLIENT_IP_ETH1 = "192.168.3.100"
 ROUTER_IP = "192.168.2.1"
 FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
 
-### 3.2. TowerOS-ThinClient
+### 3.2. Firewall Rules
+
+The firewall is the most important element for securing the Tower network. `iptables` is installed and configured on each host and on the thinclient using the following two scripts:
+
+https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
+https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh
+
+Both are standalone, ie they clean all the rules at the beginning and save the new rules at the end.
+
+The thinclient is configured with the following guide https://wiki.archlinux.org/title/Simple_stateful_firewall
+Hosts are configured the same way, but with the following additional rules:
+
+- Port 22 is open only for the Thin Client (for `ssh` connections)
+- for offline hosts we reject all outgoing traffic
+- for online hosts, outgoing traffic is only rejected to the thinclient and the other hosts.
+- for the host having the role of `router`, we activate the ip forwarding to share the connection with the other online hosts.
+
+### 3.3. TowerOS-ThinClient
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
@@ -337,7 +355,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 7. Cleaning temporary files.
 
 
-### 3.3. TowerOS-Host
+### 3.4. TowerOS-Host
 
 `buildhost.py` is the module responsible for generating an image of TowerOS-ThinClient when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
 
@@ -373,7 +391,7 @@ Here are the different steps taken by `buildhost.py` to configure an image when 
 
 Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folder by the TowerOS installer.
 
-### 3.4. SSHConf
+### 3.5. SSHConf
 
 `tower-tools` uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
@@ -383,7 +401,7 @@ Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folde
 
 Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/project/sshconf/) to manipulate `ssh` config files.
 
-### 3.5. Provision
+### 3.6. Provision
 
 `provision.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
 
@@ -397,7 +415,7 @@ The steps to provision a host are as follows:
 
 Once a host is provisioned it is therefore directly accessible by ssh with `ssh <host>` or `tower run <host>`.
 
-### 3.6. GUI
+### 3.7. GUI
 
 GUI is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
 
@@ -423,7 +441,7 @@ Here are the steps taken by `gui.py` to run an application on one of the hosts:
 
 GUI works the same way as X2GO from which it is directly inspired.
 
-### 3.7. Install
+### 3.8. Install
 
 This module allows to use `apk` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
 
