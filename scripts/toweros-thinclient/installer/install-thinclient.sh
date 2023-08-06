@@ -9,6 +9,25 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
+uuid_or_device() {
+	local i=
+	case "$1" in
+		/dev/md*) echo "$1" && return 0;;
+	esac
+	test -z "$USE_UUID" && echo "$1" &&return 0
+
+	for i in $(_blkid "$1"); do
+		case "$i" in
+			UUID=*) eval $i;;
+		esac
+	done
+	if [ -n "$UUID" ]; then
+		echo "UUID=$UUID"
+	else
+		echo "$1"
+	fi
+}
+
 prepare_drive() {
     # zeroing hard drive
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
@@ -17,7 +36,7 @@ prepare_drive() {
     parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
     parted $TARGET_DRIVE set 1 esp on
     # create LVM partition (/dev/sda2)
-    parted $TARGET_DRIVE mkpart primary 1 -1
+    parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
     # get partitions names
     BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
     LVM_PARTITION=$(ls $TARGET_DRIVE*2)
@@ -47,7 +66,7 @@ prepare_drive() {
     mkfs.ext4 -F "$ROOT_PARTITION"
     # mount partitions
     mkdir -p /mnt
-    mount "$ROOT_PARTITION" /mnt
+    mount -t ext4 "$ROOT_PARTITION" /mnt
     mkdir -p /mnt/boot
     mount "$BOOT_PARTITION" /mnt/boot
     swapon "$SWAP_PARTITION"
@@ -129,6 +148,8 @@ EndSection
 EOF
 
     # start services
+    rc-update add lvm
+    rc-update add dmcrypt
     rc-update add iptables
     rc-update add networking
     rc-update add dbus
@@ -165,7 +186,6 @@ clone_live_system_to_disk() {
     # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
     echo 'features="ata base ide scsi usb virtio ext4 nvme vmd lvm keymap cryptsetup cryptkey resume"' > /mnt/etc/mkinitfs/mkinitfs.conf
-     
 
     # apk reads config from target root so we need to copy the config
     mkdir -p /mnt/etc/apk/keys/
@@ -192,6 +212,8 @@ clone_live_system_to_disk() {
     umount /mnt/proc
     umount /mnt/dev
 
+    mkinitfs -c /mnt/etc/mkinitfs/mkinitfs.conf -b /mnt/ $(ls /mnt/lib/modules/)
+
     # Get branch from buildthinclient.py
     mkdir -p /mnt/etc/apk
     cat <<EOF > /mnt/etc/apk/repositories 
@@ -211,9 +233,11 @@ EOF
 
 install_bootloader() {
     # setup syslinux
-    kernel_opts="quiet rootfstype=ext4 cryptroot=$LVM_PARTITION cryptdm=lvmcrypt"
+    LVM_UUID=$(uuid_or_device $LVM_PARTITION)
+    ROOT_UUID=$(uuid_or_device $ROOT_PARTITION)
+    kernel_opts="quiet rootfstype=ext4 cryptroot=$LVM_UUID cryptdm=lvmcrypt"
     modules="sd-mod,usb-storage,ext4,nvme,vmd,cryptsetup,keymap,cryptkey,kms,lvm"
-    sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
+    sed -e "s:^root=.*:root=$ROOT_UUID:" \
         -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
         -e "s:^modules=.*:modules=$modules:" \
         /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
