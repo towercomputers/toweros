@@ -16,14 +16,31 @@ prepare_drive() {
     parted $TARGET_DRIVE mklabel gpt
     parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
     parted $TARGET_DRIVE set 1 esp on
-    # create swap partition (/dev/sda2)
-    parted $TARGET_DRIVE mkpart primary linux-swap 1GB 9GB
-    # create root partition (/dev/sda3)
-    parted $TARGET_DRIVE mkpart primary ext4 9GB 100%
+    # create LVM partition (/dev/sda2)
+    parted $TARGET_DRIVE mkpart primary 1 -1
     # get partitions names
     BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
-    SWAP_PARTITION=$(ls $TARGET_DRIVE*2)
-    ROOT_PARTITION=$(ls $TARGET_DRIVE*3)
+    LVM_PARTITION=$(ls $TARGET_DRIVE*2)
+    # generate LUKS key
+    #dd if=/dev/urandom of=/root/secret.key bs=1024 count=2
+    #chmod 0400 /root/secret.key
+    # create LUKS partition
+    #cryptsetup luksFormat $LVM_PARTITION /root/secret.key
+    #cryptsetup luksAddKey $LVM_PARTITION /root/secret.key --key-file=/root/secret.key
+    cryptsetup -v -c aes-xts-plain64 -s 512 --hash sha512 --pbkdf pbkdf2 \
+                --iter-time 1000 --use-random luksFormat $LVM_PARTITION 
+    # initialize the LUKS partition
+    #cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/root/secret.key
+    cryptsetup luksOpen $LVM_PARTITION lvmcrypt
+    # create LVM physical volumes
+    vgcreate vg0 /dev/mapper/lvmcrypt
+    # create swap volume
+    lvcreate -L 8G vg0 -n swap
+    # create root volume
+    lvcreate -l 100%FREE vg0 -n root
+    # set partitions names
+    SWAP_PARTITION="/dev/vg0/swap"
+    ROOT_PARTITION="/dev/vg0/root"
     # format partitions
     mkfs.fat -F 32 "$BOOT_PARTITION"
     mkswap "$SWAP_PARTITION"
@@ -147,7 +164,8 @@ clone_live_system_to_disk() {
 
     # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
-    echo 'features="ata base ide scsi usb virtio ext4 nvme vmd"' > /mnt/etc/mkinitfs/mkinitfs.conf
+    echo 'features="ata base ide scsi usb virtio ext4 nvme vmd lvm keymap cryptsetup cryptkey resume"' > /mnt/etc/mkinitfs/mkinitfs.conf
+     
 
     # apk reads config from target root so we need to copy the config
     mkdir -p /mnt/etc/apk/keys/
@@ -162,7 +180,7 @@ clone_live_system_to_disk() {
     # install packages
     local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
     local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
-    pkgs="$pkgs linux-lts  alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
+    pkgs="$pkgs linux-lts alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
     local repoflags=
     for i in $repos; do
@@ -193,8 +211,8 @@ EOF
 
 install_bootloader() {
     # setup syslinux
-    kernel_opts="quiet rootfstype=ext4"
-    modules="sd-mod,usb-storage,ext4,nvme,vmd"
+    kernel_opts="quiet rootfstype=ext4 cryptroot=$LVM_PARTITION cryptdm=lvmcrypt"
+    modules="sd-mod,usb-storage,ext4,nvme,vmd,cryptsetup,keymap,cryptkey,kms,lvm"
     sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
         -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
         -e "s:^modules=.*:modules=$modules:" \
