@@ -1,5 +1,6 @@
 
 #!/bin/bash
+# based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
 set +e
 set -x
@@ -9,8 +10,6 @@ TOWER_NETWORK="$2"
 HOSTNAME="$3"
 ONLINE="$4"
 ROUTER_IP="$5"
-
-# based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
 # clean everything
 iptables -F
