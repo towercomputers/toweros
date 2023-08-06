@@ -9,25 +9,6 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
-uuid_or_device() {
-	local i=
-	case "$1" in
-		/dev/md*) echo "$1" && return 0;;
-	esac
-	test -z "$USE_UUID" && echo "$1" &&return 0
-
-	for i in $(_blkid "$1"); do
-		case "$i" in
-			UUID=*) eval $i;;
-		esac
-	done
-	if [ -n "$UUID" ]; then
-		echo "UUID=$UUID"
-	else
-		echo "$1"
-	fi
-}
-
 prepare_drive() {
     # zeroing hard drive
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
@@ -231,11 +212,9 @@ EOF
 
 install_bootloader() {
     # setup syslinux
-    LVM_UUID=$(uuid_or_device $LVM_PARTITION)
-    ROOT_UUID=$(uuid_or_device $ROOT_PARTITION)
-    kernel_opts="quiet rootfstype=ext4 cryptroot=$LVM_UUID cryptdm=lvmcrypt"
+    kernel_opts="quiet rootfstype=ext4 cryptroot=$LVM_PARTITION cryptdm=lvmcrypt"
     modules="sd-mod,usb-storage,ext4,nvme,vmd,cryptsetup,keymap,cryptkey,kms,lvm"
-    sed -e "s:^root=.*:root=$ROOT_UUID:" \
+    sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
         -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
         -e "s:^modules=.*:modules=$modules:" \
         /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
