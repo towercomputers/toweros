@@ -212,8 +212,6 @@ clone_live_system_to_disk() {
     umount /mnt/proc
     umount /mnt/dev
 
-    mkinitfs -c /mnt/etc/mkinitfs/mkinitfs.conf -b /mnt/ $(ls /mnt/lib/modules/)
-
     # Get branch from buildthinclient.py
     mkdir -p /mnt/etc/apk
     cat <<EOF > /mnt/etc/apk/repositories 
@@ -245,6 +243,7 @@ install_bootloader() {
     dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
 
     extlinux --install /mnt/boot
+    chroot /mnt/ update-extlinux
 
     mkdir -p /mnt/boot/EFI/boot
     cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
