@@ -74,8 +74,6 @@ iptables -D INPUT -p udp -j logreject-icmpport
 iptables -A INPUT -p udp -m recent --set --rsource --name UDP-PORTSCAN -j logreject-icmpport
 # reject all remaining incoming traffic with icmp protocol unreachable messages
 iptables -A INPUT -j logreject-icmpproto
-# open port for avahi
-iptables -I UDP -p udp -m udp --dport 5353 -j logaccept
 # drop all other traffic
 iptables -A INPUT -j logdrop
 
