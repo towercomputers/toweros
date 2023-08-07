@@ -23,7 +23,7 @@ TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
 #DRIVES = lsscsi('-s').strip().split("\n")
-DRIVES = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
+DRIVES = lambda: subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
 
 def print_title(title):
     title_text = Text(f"\n{title}\n")
@@ -113,7 +113,7 @@ def get_disk_encryption():
 
 def get_target_drive():
     drive = select_value(
-        DRIVES,
+        DRIVES(),
         "Please select the drive where you want to install TowerOS",
         "Target drive",
         no_columns=True
@@ -121,13 +121,20 @@ def get_target_drive():
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def get_cryptkey_drive(os_target):
+    all_drives = DRIVES()
+    no_selected_drives = [d for d in all_drives if not d.strip().endswith(os_target)]
+    please_refresh = '<-- Let me insert a drive and refresh the list!'
+    no_selected_drives.append(please_refresh)
     drive = select_value(
-        [DRIVES[i] for i in range(len(DRIVES)) if not DRIVES[i].strip().endswith(os_target)],
+        no_selected_drives,
         "Please select the drive where you want to put the disk encryption keyfile",
         "Target keyfile drive",
         no_columns=True
     )
-    return drive[drive.index('/dev/'):].split(" ")[0].strip()
+    if drive == please_refresh:
+        return get_cryptkey_drive(os_target)
+    else:
+        return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def get_lang():
     return select_by_letter(
@@ -165,6 +172,8 @@ def print_value(label, value):
 def confirm_config(config):
     print_title("Please confirm the current configuration:")
     print_value("Target drive", config['TARGET_DRIVE'])
+    print_value("Full Disk Encryption", config['ENCRYPT_DISK'])
+    print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
     print_value("Language", config['LANG'])
     print_value("Timezone", config['TIMEZONE'])
     print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
