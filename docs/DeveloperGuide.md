@@ -2,11 +2,34 @@
 
 ## 1. Setup environement
 
-Connect to internet with:
+To connect to internet you must:
+
+1. provision a `router`
+2. set the thinclient gateway to `192.168.2.1` (the router`s ip):
+
+The file /etc/network/interfaces must contain the following:
 
 ```
-$> setup-wifi <ssid> <password>
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet static
+    address 192.168.2.100/24
+    gateway 192.168.2.1
+auto eth1
+iface eth1 inet static
+    address 192.168.3.100/24
+EOF
 ```
+3. set the DNS server:
+
+The file /etc/resolv.conf must contain the following:
+````
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+```
+
+4. restart network with: `sudo rc-service networking restart`
 
 Configure `git`, download Github repository in `~/towercomputers/tools` and install `hatch` with:
 
@@ -74,11 +97,7 @@ $> tower run web midori
 
 Check also if the Application menu contains shortcuts for installed packages.
 
-8. Logout from `xfce` and connect to internet:
-
-```
-$> setup-wifi <ssid> <password>
-```
+8. Logout from `xfce` and connect to internet as explained above
 
 9. Build an host image with:
 

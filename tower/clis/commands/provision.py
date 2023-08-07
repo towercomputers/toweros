@@ -24,6 +24,20 @@ def add_args(argparser):
         default=""
     )
     provision_parser.add_argument(
+        '--zero-device', 
+        help="""Zeroing device before copying image (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    provision_parser.add_argument(
+        '--no-confirm', 
+        help="""Don't ask confirmation (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    provision_parser.add_argument(
         '--public-key-path', 
         help="""Public key path used to access the host (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
         required=False
@@ -93,13 +107,20 @@ def add_args(argparser):
         help="""Network interface (Default: first interface starting by 'e') """,
         required=False,
     )
+    provision_parser.add_argument(
+        '--force', 
+        help="""Overwrite existing host (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
 def check_args(args, parser_error):
-    if re.match(r'/^(?![0-9]{1,15}$)[a-zA-Z0-9-]{1,15}$/', args.name[0]):
-        parser_error(message="Host name invalid. Must be between one and 15 alphanumeric chars.")
+    if re.match(r'/^(?![0-9]{1,15}$)[a-z0-9-]{1,15}$/', args.name[0]):
+        parser_error(message="Host name invalid. Must be between one and 15 minuscule alphanumeric chars.")
 
-    if sshconf.exists(args.name[0]):
-        parser_error("Host name already used.")
+    if sshconf.exists(args.name[0]) and not args.force:
+        parser_error("Host name already used. Please use `--force` to overwrite it.")
 
     if args.sd_card:
         disk_list = utils.get_device_list()
@@ -109,13 +130,13 @@ def check_args(args, parser_error):
             parser_error("sd-card path invalid.") # can't right on the only disk
 
     if args.public_key_path:
-        if not arg.private_key_path :
+        if not args.private_key_path :
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.public_key_path):
             parser_error("public_key path invalid.")
 
     if args.private_key_path:
-        if not arg.public_key_path :
+        if not args.public_key_path :
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.private_key_path):
             parser_error("private_key path invalid.")
@@ -147,9 +168,18 @@ def check_args(args, parser_error):
         interaces = utils.get_interfaces()
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}")
-
-    if args.online == args.offline:
-        parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
+    
+    if args.name[0] == sshconf.ROUTER_HOSTNAME:
+        if not args.wlan_ssid:
+            parser_error(message="You must provide a wifi SSID for the router.")
+        if not args.wlan_password:
+            parser_error(message="You must provide a wifi password for the router.")
+    else:
+        if args.online == args.offline:
+            parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
+        if args.online:
+            if not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+                parser_error(message=f"`{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
 
 
 def execute(args):

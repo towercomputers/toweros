@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import subprocess
+from base64 import b64encode
 
 from rich import print as rprint
 from rich.columns import Columns
@@ -99,7 +100,12 @@ def get_user_information():
         password = Prompt.ask("Enter the password", password=True)
         confirm_password = Prompt.ask("Confirm the password", password=True)
         retry += 1
-    return login, password
+    
+    salt = b64encode(os.urandom(16)).decode('utf-8')
+    cmd = f"openssl passwd -6 -salt {salt} {password}"
+    password_hash = subprocess.run(cmd.split(" "), capture_output=True, encoding="UTF-8").stdout.strip().split("\n")[0]
+    
+    return login, password_hash
 
 def get_target_drive():
     drive = select_value(
@@ -168,13 +174,13 @@ def ask_config():
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
         config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
-        config['USERNAME'], config['PASSWORD'] = get_user_information()
-        config['ROOT_PASSWORD'] = config['PASSWORD']
+        config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
+        config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']
         confirmed = confirm_config(config)
     return config
 
 def main():
-    config = "\n".join([f'{key}="{value}"' for key, value in ask_config().items()])
+    config = "\n".join([f"{key}='{value}'" for key, value in ask_config().items()])
     with open("/root/tower.env", 'w') as fp:
         fp.write(config)
         fp.write("\n")

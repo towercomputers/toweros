@@ -20,8 +20,9 @@ For a more formal description of the Tower architecture, including a comparison 
   * 1.3. [Custom Thin Client (Linux)](#13-custom-thin-client-linux)
     * 1.3.1. [Install dependencies](#131-install-dependencies)
     * 1.3.2. [Enable services](#132-enable-services)
-    * 1.3.3. [Update /etc/sudoers](#134-update-etcsudoers)
-    * 1.3.4. [Install `tower-tools`](#135-install-tower-tools)
+    * 1.3.3. [Prepare networks](#133-prepare-networks)
+    * 1.3.4. [Update /etc/sudoers](#134-update-etcsudoers)
+    * 1.3.5. [Install `tower-tools`](#135-install-tower-tools)
 * 2.[ Usage](#2-usage)
   * 2.1. [Provision a Host](#21-provision-a-host)
     * 2.1.1. [Generate an image with build-image](#211-generate-an-image-with-build-image)
@@ -32,18 +33,19 @@ For a more formal description of the Tower architecture, including a comparison 
   * 2.5. [Example using two hosts](#25-example-using-two-hosts)
   * 2.6. [Build a TowerOS image with Docker](#27-build-a-toweros-image-with-docker)
 * 3.[ Implementation](#3-implementation)
-  * 3.1. [TowerOS-ThinClient](#31-toweros-thinclient)
-  * 3.2. [TowerOS-Host](#32-toweros-host)
-  * 3.3. [SSHConf](#33-sshconf)
-  * 3.4. [Provision](#34-provision)
-  * 3.5. [GUI](#35-gui)
-  * 3.6. [Install](#36-install)
+  * 3.1. [Network architecture](#31-network-architecture)
+  * 3.2. [TowerOS-ThinClient](#32-toweros-thinclient)
+  * 3.3. [TowerOS-Host](#33-toweros-host)
+  * 3.4. [SSHConf](#34-sshconf)
+  * 3.5. [Provision](#35-provision)
+  * 3.6. [GUI](#36-gui)
+  * 3.7. [Install](#37-install)
 
 ## 1. Installation
 
 ### 1.1. Hardware configuration
 
-You must have a Thin Client (typically a laptop like a Lenovo X270) connected to a switch and one or more Raspberry PI 4 computers connected on the same switch.
+You must have a Thin Client (typically a laptop like a Lenovo X270) connected to TWO unmanaged switches and one or more Raspberry PI 4 computers connected on the same switches.
 
 ### 1.2. TowerOS-ThinClient
 
@@ -66,17 +68,18 @@ Note: you can build your own image of TowerOS with command `build-tower-image th
 
 ### 1.3. Custom Thin Client (Linux)
 
+If you have installed toweros-thinclient you don't need to perform this step, you can skip to paragraph 2 (Usage).
+
 #### 1.3.1. Install dependencies
 
 ```
-$> apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
-      avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
-      musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
-      alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
-      fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
-      agetty runuser nano vim net-tools losetup xorg-server xf86-input-libinput \
-      xinit udev xfce4 xfce4-terminal xfce4-screensaver adw-gtk3 \
-      adwaita-xfce-icon-theme setxkbmap
+$> apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh rsync git \
+          iptables lsblk perl-utils xz musl-locales e2fsprogs-extra nx-libs xsetroot \
+          mcookie parted lsscsi figlet alpine-sdk build-base apk-tools acct acct-openrc \
+          alpine-conf sfdisk busybox fakeroot syslinux xorriso squashfs-tools mtools \
+          dosfstools grub-efi abuild agetty runuser nano vim net-tools losetup \
+          xorg-server xf86-input-libinput xinit udev xfce4 xfce4-terminal xfce4-screensaver \
+          xfce4-clipman-plugin adw-gtk3 adwaita-xfce-icon-theme setxkbmap syslog-ng
 ```
 
 #### 1.3.2. Enable services
@@ -90,17 +93,29 @@ sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
 then
 
 ```
-$> rc-update add dhcpcd
-$> rc-update add avahi-daemon
 $> rc-update add iptables
 $> rc-update add networking
-$> rc-update add wpa_supplicant boot
 $> rc-update add dbus
 ```
 
-**Important:** Make sure you are connected to the switch and check that your first wired interface (starting with the letter `e`) has an assigned IP.
+#### 1.3.3. Prepare networks
 
-#### 1.3.3. Update `/etc/sudoers` and groups
+Make sure you are connected to the two switches and check that your wired interfaces (starting with the letter `e`).
+
+The file /etc/network/interfaces must contain the following:
+
+```
+auto lo
+iface lo inet loopback
+auto eth0
+iface eth0 inet static
+    address 192.168.2.100/24
+iface eth1 inet static
+    address 192.168.3.100/24
+EOF
+```
+
+#### 1.3.4. Update `/etc/sudoers` and groups
 
 `tower-tools` assumes that the current user has full `sudo` access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:
 
@@ -114,7 +129,7 @@ To build an image with `build-tower-image` you need to add the current user in t
 addgroup <you_username> abuild
 ```
 
-#### 1.3.4. Install `tower-tools`
+#### 1.3.5. Install `tower-tools`
 
 Update pip to the latest version:
 
@@ -144,23 +159,35 @@ This will generate an image file compressed with xz in `~/.cache/tower/builds/`.
 
 #### 2.1.2. Prepare the SD card
 
+For offline host:
+
 ```
 $> tower provision <host> --offline
 ```
 
-and for an online host:
+The sd-card must be inserted in a RPI connected to the offline network (`eth1` of the thinclient)
+
+To provision an online host you must first provision the `router`:
 
 ```
-$> tower provision <host> --online --wlan-ssid <ssid> --wlan-password <password>
+$> tower provision router --wlan-ssid <ssid> --wlan-password <password>
 ```
 
-or, if the thin client is already connected to internet:
+and then:
 
 ```
 $> tower provision <host> --online
 ```
 
-Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
+The sd-cards of the `router` and online hosts must be inserted in a RPI connected to the online network (`eth0` of the thinclient)
+
+Keyboard, timezone and lang are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
+
+To update the wifi settings of the router you can use the command `wlan-connect`:
+
+```
+$> tower provision wlan-connect --ssid <ssid> --password <password>
+```
 
 ### 2.2. Execute a command on one of the hosts
 
@@ -264,7 +291,20 @@ $> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileg
 
 To date, `tower-tools` includes six main modules: `buildthinclient.py` and `buildhost.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provision.py`, `install.py`, and `gui.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the `thinclient`.
 
-### 3.1. TowerOS-ThinClient
+### 3.1. Network architecture
+
+The thinclient is connected to two separate networks (via two distinct switches), one connected to the internet, the other offline. The hosts supposed to have a connection are connected to the first network, and those which should be offline are connected to the second.
+On the online network, one of the hosts, called the `router`, is connected to the internet and shares the connection with all the hosts connected to the same network.
+All IPs are static and assigned by the `tower` tool. Here are the IPs used:
+
+TOWER_NETWORK_ONLINE = "192.168.2.0/24"
+TOWER_NETWORK_OFFLINE = "192.168.3.0/24"
+THIN_CLIENT_IP_ETH0 = "192.168.2.100"
+THIN_CLIENT_IP_ETH1 = "192.168.3.100"
+ROUTER_IP = "192.168.2.1"
+FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
+
+### 3.2. TowerOS-ThinClient
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
@@ -297,7 +337,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 7. Cleaning temporary files.
 
 
-### 3.2. TowerOS-Host
+### 3.3. TowerOS-Host
 
 `buildhost.py` is the module responsible for generating an image of TowerOS-ThinClient when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
 
@@ -333,7 +373,7 @@ Here are the different steps taken by `buildhost.py` to configure an image when 
 
 Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folder by the TowerOS installer.
 
-### 3.3. SSHConf
+### 3.4. SSHConf
 
 `tower-tools` uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
@@ -343,7 +383,7 @@ Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folde
 
 Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/project/sshconf/) to manipulate `ssh` config files.
 
-### 3.4. Provision
+### 3.5. Provision
 
 `provision.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
 
@@ -357,7 +397,7 @@ The steps to provision a host are as follows:
 
 Once a host is provisioned it is therefore directly accessible by ssh with `ssh <host>` or `tower run <host>`.
 
-### 3.5. GUI
+### 3.6. GUI
 
 GUI is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
 
@@ -383,7 +423,7 @@ Here are the steps taken by `gui.py` to run an application on one of the hosts:
 
 GUI works the same way as X2GO from which it is directly inspired.
 
-### 3.6. Install
+### 3.7. Install
 
 This module allows to use `apk` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
 

@@ -31,7 +31,7 @@ def lazy_umount(path, retry=0):
 def get_device_list():
     result = lsblk('-J', '-T', '-d')
     result = json.loads(str(result))
-    return [f"/dev/{e['name']}" for e in result['blockdevices']]
+    return [f"/dev/{e['name']}" for e in result['blockdevices'] if e['size'] != '0B']
 
 def select_sdcard_device():
     k = None
