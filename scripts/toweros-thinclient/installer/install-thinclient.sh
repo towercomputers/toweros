@@ -9,6 +9,31 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
+prepare_key_drive() {
+    # zeroing hard drive
+    dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
+    # create boot partition (/dev/sda1)
+    parted $CRYPTKEY_DRIVE mklabel msdos \
+                           mkpart primary fat32 0% 100%
+    # get partitions names
+    CRYPTKEY_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
+    # format partitions
+    mkfs.fat -F 32 "$CRYPTKEY_PARTITION"
+    # mount partitions
+    mkdir -p /cryptkeydisk
+    mount -t vfat "$CRYPTKEY_PARTITION" /cryptkeydisk
+    # generate LUKS key
+    dd if=/dev/urandom of=/cryptkeydisk/secret.key bs=1024 count=2
+    chmod 0400 /cryptkeydisk/secret.key
+    # find UUID of the partition
+    for i in $(blkid | grep "^$CRYPTKEY_PARTITION"); do
+		case "$i" in
+			UUID=*) eval $i;
+		esac
+	done
+    CRYPTKEY_PARTITION_UUID=$UUID
+}
+
 prepare_drive() {
     # zeroing hard drive
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
@@ -21,19 +46,24 @@ prepare_drive() {
     # get partitions names
     BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
     LVM_PARTITION=$(ls $TARGET_DRIVE*2)
-    # generate LUKS key
-    #dd if=/dev/urandom of=/root/secret.key bs=1024 count=2
-    #chmod 0400 /root/secret.key
-    # create LUKS partition
-    #cryptsetup luksFormat $LVM_PARTITION /root/secret.key
-    #cryptsetup luksAddKey $LVM_PARTITION /root/secret.key --key-file=/root/secret.key
-    cryptsetup -v -c aes-xts-plain64 -s 512 --hash sha512 --pbkdf pbkdf2 \
-                --iter-time 1000 --use-random luksFormat $LVM_PARTITION 
-    # initialize the LUKS partition
-    #cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/root/secret.key
-    cryptsetup luksOpen $LVM_PARTITION lvmcrypt
-    # create LVM physical volumes
-    vgcreate vg0 /dev/mapper/lvmcrypt
+
+    if [ "$ENCRYPT_DISK" == "true" ]; then
+        # prepare LUKS key drive
+        prepare_key_drive
+        # create LUKS partition
+        cryptsetup luksFormat $LVM_PARTITION /cryptkeydisk/secret.key
+        cryptsetup luksAddKey $LVM_PARTITION /cryptkeydisk/secret.key --key-file=/cryptkeydisk/secret.key
+        # initialize the LUKS partition
+        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/cryptkeydisk/secret.key
+        # create LVM physical volumes
+        vgcreate vg0 /dev/mapper/lvmcrypt
+    else
+        # initialize the LVM partition
+        pvcreate $LVM_PARTITION
+        # create LVM volume group
+        vgcreate vg0 $LVM_PARTITION
+    fi
+    
     # create swap volume
     lvcreate -L 8G vg0 -n swap
     # create root volume
@@ -102,9 +132,15 @@ iface lo inet loopback
 auto eth0
 iface eth0 inet static
     address 192.168.2.100/24
+    #gateway 192.168.2.1
 auto eth1
 iface eth1 inet static
     address 192.168.3.100/24
+EOF
+    # For devs convenience
+    cat <<EOF > /etc/resolv.conf
+#nameserver 8.8.8.8
+#nameserver 8.8.4.4
 EOF
 
     # set locales
@@ -166,7 +202,12 @@ clone_live_system_to_disk() {
 
     # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
-    echo 'features="ata base ide scsi usb virtio ext4 nvme vmd lvm keymap cryptsetup cryptkey resume"' > /mnt/etc/mkinitfs/mkinitfs.conf
+
+    features="ata base ide scsi usb virtio ext4 nvme vmd lvm keymap"
+    if [ "$ENCRYPT_DISK" = "true" ]; then
+        features="$features cryptsetup cryptkey resume"
+    fi
+    echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 
     # apk reads config from target root so we need to copy the config
     mkdir -p /mnt/etc/apk/keys/
@@ -212,8 +253,14 @@ EOF
 
 install_bootloader() {
     # setup syslinux
-    kernel_opts="quiet rootfstype=ext4 cryptroot=$LVM_PARTITION cryptdm=lvmcrypt"
-    modules="sd-mod,usb-storage,ext4,nvme,vmd,cryptsetup,keymap,cryptkey,kms,lvm"
+    kernel_opts="quiet rootfstype=ext4"
+    modules="sd-mod,usb-storage,ext4,nvme,vmd,keymap,kms,lvm"
+    
+    if [ "$ENCRYPT_DISK" = "true" ]; then
+        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION rootkeydev=/dev/disk/by-uuid/$CRYPTKEY_PARTITION_UUID rootkey=secret.key cryptdm=lvmcrypt"
+        modules="$modules,cryptsetup,cryptkey"
+    fi
+
     sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
         -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
         -e "s:^modules=.*:modules=$modules:" \
@@ -256,7 +303,9 @@ unmount_and_reboot() {
 ask_configuration() {
     SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
     # initialize coniguration variables:
-    # ROOT_PASSWORD, USERNAME, PASSWORD, LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, TARGET_DRIVE
+    # ROOT_PASSWORD, USERNAME, PASSWORD, 
+    # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
+    # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
 }

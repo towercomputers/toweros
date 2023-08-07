@@ -107,11 +107,24 @@ def get_user_information():
     
     return login, password_hash
 
+def get_disk_encryption():
+    print_title("Full disk encryption")
+    return Confirm.ask("Do you want to encrypt the disk with a keyfile stored in an external device ?")
+
 def get_target_drive():
     drive = select_value(
         DRIVES,
         "Please select the drive where you want to install TowerOS",
         "Target drive",
+        no_columns=True
+    )
+    return drive[drive.index('/dev/'):].split(" ")[0].strip()
+
+def get_cryptkey_drive(os_target):
+    drive = select_value(
+        [DRIVES[i] for i in range(len(DRIVES)) if not DRIVES[i].strip().endswith(os_target)],
+        "Please select the drive where you want to put the disk encryption keyfile",
+        "Target keyfile drive",
         no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
@@ -171,6 +184,9 @@ def ask_config():
     config = {}
     while not confirmed:
         config['TARGET_DRIVE'] = get_target_drive()
+        config['ENCRYPT_DISK'] = "true" if get_disk_encryption() else "false"
+        if config['ENCRYPT_DISK'] == "true":
+            config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'])
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
         config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
