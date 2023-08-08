@@ -84,10 +84,6 @@ prepare_drive() {
     # update fstab
     mkdir -p /mnt/etc/
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
-    # copy LUKS key to the disk
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        cp /cryptkeydisk/secret.key /mnt/crypto_keyfile.bin
-    fi
 }
 
 prepare_home_directory() {
@@ -289,6 +285,11 @@ install_bootloader() {
     rm -f /mnt/boot/*.sys
     rm -f /mnt/boot/extlinux.conf
     cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
+
+     # copy LUKS key to the disk
+    if [ "$ENCRYPT_DISK" == "true" ]; then
+        cp /cryptkeydisk/secret.key /mnt/crypto_keyfile.bin
+    fi
 }
 
 
