@@ -34,6 +34,7 @@ squashfs-tools
 mtools
 dosfstools
 grub-efi
+efibootmgr
 abuild
 agetty
 runuser
