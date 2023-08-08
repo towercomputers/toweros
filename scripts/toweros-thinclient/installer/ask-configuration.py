@@ -173,7 +173,8 @@ def confirm_config(config):
     print_title("Please confirm the current configuration:")
     print_value("Target drive", config['TARGET_DRIVE'])
     print_value("Full Disk Encryption", config['ENCRYPT_DISK'])
-    print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
+    if config['ENCRYPT_DISK'] == "true":
+        print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
     print_value("Language", config['LANG'])
     print_value("Timezone", config['TIMEZONE'])
     print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])

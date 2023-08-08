@@ -51,17 +51,17 @@ prepare_drive() {
         # prepare LUKS key drive
         prepare_key_drive
         # create LUKS partition
-        cryptsetup luksFormat $LVM_PARTITION /cryptkeydisk/secret.key
+        cryptsetup -q luksFormat $LVM_PARTITION /cryptkeydisk/secret.key
         cryptsetup luksAddKey $LVM_PARTITION /cryptkeydisk/secret.key --key-file=/cryptkeydisk/secret.key
         # initialize the LUKS partition
         cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/cryptkeydisk/secret.key
         # create LVM physical volumes
-        vgcreate vg0 /dev/mapper/lvmcrypt
+        vgcreate -y vg0 /dev/mapper/lvmcrypt
     else
         # initialize the LVM partition
-        pvcreate $LVM_PARTITION
+        pvcreate -y $LVM_PARTITION
         # create LVM volume group
-        vgcreate vg0 $LVM_PARTITION
+        vgcreate -y vg0 $LVM_PARTITION
     fi
     
     # create swap volume
@@ -84,6 +84,10 @@ prepare_drive() {
     # update fstab
     mkdir -p /mnt/etc/
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
+    # copy LUKS key to the disk
+    if [ "$ENCRYPT_DISK" == "true" ]; then
+        cp /cryptkeydisk/secret.key /mnt/crypto_keyfile.bin
+    fi
 }
 
 prepare_home_directory() {
@@ -203,7 +207,7 @@ clone_live_system_to_disk() {
     # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
 
-    features="ata base ide scsi usb virtio ext4 nvme vmd lvm keymap"
+    features="ata base ide scsi usb virtio vfat ext4 nvme vmd lvm keymap"
     if [ "$ENCRYPT_DISK" = "true" ]; then
         features="$features cryptsetup cryptkey resume"
     fi
@@ -251,13 +255,18 @@ EOF
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
+install_grub() {
+    grub-install --target=x86_64-efi --efi-directory=/mnt/boot
+    grub-mkconfig -o /mnt/boot/grub/grub.cfg
+}
+
 install_bootloader() {
     # setup syslinux
     kernel_opts="quiet rootfstype=ext4"
-    modules="sd-mod,usb-storage,ext4,nvme,vmd,keymap,kms,lvm"
+    modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
     
     if [ "$ENCRYPT_DISK" = "true" ]; then
-        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION rootkeydev=/dev/disk/by-uuid/$CRYPTKEY_PARTITION_UUID rootkey=secret.key cryptdm=lvmcrypt"
+        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
         modules="$modules,cryptsetup,cryptkey"
     fi
 
@@ -281,6 +290,8 @@ install_bootloader() {
     rm -f /mnt/boot/extlinux.conf
     cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
 }
+
+
 
 install_thinclient() {
     # make sure /bin and /lib are executable
