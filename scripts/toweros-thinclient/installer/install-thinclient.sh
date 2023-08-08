@@ -13,8 +13,8 @@ prepare_key_drive() {
     # zeroing hard drive
     dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
     # create boot partition (/dev/sda1)
-    parted $CRYPTKEY_DRIVE mklabel msdos \
-                           mkpart primary fat32 0% 100%
+    parted $CRYPTKEY_DRIVE mklabel gpt
+    parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
     # get partitions names
     CRYPTKEY_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
     # format partitions
