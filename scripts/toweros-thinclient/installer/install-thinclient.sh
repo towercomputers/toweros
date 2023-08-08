@@ -9,61 +9,58 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
-prepare_key_drive() {
-    # zeroing hard drive
-    dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
-    # create boot partition (/dev/sda1)
-    parted $CRYPTKEY_DRIVE mklabel gpt
-    parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
-    # get partitions names
-    CRYPTKEY_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
-    # format partitions
-    mkfs.fat -F 32 "$CRYPTKEY_PARTITION"
-    # mount partitions
-    mkdir -p /cryptkeydisk
-    mount -t vfat "$CRYPTKEY_PARTITION" /cryptkeydisk
-    # generate LUKS key
-    dd if=/dev/urandom of=/cryptkeydisk/secret.key bs=1024 count=2
-    chmod 0400 /cryptkeydisk/secret.key
-    # find UUID of the partition
-    for i in $(blkid | grep "^$CRYPTKEY_PARTITION"); do
-		case "$i" in
-			UUID=*) eval $i;
-		esac
-	done
-    CRYPTKEY_PARTITION_UUID=$UUID
+prepare_boot_partition() {
+    if [ "$ENCRYPT_DISK" == "true" ]; then
+        # zeroing hard drive
+        dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
+        # create boot partition (/dev/sda1)
+        parted $CRYPTKEY_DRIVE mklabel gpt
+        parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
+        parted $CRYPTKEY_DRIVE set 1 esp on
+        # get partition name
+        BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
+    else
+        # zeroing hard drive
+        dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
+        # create boot partition (/dev/sda1)
+        parted $TARGET_DRIVE mklabel gpt
+        parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
+        parted $TARGET_DRIVE set 1 esp on
+        # get partition name
+        BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
+    fi
 }
 
-prepare_drive() {
-    # zeroing hard drive
-    dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
-    # create boot partition (/dev/sda1)
-    parted $TARGET_DRIVE mklabel gpt
-    parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
-    parted $TARGET_DRIVE set 1 esp on
+prepare_lvm_partition() {
     # create LVM partition (/dev/sda2)
-    parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
-    # get partitions names
-    BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
-    LVM_PARTITION=$(ls $TARGET_DRIVE*2)
-
     if [ "$ENCRYPT_DISK" == "true" ]; then
-        # prepare LUKS key drive
-        prepare_key_drive
+        parted $TARGET_DRIVE mkpart primary ext4 0% 100%
+        # get partition name
+        LVM_PARTITION=$(ls $TARGET_DRIVE*1)
+        # generate LUKS key
+        dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
+        chmod 0400 /crypto_keyfile.bin
         # create LUKS partition
-        cryptsetup -q luksFormat $LVM_PARTITION /cryptkeydisk/secret.key
-        cryptsetup luksAddKey $LVM_PARTITION /cryptkeydisk/secret.key --key-file=/cryptkeydisk/secret.key
+        cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
+        cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
         # initialize the LUKS partition
-        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/cryptkeydisk/secret.key
+        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
         # create LVM physical volumes
         vgcreate -y vg0 /dev/mapper/lvmcrypt
     else
+        parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
+        # get partition name
+        LVM_PARTITION=$(ls $TARGET_DRIVE*2)
         # initialize the LVM partition
         pvcreate -y $LVM_PARTITION
         # create LVM volume group
         vgcreate -y vg0 $LVM_PARTITION
     fi
-    
+}
+
+prepare_drive() {
+    prepare_boot_partition
+    prepare_lvm_partition    
     # create swap volume
     lvcreate -L 8G vg0 -n swap
     # create root volume
@@ -84,6 +81,10 @@ prepare_drive() {
     # update fstab
     mkdir -p /mnt/etc/
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
+     # copy LUKS key to the disk
+    if [ "$ENCRYPT_DISK" == "true" ]; then
+        cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
+    fi
 }
 
 prepare_home_directory() {
@@ -251,11 +252,6 @@ EOF
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
-install_grub() {
-    grub-install --target=x86_64-efi --efi-directory=/mnt/boot
-    grub-mkconfig -o /mnt/boot/grub/grub.cfg
-}
-
 install_bootloader() {
     # setup syslinux
     kernel_opts="quiet rootfstype=ext4"
@@ -285,11 +281,6 @@ install_bootloader() {
     rm -f /mnt/boot/*.sys
     rm -f /mnt/boot/extlinux.conf
     cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
-
-     # copy LUKS key to the disk
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        cp /cryptkeydisk/secret.key /mnt/crypto_keyfile.bin
-    fi
 }
 
 
@@ -307,6 +298,7 @@ install_thinclient() {
 }
 
 unmount_and_reboot() {
+    rm -f /mnt/crypto_keyfile.bin
     umount /mnt/boot
     umount /mnt
     reboot
