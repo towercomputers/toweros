@@ -290,6 +290,16 @@ install_bootloader() {
     cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
 }
 
+install_secure_boot() {
+    if [ "$SECURE_DISK" = "true" ]; then
+        sbctl create-keys
+        sbctl sign /mnt/boot/EFI/boot/bootx64.efi
+        sbctl enroll-keys -m
+        mkdir -p /mnt/usr/share/secureboot
+        cp -rf /usr/share/secureboot/* /mnt/usr/share/secureboot/
+    fi
+}
+
 install_thinclient() {
     # make sure /bin and /lib are executable
     chmod 755 /
@@ -300,6 +310,7 @@ install_thinclient() {
     update_live_system
     clone_live_system_to_disk
     install_bootloader
+    install_secure_boot
 }
 
 unmount_and_reboot() {
@@ -314,7 +325,7 @@ ask_configuration() {
     # initialize coniguration variables:
     # ROOT_PASSWORD, USERNAME, PASSWORD, 
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
-    # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE
+    # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE, SECURE_BOOT
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
 }

@@ -23,8 +23,14 @@ TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
 
+def run_cmd(cmd, to_json=False):
+    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8").stdout.strip()
+    if to_json:
+        return json.loads(out)
+    return out
+
 def get_mountpoints():
-    all_devices = json.loads(subprocess.run(['lsblk', '-J'],capture_output=True, encoding="UTF-8").stdout.strip())
+    all_devices = run_cmd(['lsblk', '-J'], to_json=True)
     mountpoints = {}
     for device in all_devices['blockdevices']:
         if device['type'] == 'disk':
@@ -32,7 +38,7 @@ def get_mountpoints():
     return mountpoints
 
 def disk_list(exclude=None):
-    all_disks = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
+    all_disks = run_cmd(['lsscsi']).split("\n")
     mountpoints = get_mountpoints()
     disks = []
     for disk in all_disks:
@@ -122,7 +128,7 @@ def get_user_information():
     
     salt = b64encode(os.urandom(16)).decode('utf-8')
     cmd = f"openssl passwd -6 -salt {salt} {password}"
-    password_hash = subprocess.run(cmd.split(" "), capture_output=True, encoding="UTF-8").stdout.strip().split("\n")[0]
+    password_hash = run_cmd(cmd.split(" ")).split("\n")[0]
     
     return login, password_hash
 
@@ -139,6 +145,24 @@ def get_target_drive():
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
+def check_secure_boot_status():
+    sbctl_status = run_cmd(["sbctl", "status", "--json"], to_json=True)
+    error = False
+    if sbctl_status['secure_boot'] != False:
+        print_error("Error: Secure boot is enabled, you must disable it to install TowerOS-Thinclient with secure boot.")
+        error = True
+    if sbctl_status['setup_mode'] != True:
+        print_error("Error: Secure boot's 'Setup Mode' is disable, you must enbale it to install TowerOS-Thinclient with secure boot.")
+        error = True
+    if len(sbctl_status['vendors']) > 0:
+        print_error("Error: You must delete all secure boot keys to install TowerOS-Thinclient with secure boot.")
+        error = True
+    if error:
+        print_error("Please refer to the documentation to prepare your laptop firmware for secure boot:")
+        print_error("https://github.com/towercomputers/tools/blob/master/docs/SecureBoot.md")
+        return False
+    return True
+
 def get_cryptkey_drive(os_target):
     no_selected_drives = disk_list(exclude=os_target)
     please_refresh = '<-- Let me insert a drive and refresh the list!'
@@ -153,6 +177,13 @@ def get_cryptkey_drive(os_target):
         return get_cryptkey_drive(os_target)
     else:
         return drive[drive.index('/dev/'):].split(" ")[0].strip()
+    
+def get_secure_boot():
+    print_title("Secure boot")
+    with_secure_boot = Confirm.ask("Do you want to install TowerOS-Thinclient with secure boot ?")
+    if with_secure_boot and not check_secure_boot_status():
+        return False
+    return with_secure_boot
 
 def get_lang():
     return select_by_letter(
@@ -193,6 +224,7 @@ def confirm_config(config):
     print_value("Full Disk Encryption", config['ENCRYPT_DISK'])
     if config['ENCRYPT_DISK'] == "true":
         print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
+    print_value("Secure Boot", config['SECURE_BOOT'])
     print_value("Language", config['LANG'])
     print_value("Timezone", config['TIMEZONE'])
     print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
@@ -203,6 +235,9 @@ def confirm_config(config):
     if config['ENCRYPT_DISK'] == "true":
         print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
         print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
+    if config['SECURE_BOOT'] == "true":
+        print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
+        print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def ask_config():
@@ -220,6 +255,7 @@ def ask_config():
         config['ENCRYPT_DISK'] = "true" if get_disk_encryption() else "false"
         if config['ENCRYPT_DISK'] == "true":
             config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'])
+        config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
         config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
