@@ -22,8 +22,27 @@ with open(LOCALE_FILE, "r") as fp:
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
-#DRIVES = lsscsi('-s').strip().split("\n")
-DRIVES = lambda: subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
+
+def get_mountpoints():
+    all_devices = json.loads(subprocess.run(['lsblk', '-J'],capture_output=True, encoding="UTF-8").stdout.strip())
+    mountpoints = {}
+    for device in all_devices['blockdevices']:
+        if device['type'] == 'disk':
+            mountpoints[f"/dev/{device['name']}"] = device['mountpoints'][0]
+    return mountpoints
+
+def disk_list(exclude=None):
+    all_disks = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
+    mountpoints = get_mountpoints()
+    disks = []
+    for disk in all_disks:
+        path = disk[disk.index('/dev/'):].split(" ")[0].strip()
+        if exclude and path == exclude:
+            continue
+        if mountpoints[path] is not None:
+            continue
+        disks.append(disk)
+    return disks
 
 def print_title(title):
     title_text = Text(f"\n{title}\n")
@@ -113,7 +132,7 @@ def get_disk_encryption():
 
 def get_target_drive():
     drive = select_value(
-        DRIVES(),
+        disk_list(),
         "Please select the drive where you want to install TowerOS",
         "Target drive",
         no_columns=True
@@ -121,8 +140,7 @@ def get_target_drive():
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def get_cryptkey_drive(os_target):
-    all_drives = DRIVES()
-    no_selected_drives = [d for d in all_drives if not d.strip().endswith(os_target)]
+    no_selected_drives = disk_list(exclude=os_target)
     please_refresh = '<-- Let me insert a drive and refresh the list!'
     no_selected_drives.append(please_refresh)
     drive = select_value(

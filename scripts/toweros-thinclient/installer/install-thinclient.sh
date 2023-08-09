@@ -290,8 +290,6 @@ install_bootloader() {
     cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
 }
 
-
-
 install_thinclient() {
     # make sure /bin and /lib are executable
     chmod 755 /
