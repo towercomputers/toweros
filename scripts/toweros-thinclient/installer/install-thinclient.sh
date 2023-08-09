@@ -86,6 +86,8 @@ prepare_drive() {
     # update fstab
     mkdir -p /mnt/etc/
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
+    # remove boot partition from fstab
+    sed -i '/\/boot/d' /mnt/etc/fstab
      # copy LUKS key to the disk
     if [ "$ENCRYPT_DISK" == "true" ]; then
         cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
