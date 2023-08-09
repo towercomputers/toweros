@@ -22,8 +22,27 @@ with open(LOCALE_FILE, "r") as fp:
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
-#DRIVES = lsscsi('-s').strip().split("\n")
-DRIVES = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
+
+def get_mountpoints():
+    all_devices = json.loads(subprocess.run(['lsblk', '-J'],capture_output=True, encoding="UTF-8").stdout.strip())
+    mountpoints = {}
+    for device in all_devices['blockdevices']:
+        if device['type'] == 'disk':
+            mountpoints[f"/dev/{device['name']}"] = device['mountpoints'][0]
+    return mountpoints
+
+def disk_list(exclude=None):
+    all_disks = subprocess.run(['lsscsi'],capture_output=True, encoding="UTF-8").stdout.strip().split("\n")
+    mountpoints = get_mountpoints()
+    disks = []
+    for disk in all_disks:
+        path = disk[disk.index('/dev/'):].split(" ")[0].strip()
+        if exclude and path == exclude:
+            continue
+        if mountpoints[path] is not None:
+            continue
+        disks.append(disk)
+    return disks
 
 def print_title(title):
     title_text = Text(f"\n{title}\n")
@@ -107,14 +126,33 @@ def get_user_information():
     
     return login, password_hash
 
+def get_disk_encryption():
+    print_title("Full disk encryption")
+    return Confirm.ask("Do you want to encrypt the disk with a keyfile stored in an external device ?")
+
 def get_target_drive():
     drive = select_value(
-        DRIVES,
+        disk_list(),
         "Please select the drive where you want to install TowerOS",
         "Target drive",
         no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
+
+def get_cryptkey_drive(os_target):
+    no_selected_drives = disk_list(exclude=os_target)
+    please_refresh = '<-- Let me insert a drive and refresh the list!'
+    no_selected_drives.append(please_refresh)
+    drive = select_value(
+        no_selected_drives,
+        "Please select the drive where you want to put the disk encryption keyfile",
+        "Target keyfile drive",
+        no_columns=True
+    )
+    if drive == please_refresh:
+        return get_cryptkey_drive(os_target)
+    else:
+        return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def get_lang():
     return select_by_letter(
@@ -152,11 +190,19 @@ def print_value(label, value):
 def confirm_config(config):
     print_title("Please confirm the current configuration:")
     print_value("Target drive", config['TARGET_DRIVE'])
+    print_value("Full Disk Encryption", config['ENCRYPT_DISK'])
+    if config['ENCRYPT_DISK'] == "true":
+        print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
     print_value("Language", config['LANG'])
     print_value("Timezone", config['TIMEZONE'])
     print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
     print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
     print_value("Username", config['USERNAME'])
+    rprint("\n")
+    print_error(f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased.")
+    if config['ENCRYPT_DISK'] == "true":
+        print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
+        print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def ask_config():
@@ -171,6 +217,9 @@ def ask_config():
     config = {}
     while not confirmed:
         config['TARGET_DRIVE'] = get_target_drive()
+        config['ENCRYPT_DISK'] = "true" if get_disk_encryption() else "false"
+        if config['ENCRYPT_DISK'] == "true":
+            config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'])
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
         config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
