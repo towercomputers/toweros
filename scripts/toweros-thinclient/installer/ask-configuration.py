@@ -198,6 +198,11 @@ def confirm_config(config):
     print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
     print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
     print_value("Username", config['USERNAME'])
+    rprint("\n")
+    print_error(f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased.")
+    if config['ENCRYPT_DISK'] == "true":
+        print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
+        print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def ask_config():
