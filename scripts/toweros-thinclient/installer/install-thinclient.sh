@@ -9,21 +9,25 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
+initialize_disks() {
+    # zeroing hard drive
+    dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
+    parted $TARGET_DRIVE mklabel gpt
+    if [ "$ENCRYPT_DISK" == "true" ]; then
+        dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
+        parted $CRYPTKEY_DRIVE mklabel gpt
+    fi
+}
+
 prepare_boot_partition() {
     if [ "$ENCRYPT_DISK" == "true" ]; then
-        # zeroing hard drive
-        dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
         # create boot partition (/dev/sda1)
-        parted $CRYPTKEY_DRIVE mklabel gpt
         parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
         parted $CRYPTKEY_DRIVE set 1 esp on
         # get partition name
         BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
     else
-        # zeroing hard drive
-        dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
         # create boot partition (/dev/sda1)
-        parted $TARGET_DRIVE mklabel gpt
         parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
         parted $TARGET_DRIVE set 1 esp on
         # get partition name
@@ -59,6 +63,7 @@ prepare_lvm_partition() {
 }
 
 prepare_drive() {
+    initialize_disks
     prepare_boot_partition
     prepare_lvm_partition    
     # create swap volume
