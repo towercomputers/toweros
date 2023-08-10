@@ -56,3 +56,4 @@ setxkbmap
 syslog-ng
 cryptsetup
 lvm2
+sbctl
