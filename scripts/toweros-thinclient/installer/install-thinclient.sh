@@ -293,6 +293,7 @@ install_bootloader() {
 install_secure_boot() {
     if [ "$SECURE_DISK" = "true" ]; then
         sbctl create-keys
+        cp /mnt/boot/EFI/boot/bootx64.efi /mnt/boot/EFI/boot/bootx64.efi.unsigned
         sbctl sign /mnt/boot/EFI/boot/bootx64.efi
         sbctl enroll-keys -m
         mkdir -p /mnt/usr/share/secureboot
