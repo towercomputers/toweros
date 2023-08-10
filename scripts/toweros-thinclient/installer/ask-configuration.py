@@ -182,7 +182,11 @@ def get_secure_boot():
     print_title("Secure boot")
     with_secure_boot = Confirm.ask("Do you want to install TowerOS-Thinclient with secure boot ?")
     if with_secure_boot and not check_secure_boot_status():
-        return False
+        continue_without_secure_boot = Confirm.ask("Do you want to continue without secure boot (y) or reboot (n) ?")
+        if continue_without_secure_boot:
+            return False
+        else:
+            os.system('reboot')
     return with_secure_boot
 
 def get_lang():
