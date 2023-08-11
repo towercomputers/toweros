@@ -46,7 +46,7 @@ For a more formal description of the Tower architecture, including a comparison 
 
 ### 1.1. Hardware configuration
 
-You must have a Thin Client (typically a laptop like a Lenovo X270) connected to TWO unmanaged switches and one or more Raspberry PI 4 computers connected on the same switches.
+You must have a Thin Client (typically a laptop like a Lenovo X270) connected to TWO unmanaged switches and one or more Raspberry PI 4 computers connected on the same switches. For each Raspberry PI you must have a sd-card and an USB-3 key.
 
 ### 1.2. TowerOS-ThinClient
 

@@ -178,7 +178,7 @@ def check_args(args, parser_error):
         if args.online == args.offline:
             parser_error(message="You must use one and only one of the argument `--online` and `--offline`.")
         if args.online:
-            if not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+            if not sshconf.exists(sshconf.ROUTER_HOSTNAME) and not args.force:
                 parser_error(message=f"`{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
 
 
