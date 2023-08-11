@@ -161,12 +161,9 @@ clone_live_system_to_disk() {
 
 	# prepare boot and root partitions and folders
 	mount -o remount,rw /media/mmcblk0p1
-	rm -f /media/mmcblk0p1/boot/* 
-	rm /mnt/boot/boot
-	mv /mnt/boot/* /media/mmcblk0p1/boot/
+	cp -rf /mnt/boot/*rpi? /media/mmcblk0p1/boot/
 	rm -Rf /mnt/boot
-	mkdir /mnt/media/mmcblk0p1
-	ln -s /media/mmcblk0p1/boot /mnt/boot || true
+
 	# update fstab
 	sed -i '/cdrom/d' /mnt/etc/fstab 
 	sed -i '/floppy/d' /mnt/etc/fstab
@@ -201,8 +198,6 @@ clean_and_reboot() {
 	rm /media/mmcblk0p1/tower.env
 	# remove keyfile
 	rm /mnt/crypto_keyfile.bin
-	rm -rf /media/mmcblk0p1/overlays
-	rm -f /media/mmcblk0p1/headless.apkovl.tar.gz
 	# reboot
 	reboot
 }
