@@ -16,7 +16,7 @@ def run_cmd(cmd, to_json=False):
     return out
 
 def get_disk_bench():
-    cmd = "iozone -e -I -a -s 100M -r 4k -i 0 -i 1 -i 2 -R"
+    cmd = "sudo iozone -e -I -a -s 100M -r 4k -i 0 -i 1 -i 2 -R"
     benchmark = run_cmd(cmd.split(" "))
     return benchmark.split("Excel output is below:")[1].strip()
 
