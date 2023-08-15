@@ -88,8 +88,6 @@ prepare_drive() {
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
     # remove boot partition from fstab
     sed -i '/\/boot/d' /mnt/etc/fstab
-    # https://madaidans-insecurities.github.io/guides/linux-hardening.html#hidepid
-    echo "proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0" >> /mnt/etc/fstab
      # copy LUKS key to the disk
     if [ "$ENCRYPT_DISK" == "true" ]; then
         cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin

@@ -128,6 +128,7 @@ EOF
 	sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin no/g" /etc/ssh/sshd_config
 	sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
 	sed -i "s/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/g" /etc/ssh/sshd_config
+	echo "rc_need=networking" >> /etc/conf.d/sshd
 }
 
 clone_live_system_to_disk() {
@@ -178,8 +179,6 @@ clone_live_system_to_disk() {
 	sed -i '/cdrom/d' /mnt/etc/fstab 
 	sed -i '/floppy/d' /mnt/etc/fstab
 	sed -i '/\/boot/d' /mnt/etc/fstab
-	# https://madaidans-insecurities.github.io/guides/linux-hardening.html#hidepid
-    echo "proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0" >> /mnt/etc/fstab
 
 	# update cmdline.txt
 	kernel_opts="quiet console=tty1 rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
