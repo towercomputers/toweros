@@ -88,6 +88,8 @@ prepare_drive() {
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
     # remove boot partition from fstab
     sed -i '/\/boot/d' /mnt/etc/fstab
+    # https://madaidans-insecurities.github.io/guides/linux-hardening.html#hidepid
+    echo "proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0" >> /mnt/etc/fstab
      # copy LUKS key to the disk
     if [ "$ENCRYPT_DISK" == "true" ]; then
         cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
@@ -193,6 +195,9 @@ EOF
     # configure firewall
     sh $SCRIPT_DIR/configure-firewall.sh
 
+    # disable wireless devices
+    rfkill block all
+
     prepare_home_directory
 }
 
@@ -260,8 +265,8 @@ EOF
 }
 
 install_bootloader() {
-    # setup syslinux
-    kernel_opts="quiet rootfstype=ext4"
+    # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
+    kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
     modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
     
     if [ "$ENCRYPT_DISK" = "true" ]; then
@@ -269,6 +274,7 @@ install_bootloader() {
         modules="$modules,cryptsetup,cryptkey"
     fi
 
+    # setup syslinux
     sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
         -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
         -e "s:^modules=.*:modules=$modules:" \
