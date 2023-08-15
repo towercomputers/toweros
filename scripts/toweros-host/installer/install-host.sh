@@ -75,8 +75,14 @@ iface eth0 inet static
 address $STATIC_HOST_IP/24
 EOF
 
+	# disable wireless devices
+    rfkill block all
+
 	# enable connection if requested
 	if [ "$HOSTNAME" == "router" ]; then
+		# enable wifi
+		rfkill unblock wifi
+		# setup wifi connection
 		mkdir -p /etc/wpa_supplicant
 		cat <<EOF > /etc/wpa_supplicant/wpa_supplicant.conf
 network={
@@ -96,6 +102,8 @@ net.ipv4.ip_forward=1
 net.ipv6.conf.default.forwarding=1
 net.ipv6.conf.all.forwarding=1
 EOF
+		# Allow tcp forwarding for ssh tunneling (used by `install` and `run` commands)
+		sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
 	else
 		if [ "$ONLINE" == "true" ]; then
 			# update network configuration
@@ -106,10 +114,6 @@ EOF
 		fi
 	fi
 
-	# TODO: more sshd configuration
-	# Allow tcp forwarding for ssh tunneling (used by `install` and `run` commands)
-	sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
-
 	# setup services
 	rc-update add iptables default
 	rc-update add dbus default
@@ -118,6 +122,13 @@ EOF
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		rc-update add chronyd default
 	fi
+
+	# update sshd configuration
+	sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $STATIC_HOST_IP/g" /etc/ssh/sshd_config
+	sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin no/g" /etc/ssh/sshd_config
+	sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
+	sed -i "s/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/g" /etc/ssh/sshd_config
+	echo "rc_need=networking" >> /etc/conf.d/sshd
 }
 
 clone_live_system_to_disk() {
@@ -167,9 +178,11 @@ clone_live_system_to_disk() {
 	# update fstab
 	sed -i '/cdrom/d' /mnt/etc/fstab 
 	sed -i '/floppy/d' /mnt/etc/fstab
+	sed -i '/\/boot/d' /mnt/etc/fstab
 
 	# update cmdline.txt
-	kernel_opts="quiet console=tty1 rootfstype=ext4 root=$ROOT_PARTITION cryptroot=$LVM_DISK cryptkey=yes cryptdm=lvmcrypt"
+	kernel_opts="quiet console=tty1 rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
+	kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_DISK cryptkey=yes cryptdm=lvmcrypt"
     modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey"
     cmdline="modules=$modules $kernel_opts"
     echo "$cmdline" > /media/mmcblk0p1/cmdline.txt
