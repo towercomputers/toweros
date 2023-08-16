@@ -4,6 +4,7 @@
 import json
 import re
 import subprocess
+import sys
 
 from rich.console import Console
 from rich.table import Table
@@ -15,8 +16,9 @@ def run_cmd(cmd, to_json=False):
         return json.loads(out)
     return out
 
-def get_disk_bench():
-    cmd = "sudo iozone -e -I -a -s 100M -r 4k -i 0 -i 1 -i 2 -R"
+def get_disk_bench(record_size, file_size, fast=True):
+    opt = "-a" if fast else "-e -I -a"
+    cmd = f"sudo iozone {opt} -s {file_size} -r {record_size} -i 0 -i 1 -i 2 -R"
     benchmark = run_cmd(cmd.split(" "))
     return benchmark.split("Excel output is below:")[1].strip()
 
@@ -33,9 +35,15 @@ def parse_bench(benchmark):
     lines = [[line[0], to_mbps(line[2].split(" ")[1])] for line in lines]
     return {line[0]: line[1] for line in lines}
 
-def display_bench(values): 
+def display_bench():
+    record_size = sys.argv[1] if len(sys.argv) > 1 else '4k'
+    file_size = sys.argv[2] if len(sys.argv) > 2 else '100M'
+    slow = True if len(sys.argv) > 3 else False
+        
+    values = parse_bench(get_disk_bench(record_size, file_size, not slow)) 
+
     table = Table(
-        title="\nTest with 100M file and 4k record size\n", 
+        title=f"\nTest with: {record_size} record size, {file_size} file\n", 
         show_header=False,
         title_style="bold magenta"
     )
@@ -51,4 +59,6 @@ def display_bench(values):
     console = Console()
     console.print(table)
 
-display_bench(parse_bench(get_disk_bench()))
+install_cmd = "sudo apk --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing add python3 py3-rich iozone"
+run_cmd(install_cmd.split(" "))
+display_bench()
