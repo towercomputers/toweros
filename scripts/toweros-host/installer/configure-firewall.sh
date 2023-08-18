@@ -1,4 +1,3 @@
-
 #!/bin/bash
 # based on https://wiki.archlinux.org/title/Simple_stateful_firewall
 
@@ -55,6 +54,8 @@ iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j logaccept
 
 if [ "$HOSTNAME" == "router" ]; then
     # enable ip forwarding
+    #iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp -j DNAT --to 127.0.0.1:$TRANS_PORT
+    #iptables -t nat -A OUTPUT -p tcp -j DNAT --to-destination 127.0.0.1:$TRANS_PORT
     iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
     iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
     iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT

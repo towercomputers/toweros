@@ -118,6 +118,7 @@ EOF
 	rc-update add iptables default
 	rc-update add dbus default
 	rc-update add sshd default
+	rc-update add tor default
 	rc-update add networking boot
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		rc-update add chronyd default
