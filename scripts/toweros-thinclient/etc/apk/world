@@ -34,6 +34,7 @@ squashfs-tools
 mtools
 dosfstools
 grub-efi
+efibootmgr
 abuild
 agetty
 runuser
@@ -53,3 +54,6 @@ adw-gtk3
 adwaita-xfce-icon-theme
 setxkbmap
 syslog-ng
+cryptsetup
+lvm2
+sbctl

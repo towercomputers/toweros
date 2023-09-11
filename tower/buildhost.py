@@ -43,14 +43,14 @@ def prepare_working_dir():
 def fetch_apk_packages(repo_path, branch, packages):
     apk(
         'fetch', '--arch', 'armv7', '-R', '--url', '--no-cache', '--allow-untrusted',
-        '--root', wd("EXPORT_ROOTFS_DIR/boot"),
+        '--root', wd("EXPORT_BOOTFS_DIR"),
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/community',
         '-o', repo_path, *packages, _out=logger.debug
     )
 
 def prepare_apk_repos(private_key_path):
-    repo_path = wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/")
+    repo_path = wd("EXPORT_BOOTFS_DIR/apks/armv7/")
     rm('-rf', repo_path)
     mkdir('-p',repo_path)
     world_path = os.path.join(INSTALLER_DIR, 'etc', 'apk', 'world')
@@ -66,8 +66,8 @@ def prepare_apk_repos(private_key_path):
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_UNVERSIONED, unversioned_apks)
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_VERSIONED, versioned_apks)
     # prepare index
-    apks = glob.glob(wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/*.apk"))
-    apk_index_path = wd("EXPORT_ROOTFS_DIR/boot/apks/armv7/APKINDEX.tar.gz")
+    apks = glob.glob(wd("EXPORT_BOOTFS_DIR/apks/armv7/*.apk"))
+    apk_index_path = wd("EXPORT_BOOTFS_DIR/apks/armv7/APKINDEX.tar.gz")
     apk_index_opts = ['index', '--arch', 'armv7', '--rewrite-arch', 'armv7', '--allow-untrusted']
     apk(*apk_index_opts, '-o', apk_index_path, *apks, _out=logger.debug)
     # sign index
@@ -85,14 +85,13 @@ def prepare_system_image(alpine_tar_path, private_key_path):
         _out=logger.debug
     )
     # mount image in temporary folder
-    mkdir('-p', wd("EXPORT_ROOTFS_DIR"))
-    mount(wd("root.img"), wd("EXPORT_ROOTFS_DIR"))
+    mkdir('-p', wd("EXPORT_BOOTFS_DIR"))
+    mount(wd("root.img"), wd("EXPORT_BOOTFS_DIR"))
     # put alpine linux files
-    mkdir(wd("EXPORT_ROOTFS_DIR/boot"))
-    tar('-xpf', alpine_tar_path, '-C', wd("EXPORT_ROOTFS_DIR/boot"))
+    tar('-xpf', alpine_tar_path, '-C', wd("EXPORT_BOOTFS_DIR"))
     prepare_apk_repos(private_key_path)
     # synchronize folder
-    sync(wd("EXPORT_ROOTFS_DIR"))
+    sync(wd("EXPORT_BOOTFS_DIR"))
 
 def prepare_overlay(pub_key_path):
     # put installer in local.d
@@ -107,7 +106,7 @@ def prepare_overlay(pub_key_path):
     Command('sh')(
         os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'),
         wd("overlay"),
-        _cwd=wd("EXPORT_ROOTFS_DIR/boot/"),
+        _cwd=wd("EXPORT_BOOTFS_DIR/"),
         _out=print
     )
 
@@ -146,14 +145,13 @@ def create_loop_device(image_file):
 @clitask("Copying Alpine Linux system in RPI partitions...")
 def prepare_rpi_partitions(loop_dev):
     boot_dev = f"{loop_dev}p1"
-    root_dev = f"{loop_dev}p2"
     # format partitions
     mkdosfs('-n', 'bootfs', '-F', 32, '-s', 4, '-v', boot_dev, _out=logger.debug)
     # mount partitions
-    mkdir('-p', wd("ROOTFS_DIR/boot"), _out=logger.debug)
-    mount('-v', boot_dev, wd("ROOTFS_DIR/boot"), '-t', 'vfat')
+    mkdir('-p', wd("BOOTFS_DIR"), _out=logger.debug)
+    mount('-v', boot_dev, wd("BOOTFS_DIR"), '-t', 'vfat')
     # copy system in partitions
-    rsync('-rtxv', wd("EXPORT_ROOTFS_DIR/boot/"), wd("ROOTFS_DIR/boot/"), _out=logger.debug)
+    rsync('-rtxv', wd("EXPORT_BOOTFS_DIR/"), wd("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir, owner):
@@ -175,10 +173,8 @@ def copy_image(builds_dir, owner):
     return image_path
 
 def unmount_all():
-    utils.lazy_umount(wd("ROOTFS_DIR/boot/"))
-    utils.lazy_umount(wd("ROOTFS_DIR"))
-    utils.lazy_umount(wd("EXPORT_ROOTFS_DIR"))
     utils.lazy_umount(wd("BOOTFS_DIR"))
+    utils.lazy_umount(wd("EXPORT_BOOTFS_DIR"))
     losetup('-D')
 
 @clitask("Cleaning up...")
@@ -248,30 +244,7 @@ def insert_tower_env(boot_part, config):
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     logger.debug(f"Host configuration:\n{str_env}")
     # insert tower.env file in boot partition
-    tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))    
-
-@clitask("Creating root partition...")
-def prepare_root_partition(device, boot_part):
-    device_name = device.split("/")[-1]
-    part_name = boot_part.split("/")[-1]
-    sys_block_path = f"/sys/block/{device_name}/{part_name}/"
-    boot_start = cat(f"{sys_block_path}/start").strip()
-    boot_size = cat(f"{sys_block_path}/size").strip()
-    start_root = int(boot_start) + int(boot_size) + 1
-    start_root = math.ceil(start_root / 2048) * 2048
-    try:
-        buf = StringIO()
-        parted(
-            '--script', '-a', 'optimal', device, 
-            'unit', 's', 'mkpart', 'primary', 'ext4', 
-            start_root, '100%', _out=buf, _err=buf
-        )
-        root_part = Command('sh')('-c', f'ls {device}*2').strip()
-        mkfs_ext4('-F', root_part, _out=buf, _err=buf)
-    except ErrorReturnCode:
-        logger.error(buf.getvalue())
-        logger.error("Error creating root partition, please check the SD card intergirty or try again with the flag `--zero-device`.")
-        raise Exception("Error creating root partition")
+    tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     
 @clitask("Installing TowserOS-Host in {1}...", 
          timer_message="TowserOS-Host installed in {0}.\nPlease insert the SD Card into the Host computer, then turn it on and wait for it to be discover on the network.", 
@@ -283,6 +256,5 @@ def burn_image(image_file, device, config, zero_device=False):
             zeroing_device(device)
         boot_part = copy_image_in_device(image_file, device)
         insert_tower_env(boot_part, config)
-        prepare_root_partition(device, boot_part)
     finally:
         cleanup()

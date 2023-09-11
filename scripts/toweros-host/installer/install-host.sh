@@ -9,11 +9,34 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
-mount_root_partition() {
+prepare_root_partition() {
+	#LVM_DISK=/dev/mmcblk0p2
+	# we are using the first USB plugged in as root disk
+	LVM_DISK=/dev/sda
+	# zeroing usb drive
+    dd if=/dev/zero of=$LVM_DISK bs=512 count=1 conv=notrunc
+	# generate LUKS key
+	dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
+	chmod 0400 /crypto_keyfile.bin
+	# create LUKS partition
+	cryptsetup -q luksFormat $LVM_DISK /crypto_keyfile.bin
+	cryptsetup luksAddKey $LVM_DISK /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
+	# initialize the LUKS partition
+	cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
+	# create LVM physical volumes
+	vgcreate -y vg0 /dev/mapper/lvmcrypt
+	# create root volume
+    lvcreate -l 100%FREE vg0 -n root
+    # set partition name
+    ROOT_PARTITION="/dev/vg0/root"
+    # format partition
+    mkfs.ext4 -F "$ROOT_PARTITION"
 	# create mount point
 	mkdir -p /mnt
 	# mount root partition
-	mount /dev/mmcblk0p2 /mnt
+	mount $ROOT_PARTITION /mnt
+	# copy LUKS key
+	cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
 }
 
 prepare_home_directory() {
@@ -52,8 +75,14 @@ iface eth0 inet static
 address $STATIC_HOST_IP/24
 EOF
 
+	# disable wireless devices
+    rfkill block all
+
 	# enable connection if requested
 	if [ "$HOSTNAME" == "router" ]; then
+		# enable wifi
+		rfkill unblock wifi
+		# setup wifi connection
 		mkdir -p /etc/wpa_supplicant
 		cat <<EOF > /etc/wpa_supplicant/wpa_supplicant.conf
 network={
@@ -73,6 +102,8 @@ net.ipv4.ip_forward=1
 net.ipv6.conf.default.forwarding=1
 net.ipv6.conf.all.forwarding=1
 EOF
+		# Allow tcp forwarding for ssh tunneling (used by `install` and `run` commands)
+		sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
 	else
 		if [ "$ONLINE" == "true" ]; then
 			# update network configuration
@@ -83,10 +114,6 @@ EOF
 		fi
 	fi
 
-	# TODO: more sshd configuration
-	# Allow tcp forwarding for ssh tunneling (used by `install` and `run` commands)
-	sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
-
 	# setup services
 	rc-update add iptables default
 	rc-update add dbus default
@@ -95,6 +122,13 @@ EOF
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		rc-update add chronyd default
 	fi
+
+	# update sshd configuration
+	sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $STATIC_HOST_IP/g" /etc/ssh/sshd_config
+	sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin no/g" /etc/ssh/sshd_config
+	sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
+	sed -i "s/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/g" /etc/ssh/sshd_config
+	echo "rc_need=networking" >> /etc/conf.d/sshd
 }
 
 clone_live_system_to_disk() {
@@ -111,7 +145,8 @@ clone_live_system_to_disk() {
 
     # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
-    echo 'features="base mmc usb ext4 mmc"' > /mnt/etc/mkinitfs/mkinitfs.conf
+    features="base mmc usb ext4 mmc vfat nvme vmd lvm cryptsetup cryptkey"
+    echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 
     # apk reads config from target root so we need to copy the config
     mkdir -p /mnt/etc/apk/keys/
@@ -137,18 +172,20 @@ clone_live_system_to_disk() {
 
 	# prepare boot and root partitions and folders
 	mount -o remount,rw /media/mmcblk0p1
-	rm -f /media/mmcblk0p1/boot/* 
-	rm /mnt/boot/boot
-	mv /mnt/boot/* /media/mmcblk0p1/boot/
+	cp -rf /mnt/boot/*rpi? /media/mmcblk0p1/boot/
 	rm -Rf /mnt/boot
-	mkdir /mnt/media/mmcblk0p1
-	ln -s /mnt/media/mmcblk0p1/boot /mnt/boot || true
+
 	# update fstab
-	echo "/dev/mmcblk0p1 /media/mmcblk0p1 vfat defaults 0 0" >> /mnt/etc/fstab
 	sed -i '/cdrom/d' /mnt/etc/fstab 
 	sed -i '/floppy/d' /mnt/etc/fstab
+	sed -i '/\/boot/d' /mnt/etc/fstab
+
 	# update cmdline.txt
-	sed -i 's/$/ root=\/dev\/mmcblk0p2 /' /media/mmcblk0p1/cmdline.txt
+	kernel_opts="quiet console=tty1 rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
+	kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_DISK cryptkey=yes cryptdm=lvmcrypt"
+    modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey"
+    cmdline="modules=$modules $kernel_opts"
+    echo "$cmdline" > /media/mmcblk0p1/cmdline.txt
 
 	# copy home directory in /mnt
 	mkdir -p "/mnt/home/"
@@ -172,6 +209,8 @@ clean_and_reboot() {
 	mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
 	# remove configuration file
 	rm /media/mmcblk0p1/tower.env
+	# remove keyfile
+	rm /mnt/crypto_keyfile.bin
 	# reboot
 	reboot
 }
@@ -187,7 +226,7 @@ init_configuration() {
 
 install_host() {
 	init_configuration
-	mount_root_partition
+	prepare_root_partition
 	prepare_home_directory
 	update_live_system
 	clone_live_system_to_disk
