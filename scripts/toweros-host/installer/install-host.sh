@@ -14,7 +14,7 @@ prepare_root_partition() {
 	# we are using the first USB plugged in as root disk..
 	LVM_DISK=/dev/sda
 	# ..unless a nvme disk is present
-	if [ -d /dev/nvme0n1 ]; then
+	if [ -b /dev/nvme0n1 ]; then
 		LVM_DISK=/dev/nvme0n1
 	fi
 	# zeroing usb drive
