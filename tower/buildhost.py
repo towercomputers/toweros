@@ -10,10 +10,10 @@ from io import StringIO
 import sh
 from sh import (
     Command, ErrorReturnCode,
-    mount, parted, mkdosfs, resize2fs, tee, cat, echo,
+    mount, parted, mkdosfs, tee, cat, echo,
     cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
-    losetup, abuild_sign, openssl
+    losetup, abuild_sign, openssl,
 )
 mkfs_ext4 = Command('mkfs.ext4')
 fsck_ext4 = Command('fsck.ext4')
@@ -109,6 +109,7 @@ def prepare_overlay(pub_key_path):
         _cwd=wd("EXPORT_BOOTFS_DIR/"),
         _out=print
     )
+    tee(wd("EXPORT_BOOTFS_DIR/usercfg.txt"), _in=echo("dtoverlay=dwc2,dr_mode=host"))
 
 @clitask("Creating RPI partitions...")
 def create_rpi_boot_partition():
