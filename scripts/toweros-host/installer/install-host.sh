@@ -11,8 +11,12 @@ update_passord() {
 
 prepare_root_partition() {
 	#LVM_DISK=/dev/mmcblk0p2
-	# we are using the first USB plugged in as root disk
+	# we are using the first USB plugged in as root disk..
 	LVM_DISK=/dev/sda
+	# ..unless a nvme disk is present
+	if [ -d /dev/nvme0n1 ]; then
+		LVM_DISK=/dev/nvme0n1
+	fi
 	# zeroing usb drive
     dd if=/dev/zero of=$LVM_DISK bs=512 count=1 conv=notrunc
 	# generate LUKS key
