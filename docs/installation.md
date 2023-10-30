@@ -10,7 +10,7 @@ The easiest way to use Tower is to run the TowerOS-ThinClient GNU/Linux distribu
 
 To install get TowerOS-ThinClient:
 
-1. Download the latest image here: [https://drive.google.com/file/d/1xpC7BlrOa0LaHNuQ4-SQUiOGassmMb-x/view?usp=sharing](https://drive.google.com/file/d/1xpC7BlrOa0LaHNuQ4-SQUiOGassmMb-x/view?usp=sharing).
+1. Download the latest image here: [https://github.com/towercomputers/tools/releases/latest](https://github.com/towercomputers/tools/releases/latest).
 2. Prepare a bootable USB medium using the above image.
 3. Boot the Thin Client with the USB drive and follow the instructions.
 
