@@ -2,4 +2,4 @@
 
 **Tower** is a computer system for paranoid individuals and high-value targets that turns the existing paradigm for computer security on its head: Instead of taking a single computer and splitting it into multiple security domains at the level of the operating system or hypervisor (cf. [AppArmor](https://apparmor.net/) and [QubesOS](https://www.qubes-os.org/)), Tower combines *multiple, independent computers* into a single, unified, virtual system with a shared, composited user interface. Each security domain is regelated to a separate, dedicated *Host* (e.g. a Raspberry Pi), and the user accesses their applications from a *Thin Client* (e.g. a laptop) over a LAN using standard network protocols (namely, SSH and NX), following strict firewall rules that govern all network communication.
 
-## [FULL DOCUMENTATION HERE](./docs/index.md) 
+## [FULL DOCUMENTATION HERE](https://towercomputers.github.io/tower-tools/) 
