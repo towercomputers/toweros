@@ -55,7 +55,7 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     chmod 600 ~/.ssh/*
     mkdir -p ~/towercomputers
     cd ~/towercomputers
-    git clone git@github.com:towercomputers/tools.git
+    git clone git@github.com:towercomputers/tower-tools.git
 fi
 
 

@@ -17,7 +17,7 @@ from tower.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
-TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tools.git"
+TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/tower-tools.git"
 # TODO: test v3.19 on release
 ALPINE_BRANCH = "3.18"
 
