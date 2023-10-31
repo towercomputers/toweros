@@ -2,7 +2,7 @@
 
 ### 1.1. Hardware configuration
 
-![Tower Archi](../img/towerarchi.jpg)
+![Tower Archi](../img/towerarchi.png)
 
 To use Tower you need a Thin Client and several Hosts connected via one or ideally two switches.
 
