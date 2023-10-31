@@ -1,0 +1,676 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://towercomputers.github.io/tower-tools/implementation/">
+      
+      
+        <link rel="prev" href="../usage/">
+      
+      
+        <link rel="next" href="../DeveloperGuide/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+    
+    
+      
+        <title>Implementation - Tower Computers</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#3-implementation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Tower Computers" class="md-header__button md-logo" aria-label="Tower Computers" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Tower Computers
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Implementation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Tower Computers" class="md-nav__button md-logo" aria-label="Tower Computers" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Tower Computers
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Implementation
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Implementation
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#3-implementation" class="md-nav__link">
+    3. Implementation
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-toweros-thinclient" class="md-nav__link">
+    3.1. TowerOS-ThinClient
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-toweros-host" class="md-nav__link">
+    3.2. TowerOS-Host
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-sshconf" class="md-nav__link">
+    3.3. SSHConf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-provision" class="md-nav__link">
+    3.4. Provision
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-gui" class="md-nav__link">
+    3.5. GUI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-install" class="md-nav__link">
+    3.6. Install
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DeveloperGuide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#3-implementation" class="md-nav__link">
+    3. Implementation
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-toweros-thinclient" class="md-nav__link">
+    3.1. TowerOS-ThinClient
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-toweros-host" class="md-nav__link">
+    3.2. TowerOS-Host
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-sshconf" class="md-nav__link">
+    3.3. SSHConf
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-provision" class="md-nav__link">
+    3.4. Provision
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-gui" class="md-nav__link">
+    3.5. GUI
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-install" class="md-nav__link">
+    3.6. Install
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Implementation</h1>
+
+<h2 id="3-implementation">3. Implementation</h2>
+<p>To date, <code>tower-tools</code> includes six main modules: <code>buildthinclient.py</code> and <code>buildhost.py</code> to build the OS images used by the <code>thinclient</code> and the hosts. <code>sshconf.py</code> which manages <code>tower-tools</code> and <code>ssh</code> configuration files. <code>provision.py</code>, <code>install.py</code>, and <code>gui.py</code> which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the <code>thinclient</code>.</p>
+<h3 id="31-toweros-thinclient">3.1. TowerOS-ThinClient</h3>
+<p><code>buildthinclient.py</code> is the module responsible for generating an image of TowerOS with the <code>build-tower-image thinclient</code> command.</p>
+<p>TowerOS is based on Alpine Linux, and <code>buildthinclient.py</code> uses the <code>mkimage</code> tool (see https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage).</p>
+<p>The installer contains all the apk and pip packages necessary for installing the base system and <code>tower-tools</code>, which is ready to use from the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.</p>
+<p>Here are the different steps taken by <code>buildthinclient.py</code> to generate an image:</p>
+<ol>
+<li>
+<p>Gathering the necessary builds.
+The script starts by checking for the existence of a <code>./dist</code>, <code>./builds</code> or <code>~/.cache/tower/builds/</code> folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists, then the script creates the folder <code>~/.cache/tower/builds/</code>. Next:</p>
+<ol>
+<li>The script then verifies that the TowerOS-Host image is present. If not, it launches the build of a new image (cf. TowerOS-Host). </li>
+<li>The script checks for the existence of a <code>tower-tools</code> wheel package. If it does not exist the package is retrieved from Github.</li>
+</ol>
+</li>
+<li>
+<p>Downloading pip packages with <code>pip download</code> in a cache folder</p>
+</li>
+<li>
+<p>Creating and updating an Alpine APK overlay folder with mainly:</p>
+<ol>
+<li><code>pip</code> cache folder</li>
+<li>add  system install bash scripts (see https://github.com/towercomputers/tools/tree/dev/scripts/toweros-thinclient)</li>
+<li>add the Towercomputers documentation</li>
+<li>Add /etc configuration files</li>
+<li>add builds required by <code>tower-tools</code> (TowerOS-Host, <code>tower-tools</code>)</li>
+</ol>
+</li>
+<li>
+<p>Launch of <code>mkimage</code> which takes care of the rest.</p>
+</li>
+<li>
+<p>Renaming and copying the image into the <code>builds</code> folder.</p>
+</li>
+<li>
+<p>Cleaning temporary files.</p>
+</li>
+</ol>
+<p><strong>Notes about the TowerOS-ThinClient installer:</strong></p>
+<ul>
+<li>The TowerOS-ThinClient install scripts generally follow the official Alpine Linux install guide (see <a href="https://wiki.alpinelinux.org/wiki/Installation">https://wiki.alpinelinux.org/wiki/Installation</a>) </li>
+<li>The installer sets up an <code>iptables</code> firewall as described here <a href="https://wiki.archlinux.org/title/Simple_stateful_firewall">https://wiki.archlinux.org/title/Simple_stateful_firewall</a>.</li>
+<li>TowerOS-ThinClient uses <code>Syslinux</code> as the boot loader.</li>
+</ul>
+<h3 id="32-toweros-host">3.2. TowerOS-Host</h3>
+<p><code>buildhost.py</code> is the module responsible for generating an image of TowerOS-ThinClient when the <code>build-tower-image host</code> command is executed and also for configuring the image when the <code>tower provision</code> command is called.</p>
+<p><code>buildhost.py</code> uses the same method as <code>pigen</code> to build an image for a Raspberry PI (see <a href="https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh">https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh</a>) but unlike <code>pigen</code> which uses a Debian-based system, <code>buildhost.py</code> uses an Alpine Linux-based system (see https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi).</p>
+<p>TowerOS-ThinClient must be used with the <code>tower provision</code> command which finalises the configuration of the image which is otherwise neither secure (no firewall in particular) nor ready to be used by <code>tower-tools</code>.</p>
+<p>Here are the different steps taken by <code>buildhost.py</code> to generate an image:</p>
+<ol>
+<li>
+<p>Installing an Alpine Linux system in a mounted temporary folder:</p>
+<ol>
+<li>creating an image file with <code>mkfs.ext4</code></li>
+<li>mount this image with <code>mount</code></li>
+<li>installation of a minimalist Alpine Linux system and NX in the mounted folder (<a href="https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz">https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz</a>)</li>
+</ol>
+</li>
+<li>
+<p>creation with <code>parted</code>, in an image file, of the partitions necessary for a Raspberry PI with the size adapted for the system installed in step 1.</p>
+</li>
+<li>
+<p>copy, with <code>rsync</code>, the system installed in step 1 into the partitions created in step 2.</p>
+</li>
+<li>
+<p>compression of the image containing the partitions from step 2.</p>
+</li>
+<li>
+<p>Unmounting and cleaning files and temporary folders.</p>
+</li>
+</ol>
+<p>Here are the different steps taken by <code>buildhost.py</code> to configure an image when provisioning an host:</p>
+<ol>
+<li>
+<p>copy image to sd-card</p>
+</li>
+<li>
+<p>expand root partition to occupy entire sd-card</p>
+</li>
+<li>
+<p>places a <code>tower.env</code> file in the root of the boot partition. This file contains all the variables needed to install the system on first boot (HOSTNAME, USERNAME, PUBLIC_KEY, ...).</p>
+</li>
+<li>
+<p>unmount the sd-card which is ready to be inserted into the RPI</p>
+</li>
+</ol>
+<p>Note: A TowerOS-ThinClient image is placed in the <code>~/.cache/tower/builds/</code> folder by the TowerOS installer.</p>
+<h3 id="33-sshconf">3.3. SSHConf</h3>
+<p><code>tower-tools</code> uses a single configuration file in the same format as an SSH config file: <code>~/.ssh/tower.conf</code>. This file, included in <code>~/.ssh/config</code>, is used both by <code>tower-tools</code> to maintain the list of hosts and by <code>ssh</code> to access hosts directly with <code>ssh &lt;host&gt;</code>. <code>sshconf.py</code> is responsible for maintaining this file and generally anything that requires manipulation of something in the <code>~./ssh</code> folder. Notably:</p>
+<ol>
+<li>to discover the IP of a newly installed host and update <code>tower.conf</code></li>
+<li>update <code>~/.ssh/know_hosts</code></li>
+<li>check the status of a host and if he is online.</li>
+</ol>
+<p>Note: <code>sshconf.py</code> uses <a href="https://pypi.org/project/sshconf/">https://pypi.org/project/sshconf/</a> to manipulate <code>ssh</code> config files.</p>
+<h3 id="34-provision">3.4. Provision</h3>
+<p><code>provision.py</code> is used by the <code>tower provision &lt;host&gt;</code> command to prepare an SD card directly usable by a Rasbperry PI.</p>
+<p>The steps to provision a host are as follows:</p>
+<ol>
+<li>generation of a key pair.</li>
+<li>generation of the host configuration (<code>tower.env</code> file), with the values provided on the command line, or with those retrieved from the <code>thinclient</code>.</li>
+<li>copy of the TowerOS-ThinClient image on the SD card and insertion of the configuration file.</li>
+<li>waiting for the new host to be detected on the network after the user inserts the sd-card in the RPI and the boot is finished.</li>
+<li>updated <code>ssh</code> and <code>tower-tools</code> configuration file.</li>
+</ol>
+<p>Once a host is provisioned it is therefore directly accessible by ssh with <code>ssh &lt;host&gt;</code> or <code>tower run &lt;host&gt;</code>.</p>
+<h3 id="35-gui">3.5. GUI</h3>
+<p>GUI is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the <code>thinclient</code> a graphical application installed on one of the hosts with <code>tower run &lt;host&gt; &lt;application-name&gt;application&gt;</code>.</p>
+<p><code>nxagent</code> must be installed in the host and <code>nxproxy</code> in the <code>thinclient</code>. Of course both are pre-installed in TowerOS and TowerOS-ThinClient.</p>
+<p>Here are the steps taken by <code>gui.py</code> to run an application on one of the hosts:</p>
+<ol>
+<li>
+<p>Generation of a unique cookie which is added in the host with <code>xauth add</code>.</p>
+</li>
+<li>
+<p>With <code>ssh</code> launch <code>nxagent</code> on the host which only accepts local connections.</p>
+</li>
+<li>
+<p>With the same command line, open a tunnel between the host and the <code>thinclient</code> on the port of <code>nxagent</code>.</p>
+</li>
+<li>
+<p>Launch <code>nxproxy</code> with the cookie generated in step 1 and on the same port as the tunnel opened in step 3.</p>
+</li>
+<li>
+<p>At this stage <code>nxproxy</code> and <code>nxagent</code> are connected and we have a "virtual screen" on which we run the graphical application with: <code>ssh &lt;host&gt; DISPLAY=:50 &lt;application-name&gt;application&gt;</code>.</p>
+</li>
+<li>
+<p>When the application launched in the previous step is closed, <code>gui.py</code></p>
+<ol>
+<li>closes <code>nxagent</code> and the tunnel opened in step 2 and 3.</li>
+<li>revokes the cookie from step 1 with <code>xauth remove</code></li>
+<li>closes <code>nxproxy</code></li>
+</ol>
+</li>
+</ol>
+<p>GUI works the same way as X2GO from which it is directly inspired.</p>
+<h3 id="36-install">3.6. Install</h3>
+<p>This module allows to use <code>apk</code> on an offline host through an <code>ssh</code> tunnel to an online host. To do this it performs the following steps:</p>
+<ol>
+<li>
+<p>Preparing the offline host to redirect requests to the <code>apk</code> repository to the <code>thinclient</code>:</p>
+<ol>
+<li>Added a <code>127.0.0.1 &lt;apk_repo_host&gt;</code> entry in the <code>/etc/hosts</code> file</li>
+<li>Added an <code>iptables</code> rule to redirect requests on port 80 to port 4443 (so you don't need to open the tunnel in <code>root</code> because port 80 is protected).</li>
+<li>Preparation of a pacman.conf file containing only the <code>apk_repo_host</code>.</li>
+<li>Opening a tunnel to redirect port 4443 of the offline host to port 4666 of the <code>thinclient</code>.</li>
+</ol>
+</li>
+<li>
+<p>Open a tunnel to redirect port 4666 from <code>thinclient</code> to the apk repository host on the online host with: <code>ssh -R 4666:&lt;apk_repo_host&gt;:80 &lt;online-host&gt;</code>.</p>
+</li>
+<li>
+<p>At this point the module can normally use <code>apk</code> with <code>ssh</code> on the offline host to install the desired packages.</p>
+</li>
+<li>
+<p>Once the installation is finished, clean the <code>/etc/hosts</code> file and the <code>iptables</code> rules on the offline host and close the ssh tunnels.</p>
+</li>
+</ol>
+<p>Note: when installing each package, <code>apk</code> verifies that it has been signed by the authors and maintainers of Alpine Linux. Therefore it is not necessary to trust the online host but above all to initialise the apk keys in a trusted environment. This means for us that it is imperative to build the images of TowerOS and TowerOS-ThinClient in a trusted environment and to manually verify the keys.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

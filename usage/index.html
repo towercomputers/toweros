@@ -1,0 +1,644 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://towercomputers.github.io/tower-tools/usage/">
+      
+      
+        <link rel="prev" href="../installation/">
+      
+      
+        <link rel="next" href="../implementation/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+    
+    
+      
+        <title>Usage - Tower Computers</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#2-usage" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Tower Computers" class="md-header__button md-logo" aria-label="Tower Computers" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Tower Computers
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usage
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Tower Computers" class="md-nav__button md-logo" aria-label="Tower Computers" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Tower Computers
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#2-usage" class="md-nav__link">
+    2. Usage
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-provision-a-host" class="md-nav__link">
+    2.1. Provision a host
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1. Provision a host">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#211-generate-an-image-with-build-image" class="md-nav__link">
+    2.1.1. Generate an image with build-image
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#212-prepare-the-sd-card" class="md-nav__link">
+    2.1.2. Prepare the SD card
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-execute-a-command-on-one-of-the-hosts" class="md-nav__link">
+    2.2. Execute a command on one of the hosts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-install-an-application-on-one-of-the-hosts" class="md-nav__link">
+    2.3. Install an application on one of the hosts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-list-hosts-and-their-statuses" class="md-nav__link">
+    2.4. List hosts and their statuses
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-example-using-two-hosts" class="md-nav__link">
+    2.5. Example using two hosts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-use-with-hatch" class="md-nav__link">
+    2.6. Use with hatch
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-build-a-toweros-image-with-docker" class="md-nav__link">
+    2.7. Build a TowerOS image with Docker
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../implementation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Implementation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DeveloperGuide/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#2-usage" class="md-nav__link">
+    2. Usage
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-provision-a-host" class="md-nav__link">
+    2.1. Provision a host
+  </a>
+  
+    <nav class="md-nav" aria-label="2.1. Provision a host">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#211-generate-an-image-with-build-image" class="md-nav__link">
+    2.1.1. Generate an image with build-image
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#212-prepare-the-sd-card" class="md-nav__link">
+    2.1.2. Prepare the SD card
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-execute-a-command-on-one-of-the-hosts" class="md-nav__link">
+    2.2. Execute a command on one of the hosts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-install-an-application-on-one-of-the-hosts" class="md-nav__link">
+    2.3. Install an application on one of the hosts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-list-hosts-and-their-statuses" class="md-nav__link">
+    2.4. List hosts and their statuses
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#25-example-using-two-hosts" class="md-nav__link">
+    2.5. Example using two hosts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#26-use-with-hatch" class="md-nav__link">
+    2.6. Use with hatch
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#27-build-a-toweros-image-with-docker" class="md-nav__link">
+    2.7. Build a TowerOS image with Docker
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  <h1>Usage</h1>
+
+<h2 id="2-usage">2. Usage</h2>
+<h3 id="21-provision-a-host">2.1. Provision a host</h3>
+<p>Note: If you are using TowerOS, you can skip the first step.</p>
+<h4 id="211-generate-an-image-with-build-image">2.1.1. Generate an image with build-image</h4>
+<pre><code>$&gt; build-tower-image host
+</code></pre>
+<p>This will generate an image file compressed with xz in <code>~/.cache/tower/builds/</code>. Images in this folder will be used by default by the provision command if the <code>--image</code> flag is not provided.</p>
+<h4 id="212-prepare-the-sd-card">2.1.2. Prepare the SD card</h4>
+<pre><code>$&gt; tower provision &lt;host&gt; --offline
+</code></pre>
+<p>or, for an online host:</p>
+<pre><code>$&gt; tower provision &lt;host&gt; --online
+</code></pre>
+<p>Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see <code>tower provision --help</code>).</p>
+<h3 id="22-execute-a-command-on-one-of-the-hosts">2.2. Execute a command on one of the hosts</h3>
+<p>Run a command on a host with SSH:</p>
+<pre><code>$&gt; ssh &lt;host&gt; ls ~/
+</code></pre>
+<p>or a graphical application with NX protocol:</p>
+<pre><code>$&gt; tower run &lt;host&gt; &lt;application-name&gt;
+</code></pre>
+<h3 id="23-install-an-application-on-one-of-the-hosts">2.3. Install an application on one of the hosts</h3>
+<pre><code>$&gt; tower install &lt;host&gt; &lt;application-name&gt;
+</code></pre>
+<p>or, if the host is offline, you can tunnel the installation through an online host:</p>
+<pre><code>$&gt; tower install &lt;offline-host&gt; &lt;application-name&gt; --online-host &lt;online-host&gt; 
+</code></pre>
+<h3 id="24-list-hosts-and-their-statuses">2.4. List hosts and their statuses</h3>
+<pre><code>$&gt; tower status
+</code></pre>
+<h3 id="25-example-using-two-hosts">2.5. Example using two hosts</h3>
+<p>Provision the first offline host named <code>office</code>.</p>
+<pre><code>$&gt; tower provision office
+</code></pre>
+<p>Provision a second online host named <code>web</code>.</p>
+<pre><code>$&gt; tower provision web --online –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
+</code></pre>
+<p>Install galculator on the <code>office</code> offline host.</p>
+<pre><code>$&gt; tower install office galculator --online-host=web
+</code></pre>
+<p>Run galculator from <code>office</code>.</p>
+<pre><code>$&gt; startx
+$&gt; tower run office gcalculator
+</code></pre>
+<h3 id="26-use-with-hatch">2.6. Use with hatch</h3>
+<pre><code>$&gt; git clone git@github.com:towercomputers/tools.git
+$&gt; cd tools
+$&gt; pip install hatch
+$&gt; hatch run tower --help
+$&gt; hatch run build-tower-image --help
+</code></pre>
+<h3 id="27-build-a-toweros-image-with-docker">2.7. Build a TowerOS image with Docker</h3>
+<p>Build the Docker image with:</p>
+<pre><code>$&gt; git clone git@github.com:towercomputers/tools.git
+$&gt; cd tools
+$&gt; hatch build -t wheel
+$&gt; docker build -t build-tower-image:latest .
+</code></pre>
+<p>Then build the TowerOS image inside a Docker container:</p>
+<pre><code>$&gt; docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
+</code></pre>
+<p>Retrieve that image from the container:</p>
+<pre><code>$&gt; docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
+</code></pre>
+<p>Finally delete the container with:</p>
+<pre><code>$&gt; docker rm towerbuilder
+</code></pre>
+<p><strong>Note: </strong>With the ARM64 architecture, you must use <code>buildx</code> and a cross-platform emulator like <code>tonistiigi/binfmt</code>.</p>
+<pre><code>$&gt; docker buildx create --use
+$&gt; docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
+$&gt; docker run --privileged --rm tonistiigi/binfmt --install all
+$&gt; docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
+              build-tower-image thinclient
+</code></pre>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>
