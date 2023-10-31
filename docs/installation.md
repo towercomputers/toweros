@@ -26,6 +26,8 @@ Tips:
 
 1.1.1. Compute Module 4 Lite
 
+![Deskpi Super6c board](../img/deskpi.jpg)
+
 Using CM4s and the [Deskpi Super6c board](https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported) you can avoid most cables and put all your hosts in an ATX case.
 
 For each CM4 you need:
