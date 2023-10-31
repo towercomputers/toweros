@@ -274,47 +274,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#13-custom-thin-client-linux" class="md-nav__link">
-    1.3. Custom Thin Client (Linux)
-  </a>
-  
-    <nav class="md-nav" aria-label="1.3. Custom Thin Client (Linux)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#131-install-dependencies" class="md-nav__link">
-    1.3.1. Install dependencies
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#132-enable-services" class="md-nav__link">
-    1.3.2. Enable services
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#133-update-etcsudoers-and-groups" class="md-nav__link">
-    1.3.3. Update /etc/sudoers and groups
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#134-install-tower-tools" class="md-nav__link">
-    1.3.4. Install tower-tools
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -385,6 +344,25 @@
   
 
     
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Tower%20Whitepaper.pdf" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Whitepaper
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -431,47 +409,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#13-custom-thin-client-linux" class="md-nav__link">
-    1.3. Custom Thin Client (Linux)
-  </a>
-  
-    <nav class="md-nav" aria-label="1.3. Custom Thin Client (Linux)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#131-install-dependencies" class="md-nav__link">
-    1.3.1. Install dependencies
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#132-enable-services" class="md-nav__link">
-    1.3.2. Enable services
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#133-update-etcsudoers-and-groups" class="md-nav__link">
-    1.3.3. Update /etc/sudoers and groups
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#134-install-tower-tools" class="md-nav__link">
-    1.3.4. Install tower-tools
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -514,6 +451,7 @@
 <li>for sd-cards and usb keys, look at the list of hardware that we tested and their performance (TODO)</li>
 </ul>
 <p>1.1.1. Compute Module 4 Lite</p>
+<p><img alt="Deskpi Super6c board" src="../img/deskpi.jpg" /></p>
 <p>Using CM4s and the <a href="https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported">Deskpi Super6c board</a> you can avoid most cables and put all your hosts in an ATX case.</p>
 <p>For each CM4 you need:</p>
 <ul>
@@ -530,45 +468,6 @@
 <li>Prepare a bootable USB medium using the above image.</li>
 <li>Boot the Thin Client with the USB drive and follow the instructions.</li>
 </ol>
-<p>Note: you can build your own image of TowerOS with command <code>build-tower-image thinclient</code> or with Docker (see below).</p>
-<h3 id="13-custom-thin-client-linux">1.3. Custom Thin Client (Linux)</h3>
-<h4 id="131-install-dependencies">1.3.1. Install dependencies</h4>
-<pre><code>$&gt; apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
-      avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
-      musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
-      alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
-      fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
-      agetty runuser nano vim net-tools losetup xorg-server xf86-input-libinput \
-      xinit udev xfce4 xfce4-terminal xfce4-screensaver adw-gtk3 \
-      adwaita-xfce-icon-theme setxkbmap
-</code></pre>
-<h4 id="132-enable-services">1.3.2. Enable services</h4>
-<p>If necessary, enable IPv4 with:</p>
-<pre><code>sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
-</code></pre>
-<p>then</p>
-<pre><code>$&gt; rc-update add dhcpcd
-$&gt; rc-update add avahi-daemon
-$&gt; rc-update add iptables
-$&gt; rc-update add networking
-$&gt; rc-update add wpa_supplicant boot
-$&gt; rc-update add dbus
-</code></pre>
-<p><strong>Important:</strong> Make sure you are connected to the switch and check that your first wired interface (starting with the letter <code>e</code>) has an assigned IP.</p>
-<h4 id="133-update-etcsudoers-and-groups">1.3.3. Update <code>/etc/sudoers</code> and groups</h4>
-<p><code>tower-tools</code> assumes that the current user has full <code>sudo</code> access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:</p>
-<pre><code>&lt;you_username&gt; ALL=(ALL) NOPASSWD: ALL
-</code></pre>
-<p>To build an image with <code>build-tower-image</code> you need to add the current user in the <code>abuild</code> group:</p>
-<pre><code>addgroup &lt;you_username&gt; abuild
-</code></pre>
-<h4 id="134-install-tower-tools">1.3.4. Install <code>tower-tools</code></h4>
-<p>Update pip to the latest version:</p>
-<pre><code>$&gt; python3 -m pip install --upgrade pip
-</code></pre>
-<p>then:</p>
-<pre><code>$&gt; python3 -m pip install &quot;tower-tools @ git+ssh://github.com/towercomputers/tools.git&quot;
-</code></pre>
 
 
 

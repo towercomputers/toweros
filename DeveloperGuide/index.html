@@ -14,6 +14,8 @@
         <link rel="prev" href="../implementation/">
       
       
+        <link rel="next" href="../Tower%20Whitepaper.pdf">
+      
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
@@ -318,10 +320,84 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#2-test-with-hatch" class="md-nav__link">
+    2. Test with hatch
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-manually-qa-toweros-thinclient-release" class="md-nav__link">
+    3. Manually QA TowerOS-ThinClient release
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-build-you-own-custom-thin-client-linux" class="md-nav__link">
+    4. Build you own custom Thin Client (Linux)
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Build you own custom Thin Client (Linux)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-install-dependencies" class="md-nav__link">
+    4.1. Install dependencies
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-enable-services" class="md-nav__link">
+    4.2. Enable services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-update-etcsudoers-and-groups" class="md-nav__link">
+    4.3. Update /etc/sudoers and groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-install-tower-tools" class="md-nav__link">
+    4.4. Install tower-tools
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Tower%20Whitepaper.pdf" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Whitepaper
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -356,6 +432,61 @@
   <a href="#1-setup-environement" class="md-nav__link">
     1. Setup environement
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-test-with-hatch" class="md-nav__link">
+    2. Test with hatch
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-manually-qa-toweros-thinclient-release" class="md-nav__link">
+    3. Manually QA TowerOS-ThinClient release
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-build-you-own-custom-thin-client-linux" class="md-nav__link">
+    4. Build you own custom Thin Client (Linux)
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Build you own custom Thin Client (Linux)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-install-dependencies" class="md-nav__link">
+    4.1. Install dependencies
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-enable-services" class="md-nav__link">
+    4.2. Enable services
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-update-etcsudoers-and-groups" class="md-nav__link">
+    4.3. Update /etc/sudoers and groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-install-tower-tools" class="md-nav__link">
+    4.4. Install tower-tools
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -396,91 +527,131 @@ EOF
 <ol>
 <li>set the DNS server:</li>
 </ol>
-<p>The file /etc/resolv.conf must contain the following:
-````
-nameserver 8.8.8.8
-nameserver 8.8.4.4</p>
-<pre><code>
-4. restart network with: `sudo rc-service networking restart`
-
-Configure `git`, download Github repository in `~/towercomputers/tools` and install `hatch` with:
-
+<p>The file /etc/resolv.conf must contain the following:</p>
+<pre><code>nameserver 8.8.8.8
+nameserver 8.8.4.4
 </code></pre>
-<p>$&gt; ~/install-dev.sh <git-name> <git-email> <git-private-key-path></p>
-<pre><code>
-## 2. Test with hatch
-
+<ol>
+<li>restart network with: <code>sudo rc-service networking restart</code></li>
+</ol>
+<p>Configure <code>git</code>, download Github repository in <code>~/towercomputers/tools</code> and install <code>hatch</code> with:</p>
+<pre><code>$&gt; ~/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
 </code></pre>
-<p>$&gt; cd ~/towercomputers/tools
+<h2 id="2-test-with-hatch">2. Test with hatch</h2>
+<pre><code>$&gt; cd ~/towercomputers/tools
 $&gt; hatch run tower --help
-$&gt; hatch run build-tower-image --help</p>
-<pre><code>
-## 3. Manually QA TowerOS-ThinClient release
-
-On first boot:
-
-1. Basic checking
-
-- Welcome message should be customized.
-- README, whitepaper and install-dev.sh should be in ~/.
-- wheel package and host image should be in ~/.cache/tower/builds.
-- iptables -L -v should show firewall rules and /var/logs/iptables.log should contain firewall logs.
-- `lo` and `eth0` should be up (check  with `ip ad`)
-
-2. Provision an online host:
-
+$&gt; hatch run build-tower-image --help
 </code></pre>
-<p>$&gt; tower provision web --online --wlan-ssid <ssid> --wlan-password <password> --sd-card /dev/sdb </p>
-<pre><code>
-3. Provision an offline host:
-
+<h2 id="3-manually-qa-toweros-thinclient-release">3. Manually QA TowerOS-ThinClient release</h2>
+<p>On first boot:</p>
+<ol>
+<li>
+<p>Basic checking</p>
+</li>
+<li>
+<p>Welcome message should be customized.</p>
+</li>
+<li>README, whitepaper and install-dev.sh should be in ~/.</li>
+<li>wheel package and host image should be in ~/.cache/tower/builds.</li>
+<li>iptables -L -v should show firewall rules and /var/logs/iptables.log should contain firewall logs.</li>
+<li>
+<p><code>lo</code> and <code>eth0</code> should be up (check  with <code>ip ad</code>)</p>
+</li>
+<li>
+<p>Provision an online host:</p>
+</li>
+</ol>
+<pre><code>$&gt; tower provision web --online --wlan-ssid &lt;ssid&gt; --wlan-password &lt;password&gt; --sd-card /dev/sdb 
 </code></pre>
-<p>$&gt; tower provision office --offline --sd-card /dev/sdb</p>
-<pre><code>
-4. Check status:
-
+<ol>
+<li>Provision an offline host:</li>
+</ol>
+<pre><code>$&gt; tower provision office --offline --sd-card /dev/sdb
 </code></pre>
-<p>$&gt; tower status</p>
-<pre><code>
-5. Install package in offline host:
-
+<ol>
+<li>Check status:</li>
+</ol>
+<pre><code>$&gt; tower status
 </code></pre>
-<p>$&gt; tower install office xcalc --online-host office</p>
-<pre><code>
-6. Install package in online host:
-
+<ol>
+<li>Install package in offline host:</li>
+</ol>
+<pre><code>$&gt; tower install office xcalc --online-host office
 </code></pre>
-<p>$&gt; tower install web midori</p>
-<pre><code>
-7. Test installed packages
-
+<ol>
+<li>Install package in online host:</li>
+</ol>
+<pre><code>$&gt; tower install web midori
 </code></pre>
-<p>$&gt; startx
+<ol>
+<li>Test installed packages</li>
+</ol>
+<pre><code>$&gt; startx
 $&gt; tower run office xcalc
-$&gt; tower run web midori</p>
-<pre><code>
-Check also if the Application menu contains shortcuts for installed packages.
-
-8. Logout from `xfce` and connect to internet as explained above
-
-9. Build an host image with:
-
+$&gt; tower run web midori
 </code></pre>
-<p>$&gt; buld-tower-image host</p>
-<pre><code>
-10. Build a thinclient image with:
-
+<p>Check also if the Application menu contains shortcuts for installed packages.</p>
+<ol>
+<li>
+<p>Logout from <code>xfce</code> and connect to internet as explained above</p>
+</li>
+<li>
+<p>Build an host image with:</p>
+</li>
+</ol>
+<pre><code>$&gt; buld-tower-image host
 </code></pre>
-<p>$&gt; buld-tower-image thinclient</p>
-<pre><code>
-11. Install development environment with:
-
+<ol>
+<li>Build a thinclient image with:</li>
+</ol>
+<pre><code>$&gt; buld-tower-image thinclient
 </code></pre>
-<p>$&gt; ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
-```</p>
+<ol>
+<li>Install development environment with:</li>
+</ol>
+<pre><code>$&gt; ~/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
+</code></pre>
 <ol>
 <li>If you are brave redo all these tests with the image generated in step 10 :)</li>
 </ol>
+<h2 id="4-build-you-own-custom-thin-client-linux">4. Build you own custom Thin Client (Linux)</h2>
+<h3 id="41-install-dependencies">4.1. Install dependencies</h3>
+<pre><code>$&gt; apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
+      avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
+      musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
+      alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
+      fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
+      agetty runuser nano vim net-tools losetup xorg-server xf86-input-libinput \
+      xinit udev xfce4 xfce4-terminal xfce4-screensaver adw-gtk3 \
+      adwaita-xfce-icon-theme setxkbmap
+</code></pre>
+<h3 id="42-enable-services">4.2. Enable services</h3>
+<p>If necessary, enable IPv4 with:</p>
+<pre><code>sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
+</code></pre>
+<p>then</p>
+<pre><code>$&gt; rc-update add dhcpcd
+$&gt; rc-update add avahi-daemon
+$&gt; rc-update add iptables
+$&gt; rc-update add networking
+$&gt; rc-update add wpa_supplicant boot
+$&gt; rc-update add dbus
+</code></pre>
+<p><strong>Important:</strong> Make sure you are connected to the switch and check that your first wired interface (starting with the letter <code>e</code>) has an assigned IP.</p>
+<h3 id="43-update-etcsudoers-and-groups">4.3. Update <code>/etc/sudoers</code> and groups</h3>
+<p><code>tower-tools</code> assumes that the current user has full <code>sudo</code> access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:</p>
+<pre><code>&lt;you_username&gt; ALL=(ALL) NOPASSWD: ALL
+</code></pre>
+<p>To build an image with <code>build-tower-image</code> you need to add the current user in the <code>abuild</code> group:</p>
+<pre><code>addgroup &lt;you_username&gt; abuild
+</code></pre>
+<h3 id="44-install-tower-tools">4.4. Install <code>tower-tools</code></h3>
+<p>Update pip to the latest version:</p>
+<pre><code>$&gt; python3 -m pip install --upgrade pip
+</code></pre>
+<p>then:</p>
+<pre><code>$&gt; python3 -m pip install &quot;tower-tools @ git+ssh://github.com/towercomputers/tools.git&quot;
+</code></pre>
 
 
 
