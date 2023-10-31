@@ -1,0 +1,10 @@
+site_name: Tower Computers
+site_url: https://towercomputers.github.io/tower-tools/
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Implementation: implementation.md
+  - Development: DeveloperGuide.md
