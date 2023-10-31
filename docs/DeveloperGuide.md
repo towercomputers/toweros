@@ -31,16 +31,18 @@ nameserver 8.8.4.4
 
 4. restart network with: `sudo rc-service networking restart`
 
-Configure `git`, download Github repository in `~/towercomputers/tools` and install `hatch` with:
+Configure `git`, download Github repository in `~/towercomputers/tower-tools` and install `hatch` with:
 
 ```
 $> ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
 ```
 
-## 2. Test with hatch
+## 2. Use Tower with hatch
 
 ```
-$> cd ~/towercomputers/tools
+$> git clone git@github.com:towercomputers/tower-tools.git
+$> cd tower-tools
+$> pip install hatch
 $> hatch run tower --help
 $> hatch run build-tower-image --help
 ```
@@ -180,5 +182,52 @@ $> python3 -m pip install --upgrade pip
 then:
 
 ```
-$> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputers/tools.git"
+$> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputers/tower-tools.git"
+```
+
+## 5. Generate an host image with build-image
+
+```
+$> build-tower-image host
+```
+
+This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command if the `--image` flag is not provided.
+
+## 6. Build a TowerOS image with Docker
+
+Build the Docker image with:
+
+```
+$> git clone git@github.com:towercomputers/tower-tools.git
+$> cd tools
+$> hatch build -t wheel
+$> docker build -t build-tower-image:latest .
+```
+
+Then build the TowerOS image inside a Docker container:
+
+```
+$> docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
+```
+
+Retrieve that image from the container:
+
+```
+$> docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
+```
+
+Finally delete the container with:
+
+```
+$> docker rm towerbuilder
+```
+
+**Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
+
+```
+$> docker buildx create --use
+$> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
+$> docker run --privileged --rm tonistiigi/binfmt --install all
+$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
+              build-tower-image thinclient
 ```

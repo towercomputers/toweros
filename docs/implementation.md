@@ -23,7 +23,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 4. Creating and updating an Alpine APK overlay folder with mainly:
 
     1. `pip` cache folder
-    2. add  system install bash scripts (see https://github.com/towercomputers/tools/tree/dev/scripts/toweros-thinclient)
+    2. add  system install bash scripts (see https://github.com/towercomputers/tower-tools/tree/dev/scripts/toweros-thinclient)
     3. add the Towercomputers documentation
     4. Add /etc configuration files
     5. add builds required by `tower-tools` (TowerOS-Host, `tower-tools`)

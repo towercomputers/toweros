@@ -2,17 +2,7 @@
 
 ### 2.1. Provision a host
 
-Note: If you are using TowerOS, you can skip the first step.
-
-#### 2.1.1. Generate an image with build-image
-
-```
-$> build-tower-image host
-```
-
-This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command if the `--image` flag is not provided.
-
-#### 2.1.2. Prepare the SD card
+Prepare the sd-card in the Thin Client with the command bellow. Once the sd-card is ready you must insert it into the Raspberry Pi or CM4 and turn it on.
 
 ```
 $> tower provision <host> --offline
@@ -83,53 +73,4 @@ Run galculator from `office`.
 ```
 $> startx
 $> tower run office gcalculator
-```
-
-### 2.6. Use with hatch
-
-```
-$> git clone git@github.com:towercomputers/tools.git
-$> cd tools
-$> pip install hatch
-$> hatch run tower --help
-$> hatch run build-tower-image --help
-```
-
-### 2.7. Build a TowerOS image with Docker
-
-Build the Docker image with:
-
-```
-$> git clone git@github.com:towercomputers/tools.git
-$> cd tools
-$> hatch build -t wheel
-$> docker build -t build-tower-image:latest .
-```
-
-Then build the TowerOS image inside a Docker container:
-
-```
-$> docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
-```
-
-Retrieve that image from the container:
-
-```
-$> docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
-```
-
-Finally delete the container with:
-
-```
-$> docker rm towerbuilder
-```
-
-**Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
-
-```
-$> docker buildx create --use
-$> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
-$> docker run --privileged --rm tonistiigi/binfmt --install all
-$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
-              build-tower-image thinclient
 ```
