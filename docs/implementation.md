@@ -17,8 +17,8 @@ All IPs are static and assigned by the `tower` tool. Here are the IPs used:
 
 The firewall is the most important element for securing the Tower network. `iptables` is installed and configured on each host and on the thinclient using the following two scripts:
 
-https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
-https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh
+* https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
+* https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh
 
 Both are standalone, ie they clean all the rules at the beginning and save the new rules at the end.
 

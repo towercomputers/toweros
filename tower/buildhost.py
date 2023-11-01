@@ -248,7 +248,7 @@ def insert_tower_env(boot_part, config):
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     
 @clitask("Installing TowserOS-Host in {1}...", 
-         timer_message="TowserOS-Host installed in {0}.\nPlease insert the SD Card into the Host computer, then turn it on and wait for it to be discover on the network.", 
+         timer_message="TowserOS-Host installed in {0}.\nPlease remove the SD-Card from the Thin Client and insert it into the Host computer, then turn it on the Host computer and wait for it to be discover by the Thin Client on the network.", 
          sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:

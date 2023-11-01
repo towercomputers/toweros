@@ -36,12 +36,12 @@ def get_device_list():
 def select_sdcard_device():
     k = None
     while k is None:
-        k = input("Please ensure the sd-card is *NOT* connected and press ENTER.")
+        k = input("Please ensure the sd-card is *NOT* connected to the Thin Client and press ENTER.")
     devices_before = get_device_list()
     
     k = None
     while k is None:
-        k = input("Please insert now the sd-card and press ENTER.")
+        k = input("Please insert now the sd-card to the Thin Client and press ENTER.")
 
     time.sleep(2)
     devices_after = get_device_list()
