@@ -7,6 +7,7 @@ nav:
   - Hardware requirements: hardware.md
   - Installation: installation.md
   - Usage: usage.md
+  - Security: security.md
   - Implementation: implementation.md
   - Development: DeveloperGuide.md
   - Whitepaper: "Tower Whitepaper.pdf"
