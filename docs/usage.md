@@ -1,12 +1,12 @@
-## 1. Provision a host
+## 1. Provision an online host
 
-Prepare the sd-card in the Thin Client with the command bellow. Once the sd-card is ready you must insert it into the Raspberry Pi or CM4 and turn it on.
+Only one of the hosts is connected to the internet via WIFI. This host, called the `router`, is then responsible for sharing the connection with all the other online hosts. The first online host that you can/must provision is therefore the router:
 
 ```
-$> tower provision <host> --offline
+$> tower provision router –wlan-ssid <ssid> –wlan-password <password>
 ```
 
-or, for an online host:
+Once the `router` is correctly provisioned, you can provision other online hosts:
 
 ```
 $> tower provision <host> --online
@@ -14,7 +14,15 @@ $> tower provision <host> --online
 
 Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
 
-## 2. Execute a command on one of the hosts
+## 2. Provision an offline host
+
+Prepare the sd-card in the Thin Client with the command bellow. Once the sd-card is ready you must insert it into the Raspberry Pi or CM4 and turn it on.
+
+```
+$> tower provision <host> --offline
+```
+
+## 3. Execute a command on one of the hosts
 
 Run a command on a host with SSH:
 
@@ -28,42 +36,38 @@ or a graphical application with NX protocol:
 $> tower run <host> <application-name>
 ```
 
-## 3. Install an application on one of the hosts
+## 4. Install an application on one of the hosts
 
 ```
 $> tower install <host> <application-name>
 ```
 
-or, if the host is offline, you can tunnel the installation through an online host:
+Important: To be able to install packages on offline hosts you must first provision the `router`.
 
-```
-$> tower install <offline-host> <application-name> --online-host <online-host> 
-```
-
-## 4. List hosts and their statuses
+## 5. List hosts and their statuses
 
 ```
 $> tower status
 ```
 
-## 5. Example using two hosts
+## 6. Example using two hosts
 
-Provision the first offline host named `office`.
+Provision the router.
+
+```
+$> tower provision router –wlan-ssid <ssid> –wlan-password <password>
+```
+
+Provision an offline host named `office`.
 
 ```
 $> tower provision office
 ```
 
-Provision a second online host named `web`.
-
-```
-$> tower provision web --online –wlan-ssid <ssid> –wlan-password <password>
-```
-
 Install galculator on the `office` offline host.
 
 ```
-$> tower install office galculator --online-host=web
+$> tower install office galculator
 ```
 
 Run galculator from `office`.
