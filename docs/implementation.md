@@ -1,6 +1,36 @@
 To date, `tower-tools` includes six main modules: `buildthinclient.py` and `buildhost.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provision.py`, `install.py`, and `gui.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the `thinclient`.
 
-## 1. TowerOS-ThinClient
+## 1. Network architecture
+
+The thinclient is connected to two separate networks (via two distinct switches), one connected to the internet, the other offline. The hosts supposed to have a connection are connected to the first network, and those which should be offline are connected to the second.
+On the online network, one of the hosts, called the `router`, is connected to the internet and shares the connection with all the hosts connected to the same network.
+All IPs are static and assigned by the `tower` tool. Here are the IPs used:
+
+* TOWER_NETWORK_ONLINE = "192.168.2.0/24"
+* TOWER_NETWORK_OFFLINE = "192.168.3.0/24"
+* THIN_CLIENT_IP_ETH0 = "192.168.2.100"
+* THIN_CLIENT_IP_ETH1 = "192.168.3.100"
+* ROUTER_IP = "192.168.2.1"
+* FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
+
+## 2. Firewall Rules
+
+The firewall is the most important element for securing the Tower network. `iptables` is installed and configured on each host and on the thinclient using the following two scripts:
+
+https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
+https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh
+
+Both are standalone, ie they clean all the rules at the beginning and save the new rules at the end.
+
+The thinclient is configured with the following guide https://wiki.archlinux.org/title/Simple_stateful_firewall
+Hosts are configured the same way, but with the following additional rules:
+
+- Port 22 is open only for the Thin Client (for `ssh` connections)
+- for offline hosts we reject all outgoing traffic
+- for online hosts, outgoing traffic is only rejected to the thinclient and the other hosts.
+- for the host having the role of `router`, we activate the ip forwarding to share the connection with the other online hosts.
+
+## 3. TowerOS-ThinClient
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
@@ -39,7 +69,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 * TowerOS-ThinClient uses `Syslinux` as the boot loader.
 
 
-## 2. TowerOS-Host
+## 4. TowerOS-Host
 
 `buildhost.py` is the module responsible for generating an image of TowerOS-ThinClient when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
 
@@ -75,7 +105,7 @@ Here are the different steps taken by `buildhost.py` to configure an image when 
 
 Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folder by the TowerOS installer.
 
-## 3. SSHConf
+## 5. SSHConf
 
 `tower-tools` uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
@@ -85,7 +115,7 @@ Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folde
 
 Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/project/sshconf/) to manipulate `ssh` config files.
 
-## 4. Provision
+## 6. Provision
 
 `provision.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
 
@@ -99,7 +129,7 @@ The steps to provision a host are as follows:
 
 Once a host is provisioned it is therefore directly accessible by ssh with `ssh <host>` or `tower run <host>`.
 
-## 5. GUI
+## 7. GUI
 
 GUI is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
 
@@ -125,7 +155,7 @@ Here are the steps taken by `gui.py` to run an application on one of the hosts:
 
 GUI works the same way as X2GO from which it is directly inspired.
 
-## 6. Install
+## 8. Install
 
 This module allows to use `apk` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
 
