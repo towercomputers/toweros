@@ -123,6 +123,10 @@ prepare_home_directory() {
     chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
     runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-tools
     echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
+
+    if [ "$STARTX_ON_LOGIN" == "true" ]; then
+        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
+    fi
 }
 
 update_live_system() {
@@ -331,6 +335,7 @@ ask_configuration() {
     # ROOT_PASSWORD, USERNAME, PASSWORD, 
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
     # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE, SECURE_BOOT
+    # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
 }

@@ -219,6 +219,10 @@ def get_keymap():
     variant = layout if variant == "No Variant" else f"{layout}-{variant}"
     return layout, variant
 
+def get_startx_on_login():
+    print_title("Start X on login")
+    return Confirm.ask("Do you want to automatically start X on login ?")
+
 def print_value(label, value):
     rprint(Text.assemble((f"{label}: ", "bold"), value))
 
@@ -263,6 +267,7 @@ def ask_config():
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
         config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
+        config['STARTX_ON_LOGIN'] = "true" if get_startx_on_login() else "false"
         config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
         config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']
         confirmed = confirm_config(config)
