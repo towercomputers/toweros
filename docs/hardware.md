@@ -34,3 +34,42 @@ For each CM4 you need:
 One of the CM4s, the one that will serve as a router, must have WiFi and 2GB of RAM is sufficient. For other hosts, WiFi is not necessary, but we recommend 8GB of RAM, especially for hosts that need to run graphicals applications.
 
 Ideally you should use two Deskpis, one for online hosts and another for offline hosts.
+
+## 3. Hardware check list
+
+**Thin Client**
+
+- Laptop (Lenovo X270)
+- USB Ethernet Adaptater (https://www.olimex.com/Products/USB-Modules/USB-GIGABIT/open-source-hardware)
+- SD-Card reader
+- 2 RJ45 cables
+
+**Network**
+
+* 2 unmanaged switches
+
+**Rasperry Pi 4b Hosts**
+
+* minimum one RPI for the `router` (2Go RAM recommanded)
+* one RPI by host, RAM based and storage storage based on usage pattern
+* one SD-Card by host
+* one USB Key by host
+* one RJ-45 cable by host
+* one RTC Clock hat for offline host
+* if you are using a POE switch, one POE hat by host or evenetually a USB hub
+
+**Rasperry Pi CM4 Lite**
+
+* One or two Deskpi Super6c board
+* minimum one CM4 for the `router` (2Go RAM recommanded)
+* one CM4 by host, RAM based and storage storage based on usage pattern
+* one SD-Card by host
+* one NVMe M.2 SS2 by host
+
+**Suggested for debugging**
+
+* Monitor
+* micro HDMI<->monitor cable adapter
+* USB keyboard
+* USB mouse
+
