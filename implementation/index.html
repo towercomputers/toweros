@@ -542,8 +542,10 @@ All IPs are static and assigned by the <code>tower</code> tool. Here are the IPs
 </ul>
 <h2 id="2-firewall-rules">2. Firewall Rules</h2>
 <p>The firewall is the most important element for securing the Tower network. <code>iptables</code> is installed and configured on each host and on the thinclient using the following two scripts:</p>
-<p>https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
-https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh</p>
+<ul>
+<li>https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh</li>
+<li>https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh</li>
+</ul>
 <p>Both are standalone, ie they clean all the rules at the beginning and save the new rules at the end.</p>
 <p>The thinclient is configured with the following guide https://wiki.archlinux.org/title/Simple_stateful_firewall
 Hosts are configured the same way, but with the following additional rules:</p>
