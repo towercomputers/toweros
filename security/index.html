@@ -8,19 +8,25 @@
       
       
       
+        <link rel="canonical" href="https://towercomputers.github.io/tower-tools/security/">
       
       
+        <link rel="prev" href="../usage/">
       
-      <link rel="icon" href="/tower-tools/assets/images/favicon.png">
+      
+        <link rel="next" href="../implementation/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
     
     
       
-        <title>Tower Computers</title>
+        <title>Security - Tower Computers</title>
       
     
     
-      <link rel="stylesheet" href="/tower-tools/assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
       
       
 
@@ -39,7 +45,7 @@
       
     
     
-    <script>__md_scope=new URL("/tower-tools/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -60,6 +66,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#1-security-guarantees" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -72,7 +83,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/tower-tools/." title="Tower Computers" class="md-header__button md-logo" aria-label="Tower Computers" data-md-component="logo">
+    <a href=".." title="Tower Computers" class="md-header__button md-logo" aria-label="Tower Computers" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -92,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Security
             
           </span>
         </div>
@@ -164,7 +175,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/tower-tools/." title="Tower Computers" class="md-nav__button md-logo" aria-label="Tower Computers" data-md-component="logo">
+    <a href=".." title="Tower Computers" class="md-nav__button md-logo" aria-label="Tower Computers" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -181,7 +192,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -200,7 +211,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/hardware/" class="md-nav__link">
+      <a href="../hardware/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -219,7 +230,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -238,7 +249,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/usage/" class="md-nav__link">
+      <a href="../usage/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -255,9 +266,27 @@
       
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="/tower-tools/security/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Security
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -266,6 +295,85 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-security-guarantees" class="md-nav__link">
+    1. Security Guarantees
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Security Guarantees">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-firewall" class="md-nav__link">
+    1.1 Firewall
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-hardware" class="md-nav__link">
+    1.2 Hardware
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-operating-system" class="md-nav__link">
+    2. Operating System
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Operating System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-application-level" class="md-nav__link">
+    2.1. Application-Level
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-trusted-computing-base" class="md-nav__link">
+    3. Trusted Computing Base
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-threat-analysis" class="md-nav__link">
+    4. Threat Analysis
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -276,7 +384,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/implementation/" class="md-nav__link">
+      <a href="../implementation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -295,7 +403,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/DeveloperGuide/" class="md-nav__link">
+      <a href="../DeveloperGuide/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -314,7 +422,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tower-tools/Tower%20Whitepaper.pdf" class="md-nav__link">
+      <a href="../Tower%20Whitepaper.pdf" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -345,6 +453,75 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-security-guarantees" class="md-nav__link">
+    1. Security Guarantees
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Security Guarantees">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-firewall" class="md-nav__link">
+    1.1 Firewall
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-hardware" class="md-nav__link">
+    1.2 Hardware
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-operating-system" class="md-nav__link">
+    2. Operating System
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Operating System">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-application-level" class="md-nav__link">
+    2.1. Application-Level
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-trusted-computing-base" class="md-nav__link">
+    3. Trusted Computing Base
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-threat-analysis" class="md-nav__link">
+    4. Threat Analysis
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -355,8 +532,108 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+
+  <h1>Security</h1>
+
+<h2 id="1-security-guarantees">1. Security Guarantees</h2>
+<h3 id="11-firewall">1.1 Firewall</h3>
+<ul>
+<li>There is zero direct communication between hosts (however there is tunneling for package management).</li>
+<li>All communication between the thin client and a host is over SSH and on port 22 (ideally including screen sharing).</li>
+<li>All communication between the thin client and a host must originate with the thin client.</li>
+<li>No connections to the online hosts may originate from the Internet.</li>
+<li>Tunneling from the thin client to the Internet is allowed.</li>
+</ul>
+<h3 id="12-hardware">1.2 Hardware</h3>
+<ul>
+<li>Online hosts are connected to an Ethernet switch and a WLAN; offline hosts are connected only to the switch.</li>
+</ul>
+<h2 id="2-operating-system">2. Operating System</h2>
+<ul>
+<li>Reasonable standards; but this is mostly out of scope. (Disable HT; use a hardened Linux kernel; etc.)</li>
+</ul>
+<h3 id="21-application-level">2.1. Application-Level</h3>
+<ul>
+<li>All network connections between the thin client and a host) must be directly triggered by user action.</li>
+</ul>
+<h2 id="3-trusted-computing-base">3. Trusted Computing Base</h2>
+<ul>
+<li>Tower Tooling</li>
+<li>Alpine Linux Base System</li>
+<li>Network Drivers</li>
+<li>Network Card Hardware</li>
+<li>SSH</li>
+<li>Screensharing Software</li>
+</ul>
+<h2 id="4-threat-analysis">4. Threat Analysis</h2>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Attack</th>
+<th>Mitigated</th>
+<th>If so, how?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Theft</td>
+<td>Theft of Device</td>
+<td>Yes</td>
+<td>Encrypted root disks</td>
+</tr>
+<tr>
+<td>Physical Tampering</td>
+<td>Evil-Maid Attack</td>
+<td>Optional</td>
+<td>Raspberry Pis: https://www.zymbit.com/</td>
+</tr>
+<tr>
+<td>Physical Tampering</td>
+<td>Cold-Boot Attack</td>
+<td>Optional</td>
+<td>Raspberry Pis: https://www.zymbit.com/</td>
+</tr>
+<tr>
+<td>Microarchitectural</td>
+<td>RowHammer; RowPress</td>
+<td>Yes</td>
+<td>Host-Isolation</td>
+</tr>
+<tr>
+<td>Microarchitectural</td>
+<td>Speculative Execution</td>
+<td>Yes</td>
+<td>Host-Isolation</td>
+</tr>
+<tr>
+<td>Physical Side-Channel</td>
+<td>Power Consumption (https://www.hertzbleed.com/)</td>
+<td>Optional</td>
+<td>Disable DVFS</td>
+</tr>
+<tr>
+<td>Physical Side-Channel</td>
+<td>Acoustic Emissions</td>
+<td>No</td>
+<td></td>
+</tr>
+<tr>
+<td>Physical Side-Channel</td>
+<td>Electromagnetic Radiation</td>
+<td>No</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -389,10 +666,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "/tower-tools/", "features": [], "search": "/tower-tools/assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/tower-tools/assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
       
     
   </body>
