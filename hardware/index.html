@@ -8,9 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://towercomputers.github.io/tower-tools/SecureBoot/">
+        <link rel="canonical" href="https://towercomputers.github.io/tower-tools/hardware/">
       
       
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../installation/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -18,7 +22,7 @@
     
     
       
-        <title>Secure Boot - Tower Computers</title>
+        <title>Hardware requirements - Tower Computers</title>
       
     
     
@@ -63,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#secure-boot" class="md-skip">
+        <a href="#1-raspberry-pi-4b" class="md-skip">
           Skip to content
         </a>
       
@@ -99,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Secure Boot
+              Hardware requirements
             
           </span>
         </div>
@@ -205,9 +209,27 @@
       
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../hardware/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Hardware requirements
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -216,6 +238,38 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-raspberry-pi-4b" class="md-nav__link">
+    1. Raspberry PI 4b
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-compute-module-4-lite" class="md-nav__link">
+    2. Compute Module 4 Lite
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -332,8 +386,6 @@
   
   
   
-    
-  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -342,15 +394,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#before-the-installation" class="md-nav__link">
-    Before the installation
+  <a href="#1-raspberry-pi-4b" class="md-nav__link">
+    1. Raspberry PI 4b
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#after-the-installation" class="md-nav__link">
-    After the installation
+  <a href="#2-compute-module-4-lite" class="md-nav__link">
+    2. Compute Module 4 Lite
   </a>
   
 </li>
@@ -370,22 +422,35 @@
                   
 
 
-<h1 id="secure-boot">Secure Boot</h1>
-<p>Secure Boot is a server security feature that is implemented in the BIOS and does not require special hardware. Secure Boot ensures that each component launched during the boot process is digitally signed and that the signature is validated against a set of trusted certificates embedded in the UEFI BIOS.</p>
-<p>Tower OS-Thin Client offers the possibility to activate Secure Boot. To do this, the firmware must be correctly configured before and after installation.</p>
-<h2 id="before-the-installation">Before the installation</h2>
-<p>You must:</p>
+  <h1>Hardware requirements</h1>
+
+<p>To use Tower you need a Thin Client and several Hosts connected via one or ideally two switches.</p>
+<p>The Thin Client is typically a laptop like the Lenovo X270. An SD-card reader is necessary for the Thin Client to prepare the SD-cards containing the hosts' OS. Two RJ45 ports are also necessary to connect the Thin Client to the two switches (you can optionally use a USB ethernet adapter).</p>
+<p>For the moment tower has been tested with two types of hosts: Raspberry PI 4b and Compute Module 4 Lite.</p>
+<h2 id="1-raspberry-pi-4b">1. Raspberry PI 4b</h2>
+<p><img alt="Tower Archi" src="../img/towerarchi.png" /></p>
+<p>For each Raspberry PI you need:</p>
 <ul>
-<li>disable Secure Boot if necessary</li>
-<li>Reset to "Setup Mode"</li>
-<li>Clear all secure boot keys already registered.</li>
+<li>an SD card, for the boot partition</li>
+<li>a USB key which will serve as a hard drive.</li>
+<li>for offline hosts a Real Time Clock hat</li>
 </ul>
-<p>On Thinkpad firmware these three things can be done on the same screen:</p>
-<p><img alt="alt text" src="./ThinkPadSecureBoot.jpg" /></p>
-<h2 id="after-the-installation">After the installation</h2>
-<p>You must enable the "Secure Boot" in the same screen.</p>
-<p>Attention, once activated you will not be able to boot on unsigned devices, for example a live system on a USB key. It will first be necessary to deactivate the "Secure Boot".</p>
-<p>Remember to make a backup of the private keys used for Secure Boot. They are located here: /usr/share/secureboot/keys/</p>
+<p>Tips:</p>
+<ul>
+<li>Remember to plug the USB key into the blue port (USB 3.0)</li>
+<li>For hosts that serve as a router we recommend an RPI with 2GB of RAM, for others, especially if you plan to run graphicals applications, we recommend 8GB of RAM.</li>
+<li>for sd-cards and usb keys, look at the list of hardware that we tested and their performance (TODO)</li>
+</ul>
+<h2 id="2-compute-module-4-lite">2. Compute Module 4 Lite</h2>
+<p><img alt="Deskpi Super6c board" src="../img/deskpi.jpg" /></p>
+<p>Using CM4s and the <a href="https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported">Deskpi Super6c board</a> you can avoid most cables and put all your hosts in an ATX case.</p>
+<p>For each CM4 you need:</p>
+<ul>
+<li>an SD card, for the boot partition</li>
+<li>a NVMe M.2 SS2 which will serve as a hard drive.</li>
+</ul>
+<p>One of the CM4s, the one that will serve as a router, must have WiFi and 2GB of RAM is sufficient. For other hosts, WiFi is not necessary, but we recommend 8GB of RAM, especially for hosts that need to run graphicals applications.</p>
+<p>Ideally you should use two Deskpis, one for online hosts and another for offline hosts.</p>
 
 
 
