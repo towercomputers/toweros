@@ -1,8 +1,6 @@
-## 3. Implementation
-
 To date, `tower-tools` includes six main modules: `buildthinclient.py` and `buildhost.py` to build the OS images used by the `thinclient` and the hosts. `sshconf.py` which manages `tower-tools` and `ssh` configuration files. `provision.py`, `install.py`, and `gui.py` which respectively allow you to provision a host, to install an application on it even without an internet connection and to run a graphical application of a host from the `thinclient`.
 
-### 3.1. TowerOS-ThinClient
+## 1. TowerOS-ThinClient
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
 
@@ -41,7 +39,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 * TowerOS-ThinClient uses `Syslinux` as the boot loader.
 
 
-### 3.2. TowerOS-Host
+## 2. TowerOS-Host
 
 `buildhost.py` is the module responsible for generating an image of TowerOS-ThinClient when the `build-tower-image host` command is executed and also for configuring the image when the `tower provision` command is called.
 
@@ -77,7 +75,7 @@ Here are the different steps taken by `buildhost.py` to configure an image when 
 
 Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folder by the TowerOS installer.
 
-### 3.3. SSHConf
+## 3. SSHConf
 
 `tower-tools` uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, included in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
@@ -87,7 +85,7 @@ Note: A TowerOS-ThinClient image is placed in the `~/.cache/tower/builds/` folde
 
 Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/project/sshconf/) to manipulate `ssh` config files.
 
-### 3.4. Provision
+## 4. Provision
 
 `provision.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry PI.
 
@@ -101,7 +99,7 @@ The steps to provision a host are as follows:
 
 Once a host is provisioned it is therefore directly accessible by ssh with `ssh <host>` or `tower run <host>`.
 
-### 3.5. GUI
+## 5. GUI
 
 GUI is a module that allows the use of the NX protocol through an SSH tunnel. It allows to execute from the `thinclient` a graphical application installed on one of the hosts with `tower run <host> <application-name>application>`.
 
@@ -127,7 +125,7 @@ Here are the steps taken by `gui.py` to run an application on one of the hosts:
 
 GUI works the same way as X2GO from which it is directly inspired.
 
-### 3.6. Install
+## 6. Install
 
 This module allows to use `apk` on an offline host through an `ssh` tunnel to an online host. To do this it performs the following steps:
 

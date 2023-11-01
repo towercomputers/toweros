@@ -1,8 +1,6 @@
-# Development Guide
-
 ## 1. Setup environement
 
-To connect to internet you must:
+To connect the Thin Client to internet you must:
 
 1. provision a `router`
 2. set the thinclient gateway to `192.168.2.1` (the router`s ip):

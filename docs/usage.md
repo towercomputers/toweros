@@ -1,6 +1,4 @@
-## 2. Usage
-
-### 2.1. Provision a host
+## 1. Provision a host
 
 Prepare the sd-card in the Thin Client with the command bellow. Once the sd-card is ready you must insert it into the Raspberry Pi or CM4 and turn it on.
 
@@ -16,7 +14,7 @@ $> tower provision <host> --online
 
 Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
 
-### 2.2. Execute a command on one of the hosts
+## 2. Execute a command on one of the hosts
 
 Run a command on a host with SSH:
 
@@ -30,7 +28,7 @@ or a graphical application with NX protocol:
 $> tower run <host> <application-name>
 ```
 
-### 2.3. Install an application on one of the hosts
+## 3. Install an application on one of the hosts
 
 ```
 $> tower install <host> <application-name>
@@ -42,13 +40,13 @@ or, if the host is offline, you can tunnel the installation through an online ho
 $> tower install <offline-host> <application-name> --online-host <online-host> 
 ```
 
-### 2.4. List hosts and their statuses
+## 4. List hosts and their statuses
 
 ```
 $> tower status
 ```
 
-### 2.5. Example using two hosts
+## 5. Example using two hosts
 
 Provision the first offline host named `office`.
 

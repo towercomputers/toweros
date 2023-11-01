@@ -4,6 +4,7 @@ theme:
   name: material
 nav:
   - Home: index.md
+  - Hardware requirements: hardware.md
   - Installation: installation.md
   - Usage: usage.md
   - Implementation: implementation.md
