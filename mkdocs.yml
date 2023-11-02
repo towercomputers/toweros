@@ -1,5 +1,5 @@
 site_name: Tower Computers
-site_url: https://towercomputers.github.io/tower-tools/
+site_url: https://towercomputers.github.io/toweros/
 theme:
   name: material
 nav:
@@ -10,4 +10,4 @@ nav:
   - Security: security.md
   - Implementation: implementation.md
   - Development: DeveloperGuide.md
-  - Whitepaper: "Tower Whitepaper.pdf"
+  - Whitepaper: "TowerOS Whitepaper.pdf"
