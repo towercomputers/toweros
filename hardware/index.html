@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://towercomputers.github.io/toweros/hardware/">
       
       
-        <link rel="prev" href="../introduction/">
+        <link rel="prev" href="..">
       
       
         <link rel="next" href="../installation/">
@@ -233,7 +233,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../introduction/" class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -262,17 +262,6 @@
         
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Hardware
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -282,66 +271,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#thin-client-hardware-recommendations" class="md-nav__link">
-    Thin Client Hardware Recommendations
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#host-hardware-recommendations" class="md-nav__link">
-    Host Hardware Recommendations
-  </a>
-  
-    <nav class="md-nav" aria-label="Host Hardware Recommendations">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#raspberry-pi-4b" class="md-nav__link">
-    Raspberry Pi 4B
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#compute-module-4-lite" class="md-nav__link">
-    Compute Module 4 Lite
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hardware-for-debugging" class="md-nav__link">
-    Hardware for Debugging
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -611,55 +540,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#thin-client-hardware-recommendations" class="md-nav__link">
-    Thin Client Hardware Recommendations
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#host-hardware-recommendations" class="md-nav__link">
-    Host Hardware Recommendations
-  </a>
-  
-    <nav class="md-nav" aria-label="Host Hardware Recommendations">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#raspberry-pi-4b" class="md-nav__link">
-    Raspberry Pi 4B
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#compute-module-4-lite" class="md-nav__link">
-    Compute Module 4 Lite
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hardware-for-debugging" class="md-nav__link">
-    Hardware for Debugging
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -676,19 +556,19 @@
 <h1 id="hardware">Hardware</h1>
 <p>TowerOS is designed to run on a thin client device and several hosts connected <em>via</em> one or two unmanaged Ethernet switches. Two switches are necessary if the user would like to have offline as well as online hosts.</p>
 <p>The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from. (Raspberry Pi 4Bs may be booted directly from USB, however.) The thin client should also have one or two RJ-45 ports, depending on the number of switches in use.</p>
-<h2 id="thin-client-hardware-recommendations">Thin Client Hardware Recommendations</h2>
+<h1 id="thin-client-hardware-recommendations">Thin Client Hardware Recommendations</h1>
 <ul>
 <li>Lenovo X270 Laptop</li>
 <li>Olimex USB Ethernet Adapter (https://www.olimex.com/Products/USB-Modules/USB-GIGABIT/open-source-hardware)</li>
 <li>USB SD Card reader</li>
 <li>2 Ethernet Cables</li>
 </ul>
-<h2 id="host-hardware-recommendations">Host Hardware Recommendations</h2>
+<h1 id="host-hardware-recommendations">Host Hardware Recommendations</h1>
 <p>TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compute Module 4 Lite (“CM4” for short). Where as Raspberry Pi 4Bs must be connected with standalone switch hardware, CM4 modules may be connected with a board like the DeskPi Super6C, which provides for a much more compact form factor for a complete TowerOS system. CM4 modules may easily use M.2 SSDs as their persistent storage, <em>via</em> a DeskPi Super6C, and they may therefore perform better.</p>
 <p><em>Notes</em>
 - The amount of RAM required for each host is heavily dependent on the intended usage pattern. Generally, at least one host should have 8GB of RAM, to run a web browser. For the router host, we recommend having at least 2GB of RAM.
 - Different SD cards and USB keys may have very different performance characteristics. In general, USB keys are much faster than SD cards, and M.2 SSDs are faster still.</p>
-<h3 id="raspberry-pi-4b">Raspberry Pi 4B</h3>
+<h2 id="raspberry-pi-4b">Raspberry Pi 4B</h2>
 <p><img alt="Tower Archi" src="../img/towerarchi.png" /></p>
 <ul>
 <li>Raspberry Pis may be booted either from an SD card or a USB key. For best performance, the root partition should reside on a USB key. You will need at least one SD card or USB key per host.</li>
@@ -698,7 +578,7 @@
 <li>You will need one RJ-45 cable per host.</li>
 <li>You will need one RTC Clock hat for each offline host.</li>
 </ul>
-<h3 id="compute-module-4-lite">Compute Module 4 Lite</h3>
+<h2 id="compute-module-4-lite">Compute Module 4 Lite</h2>
 <p><img alt="DeskPi Super6C Board" src="../img/deskpi.jpg" /></p>
 <p>Using CM4s and the <a href="https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported">DeskPi Super6C Board</a> you can avoid most cables and put all your hosts in a single mini-ITX case.</p>
 <ul>
@@ -708,7 +588,7 @@
 <li>CM4s must use an M.2 SSD for the root partition (which also should be highly performant).</li>
 <li>To support both online and offline hosts, two independent DeskPi Super6s may be used.</li>
 </ul>
-<h2 id="hardware-for-debugging">Hardware for Debugging</h2>
+<h1 id="hardware-for-debugging">Hardware for Debugging</h1>
 <ul>
 <li>Monitor</li>
 <li>micro HDMI adapter</li>
