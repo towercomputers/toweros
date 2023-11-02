@@ -246,9 +246,15 @@ def insert_tower_env(boot_part, config):
     logger.debug(f"Host configuration:\n{str_env}")
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
-    
+
+WAITING_MESSAGE = "TowserOS-Host installed in {0}\n"
+WAITING_MESSAGE += "- remove the boot device from the Thin Client \n"
+WAITING_MESSAGE += "- insert it into the Host computer\n"
+WAITING_MESSAGE += "- turn it on the Host computer and wait for it to be discover by the Thin Client on the network.\n"
+WAITING_MESSAGE += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
+
 @clitask("Installing TowserOS-Host in {1}...", 
-         timer_message="TowserOS-Host installed in {0}.\nPlease remove the boot device from the Thin Client and insert it into the Host computer, then turn it on the Host computer and wait for it to be discover by the Thin Client on the network.", 
+         timer_message=WAITING_MESSAGE, 
          sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:
