@@ -1,11 +1,11 @@
-## 1. Setup environement
+## Set Up Development Environment
 
-To connect the Thin Client to internet you must:
+To connect the thin client to the Internet you must:
 
-1. provision a `router`
-2. set the thinclient gateway to `192.168.2.1` (the router`s ip):
+1. Provision a `router`.
+1. Set the gateway on the thin client to `192.168.2.1` (the router's IP address):
 
-The file /etc/network/interfaces must contain the following:
+The file `/etc/network/interfaces` must contain the following:
 
 ```
 auto lo
@@ -19,112 +19,115 @@ iface eth1 inet static
     address 192.168.3.100/24
 EOF
 ```
-3. set the DNS server:
 
-The file /etc/resolv.conf must contain the following:
+1. Set the DNS server on the thin client:
+
+The file `/etc/resolv.conf` must contain the following:
+
 ```
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 ```
 
-4. restart network with: `sudo rc-service networking restart`
+1. Restart the network with: `[thinclient]$ sudo rc-service networking restart`:
 
-Configure `git`, download Github repository in `~/towercomputers/tower-tools` and install `hatch` with:
-
-```
-$> ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
-```
-
-## 2. Use Tower with hatch
+Configure `git`, download Github repository in `~/towercomputers/toweros` and install `hatch` with:
 
 ```
-$> git clone git@github.com:towercomputers/tower-tools.git
-$> cd tower-tools
-$> pip install hatch
-$> hatch run tower --help
-$> hatch run build-tower-image --help
+[thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
 ```
 
-## 3. Manually QA TowerOS-ThinClient release
+## Use TowerOS with `hatch`:
+
+```
+[thinclient]$ git clone git@github.com:towercomputers/toweros.git
+[thinclient]$ cd toweros
+[thinclient]$ pip install hatch
+[thinclient]$ hatch run tower --help
+[thinclient]$ hatch run build-tower-image --help
+```
+
+## Manually QA TowerOS for Thin Client
 
 On first boot:
 
 1. Basic checking
 
-- Welcome message should be customized.
-- README, whitepaper and install-dev.sh should be in ~/.
-- wheel package and host image should be in ~/.cache/tower/builds.
-- iptables -L -v should show firewall rules and /var/logs/iptables.log should contain firewall logs.
-- `lo` and `eth0` should be up (check  with `ip ad`)
+- The “welcome message” should refer to TowerOS.
+- The README, whitepaper and `install-dev.sh` script should be found in `~/`.
+- The `wheel` package and host image should be in `~/.cache/tower/builds`.
+- `$ iptables -L -v` should show firewall rules, and `/var/logs/iptables.log` should contain firewall logs.
+- `lo` and `eth0` should be up (check  with `$ ip ad`)
 
-2. Provision an online host:
-
-```
-$> tower provision web --online --wlan-ssid <ssid> --wlan-password <password> --sd-card /dev/sdb 
-```
-
-3. Provision an offline host:
+1. Provision an online host:
 
 ```
-$> tower provision office --offline --sd-card /dev/sdb
+[thinclient]$ tower provision web --online --wlan-ssid <ssid> --wlan-password <password> --sd-card /dev/sdb 
 ```
 
-4. Check status:
+1. Provision an offline host:
 
 ```
-$> tower status
+[thinclient]$ tower provision office --offline --sd-card /dev/sdb
 ```
 
-5. Install package in offline host:
+1. Check system status:
 
 ```
-$> tower install office xcalc --online-host office
+[thinclient]$ tower status
 ```
 
-6. Install package in online host:
+1. Install a package an an offline host:
 
 ```
-$> tower install web midori
+[thinclient]$ tower install office xcalc --online-host office
 ```
 
-7. Test installed packages
+1. Install a package on an online host:
 
 ```
-$> startx
-$> tower run office xcalc
-$> tower run web midori
+[thinclient]$ tower install web midori
 ```
 
-Check also if the Application menu contains shortcuts for installed packages.
-
-8. Logout from `xfce` and connect to internet as explained above
-
-9. Build an host image with:
+1. Test installed packages:
 
 ```
-$> buld-tower-image host
+[thinclient]$ startx
+[thinclient]$ tower run office xcalc
+[thinclient]$ tower run web midori
 ```
 
-10. Build a thinclient image with:
+Check also if the Xfce Application menu contains shortcuts for installed packages.
+
+1. Log out from Xfce and connect to the Internet as described above.
+
+1. Build a host TowerOS image with:
 
 ```
-$> buld-tower-image thinclient
+[thinclient]$ buld-tower-image host
 ```
 
-11. Install development environment with:
+1. Build a thin client TowerOS image with:
 
 ```
-$> ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
+[thinclient]$ buld-tower-image thinclient
 ```
 
-12. If you are brave redo all these tests with the image generated in step 10 :)
-
-## 4. Build you own custom Thin Client (Linux)
-
-### 4.1. Install dependencies
+1. Install the development environment with:
 
 ```
-$> apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
+[thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
+```
+
+1. If you are feeling brave, you may repeat all these steps with the thin client image you generated yourself. :)
+
+
+## Build your own custom Thin Client (Linux)
+
+### Install Dependencies
+
+```
+[thinclient]$ apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
       avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
       musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
       alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
@@ -134,98 +137,98 @@ $> apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd av
       adwaita-xfce-icon-theme setxkbmap
 ```
 
-### 4.2. Enable services
+### Enable Basic Services
 
 If necessary, enable IPv4 with:
 
 ```
-sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
+[thinclient]$ sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
 ```
 
 then
 
 ```
-$> rc-update add dhcpcd
-$> rc-update add avahi-daemon
-$> rc-update add iptables
-$> rc-update add networking
-$> rc-update add wpa_supplicant boot
-$> rc-update add dbus
+[thinclient]$ rc-update add dhcpcd
+[thinclient]$ rc-update add avahi-daemon
+[thinclient]$ rc-update add iptables
+[thinclient]$ rc-update add networking
+[thinclient]$ rc-update add wpa_supplicant boot
+[thinclient]$ rc-update add dbus
 ```
 
 **Important:** Make sure you are connected to the switch and check that your first wired interface (starting with the letter `e`) has an assigned IP.
 
-### 4.3. Update `/etc/sudoers` and groups
+### Update `/etc/sudoers` and groups:
 
-`tower-tools` assumes that the current user has full `sudo` access, with no password. (Please refer to our threat model.) Check if /etc/sudoers contains the following line:
-
-```
-<you_username> ALL=(ALL) NOPASSWD: ALL
-```
-
-To build an image with `build-tower-image` you need to add the current user in the `abuild` group:
+The `toweros` software assumes that the current user has full `sudo` access with no password. (Please refer to our [threat model](security).) Check if `/etc/sudoers` contains the following line:
 
 ```
-addgroup <you_username> abuild
+<your_username> ALL=(ALL) NOPASSWD: ALL
 ```
 
-### 4.4. Install `tower-tools`
-
-Update pip to the latest version:
+To build an image with `build-tower-image`, you first need to add the current user in the `abuild` group:
 
 ```
-$> python3 -m pip install --upgrade pip
+[thinclient]$ addgroup <you_username> abuild
 ```
 
-then:
+### Install the `toweros` tools:
+
+Update `pip` to the latest version:
 
 ```
-$> python3 -m pip install "tower-tools @ git+ssh://github.com/towercomputers/tower-tools.git"
+[thinclient]$ python3 -m pip install --upgrade pip
 ```
 
-## 5. Generate an host image with build-image
+Install the `toweros` toolkit with `pip`:
 
 ```
-$> build-tower-image host
+[thinclient]$ python3 -m pip install "toweros @ git+ssh://github.com/towercomputers/toweros.git"
 ```
 
-This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command if the `--image` flag is not provided.
+## Build a host image:
 
-## 6. Build a TowerOS image with Docker
+```
+[thinclient]$ build-tower-image host
+```
+
+This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command (if the `--image` flag is not provided).
+
+## Build a TowerOS image with Docker
 
 Build the Docker image with:
 
 ```
-$> git clone git@github.com:towercomputers/tower-tools.git
-$> cd tools
-$> hatch build -t wheel
-$> docker build -t build-tower-image:latest .
+[thinclient]$ git clone git@github.com:towercomputers/toweros.git
+[thinclient]$ cd tools
+[thinclient]$ hatch build -t wheel
+[thinclient]$ docker build -t build-tower-image:latest .
 ```
 
 Then build the TowerOS image inside a Docker container:
 
 ```
-$> docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
+[thinclient]$ docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
 ```
 
 Retrieve that image from the container:
 
 ```
-$> docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
+[thinclient]$ docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
 ```
 
 Finally delete the container with:
 
 ```
-$> docker rm towerbuilder
+[thinclient]$ docker rm towerbuilder
 ```
 
 **Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
 
 ```
-$> docker buildx create --use
-$> docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
-$> docker run --privileged --rm tonistiigi/binfmt --install all
-$> docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
+[thinclient]$ docker buildx create --use
+[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
+[thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
+[thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
               build-tower-image thinclient
 ```

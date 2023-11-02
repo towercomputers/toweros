@@ -1,4 +1,4 @@
-# Introduction
+# Introduction to TowerOS
 
 **TowerOS** is an operating system for combining *multiple, independent computers* into a single high-assurance system for high-value targets and paranoid individuals. TowerOS is an example of a *converged multi-level secure (MLS) computing system*, similar to [Qubes OS](https://www.qubes-os.org/); but whereas Qubes OS takes a single computer and splits it into multiple security domains, TowerOS does the reverse---each security domain is regelated to a separate, dedicated *Host* (e.g. a Raspberry Pi), and the user accesses their applications from a *Thin Client* (e.g. a laptop) over a LAN using standard network protocols (namely, SSH and NX), with strict firewall rules governing all network communication. The different security domains are by default completely independent, and all communication across security boundaries is under the direct control of the user.
 

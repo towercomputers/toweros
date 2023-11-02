@@ -15,21 +15,21 @@ TowerOS provides tools for easily provisioning new hosts with the following step
 The first online host that you must provision is the router, which connect to the Internet _via_ a WiFi network: 
 
 ```
-[thin-client]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
+[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
 ```
 
 ## Provision an Online Host
 Once the `router` is correctly provisioned, you may provision other online hosts:
 
 ```
-[thin-client]$ tower provision <host> --online
+[thinclient]$ tower provision <host> --online
 ```
 
 ## Provision an Offline Host
 An offline host is a host without access to the Internet _via_ the router.
 
 ```
-[thin-client]$ tower provision <host> --offline
+[thinclient]$ tower provision <host> --offline
 ```
 
 # Using TowerOS
@@ -40,26 +40,26 @@ Once your hosts are provisioned, you are ready to use TowerOS. You can of course
 Run a command on a host with SSH:
 
 ```
-[thin-client]$ ssh <host> <command>
+[thinclient]$ ssh <host> <command>
 ```
 
 ## Run a graphical application on a host, with its GUI appearing on the thin client:
 
 ```
-[thin-client]$ tower run <host> <command>
+[thinclient]$ tower run <host> <command>
 ```
 
 ## Install an Alpine package on a host:
 TowerOS makes it easy to install new packages on any host by tunneling a connection through the router:
 
 ```
-[thin-client]$ tower install <host> <package>
+[thinclient]$ tower install <host> <package>
 ```
 
 ## List your hosts and their statuses
 
 ```
-[thin-client]$ tower status
+[thinclient]$ tower status
 ```
 
 
@@ -68,24 +68,24 @@ TowerOS makes it easy to install new packages on any host by tunneling a connect
 1. Provision the router:
 
 ```
-[thin-client]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
+[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
 ```
 
 1. Provision an offline host named `office`:
 
 ```
-[thin-client]$ tower provision office
+[thinclient]$ tower provision office
 ```
 
 1. Install GCalculator on the `office` offline host:
 
 ```
-[thin-client]$ tower install office galculator
+[thinclient]$ tower install office galculator
 ```
 
 1. Run galculator `office`:
 
 ```
-[thin-client]$ startx
-[thin-client]$ tower run office gcalculator
+[thinclient]$ startx
+[thinclient]$ tower run office gcalculator
 ```

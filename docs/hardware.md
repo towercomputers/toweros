@@ -1,75 +1,49 @@
 TowerOS is designed to run on a thin client device and several hosts connected _via_ one or two unmanaged Ethernet switches. Two switches are necessary if the user would like to have offline as well as online hosts.
 
-The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from. (Raspberry Pi 4Bs may be booted directly from USB, however.) The thin client should also have one or two RJ45 ports, depending on the number of switches in use.
+The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from. (Raspberry Pi 4Bs may be booted directly from USB, however.) The thin client should also have one or two RJ-45 ports, depending on the number of switches in use.
 
-TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compute Module 4 Lite.
+# Thin Client Hardware Recommendations
+- Lenovo X270 Laptop
+- Olimex USB Ethernet Adapter (https://www.olimex.com/Products/USB-Modules/USB-GIGABIT/open-source-hardware)
+- USB SD Card reader
+- 2 Ethernet Cables
 
-## 1. Raspberry Pi 4B
+
+# Host Hardware Recommendations
+TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compute Module 4 Lite (“CM4” for short). Where as Raspberry Pi 4Bs must be connected with standalone switch hardware, CM4 modules may be connected with a board like the DeskPi Super6C, which provides for a much more compact form factor for a complete TowerOS system. CM4 modules may easily use M.2 SSDs as their persistent storage, _via_ a DeskPi Super6C, and they may therefore perform better.
+
+*Notes*
+- The amount of RAM required for each host is heavily dependent on the intended usage pattern. Generally, at least one host should have 8GB of RAM, to run a web browser. For the router host, we recommend having at least 2GB of RAM.
+- Different SD cards and USB keys may have very different performance characteristics. In general, USB keys are much faster than SD cards, and M.2 SSDs are faster still.
+
+
+## Raspberry Pi 4B
 
 ![Tower Archi](../img/towerarchi.png)
 
-For each Raspberry PI you need:
+- Raspberry Pis may be booted either from an SD card or a USB key. For best performance, the root partition should reside on a USB key. You will need at least one SD card or USB key per host.
+- The USB key should ideally be plugged into the blue USB port, which supports USB 3.0.
+- If you wish to have offline hosts, then you need two switches; otherwise, one will do.
+- If you are using a PoE switch, you will need one PoE hat per host; if not, a USB hub may be used for power delivery
+- You will need one RJ-45 cable per host.
+- You will need one RTC Clock hat for each offline host.
 
-- an SD card, for the boot partition
-- a USB key which will serve as a hard drive.
-- for offline hosts a Real Time Clock hat
 
-Tips:
+## Compute Module 4 Lite
 
-- Remember to plug the USB key into the blue port (USB 3.0)
-- For hosts that serve as a router we recommend an RPI with 2GB of RAM, for others, especially if you plan to run graphicals applications, we recommend 8GB of RAM.
-- for sd-cards and usb keys, look at the list of hardware that we tested and their performance (TODO)
+![DeskPi Super6C Board](../img/deskpi.jpg)
 
-## 2. Compute Module 4 Lite
+Using CM4s and the [DeskPi Super6C Board](https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported) you can avoid most cables and put all your hosts in a single mini-ITX case.
 
-![Deskpi Super6c board](../img/deskpi.jpg)
+- Only the CM4 *Lite* is supported.
+- Only the CM4 Lite module used for the router must have on-board WiFi; the others may be entirely wireless.
+- CM4s must be booted from an SD card, which will hold the boot partition.
+- CM4s may use an M.2 SSD for the root partition, for optimal performance.
+- To support both online and offline hosts, two independent DeskPi Super6s may be used.
 
-Using CM4s and the [Deskpi Super6c board](https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported) you can avoid most cables and put all your hosts in an ATX case.
 
-For each CM4 you need:
-
-- an SD card, for the boot partition
-- a NVMe M.2 SS2 which will serve as a hard drive.
-
-One of the CM4s, the one that will serve as a router, must have WiFi and 2GB of RAM is sufficient. For other hosts, WiFi is not necessary, but we recommend 8GB of RAM, especially for hosts that need to run graphicals applications.
-
-Ideally you should use two Deskpis, one for online hosts and another for offline hosts.
-
-## 3. Hardware check list
-
-**Thin Client**
-
-- Laptop (Lenovo X270)
-- USB Ethernet Adaptater (https://www.olimex.com/Products/USB-Modules/USB-GIGABIT/open-source-hardware)
-- SD-Card reader
-- 2 RJ45 cables
-
-**Network**
-
-* 2 unmanaged switches
-
-**Rasperry Pi 4b Hosts**
-
-* minimum one RPI for the `router` (2Go RAM recommanded)
-* one RPI by host, RAM based and storage storage based on usage pattern
-* one SD-Card by host
-* one USB Key by host
-* one RJ-45 cable by host
-* one RTC Clock hat for offline host
-* if you are using a POE switch, one POE hat by host or evenetually a USB hub
-
-**Rasperry Pi CM4 Lite**
-
-* One or two Deskpi Super6c board
-* minimum one CM4 for the `router` (2Go RAM recommanded)
-* one CM4 by host, RAM based and storage storage based on usage pattern
-* one SD-Card by host
-* one NVMe M.2 SS2 by host
-
-**Suggested for debugging**
-
+# Hardware for Debugging
 * Monitor
-* micro HDMI<->monitor cable adapter
-* USB keyboard
-* USB mouse
-
+* micro HDMI adapter
+* USB Keyboard
+* USB Mouse
