@@ -1,3 +1,5 @@
+# Hardware
+
 TowerOS is designed to run on a thin client device and several hosts connected _via_ one or two unmanaged Ethernet switches. Two switches are necessary if the user would like to have offline as well as online hosts.
 
 The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from. (Raspberry Pi 4Bs may be booted directly from USB, however.) The thin client should also have one or two RJ-45 ports, depending on the number of switches in use.
@@ -19,7 +21,7 @@ TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compu
 
 ## Raspberry Pi 4B
 
-![Tower Archi](../img/towerarchi.png)
+![Tower Archi](img/towerarchi.png)
 
 - Raspberry Pis may be booted either from an SD card or a USB key. For best performance, the root partition should reside on a USB key. You will need at least one SD card or USB key per host.
 - The USB key should ideally be plugged into the blue USB port, which supports USB 3.0.
@@ -31,7 +33,7 @@ TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compu
 
 ## Compute Module 4 Lite
 
-![DeskPi Super6C Board](../img/deskpi.jpg)
+![DeskPi Super6C Board](img/deskpi.jpg)
 
 Using CM4s and the [DeskPi Super6C Board](https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported) you can avoid most cables and put all your hosts in a single mini-ITX case.
 

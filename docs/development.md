@@ -160,7 +160,7 @@ then
 
 ### Update `/etc/sudoers` and groups:
 
-The `toweros` software assumes that the current user has full `sudo` access with no password. (Please refer to our [threat model](security).) Check if `/etc/sudoers` contains the following line:
+The `toweros` software assumes that the current user has full `sudo` access with no password. (Please refer to our [threat model](security.md).) Check if `/etc/sudoers` contains the following line:
 
 ```
 <your_username> ALL=(ALL) NOPASSWD: ALL

@@ -14,7 +14,7 @@ You must:
 
 On ThinkPad firmware, these three things can be done on the same screen:
 
-![alt text](./ThinkPadSecureBoot.jpg)
+![alt text](./img/ThinkPadSecureBoot.jpg)
 
 ## After the installation
 

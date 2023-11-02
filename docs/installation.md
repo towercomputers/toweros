@@ -1,3 +1,5 @@
+# Installation
+
 To use TowerOS, you must first install the image for the thin client on the device you wish to use (normally a laptop):
 
 1. Download the latest image here: [https://github.com/towercomputers/tower-tools/releases/latest](https://github.com/towercomputers/toweros/releases/latest).
