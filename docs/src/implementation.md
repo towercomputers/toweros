@@ -16,7 +16,7 @@ This package is organized into six primary modules:
 
 ## Networking
 
-A TowerOS **thin client** connects to one or two separate networks of **hosts** (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. *Online* hosts reside on the first network; *offline* hosts on the second. On the online network, one of the hosts, called the “**router**”, is connected to the Internet and shares the connection with all the hosts connected to the same network.
+A TowerOS **thin client** connects to one or two separate networks of **hosts** (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. *Online* hosts reside on the first network; *offline* hosts on the second. On the online network, one of the hosts is the **router**: it is connected to the Internet directly and shares its connection with all the hosts connected to the same network.
 
 All IPs are static and assigned by the `tower` tool. Here are the IPs used:
 
