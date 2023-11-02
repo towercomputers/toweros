@@ -515,57 +515,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#network-architecture" class="md-nav__link">
-    Network Architecture
+  <a href="#tower-tools" class="md-nav__link">
+    Tower Tools
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#networking" class="md-nav__link">
+    Networking
+  </a>
+  
+    <nav class="md-nav" aria-label="Networking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#firewall-rules" class="md-nav__link">
     Firewall Rules
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#toweros-for-the-thin-client" class="md-nav__link">
-    TowerOS for the Thin Client
+  <a href="#building-your-own-toweros-images" class="md-nav__link">
+    Building your own TowerOS Images
+  </a>
+  
+    <nav class="md-nav" aria-label="Building your own TowerOS Images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-for-thin-clients" class="md-nav__link">
+    Image for Thin Clients
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-for-hosts" class="md-nav__link">
+    Image for Hosts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-configuration" class="md-nav__link">
+    System Configuration
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#toweros-for-hosts" class="md-nav__link">
-    TowerOS for Hosts
+  <a href="#host-provisioning" class="md-nav__link">
+    Host Provisioning
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#sshconf" class="md-nav__link">
-    SSHConf
+  <a href="#gui-application-execution" class="md-nav__link">
+    GUI Application Execution
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#provision" class="md-nav__link">
-    Provision
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gui" class="md-nav__link">
-    GUI
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#package-management" class="md-nav__link">
+    Package Management
   </a>
   
 </li>
@@ -633,57 +659,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#network-architecture" class="md-nav__link">
-    Network Architecture
+  <a href="#tower-tools" class="md-nav__link">
+    Tower Tools
   </a>
   
 </li>
       
         <li class="md-nav__item">
+  <a href="#networking" class="md-nav__link">
+    Networking
+  </a>
+  
+    <nav class="md-nav" aria-label="Networking">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#firewall-rules" class="md-nav__link">
     Firewall Rules
   </a>
   
 </li>
+        
+      </ul>
+    </nav>
+  
+</li>
       
         <li class="md-nav__item">
-  <a href="#toweros-for-the-thin-client" class="md-nav__link">
-    TowerOS for the Thin Client
+  <a href="#building-your-own-toweros-images" class="md-nav__link">
+    Building your own TowerOS Images
+  </a>
+  
+    <nav class="md-nav" aria-label="Building your own TowerOS Images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-for-thin-clients" class="md-nav__link">
+    Image for Thin Clients
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-for-hosts" class="md-nav__link">
+    Image for Hosts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-configuration" class="md-nav__link">
+    System Configuration
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#toweros-for-hosts" class="md-nav__link">
-    TowerOS for Hosts
+  <a href="#host-provisioning" class="md-nav__link">
+    Host Provisioning
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#sshconf" class="md-nav__link">
-    SSHConf
+  <a href="#gui-application-execution" class="md-nav__link">
+    GUI Application Execution
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#provision" class="md-nav__link">
-    Provision
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#gui" class="md-nav__link">
-    GUI
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install" class="md-nav__link">
-    Install
+  <a href="#package-management" class="md-nav__link">
+    Package Management
   </a>
   
 </li>
@@ -704,14 +756,17 @@
 
 
 <h1 id="implementation">Implementation</h1>
-<p>The <code>tower-tools</code> package contains six main modules:</p>
+<p>TowerOS is built on <a href="https://alpinelinux.org">Alpine Linux</a> for the latter's simplicity, minimalism, and security-first approach. TowerOS is open-source and freely licensed (MIT). It is designed to require the smallest-possible trusted computing base, to rely only on other widely used, open-source software, and to as transparent as possible in its implementation.</p>
+<h2 id="tower-tools">Tower Tools</h2>
+<p>The <code>tower-tools</code> package contains all of the tooling necessary to build TowerOS images for both the thin client and for the hosts (a pre-built image for the thin client—containing a pre-built image for hosts---is available on the <a href="https://github.com/towercomputers/toweros/releases">GitHub Releases</a> page).</p>
+<p>This package is organized into six primary modules:</p>
 <ul>
 <li><code>buildthinclient.py</code> and <code>buildhost.py</code> to build the OS images used by the thin client and the hosts</li>
-<li><code>sshconf.py</code> which manages <code>tower-tools</code> and SSH configuration files</li>
-<li><code>provision.py</code>, <code>install.py</code>, and <code>gui.py</code> which respectively allow you to provision a host, to install an application on it without an Internet connection, and to run a graphical application on a host from the thin client</li>
+<li><code>sshconf.py</code> which manages TowerOS and SSH configuration files</li>
+<li><code>provision.py</code>, <code>install.py</code>, and <code>gui.py</code> which allow you to provision a host, to install an application on it without an Internet connection, and to run a graphical application on a host from the thin client, respectively.</li>
 </ul>
-<h2 id="network-architecture">Network Architecture</h2>
-<p>A TowerOS thin client is connected to one or two separate networks (each with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. Online hosts reside on the first network; offline hosts on the second. On the online network, one of the hosts, called the “router”, is connected to the Internet and shares the connection with all the hosts connected to the same network.</p>
+<h2 id="networking">Networking</h2>
+<p>A TowerOS <strong>thin client</strong> connects to one or two separate networks of <strong>hosts</strong> (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. <em>Online</em> hosts reside on the first network; <em>offline</em> hosts on the second. On the online network, one of the hosts, called the “<strong>router</strong>”, is connected to the Internet and shares the connection with all the hosts connected to the same network.</p>
 <p>All IPs are static and assigned by the <code>tower</code> tool. Here are the IPs used:</p>
 <ul>
 <li>TOWER_NETWORK_ONLINE = "192.168.2.0/24"</li>
@@ -721,11 +776,11 @@
 <li>ROUTER_IP = "192.168.2.1"</li>
 <li>FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200</li>
 </ul>
-<h2 id="firewall-rules">Firewall Rules</h2>
-<p>Firewalls are critical elements for securing a TowerOS system. <code>iptables</code> is installed and configured on each host and on the thinclient using the following two scripts:</p>
+<h3 id="firewall-rules">Firewall Rules</h3>
+<p>Firewalls are a primary element in the security of a TowerOS system. <code>iptables</code> is installed and configured on each host and on the thin client using the following two scripts:</p>
 <ul>
-<li>https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh</li>
-<li>https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh</li>
+<li>https://github.com/towercomputers/toweros/blob/dev/scripts/toweros-host/installer/configure-firewall.sh</li>
+<li>https://github.com/towercomputers/toweros/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh</li>
 </ul>
 <p>Both of these scripts are destructive and idempotent: they clean all the rules at the beginning and save the new rules at the end.</p>
 <p>The thin client is configured with the <a href="https://wiki.archlinux.org/title/Simple_stateful_firewall">following guide</a></p>
@@ -736,9 +791,9 @@
 <li>Online hosts reject outgoing traffic directed to the thin client or to other hosts.</li>
 <li>The router has IP forwarding active, to share its connection with the other online hosts.</li>
 </ul>
-<h2 id="toweros-for-the-thin-client">TowerOS for the Thin Client</h2>
-<p><code>buildthinclient.py</code> is the module responsible for generating an image of TowerOS with the <code>build-tower-image thinclient</code> command.</p>
-<p>TowerOS is based on Alpine Linux, and <code>buildthinclient.py</code> uses the <code>mkimage</code> tool (see https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage).</p>
+<h2 id="building-your-own-toweros-images">Building your own TowerOS Images</h2>
+<h3 id="image-for-thin-clients">Image for Thin Clients</h3>
+<p><code>buildthinclient.py</code> is the module responsible for generating an image of TowerOS with the <code>build-tower-image thinclient</code> command, which uses the <code>mkimage</code> tool (see <a href="https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage">https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage</a>).</p>
 <p>The installer contains all the APK and pip packages necessary for installing the base system and <code>tower-tools</code>, which is ready to use after the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.</p>
 <p>Here are the different steps taken by <code>buildthinclient.py</code> to generate an image:</p>
 <ol>
@@ -779,7 +834,7 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 <li>The installer sets up an <code>iptables</code> firewall as described in the <a href="https://wiki.archlinux.org/title/Simple_stateful_firewall">Arch Linux Wiki</a>.</li>
 <li>The script uses SysLinux as the boot loader.</li>
 </ul>
-<h2 id="toweros-for-hosts">TowerOS for Hosts</h2>
+<h3 id="image-for-hosts">Image for Hosts</h3>
 <p><code>buildhost.py</code> is the module responsible for generating an image for the thin client when the <code>build-tower-image host</code> command is executed, and also for configuring the image when the <code>tower provision</code> command is called.</p>
 <p><code>buildhost.py</code> uses the same method as <code>pigen</code> to build an image for a Raspberry Pi (see <a href="https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh">https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh</a>) but unlike <code>pigen</code>, which uses a Debian-based system, <code>buildhost.py</code> uses an Alpine Linux–based system (see https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi).</p>
 <p>The <code>tower provision</code> command finalises the configuration of the image, which is otherwise neither secure nor ready to be used by <code>tower-tools</code>.</p>
@@ -822,15 +877,15 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 </li>
 </ol>
 <p>Note: A TowerOS image for the thin client is placed in the <code>~/.cache/tower/builds/</code> folder by the installer.</p>
-<h2 id="sshconf">SSHConf</h2>
-<p><code>tower-tools</code> uses a single configuration file in the same format as an SSH config file: <code>~/.ssh/tower.conf</code>. This file, referenced in <code>~/.ssh/config</code>, is used both by <code>tower-tools</code> to maintain the list of hosts and by <code>ssh</code> to access hosts directly with <code>ssh &lt;host&gt;</code>. The script <code>sshconf.py</code> is responsible for maintaining this file and generally anything that requires manipulation of something in the <code>~./ssh</code> folder. Notably:</p>
+<h2 id="system-configuration">System Configuration</h2>
+<p>A TowerOS system uses a single configuration file in the same format as an SSH config file: <code>~/.ssh/tower.conf</code>. This file, referenced in <code>~/.ssh/config</code>, is used both by <code>tower-tools</code> to maintain the list of hosts and by <code>ssh</code> to access hosts directly with <code>[thinclient]$ ssh &lt;host&gt;</code>. The script <code>sshconf.py</code> is responsible for maintaining this file and generally anything that requires manipulation of something in the <code>~./ssh</code> folder. Notably:</p>
 <ol>
 <li>discovering the IP of a newly installed host and updating <code>tower.conf</code> accordingly</li>
 <li>updating <code>~/.ssh/know_hosts</code></li>
 <li>checking the status of a host and if it is online</li>
 </ol>
 <p>Note: <code>sshconf.py</code> uses <a href="https://pypi.org/project/sshconf/">https://pypi.org/project/sshconf/</a> to manipulate <code>ssh</code> config files.</p>
-<h2 id="provision">Provision</h2>
+<h2 id="host-provisioning">Host Provisioning</h2>
 <p><code>provision.py</code> is used by the <code>tower provision &lt;host&gt;</code> command to prepare an SD card directly usable by a Rasbperry Pi.</p>
 <p>The steps to provision a host are as follows:</p>
 <ol>
@@ -841,7 +896,7 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 <li>Update the <code>ssh</code> and <code>tower-tools</code> configuration files</li>
 </ol>
 <p>Once a host has been provisioned, it should be accessible with <code>$ ssh &lt;host&gt;</code> or <code>$ tower run &lt;host&gt; &lt;command&gt;</code>.</p>
-<h2 id="gui">GUI</h2>
+<h2 id="gui-application-execution">GUI Application Execution</h2>
 <p><code>gui.py</code> is a module that allows the use of the NX protocol through an SSH tunnel: it allows the user run an application on one of the hosts from the safety of the thin client.</p>
 <p><code>nxagent</code> must be installed on the host, and <code>nxproxy</code> on the thin client. Of course, both are included in the TowerOS images.</p>
 <p>Here are the steps taken by <code>gui.py</code> to run an application on one of the hosts:</p>
@@ -866,7 +921,7 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 3. Terminate `nxproxy`
 </code></pre>
 <p>The GUI system therefor works the same way as X2GO, which provided the inspiration.</p>
-<h2 id="install">Install</h2>
+<h2 id="package-management">Package Management</h2>
 <p>This module allows to use of <code>apk</code> on an offline host through an SSH tunnel through the router. To do this, it performs the following steps:</p>
 <ol>
 <li>
