@@ -5,7 +5,7 @@
   authors: (
     (
       name: "Adam Krellenstein",
-      email: "adam@toweros.org",
+      email: "adam@krellenstein.com",
       url: "https://github.com/towercomputers/toweros"
     ),
   ),
