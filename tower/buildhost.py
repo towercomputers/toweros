@@ -225,7 +225,7 @@ def copy_image_in_device(image_file, device):
         dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
     except ErrorReturnCode:
         logger.error(buf.getvalue())
-        logger.error("Error copying image, please check the SD card intergirty or try again with the flag `--zero-device`.")
+        logger.error("Error copying image, please check the boot device integrity or try again with the flag `--zero-device`.")
         raise Exception("Error copying image")
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
@@ -248,7 +248,7 @@ def insert_tower_env(boot_part, config):
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     
 @clitask("Installing TowserOS-Host in {1}...", 
-         timer_message="TowserOS-Host installed in {0}.\nPlease remove the SD-Card from the Thin Client and insert it into the Host computer, then turn it on the Host computer and wait for it to be discover by the Thin Client on the network.", 
+         timer_message="TowserOS-Host installed in {0}.\nPlease remove the boot device from the Thin Client and insert it into the Host computer, then turn it on the Host computer and wait for it to be discover by the Thin Client on the network.", 
          sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:

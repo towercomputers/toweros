@@ -107,13 +107,13 @@ def prepare_provision(args):
     # generate host configuration
     host_config = prepare_host_config(args)
     # determine target device
-    sd_card = args.sd_card or utils.select_sdcard_device()
-    check_environment_value('sd-card', sd_card)
+    boot_device = args.boot_device or utils.select_boot_device()
+    check_environment_value('boot-device', boot_device)
     # find TowerOS-Host image
     image_path = prepare_host_image(args.image)
     check_environment_value('image', image_path)
     # return everything needed to provision the host
-    return image_path, sd_card, host_config, private_key_path
+    return image_path, boot_device, host_config, private_key_path
 
 @utils.clitask("Saving host configuration in {0}...")
 def save_config_file(config_path, config_str):
@@ -129,14 +129,14 @@ def save_host_config(config):
     
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args):
-    image_path, sd_card, host_config, private_key_path = prepare_provision(args)
-    confirmation1 = Text(f"Are you sure you want to completely wipe {sd_card}?", style='red')
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args)
+    confirmation1 = Text(f"Are you sure you want to completely wipe {boot_device}?", style='red')
     if args.no_confirm or Confirm.ask(confirmation1):
-        confirmation2 = Text(f"Please make sure you have plugged a USB 3 key into the host and confirm that you want to completely wipe it.", style='red')
+        confirmation2 = Text(f"Please make sure you have plugged a hard drive device (USB 3 key or SD-Card) into the host and confirm that you want to completely wipe it.", style='red')
         if args.no_confirm or Confirm.ask(confirmation2):
             save_host_config(host_config)
             del(host_config['PASSWORD'])
-            buildhost.burn_image(image_path, sd_card, host_config, args.zero_device)
+            buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
             sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
             utils.menu.prepare_xfce_menu()
