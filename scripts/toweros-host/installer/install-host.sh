@@ -221,7 +221,16 @@ init_configuration() {
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env
 		BOOT_MEDIA=/media/usb
-		LVM_DISK=/dev/mmcblk0
+		if [ -b /dev/mmcblk0 ]; then
+			LVM_DISK=/dev/mmcblk0
+		else
+			BOOT_PART=$(df $BOOT_MEDIA | tail -1 | awk '{print $1}')
+			if [ "$BOOT_PART" == "/dev/sda1" ]; then
+				LVM_DISK=/dev/sdb
+			else
+				LVM_DISK=/dev/sda
+			fi
+		fi
 	elif [ -f /media/mmcblk0p1/tower.env ]; then # boot on sdcard
 		source /media/mmcblk0p1/tower.env
 		BOOT_MEDIA=/media/mmcblk0p1
