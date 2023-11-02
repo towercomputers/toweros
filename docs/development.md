@@ -80,7 +80,7 @@ On first boot:
 1. Install a package an an offline host:
 
 ```
-[thinclient]$ tower install office xcalc --online-host office
+[thinclient]$ tower install office xcalc
 ```
 
 1. Install a package on an online host:
