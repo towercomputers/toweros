@@ -10,7 +10,7 @@ theme:
     - navigation.instant.prefetch
 nav:
   - Getting Started:
-    - Introduction: introduction.md
+    - Introduction: index.md
     - Hardware: hardware.md
     - Installation: installation.md
     - Usage: usage.md
