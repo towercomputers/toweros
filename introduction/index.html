@@ -8,13 +8,11 @@
       
       
       
-        <link rel="canonical" href="https://towercomputers.github.io/toweros/security/">
+        <link rel="canonical" href="https://towercomputers.github.io/toweros/introduction/">
       
       
-        <link rel="prev" href="../usage/">
       
-      
-        <link rel="next" href="../secure-boot/">
+        <link rel="next" href="../hardware/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +20,7 @@
     
     
       
-        <title>Security - TowerOS</title>
+        <title>Introduction - TowerOS</title>
       
     
     
@@ -67,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#security-model" class="md-skip">
+        <a href="#introduction" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +101,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Security
+              Introduction
             
           </span>
         </div>
@@ -190,6 +188,8 @@
       
   
   
+    
+  
   
     
     
@@ -199,14 +199,12 @@
       
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
         
           
           <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
@@ -220,7 +218,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             Getting Started
@@ -231,9 +229,18 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../introduction/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -242,6 +249,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -318,8 +326,6 @@
       
   
   
-    
-  
   
     
     
@@ -329,12 +335,14 @@
       
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -348,7 +356,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Security
@@ -359,27 +367,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Security
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -388,45 +378,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#security-model" class="md-nav__link">
-    Security Model
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#trusted-computing-base" class="md-nav__link">
-    Trusted Computing Base
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#threat-analysis" class="md-nav__link">
-    Threat Analysis
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -584,35 +535,8 @@
   
   
   
+    
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#security-model" class="md-nav__link">
-    Security Model
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#trusted-computing-base" class="md-nav__link">
-    Trusted Computing Base
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#threat-analysis" class="md-nav__link">
-    Threat Analysis
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -627,86 +551,9 @@
                   
 
 
-  <h1>Security</h1>
-
-<h2 id="security-model">Security Model</h2>
-<ul>
-<li>Direct communication between Hosts is forbidden.</li>
-<li>All communication between the Thin Client and a Host is over SSH and on port 22.</li>
-<li>All communication with a Host must originate with the Thin Client.</li>
-<li>All network connections between the Thin Client and a Host must be directly triggered by user action.</li>
-<li>SSH tunnels from the Thin Client or a Host through the Router are allowed.</li>
-</ul>
-<h2 id="trusted-computing-base">Trusted Computing Base</h2>
-<ul>
-<li>TowerOS Tooling</li>
-<li>Alpine Linux Base System</li>
-<li>Network Drivers</li>
-<li>Network Card Hardware</li>
-<li>SSH</li>
-<li>NX (Screensharing)</li>
-</ul>
-<h2 id="threat-analysis">Threat Analysis</h2>
-<table>
-<thead>
-<tr>
-<th>Class</th>
-<th>Attack</th>
-<th>Mitigated</th>
-<th>If so, how?</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Theft</td>
-<td>Theft of Device</td>
-<td>Yes</td>
-<td>Encrypted root disks</td>
-</tr>
-<tr>
-<td>Physical Tampering</td>
-<td>Evil-Maid Attack</td>
-<td>Optional</td>
-<td>Raspberry Pis: https://www.zymbit.com/</td>
-</tr>
-<tr>
-<td>Physical Tampering</td>
-<td>Cold-Boot Attack</td>
-<td>Optional</td>
-<td>Raspberry Pis: https://www.zymbit.com/</td>
-</tr>
-<tr>
-<td>Microarchitectural</td>
-<td>RowHammer; RowPress</td>
-<td>Yes</td>
-<td>Host-Isolation</td>
-</tr>
-<tr>
-<td>Microarchitectural</td>
-<td>Speculative Execution</td>
-<td>Yes</td>
-<td>Host-Isolation</td>
-</tr>
-<tr>
-<td>Physical Side-Channel</td>
-<td>Power Consumption (https://www.hertzbleed.com/)</td>
-<td>Optional</td>
-<td>Disable DVFS</td>
-</tr>
-<tr>
-<td>Physical Side-Channel</td>
-<td>Acoustic Emissions</td>
-<td>No</td>
-<td></td>
-</tr>
-<tr>
-<td>Physical Side-Channel</td>
-<td>Electromagnetic Radiation</td>
-<td>No</td>
-<td></td>
-</tr>
-</tbody>
-</table>
+<h1 id="introduction">Introduction</h1>
+<p><strong>TowerOS</strong> is an operating system for combining <em>multiple, independent computers</em> into a single high-assurance system for high-value targets and paranoid individuals. TowerOS is an example of a <em>converged multi-level secure (MLS) computing system</em>, similar to <a href="https://www.qubes-os.org/">Qubes OS</a>; but whereas Qubes OS takes a single computer and splits it into multiple security domains, TowerOS does the reverse---each security domain is regelated to a separate, dedicated <em>Host</em> (e.g. a Raspberry Pi), and the user accesses their applications from a <em>Thin Client</em> (e.g. a laptop) over a LAN using standard network protocols (namely, SSH and NX), with strict firewall rules governing all network communication. The different security domains are by default completely independent, and all communication across security boundaries is under the direct control of the user.</p>
+<p>In contrast to existing designs, Tower offers theoretically greater security guarantees, better usability, and more flexibility. The downside is that you need multiple computers to make it work. However, with the development of cheap, powerful and small single-board computers (SBCs), it's now quite practical to carry half a dozen computers with you wherever you go. For a more formal description of the design of TowerOS, including a detailed comparison with Qubes OS, please refer to <a href="../TowerOS%20Whitepaper.pdf">the whitepaper</a>.</p>
 
 
 
