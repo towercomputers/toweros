@@ -10,13 +10,6 @@ update_passord() {
 }
 
 prepare_root_partition() {
-	#LVM_DISK=/dev/mmcblk0p2
-	# we are using the first USB plugged in as root disk..
-	LVM_DISK=/dev/sda
-	# ..unless a nvme disk is present
-	if [ -b /dev/nvme0n1 ]; then
-		LVM_DISK=/dev/nvme0n1
-	fi
 	# zeroing usb drive
     dd if=/dev/zero of=$LVM_DISK bs=512 count=1 conv=notrunc
 	# generate LUKS key
@@ -167,7 +160,7 @@ clone_live_system_to_disk() {
     # install packages
     local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
     local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
-    local repoflags="--repository /media/mmcblk0p1/apks"
+    local repoflags="--repository $BOOT_MEDIA/apks"
     apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
 
     # clean chroot
@@ -175,8 +168,8 @@ clone_live_system_to_disk() {
     umount /mnt/dev
 
 	# prepare boot and root partitions and folders
-	mount -o remount,rw /media/mmcblk0p1
-	cp -rf /mnt/boot/*rpi? /media/mmcblk0p1/boot/
+	mount -o remount,rw $BOOT_MEDIA
+	cp -rf /mnt/boot/*rpi? $BOOT_MEDIA/boot/
 	rm -Rf /mnt/boot
 
 	# update fstab
@@ -189,7 +182,7 @@ clone_live_system_to_disk() {
 	kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_DISK cryptkey=yes cryptdm=lvmcrypt"
     modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey"
     cmdline="modules=$modules $kernel_opts"
-    echo "$cmdline" > /media/mmcblk0p1/cmdline.txt
+    echo "$cmdline" > $BOOT_MEDIA/cmdline.txt
 
 	# copy home directory in /mnt
 	mkdir -p "/mnt/home/"
@@ -212,7 +205,7 @@ clean_and_reboot() {
 	# disable auto installation on boot
 	mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
 	# remove configuration file
-	rm /media/mmcblk0p1/tower.env
+	rm $BOOT_MEDIA/tower.env
 	# remove keyfile
 	rm /mnt/crypto_keyfile.bin
 	# reboot
@@ -224,7 +217,21 @@ init_configuration() {
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
 	# STATIC_HOST_IP, ROUTER_IP
-	source /media/mmcblk0p1/tower.env
+
+	if [ -f /media/usb/tower.env ]; then # boot on usb
+		source /media/usb/tower.env
+		BOOT_MEDIA=/media/usb
+		LVM_DISK=/dev/mmcblk0
+	elif [ -f /media/mmcblk0p1/tower.env ]; then # boot on sdcard
+		source /media/mmcblk0p1/tower.env
+		BOOT_MEDIA=/media/mmcblk0p1
+		if [ -b /dev/nvme0n1 ]; then
+			LVM_DISK=/dev/nvme0n1
+		else
+			LVM_DISK=/dev/sda
+		fi
+	fi
+
 	SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 }
 
