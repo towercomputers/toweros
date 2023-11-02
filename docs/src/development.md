@@ -62,13 +62,13 @@ On first boot:
 1. Provision an online host:
 
 ```
-[thinclient]$ tower provision web --online --wlan-ssid <ssid> --wlan-password <password> --sd-card /dev/sdb 
+[thinclient]$ tower provision web --online --wlan-ssid <ssid> --wlan-password <password>
 ```
 
 1. Provision an offline host:
 
 ```
-[thinclient]$ tower provision office --offline --sd-card /dev/sdb
+[thinclient]$ tower provision office --offline
 ```
 
 1. Check system status:
