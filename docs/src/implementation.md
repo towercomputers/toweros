@@ -2,15 +2,19 @@
 
 TowerOS is built on [Alpine Linux](https://alpinelinux.org) for the latter's simplicity, minimalism, and security-first approach. TowerOS is open-source and freely licensed (MIT). It is designed to require the smallest-possible trusted computing base, to rely only on other widely used, open-source software, and to as transparent as possible in its implementation.
 
-## `tower-tools`
 
-The `tower-tools` package contains six main modules:
+## Tower Tools
+
+The `tower-tools` package contains all of the tooling necessary to build TowerOS images for both the thin client and for the hosts (a pre-built image for the thin client—containing a pre-built image for hosts---is available on the [GitHub Releases](https://github.com/towercomputers/toweros/releases) page).
+
+This package is organized into six primary modules:
 
 - `buildthinclient.py` and `buildhost.py` to build the OS images used by the thin client and the hosts
 - `sshconf.py` which manages TowerOS and SSH configuration files
 - `provision.py`, `install.py`, and `gui.py` which allow you to provision a host, to install an application on it without an Internet connection, and to run a graphical application on a host from the thin client, respectively.
 
-### Network Architecture
+
+## Networking
 
 A TowerOS **thin client** connects to one or two separate networks of **hosts** (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. *Online* hosts reside on the first network; *offline* hosts on the second. On the online network, one of the hosts, called the “**router**”, is connected to the Internet and shares the connection with all the hosts connected to the same network.
 
@@ -23,12 +27,12 @@ All IPs are static and assigned by the `tower` tool. Here are the IPs used:
 * ROUTER_IP = "192.168.2.1"
 * FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
 
-## Firewall Rules
+### Firewall Rules
 
-Firewalls are critical elements for securing a TowerOS system. `iptables` is installed and configured on each host and on the thinclient using the following two scripts:
+Firewalls are a primary element in the security of a TowerOS system. `iptables` is installed and configured on each host and on the thin client using the following two scripts:
 
-* https://github.com/towercomputers/tools/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
-* https://github.com/towercomputers/tools/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh
+* https://github.com/towercomputers/toweros/blob/dev/scripts/toweros-host/installer/configure-firewall.sh
+* https://github.com/towercomputers/toweros/blob/dev/scripts/toweros-thinclient/installer/configure-firewall.sh
 
 Both of these scripts are destructive and idempotent: they clean all the rules at the beginning and save the new rules at the end.
 
@@ -41,11 +45,12 @@ Hosts are configured the same way, but with the following additional rules:
 - Online hosts reject outgoing traffic directed to the thin client or to other hosts.
 - The router has IP forwarding active, to share its connection with the other online hosts.
 
-## TowerOS for the Thin Client
 
-`buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command.
+## Building your own TowerOS Images
 
-TowerOS is based on Alpine Linux, and `buildthinclient.py` uses the `mkimage` tool (see https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage).
+### Image for Thin Clients
+
+`buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command, which uses the `mkimage` tool (see <https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage>).
 
 The installer contains all the APK and pip packages necessary for installing the base system and `tower-tools`, which is ready to use after the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
 
@@ -80,7 +85,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 * The script uses SysLinux as the boot loader.
 
 
-## TowerOS for Hosts
+### Image for Hosts
 
 `buildhost.py` is the module responsible for generating an image for the thin client when the `build-tower-image host` command is executed, and also for configuring the image when the `tower provision` command is called.
 
@@ -116,9 +121,10 @@ Here are the different steps taken by `buildhost.py` to configure an image when 
 
 Note: A TowerOS image for the thin client is placed in the `~/.cache/tower/builds/` folder by the installer.
 
-## SSHConf
 
-`tower-tools` uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, referenced in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `ssh <host>`. The script `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
+## System Configuration
+
+A TowerOS system uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, referenced in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `[thinclient]$ ssh <host>`. The script `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
 1. discovering the IP of a newly installed host and updating `tower.conf` accordingly
 2. updating `~/.ssh/know_hosts`
@@ -126,7 +132,8 @@ Note: A TowerOS image for the thin client is placed in the `~/.cache/tower/build
 
 Note: `sshconf.py` uses [https://pypi.org/project/sshconf/](https://pypi.org/project/sshconf/) to manipulate `ssh` config files.
 
-## Provision
+
+## Host Provisioning
 
 `provision.py` is used by the `tower provision <host>` command to prepare an SD card directly usable by a Rasbperry Pi.
 
@@ -140,7 +147,8 @@ The steps to provision a host are as follows:
 
 Once a host has been provisioned, it should be accessible with `$ ssh <host>` or `$ tower run <host> <command>`.
 
-## GUI
+
+## GUI Application Execution
 
 `gui.py` is a module that allows the use of the NX protocol through an SSH tunnel: it allows the user run an application on one of the hosts from the safety of the thin client.
 
@@ -167,7 +175,8 @@ After the application has been closed, `gui.py` will perform the following actio
 
 The GUI system therefor works the same way as X2GO, which provided the inspiration.
 
-## Install
+
+## Package Management
 
 This module allows to use of `apk` on an offline host through an SSH tunnel through the router. To do this, it performs the following steps:
 
