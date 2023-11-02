@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/</loc>
+         <loc>https://towercomputers.github.io/toweros/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/DeveloperGuide/</loc>
+         <loc>https://towercomputers.github.io/toweros/DeveloperGuide/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/SecureBoot/</loc>
+         <loc>https://towercomputers.github.io/toweros/SecureBoot/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/hardware/</loc>
+         <loc>https://towercomputers.github.io/toweros/hardware/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/implementation/</loc>
+         <loc>https://towercomputers.github.io/toweros/implementation/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/installation/</loc>
+         <loc>https://towercomputers.github.io/toweros/installation/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/security/</loc>
+         <loc>https://towercomputers.github.io/toweros/security/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/tower-tools/usage/</loc>
+         <loc>https://towercomputers.github.io/toweros/usage/</loc>
          <lastmod>2023-11-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
