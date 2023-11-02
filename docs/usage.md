@@ -1,78 +1,91 @@
-## 1. Provision an online host
+Hosts are divided into two types: *online* and *offline*. Online hosts live on a separate LAN from offline hosts, and the thin client is connected to both networks. One online host is deemed the “router”, and the router is responsible for providing Internet access to the thin client and all other hosts. If you do not wish to maintain two separate networks, you can simply not provision any offline hosts.
 
-Only one of the hosts is connected to the internet via WIFI. This host, called the `router`, is then responsible for sharing the connection with all the other online hosts. The first online host that you can/must provision is therefore the router:
+# Provisioning Hosts
+TowerOS provides tools for easily provisioning new hosts with the following steps, with the user guided through them by the `tower` CLI tool:
 
-```
-$> tower provision router –wlan-ssid <ssid> –wlan-password <password>
-```
+1. Insert an SD card or USB key into the thin client.
+2. Call the `$ tower provision` command.
+3. Insert the SD card or USB key into the target host hardware.
+4. Turn on the host hardware.
+5. Wait for the provisioning process to complete on the thin client.
 
-Once the `router` is correctly provisioned, you can provision other online hosts:
+*NOTE:* You must provision a router before you provision any other online hosts.
 
-```
-$> tower provision <host> --online
-```
-
-Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see `tower provision --help`).
-
-## 2. Provision an offline host
-
-Prepare the sd-card in the Thin Client with the command bellow. Once the sd-card is ready you must insert it into the Raspberry Pi or CM4 and turn it on.
+## Provision the Router
+The first online host that you must provision is the router, which connect to the Internet _via_ a WiFi network: 
 
 ```
-$> tower provision <host> --offline
+[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
 ```
 
-## 3. Execute a command on one of the hosts
+## Provision an Online Host
+Once the `router` is correctly provisioned, you may provision other online hosts:
+
+```
+[thinclient]$ tower provision <host> --online
+```
+
+## Provision an Offline Host
+An offline host is a host without access to the Internet _via_ the router.
+
+```
+[thinclient]$ tower provision <host> --offline
+```
+
+# Using TowerOS
+Once your hosts are provisioned, you are ready to use TowerOS. You can of course access each host _via_ SSH. However, you can also run GUI applications installed on a host such that the application appears to run on the thin client.
+
+## Execute a command on one of the hosts:
 
 Run a command on a host with SSH:
 
 ```
-$> ssh <host> ls ~/
+[thinclient]$ ssh <host> <command>
 ```
 
-or a graphical application with NX protocol:
+## Run a graphical application on a host, with its GUI appearing on the thin client:
 
 ```
-$> tower run <host> <application-name>
+[thinclient]$ tower run <host> <command>
 ```
 
-## 4. Install an application on one of the hosts
+## Install an Alpine package on a host:
+TowerOS makes it easy to install new packages on any host by tunneling a connection through the router:
 
 ```
-$> tower install <host> <application-name>
+[thinclient]$ tower install <host> <package>
 ```
 
-Important: To be able to install packages on offline hosts you must first provision the `router`.
-
-## 5. List hosts and their statuses
+## List your hosts and their statuses
 
 ```
-$> tower status
+[thinclient]$ tower status
 ```
 
-## 6. Example using two hosts
 
-Provision the router.
+# Example Usage
 
-```
-$> tower provision router –wlan-ssid <ssid> –wlan-password <password>
-```
-
-Provision an offline host named `office`.
+1. Provision the router:
 
 ```
-$> tower provision office
+[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
 ```
 
-Install galculator on the `office` offline host.
+1. Provision an offline host named `office`:
 
 ```
-$> tower install office galculator
+[thinclient]$ tower provision office
 ```
 
-Run galculator from `office`.
+1. Install GCalculator on the `office` offline host:
 
 ```
-$> startx
-$> tower run office gcalculator
+[thinclient]$ tower install office galculator
+```
+
+1. Run galculator `office`:
+
+```
+[thinclient]$ startx
+[thinclient]$ tower run office gcalculator
 ```
