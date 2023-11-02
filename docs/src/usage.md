@@ -5,11 +5,12 @@ Hosts are divided into two types: *online* and *offline*. Online hosts live on a
 ## Provisioning Hosts
 TowerOS provides tools for easily provisioning new hosts with the following steps, with the user guided through them by the `tower` CLI tool:
 
-1. Insert an SD card or USB key into the thin client.
-2. Call the `$ tower provision` command.
-3. Insert the SD card or USB key into the target host hardware.
-4. Turn on the host hardware.
-5. Wait for the provisioning process to complete on the thin client.
+1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the host.
+2. Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the thin client.
+3. Call the `$ tower provision` command.
+4. Insert the boot device into the target host hardware.
+5. Turn on the host hardware.
+6. Wait for the provisioning process to complete on the thin client.
 
 *NOTE:* You must provision a router before you provision any other online hosts.
 
@@ -64,6 +65,12 @@ TowerOS makes it easy to install new packages on any host by tunneling a connect
 [thinclient]$ tower status
 ```
 
+### Move a file from one host to another
+
+```
+[thinclient]$ scp <host_source>:<file_path_in_host_source> <host_dest>:<file_path_in_host_dest>
+[thinclient]$ ssh <host_source> rm <file_path_in_host_source>
+```
 
 ## Example Usage
 
@@ -73,21 +80,28 @@ TowerOS makes it easy to install new packages on any host by tunneling a connect
 [thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
 ```
 
-1. Provision an offline host named `office`:
+2. Provision an offline host named `office`:
 
 ```
 [thinclient]$ tower provision office
 ```
 
-1. Install GCalculator on the `office` offline host:
+3. Install GCalculator on the `office` offline host:
 
 ```
 [thinclient]$ tower install office galculator
 ```
 
-1. Run galculator `office`:
+4. Run galculator `office`:
 
 ```
 [thinclient]$ startx
 [thinclient]$ tower run office gcalculator
+```
+
+5. Move a file from `router` to `office`:
+
+```
+[thinclient]$ scp router:/home/tower/myfile office:/home/tower
+[thinclient]$ ssh router rm /home/tower/myfile
 ```
