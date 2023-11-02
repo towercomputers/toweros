@@ -1,14 +1,18 @@
 # Implementation
 
+TowerOS is built on [Alpine Linux](https://alpinelinux.org) for the latter's simplicity, minimalism, and security-first approach. TowerOS is open-source and freely licensed (MIT). It is designed to require the smallest-possible trusted computing base, to rely only on other widely used, open-source software, and to as transparent as possible in its implementation.
+
+## `tower-tools`
+
 The `tower-tools` package contains six main modules:
 
 - `buildthinclient.py` and `buildhost.py` to build the OS images used by the thin client and the hosts
-- `sshconf.py` which manages `tower-tools` and SSH configuration files
-- `provision.py`, `install.py`, and `gui.py` which respectively allow you to provision a host, to install an application on it without an Internet connection, and to run a graphical application on a host from the thin client
+- `sshconf.py` which manages TowerOS and SSH configuration files
+- `provision.py`, `install.py`, and `gui.py` which allow you to provision a host, to install an application on it without an Internet connection, and to run a graphical application on a host from the thin client, respectively.
 
-## Network Architecture
+### Network Architecture
 
-A TowerOS thin client is connected to one or two separate networks (each with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. Online hosts reside on the first network; offline hosts on the second. On the online network, one of the hosts, called the “router”, is connected to the Internet and shares the connection with all the hosts connected to the same network.
+A TowerOS **thin client** connects to one or two separate networks of **hosts** (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. *Online* hosts reside on the first network; *offline* hosts on the second. On the online network, one of the hosts, called the “**router**”, is connected to the Internet and shares the connection with all the hosts connected to the same network.
 
 All IPs are static and assigned by the `tower` tool. Here are the IPs used:
 
