@@ -1,0 +1,40 @@
+soffer:
+  type: Patent
+  author: ["Soffer, Aviv", "Vaisband, Oleg"]
+  title: Secure KVM device ensuring isolation of host computers
+  date: 2014-07-01
+
+issa:
+  type: Article
+  author: ["Issa, Abdullah", "Murray, Toby", "Ernst, Gidon"]
+  title: "In search of perfect users: towards understanding the usability of converged multi-level secure user interfaces."
+  parent:
+    type: Proceedings
+    title: "Proceedings of the 30th Australian Conference on Computer-Human Interaction"
+    page-range: 572--576
+    date: 2018
+
+beaumont:
+  type: Article
+  author: ["Beaumont, Mark", "McCarthy, Jim", "Murray, Toby"]
+  title: "The cross domain desktop compositor: Using hardware-based video compositing for a multi-level secure user interface."
+  parent:
+    type: Proceedings
+    title: "Proceedings of the 32nd Annual Conference on Computer Security Applications"
+    page-range: 533--545
+    date: 2016
+
+raytheon:
+  type: Web
+  author: Raytheon Company
+  title: Raytheon Trusted Thin Client
+  date: 2014
+  url: "https:www.raytheon.com/capabilities/rtnwcm/groups/gallery/documents/ digitalasset/rtn_216411.pdf"
+
+snowden:
+  type: Post
+  author: Snowden, Edward
+  date: 2016-09-29
+  url: twitter.com/snowden/status/781493632293605376
+
+Raadt, Theo de. “‘Re: About Xen: Maybe a Reiterative Question but ..’- MARC.”“Re: About Xen: Maybe a Reiterative Question but ..”- MARC, 24 Oct. 2007, marc.info/?l\=openbsd-misc&m\=119318909016582
