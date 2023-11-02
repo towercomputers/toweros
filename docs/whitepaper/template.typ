@@ -1,22 +1,19 @@
-#let script-size = 7.97224pt
-#let footnote-size = 8.50012pt
-#let small-size = 9.24994pt
-#let normal-size = 10.00002pt
-#let large-size = 11.74988pt
-
 // This function gets your whole document as its `body` and formats
-// it as an article in the style of the American Mathematical Society.
-#let ams-article(
-  // The article's title.
-  title: "Paper title",
+// it as an article in the style of the IEEE.
+#let ieee(
+  // The paper's title.
+  title: "Paper Title",
 
   // An array of authors. For each author you can specify a name,
   // department, organization, location, and email. Everything but
   // but the name is optional.
   authors: (),
 
-  // Your article's abstract. Can be omitted if you don't have one.
+  // The paper's abstract. Can be omitted if you don't have one.
   abstract: none,
+
+  // A list of index terms to display after the abstract.
+  index-terms: (),
 
   // The article's paper size. Also affects the margins.
   paper-size: "us-letter",
@@ -25,160 +22,143 @@
   // works.
   bibliography-file: none,
 
-  // The document's content.
-  body,
+  // The paper's content.
+  body
 ) = {
-  // Formats the author's names in a list with commas and a
-  // final "and".
-  let names = authors.map(author => author.name)
-  let author-string = if authors.len() == 2 {
-    names.join(" and ")
-  } else {
-    names.join(", ", last: ", and ")
-  }
-
   // Set document metadata.
-  set document(title: title, author: names)
+  set document(title: title, author: authors.map(author => author.name))
 
-  // Set the body font. AMS uses the LaTeX font.
-  set text(size: normal-size, font: "New Computer Modern")
+  // Set the body font.
+  set text(font: "STIX Two Text", size: 10pt)
 
   // Configure the page.
   set page(
     paper: paper-size,
     // The margins depend on the paper size.
-    margin: if paper-size != "a4" {
-      (
-        top: (116pt / 279mm) * 100%,
-        left: (126pt / 216mm) * 100%,
-        right: (128pt / 216mm) * 100%,
-        bottom: (94pt / 279mm) * 100%,
-      )
+    margin: if paper-size == "a4" {
+      (x: 41.5pt, top: 80.51pt, bottom: 89.51pt)
     } else {
       (
-        top: 117pt,
-        left: 118pt,
-        right: 119pt,
-        bottom: 96pt,
+        x: (50pt / 216mm) * 100%,
+        top: (55pt / 279mm) * 100%,
+        bottom: (64pt / 279mm) * 100%,
       )
-    },
-
-    // The page header should show the page number and list of
-    // authors, except on the first page. The page number is on
-    // the left for even pages and on the right for odd pages.
-    header-ascent: 14pt,
-    header: locate(loc => {
-      let i = counter(page).at(loc).first()
-      if i == 1 { return }
-      set text(size: script-size)
-      grid(
-        columns: (6em, 1fr, 6em),
-        if calc.even(i) [#i],
-        align(center, upper(
-          if calc.odd(i) { title } else { author-string }
-        )),
-        if calc.odd(i) { align(right)[#i] }
-      )
-    }),
-
-    // On the first page, the footer should contain the page number.
-    footer-descent: 12pt,
-    footer: locate(loc => {
-      let i = counter(page).at(loc).first()
-      if i == 1 {
-        align(center, text(size: script-size, [#i]))
-      }
-    })
+    }
   )
 
+  // Configure equation numbering and spacing.
+  set math.equation(numbering: "(1)")
+  show math.equation: set block(spacing: 0.65em)
+
+  // Configure lists.
+  set enum(indent: 10pt, body-indent: 9pt)
+  set list(indent: 10pt, body-indent: 9pt)
+
   // Configure headings.
-  set heading(numbering: "1.")
-  show heading: it => {
-    // Create the heading numbering.
-    let number = if it.numbering != none {
-      counter(heading).display(it.numbering)
-      h(7pt, weak: true)
-    }
-
-    // Level 1 headings are centered and smallcaps.
-    // The other ones are run-in.
-    set text(size: normal-size, weight: 400)
-    if it.level == 1 {
-      set align(center)
-      set text(size: normal-size)
-      smallcaps[
-        #v(15pt, weak: true)
-        #number
-        #it.body
-        #v(normal-size, weak: true)
-      ]
-      counter(figure.where(kind: "theorem")).update(0)
+  set heading(numbering: "I.A.1.")
+  show heading: it => locate(loc => {
+    // Find out the final number of the heading counter.
+    let levels = counter(heading).at(loc)
+    let deepest = if levels != () {
+      levels.last()
     } else {
-      v(11pt, weak: true)
-      number
-      let styled = if it.level == 2 { strong } else { emph }
-      styled(it.body + [. ])
-      h(7pt, weak: true)
+      1
     }
-  }
 
-  // Configure lists and links.
-  set list(indent: 24pt, body-indent: 5pt)
-  set enum(indent: 24pt, body-indent: 5pt)
-  show link: set text(font: "New Computer Modern Mono")
-
-  show figure: it => {
-    show: pad.with(x: 23pt)
-    set align(center)
-
-    v(12.5pt, weak: true)
-
-    // Display the figure's body.
-    it.body
-
-    // Display the figure's caption.
-    if it.has("caption") {
-      // Gap defaults to 17pt.
-      v(if it.has("gap") { it.gap } else { 17pt }, weak: true)
-      smallcaps(it.supplement)
-      if it.numbering != none {
-        [ ]
-        it.counter.display(it.numbering)
+    set text(10pt, weight: 400)
+    if it.level == 1 [
+      // First-level headings are centered smallcaps.
+      // We don't want to number of the acknowledgment section.
+      #let is-ack = it.body in ([Acknowledgment], [Acknowledgement])
+      #set align(center)
+      #set text(if is-ack { 10pt } else { 12pt })
+      #show: smallcaps
+      #v(20pt, weak: true)
+      #if it.numbering != none and not is-ack {
+        numbering("I.", deepest)
+        h(7pt, weak: true)
       }
-      [. ]
-      it.caption.body
+      #it.body
+      #v(13.75pt, weak: true)
+    ] else if it.level == 2 [
+      // Second-level headings are run-ins.
+      #set par(first-line-indent: 0pt)
+      #set text(style: "italic")
+      #v(10pt, weak: true)
+      #if it.numbering != none {
+        numbering("A.", deepest)
+        h(7pt, weak: true)
+      }
+      #it.body
+      #v(10pt, weak: true)
+    ] else [
+      // Third level headings are run-ins too, but different.
+      #if it.level == 3 {
+        numbering("1)", deepest)
+        [ ]
+      }
+      _#(it.body):_
+    ]
+  })
+
+  // Display the paper's title.
+  v(3pt, weak: true)
+  align(center, text(18pt, title))
+  v(8.35mm, weak: true)
+
+  // Display the authors list.
+  for i in range(calc.ceil(authors.len() / 3)) {
+    let end = calc.min((i + 1) * 3, authors.len())
+    let is-last = authors.len() == end
+    let slice = authors.slice(i * 3, end)
+    grid(
+      columns: slice.len() * (1fr,),
+      gutter: 12pt,
+      ..slice.map(author => align(center, {
+        text(12pt, author.name)
+        if "department" in author [
+          \ #emph(author.department)
+        ]
+        if "organization" in author [
+          \ #emph(author.organization)
+        ]
+        if "location" in author [
+          \ #author.location
+        ]
+        if "email" in author [
+          \ #link("mailto:" + author.email)
+        ]
+      }))
+    )
+
+    if not is-last {
+      v(16pt, weak: true)
     }
-
-    v(15pt, weak: true)
   }
+  v(40pt, weak: true)
 
-  // Display the title and authors.
-  v(35pt, weak: true)
-  align(center, upper({
-    text(size: large-size, weight: 700, title)
-    v(25pt, weak: true)
-    text(size: footnote-size, author-string)
-  }))
+  // Start two column mode and configure paragraph properties.
+  show: columns.with(2, gutter: 12pt)
+  set par(justify: true, first-line-indent: 1em)
+  show par: set block(spacing: 0.65em)
 
-  // Configure paragraph properties.
-  set par(first-line-indent: 1.2em, justify: true, leading: 0.58em)
-  show par: set block(spacing: 0.58em)
+  // Display abstract and index terms.
+  if abstract != none [
+    #set text(weight: 700)
+    #h(1em) _Abstract_---#abstract
 
-  // Display the abstract
-  if abstract != none {
-    v(20pt, weak: true)
-    set text(script-size)
-    show: pad.with(x: 35pt)
-    smallcaps[Abstract. ]
-    abstract
-  }
+    #if index-terms != () [
+      #h(1em)_Index terms_---#index-terms.join(", ")
+    ]
+    #v(2pt)
+  ]
 
-  // Display the article's contents.
-  v(29pt, weak: true)
+  // Display the paper's contents.
   body
 
-  // The thing ends with details about the authors.
-  show: pad.with(x: 11.5pt)
-  set par(first-line-indent: 0pt)
-  set text(7.97224pt)
+  // Display bibliography.
+  if bibliography-file != none {
+    show bibliography: set text(8pt)
+    bibliography(bibliography-file, title: text(10pt)[References], style: "ieee")
+  }
 }

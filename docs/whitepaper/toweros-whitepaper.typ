@@ -1,6 +1,7 @@
 #import "template.typ": *
-#show: ams-article.with(
-  title: "TowerOS: An Operating System for Network-Boundary Converged Multi-Level Secure Computing",
+#show: ieee.with(
+  title: "TowerOS: An Operating System for Network-Boundary
+  Converged Multi-Level Secure Computing",
   authors: (
     (
       name: "Adam Krellenstein",
@@ -12,11 +13,17 @@
 
 #set text(font: "Palatino")
 #set quote(block: true)
+#set enum(spacing: 500%)
+#show quote: it => [
+  #set block(width: 100%)
+  #emph[#it]
+]
+#set quote(block: true)
 
 = Background
 A converged multi-level secure (MLS) computing system is one that allows the user to operate across distinct security domains through a single user interface (UI). Traditional MLS systems rely on hardware-level isolation using a keyboard-video-mouse (KVM) switch and no UI compositing@soffer or more recently with software-level isolation and software-based UI compositing (e.g. using a hypervisor).@issa While hardware-level isolation is theoretically much more secure than software-level isolation, the overall usability of any MLS system without user-interface compositing is necessarily poor in comparison, because there is no single, unified interface provided for the user.
 
-#quote[“Extant software solutions do combine the user interfaces for multiple domains onto the same desktop, however these rely on large trusted computing bases comprising hypervisor, security domain software, and drivers---making them too complex to evaluate and too risky to accredit for high assurance use. Software solutions fail to address the increasing risk of compromised hardware, implicitly incorporating many hardware components into the trusted computing base.@beaumont]
+#quote[“Extant software solutions do combine the user interfaces for multiple domains onto the same desktop, however these rely on large trusted computing bases comprising hypervisor, security domain software, and drivers---making them too complex to evaluate and too risky to accredit for high assurance use. Software solutions fail to address the increasing risk of compromised hardware, implicitly incorporating many hardware components into the trusted computing base.”@beaumont]
 
 Recently, a system for hardware-level isolation with hardware-based UI compositing was developed;@beaumont but the usability of even this design is still much lower than that of those with software-based compositing because all interfaces between the security domains must be implemented _in silico_. Raytheon's Forcepoint Trusted Thin Client and Remote allows users to access multiple isolated networks from a single thin client, but has no capability for user-interface compositing.@raytheon
 
@@ -46,27 +53,28 @@ Side-Channel Attacks
 The state-of-the-art in secure computing systems@snowden is #link("http://qubes-os.org")[Qubes OS] is an open-source converged multi-level secure operating system that uses hardware virtualization (with Xen) to isolate security domains. There is a number of major weaknesses inherent in the design of Qubes OS, all of which stem from the fact that it has a large TCB.
 
 == Advantages
-+ Most importantly, Qubes OS relies heavily on the security guarantees of Xen, which is large, complicated, and has a history of serious security vulnerabilities.@deraadt
+#enum(
+enum.item(1)[Most importantly, Qubes OS relies heavily on the security guarantees of Xen, which is large, complicated, and has a history of serious security vulnerabilities.@deraadt
+#v(-15pt)
+#quote(attribution: "J. Rutkowska")[“In recent years, as more and more top notch researchers have begun scrutinizing Xen, a number of #link("https://xenbits.xen.org/xsa/")[security bugs] have been discovered. While #link("https://www.qubes-os.org/security/xsa/")[many] of them did not affect the security of Qubes OS, there were still too many that did.”@rutkowska]#v(5pt)],
 
-#quote[In recent years, as more and more top notch researchers have begun
-scrutinizing Xen, a number of have been discovered. While of them did
-not affect the security of Qubes OS, there were still too many that
-did.@rutkowska]
+enum.item(2)[Qubes OS relies on the security properties of the hardware it runs on.
+#v(-15pt)
+#quote(attribution: "J. Rutkowska")[“Other problems arise from the underlying architecture of the x86 platform, where various inter-VM side- and covert-channels are made possible thanks to the aggressively optimized multi-core CPU architecture, most spectacularly demonstrated by the recently published #link("https://meltdownattack.com")[Meltdown and Spectre attacks]. Fundamental problems in other areas of the underlying hardware have also been discovered, such as the #link("https://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html")[Row Hammer Attack].”@rutkowska]#v(5pt)],
 
-+ Qubes OS relies on the security properties of the hardware it runs on.
+enum.item(3)[The complexity inherent in the design of Qubes OS makes the operating system difficult both to maintain and to use. Accordingly, Qubes OS development has slowed significantly in recent years: as of December 2022, the last release (v4.1.x, in February 2022) came almost four years after the previous one (v4.0.x in March 2018).@download],
 
-#quote[Other problems arise from the underlying architecture of the x86 platform, where various inter-VM side- and covert-channels are made possible thanks to the aggressively optimized multi-core CPU architecture, most spectacularly demonstrated by the recently published . Fundamental problems in other areas of the underlying hardware have also been discovered, such as the #link("https://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html")[Row Hammer Attack].@rutkowska]
-
-+ The complexity inherent in the design of Qubes OS makes the operating system difficult both to maintain and to use. Accordingly, Qubes OS development has slowed significantly in recent years: as of December 2022, the last release (v4.1.x, in February 2022) came almost four years after the previous one (v4.0.x in March 2018).@download
-
-+ Qubes OS has support only for extremely few hardware configurations. As of December 2022, are only three laptops that are known to be fully compatible with Qubes OS.@certified With only moderate effort, TowerOS may be hybridized with any modern operating system so long as that operating system supports the standard network interfaces required for SSH, etc. This flexibility can enable the system to run a wide variety of software and hardware.
+enum.item(4)[Qubes OS has support only for extremely few hardware configurations. As of December 2022, are only three laptops that are known to be fully compatible with Qubes OS.@certified With only moderate effort, TowerOS may be hybridized with any modern operating system so long as that operating system supports the standard network interfaces required for SSH, etc. This flexibility can enable the system to run a wide variety of software and hardware.]
+)
 
 == Disadvantages
-+ The primary disadvantage of the proposed design is the additional physical bulk of the computer in comparison to a single laptop running a software-boundary solution such as Qubes OS.
+#enum(
+enum.item(1)[The primary disadvantage of the proposed design is the additional physical bulk of the computer in comparison to a single laptop running a software-boundary solution such as Qubes OS.],
 
-+ With Qubes OS, each security domain has no hardware footprint, so it is theoretically easier to support a greater number of security domains.
+enum.item(2)[With Qubes OS, each security domain has no hardware footprint, so it is theoretically easier to support a greater number of security domains.],
 
-+ In some cases, the security domain isolation within Qubes OS may be able to be more granular. For example, Qubes OS supports isolating the USB-protocol processing and the handling of the block device, when loading data from a USB key; however this would not be very practical with TowerOS.
+enum.item(3)[In some cases, the security domain isolation within Qubes OS may be able to be more granular. For example, Qubes OS supports isolating the USB-protocol processing and the handling of the block device, when loading data from a USB key; however this would not be very practical with TowerOS.]
+)
 
 
 = Conclusion 
