@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#1-security-guarantees" class="md-skip">
+        <a href="#security-model" class="md-skip">
           Skip to content
         </a>
       
@@ -310,62 +310,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-security-guarantees" class="md-nav__link">
-    1. Security Guarantees
-  </a>
-  
-    <nav class="md-nav" aria-label="1. Security Guarantees">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#11-firewall" class="md-nav__link">
-    1.1 Firewall
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#12-hardware" class="md-nav__link">
-    1.2 Hardware
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-operating-system" class="md-nav__link">
-    2. Operating System
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Operating System">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#21-application-level" class="md-nav__link">
-    2.1. Application-Level
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-trusted-computing-base" class="md-nav__link">
-    3. Trusted Computing Base
+  <a href="#security-model" class="md-nav__link">
+    Security Model
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-threat-analysis" class="md-nav__link">
-    4. Threat Analysis
+  <a href="#trusted-computing-base" class="md-nav__link">
+    Trusted Computing Base
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threat-analysis" class="md-nav__link">
+    Threat Analysis
   </a>
   
 </li>
@@ -460,62 +420,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-security-guarantees" class="md-nav__link">
-    1. Security Guarantees
-  </a>
-  
-    <nav class="md-nav" aria-label="1. Security Guarantees">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#11-firewall" class="md-nav__link">
-    1.1 Firewall
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#12-hardware" class="md-nav__link">
-    1.2 Hardware
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2-operating-system" class="md-nav__link">
-    2. Operating System
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Operating System">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#21-application-level" class="md-nav__link">
-    2.1. Application-Level
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-trusted-computing-base" class="md-nav__link">
-    3. Trusted Computing Base
+  <a href="#security-model" class="md-nav__link">
+    Security Model
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-threat-analysis" class="md-nav__link">
-    4. Threat Analysis
+  <a href="#trusted-computing-base" class="md-nav__link">
+    Trusted Computing Base
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#threat-analysis" class="md-nav__link">
+    Threat Analysis
   </a>
   
 </li>
@@ -537,37 +457,24 @@
 
   <h1>Security</h1>
 
-<h2 id="1-security-guarantees">1. Security Guarantees</h2>
-<h3 id="11-firewall">1.1 Firewall</h3>
+<h2 id="security-model">Security Model</h2>
 <ul>
-<li>There is zero direct communication between hosts (however there is tunneling for package management).</li>
-<li>All communication between the thin client and a host is over SSH and on port 22 (ideally including screen sharing).</li>
-<li>All communication between the thin client and a host must originate with the thin client.</li>
-<li>No connections to the online hosts may originate from the Internet.</li>
-<li>Tunneling from the thin client to the Internet is allowed.</li>
+<li>Direct communication between Hosts is forbidden.</li>
+<li>All communication between the Thin Client and a Host is over SSH and on port 22.</li>
+<li>All communication with a Host must originate with the Thin Client.</li>
+<li>All network connections between the Thin Client and a Host must be directly triggered by user action.</li>
+<li>SSH tunnels from the Thin Client or a Host through the Router are allowed.</li>
 </ul>
-<h3 id="12-hardware">1.2 Hardware</h3>
+<h2 id="trusted-computing-base">Trusted Computing Base</h2>
 <ul>
-<li>Online hosts are connected to an Ethernet switch and a WLAN; offline hosts are connected only to the switch.</li>
-</ul>
-<h2 id="2-operating-system">2. Operating System</h2>
-<ul>
-<li>Reasonable standards; but this is mostly out of scope. (Disable HT; use a hardened Linux kernel; etc.)</li>
-</ul>
-<h3 id="21-application-level">2.1. Application-Level</h3>
-<ul>
-<li>All network connections between the thin client and a host) must be directly triggered by user action.</li>
-</ul>
-<h2 id="3-trusted-computing-base">3. Trusted Computing Base</h2>
-<ul>
-<li>Tower Tooling</li>
+<li>TowerOS Tooling</li>
 <li>Alpine Linux Base System</li>
 <li>Network Drivers</li>
 <li>Network Card Hardware</li>
 <li>SSH</li>
-<li>Screensharing Software</li>
+<li>NX (Screensharing)</li>
 </ul>
-<h2 id="4-threat-analysis">4. Threat Analysis</h2>
+<h2 id="threat-analysis">Threat Analysis</h2>
 <table>
 <thead>
 <tr>

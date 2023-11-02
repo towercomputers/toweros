@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#1-provision-an-online-host" class="md-skip">
+        <a href="#provisioning-hosts" class="md-skip">
           Skip to content
         </a>
       
@@ -255,6 +255,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -283,6 +285,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -291,43 +295,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-provision-an-online-host" class="md-nav__link">
-    1. Provision an online host
+  <a href="#provision-the-router" class="md-nav__link">
+    Provision the Router
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-provision-an-offline-host" class="md-nav__link">
-    2. Provision an offline host
+  <a href="#provision-an-online-host" class="md-nav__link">
+    Provision an Online Host
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-execute-a-command-on-one-of-the-hosts" class="md-nav__link">
-    3. Execute a command on one of the hosts
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-install-an-application-on-one-of-the-hosts" class="md-nav__link">
-    4. Install an application on one of the hosts
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#5-list-hosts-and-their-statuses" class="md-nav__link">
-    5. List hosts and their statuses
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-example-using-two-hosts" class="md-nav__link">
-    6. Example using two hosts
+  <a href="#provision-an-offline-host" class="md-nav__link">
+    Provision an Offline Host
   </a>
   
 </li>
@@ -433,6 +416,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -441,43 +426,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-provision-an-online-host" class="md-nav__link">
-    1. Provision an online host
+  <a href="#provision-the-router" class="md-nav__link">
+    Provision the Router
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-provision-an-offline-host" class="md-nav__link">
-    2. Provision an offline host
+  <a href="#provision-an-online-host" class="md-nav__link">
+    Provision an Online Host
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-execute-a-command-on-one-of-the-hosts" class="md-nav__link">
-    3. Execute a command on one of the hosts
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-install-an-application-on-one-of-the-hosts" class="md-nav__link">
-    4. Install an application on one of the hosts
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#5-list-hosts-and-their-statuses" class="md-nav__link">
-    5. List hosts and their statuses
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-example-using-two-hosts" class="md-nav__link">
-    6. Example using two hosts
+  <a href="#provision-an-offline-host" class="md-nav__link">
+    Provision an Offline Host
   </a>
   
 </li>
@@ -497,47 +461,66 @@
                   
 
 
-  <h1>Usage</h1>
-
-<h2 id="1-provision-an-online-host">1. Provision an online host</h2>
-<p>Only one of the hosts is connected to the internet via WIFI. This host, called the <code>router</code>, is then responsible for sharing the connection with all the other online hosts. The first online host that you can/must provision is therefore the router:</p>
-<pre><code>$&gt; tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
+<p>Hosts are divided into two types: <em>online</em> and <em>offline</em>. Online hosts live on a separate LAN from offline hosts, and the thin client is connected to both networks. One online host is deemed the “router”, and the router is responsible for providing Internet access to the thin client and all other hosts. If you do not wish to maintain two separate networks, you can simply not provision any offline hosts.</p>
+<h1 id="provisioning-hosts">Provisioning Hosts</h1>
+<p>TowerOS provides tools for easily provisioning new hosts with the following steps, with the user guided through them by the <code>tower</code> CLI tool:</p>
+<ol>
+<li>Insert an SD card or USB key into the thin client.</li>
+<li>Call the <code>$ tower provision</code> command.</li>
+<li>Insert the SD card or USB key into the target host hardware.</li>
+<li>Turn on the host hardware.</li>
+<li>Wait for the provisioning process to complete on the thin client.</li>
+</ol>
+<p><em>NOTE:</em> You must provision a router before you provision any other online hosts.</p>
+<h2 id="provision-the-router">Provision the Router</h2>
+<p>The first online host that you must provision is the router, which connect to the Internet <em>via</em> a WiFi network: </p>
+<pre><code>[thinclient]$ tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
 </code></pre>
-<p>Once the <code>router</code> is correctly provisioned, you can provision other online hosts:</p>
-<pre><code>$&gt; tower provision &lt;host&gt; --online
+<h2 id="provision-an-online-host">Provision an Online Host</h2>
+<p>Once the <code>router</code> is correctly provisioned, you may provision other online hosts:</p>
+<pre><code>[thinclient]$ tower provision &lt;host&gt; --online
 </code></pre>
-<p>Keyboard, timezone and WiFi parameters are retrieved from the Thin Client. You can customize them with the appropriate argument (see <code>tower provision --help</code>).</p>
-<h2 id="2-provision-an-offline-host">2. Provision an offline host</h2>
-<p>Prepare the sd-card in the Thin Client with the command bellow. Once the sd-card is ready you must insert it into the Raspberry Pi or CM4 and turn it on.</p>
-<pre><code>$&gt; tower provision &lt;host&gt; --offline
+<h2 id="provision-an-offline-host">Provision an Offline Host</h2>
+<p>An offline host is a host without access to the Internet <em>via</em> the router.</p>
+<pre><code>[thinclient]$ tower provision &lt;host&gt; --offline
 </code></pre>
-<h2 id="3-execute-a-command-on-one-of-the-hosts">3. Execute a command on one of the hosts</h2>
+<h1 id="using-toweros">Using TowerOS</h1>
+<p>Once your hosts are provisioned, you are ready to use TowerOS. You can of course access each host <em>via</em> SSH. However, you can also run GUI applications installed on a host such that the application appears to run on the thin client.</p>
+<h2 id="execute-a-command-on-one-of-the-hosts">Execute a command on one of the hosts:</h2>
 <p>Run a command on a host with SSH:</p>
-<pre><code>$&gt; ssh &lt;host&gt; ls ~/
+<pre><code>[thinclient]$ ssh &lt;host&gt; &lt;command&gt;
 </code></pre>
-<p>or a graphical application with NX protocol:</p>
-<pre><code>$&gt; tower run &lt;host&gt; &lt;application-name&gt;
+<h2 id="run-a-graphical-application-on-a-host-with-its-gui-appearing-on-the-thin-client">Run a graphical application on a host, with its GUI appearing on the thin client:</h2>
+<pre><code>[thinclient]$ tower run &lt;host&gt; &lt;command&gt;
 </code></pre>
-<h2 id="4-install-an-application-on-one-of-the-hosts">4. Install an application on one of the hosts</h2>
-<pre><code>$&gt; tower install &lt;host&gt; &lt;application-name&gt;
+<h2 id="install-an-alpine-package-on-a-host">Install an Alpine package on a host:</h2>
+<p>TowerOS makes it easy to install new packages on any host by tunneling a connection through the router:</p>
+<pre><code>[thinclient]$ tower install &lt;host&gt; &lt;package&gt;
 </code></pre>
-<p>Important: To be able to install packages on offline hosts you must first provision the <code>router</code>.</p>
-<h2 id="5-list-hosts-and-their-statuses">5. List hosts and their statuses</h2>
-<pre><code>$&gt; tower status
+<h2 id="list-your-hosts-and-their-statuses">List your hosts and their statuses</h2>
+<pre><code>[thinclient]$ tower status
 </code></pre>
-<h2 id="6-example-using-two-hosts">6. Example using two hosts</h2>
-<p>Provision the router.</p>
-<pre><code>$&gt; tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
+<h1 id="example-usage">Example Usage</h1>
+<ol>
+<li>Provision the router:</li>
+</ol>
+<pre><code>[thinclient]$ tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
 </code></pre>
-<p>Provision an offline host named <code>office</code>.</p>
-<pre><code>$&gt; tower provision office
+<ol>
+<li>Provision an offline host named <code>office</code>:</li>
+</ol>
+<pre><code>[thinclient]$ tower provision office
 </code></pre>
-<p>Install galculator on the <code>office</code> offline host.</p>
-<pre><code>$&gt; tower install office galculator
+<ol>
+<li>Install GCalculator on the <code>office</code> offline host:</li>
+</ol>
+<pre><code>[thinclient]$ tower install office galculator
 </code></pre>
-<p>Run galculator from <code>office</code>.</p>
-<pre><code>$&gt; startx
-$&gt; tower run office gcalculator
+<ol>
+<li>Run galculator <code>office</code>:</li>
+</ol>
+<pre><code>[thinclient]$ startx
+[thinclient]$ tower run office gcalculator
 </code></pre>
 
 

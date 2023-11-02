@@ -390,21 +390,21 @@
 
 
 <h1 id="secure-boot">Secure Boot</h1>
-<p>Secure Boot is a server security feature that is implemented in the BIOS and does not require special hardware. Secure Boot ensures that each component launched during the boot process is digitally signed and that the signature is validated against a set of trusted certificates embedded in the UEFI BIOS.</p>
-<p>Tower OS-Thin Client offers the possibility to activate Secure Boot. To do this, the firmware must be correctly configured before and after installation.</p>
+<p><em>Secure Boot</em> is a security feature that is implemented in the BIOS and does not require special hardware. Secure Boot ensures that each component launched during the boot process is digitally signed, and that the signature is validated against a set of trusted certificates embedded in the UEFI BIOS.</p>
+<p>TowerOS offers the possibility to activate Secure Boot on the thin client. To do this, the firmware must be correctly configured before and after installation.</p>
 <h2 id="before-the-installation">Before the installation</h2>
 <p>You must:</p>
 <ul>
-<li>disable Secure Boot if necessary</li>
+<li>Disable Secure Boot if necessary</li>
 <li>Reset to "Setup Mode"</li>
-<li>Clear all secure boot keys already registered.</li>
+<li>Clear all secure boot keys that have already been registered</li>
 </ul>
-<p>On Thinkpad firmware these three things can be done on the same screen:</p>
+<p>On ThinkPad firmware, these three things can be done on the same screen:</p>
 <p><img alt="alt text" src="./ThinkPadSecureBoot.jpg" /></p>
 <h2 id="after-the-installation">After the installation</h2>
-<p>You must enable the "Secure Boot" in the same screen.</p>
-<p>Attention, once activated you will not be able to boot on unsigned devices, for example a live system on a USB key. It will first be necessary to deactivate the "Secure Boot".</p>
-<p>Remember to make a backup of the private keys used for Secure Boot. They are located here: /usr/share/secureboot/keys/</p>
+<p>You must enable the "Secure Boot" feature on the same screen.</p>
+<p><em>Attention</em>---once activated, you will not be able to boot from unsigned devices, for example a live system on an USB key. It will first be necessary to deactivate the Secure Boot feature.</p>
+<p>Remember to make a backup of the private keys used for Secure Boot, which are located here by default in <code>/usr/share/secureboot/keys/</code>.</p>
 
 
 
