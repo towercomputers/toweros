@@ -408,6 +408,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#move-a-file-from-one-host-to-another" class="md-nav__link">
+    Move a file from one host to another
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -728,6 +735,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#move-a-file-from-one-host-to-another" class="md-nav__link">
+    Move a file from one host to another
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -760,9 +774,10 @@
 <h2 id="provisioning-hosts">Provisioning Hosts</h2>
 <p>TowerOS provides tools for easily provisioning new hosts with the following steps, with the user guided through them by the <code>tower</code> CLI tool:</p>
 <ol>
-<li>Insert an SD card or USB key into the thin client.</li>
+<li>Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the host.</li>
+<li>Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the thin client.</li>
 <li>Call the <code>$ tower provision</code> command.</li>
-<li>Insert the SD card or USB key into the target host hardware.</li>
+<li>Insert the boot device into the target host hardware.</li>
 <li>Turn on the host hardware.</li>
 <li>Wait for the provisioning process to complete on the thin client.</li>
 </ol>
@@ -795,6 +810,10 @@
 <h3 id="list-your-hosts-and-their-statuses">List your hosts and their statuses</h3>
 <pre><code>[thinclient]$ tower status
 </code></pre>
+<h3 id="move-a-file-from-one-host-to-another">Move a file from one host to another</h3>
+<pre><code>[thinclient]$ scp &lt;host_source&gt;:&lt;file_path_in_host_source&gt; &lt;host_dest&gt;:&lt;file_path_in_host_dest&gt;
+[thinclient]$ ssh &lt;host_source&gt; rm &lt;file_path_in_host_source&gt;
+</code></pre>
 <h2 id="example-usage">Example Usage</h2>
 <ol>
 <li>Provision the router:</li>
@@ -816,6 +835,12 @@
 </ol>
 <pre><code>[thinclient]$ startx
 [thinclient]$ tower run office gcalculator
+</code></pre>
+<ol>
+<li>Move a file from <code>router</code> to <code>office</code>:</li>
+</ol>
+<pre><code>[thinclient]$ scp router:/home/tower/myfile office:/home/tower
+[thinclient]$ ssh router rm /home/tower/myfile
 </code></pre>
 
 

@@ -766,7 +766,7 @@
 <li><code>provision.py</code>, <code>install.py</code>, and <code>gui.py</code> which allow you to provision a host, to install an application on it without an Internet connection, and to run a graphical application on a host from the thin client, respectively.</li>
 </ul>
 <h2 id="networking">Networking</h2>
-<p>A TowerOS <strong>thin client</strong> connects to one or two separate networks of <strong>hosts</strong> (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. <em>Online</em> hosts reside on the first network; <em>offline</em> hosts on the second. On the online network, one of the hosts, called the “<strong>router</strong>”, is connected to the Internet and shares the connection with all the hosts connected to the same network.</p>
+<p>A TowerOS <strong>thin client</strong> connects to one or two separate networks of <strong>hosts</strong> (each network with an unmanaged switch). One network is connected to the Internet; the other (optional) network is offline. <em>Online</em> hosts reside on the first network; <em>offline</em> hosts on the second. On the online network, one of the hosts is the <strong>router</strong>: it is connected to the Internet directly and shares its connection with all the hosts connected to the same network.</p>
 <p>All IPs are static and assigned by the <code>tower</code> tool. Here are the IPs used:</p>
 <ul>
 <li>TOWER_NETWORK_ONLINE = "192.168.2.0/24"</li>
