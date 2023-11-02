@@ -8,13 +8,15 @@ theme:
     - navigation.instant
     - navigation.instant.prefetch
 nav:
-  - Home: index.md
-  - Hardware requirements: hardware.md
-  - Installation: installation.md
-  - Usage: usage.md
+  - Getting Started:
+    - Introduction: introduction.md
+    - Hardware: hardware.md
+    - Installation: installation.md
+    - Usage: usage.md
   - Security:
-    - secure-boot.md
-    - security.md
-  - Implementation: implementation.md
-  - Development: development.md
-  - Whitepaper: "TowerOS Whitepaper.pdf"
+    - Security: security.md
+    - Secure Boot: secure-boot.md
+  - Technical:
+    - Whitepaper: "TowerOS Whitepaper.pdf"
+    - Implementation: implementation.md
+    - Development: development.md
