@@ -1,35 +1,21 @@
-## 1. Security Guarantees
+## Security Model
 
-### 1.1 Firewall
+- Direct communication between Hosts is forbidden.
+- All communication between the Thin Client and a Host is over SSH and on port 22.
+- All communication with a Host must originate with the Thin Client.
+- All network connections between the Thin Client and a Host must be directly triggered by user action.
+- SSH tunnels from the Thin Client or a Host through the Router are allowed.
 
-- There is zero direct communication between hosts (however there is tunneling for package management).
-- All communication between the thin client and a host is over SSH and on port 22 (ideally including screen sharing).
-- All communication between the thin client and a host must originate with the thin client.
-- No connections to the online hosts may originate from the Internet.
-- Tunneling from the thin client to the Internet is allowed.
+## Trusted Computing Base
 
-### 1.2 Hardware
-
-- Online hosts are connected to an Ethernet switch and a WLAN; offline hosts are connected only to the switch.
-
-## 2. Operating System
-
-- Reasonable standards; but this is mostly out of scope. (Disable HT; use a hardened Linux kernel; etc.)
-
-### 2.1. Application-Level
-
-- All network connections between the thin client and a host) must be directly triggered by user action.
-
-## 3. Trusted Computing Base
-
-- Tower Tooling
+- TowerOS Tooling
 - Alpine Linux Base System
 - Network Drivers
 - Network Card Hardware
 - SSH
-- Screensharing Software
+- NX (Screensharing)
 
-## 4. Threat Analysis
+## Threat Analysis
 
 | Class | Attack | Mitigated | If so, how? |
 | --- | --- | --- | --- |

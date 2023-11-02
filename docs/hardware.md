@@ -1,10 +1,10 @@
-To use Tower you need a Thin Client and several Hosts connected via one or ideally two switches.
+TowerOS is designed to run on a thin client device and several hosts connected _via_ one or two unmanaged Ethernet switches. Two switches are necessary if the user would like to have offline as well as online hosts.
 
-The Thin Client is typically a laptop like the Lenovo X270. An SD-card reader is necessary for the Thin Client to prepare the SD-cards containing the hosts' OS. Two RJ45 ports are also necessary to connect the Thin Client to the two switches (you can optionally use a USB ethernet adapter).
+The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from. (Raspberry Pi 4Bs may be booted directly from USB, however.) The thin client should also have one or two RJ45 ports, depending on the number of switches in use.
 
-For the moment tower has been tested with two types of hosts: Raspberry PI 4b and Compute Module 4 Lite.
+TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compute Module 4 Lite.
 
-## 1. Raspberry PI 4b
+## 1. Raspberry Pi 4B
 
 ![Tower Archi](../img/towerarchi.png)
 
