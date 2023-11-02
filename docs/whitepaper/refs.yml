@@ -29,12 +29,36 @@ raytheon:
   author: Raytheon Company
   title: Raytheon Trusted Thin Client
   date: 2014
-  url: "https:www.raytheon.com/capabilities/rtnwcm/groups/gallery/documents/ digitalasset/rtn_216411.pdf"
+  url: "https://www.raytheon.com/capabilities/rtnwcm/groups/gallery/documents/ digitalasset/rtn_216411.pdf"
 
 snowden:
   type: Post
   author: Snowden, Edward
   date: 2016-09-29
-  url: twitter.com/snowden/status/781493632293605376
+  url: https://twitter.com/snowden/status/781493632293605376
 
-Raadt, Theo de. “‘Re: About Xen: Maybe a Reiterative Question but ..’- MARC.”“Re: About Xen: Maybe a Reiterative Question but ..”- MARC, 24 Oct. 2007, marc.info/?l\=openbsd-misc&m\=119318909016582
+deraadt:
+  type: Thread
+  title: "Re: About Xen: maybe a reiterative question but .."
+  author: Raadt, Theo de
+  url: "https://marc.info/?l=openbsd-misc&m=119318909016582"
+  date: 2007-10-24
+
+rutkowska:
+  type: Web
+  author: Rutkowska, Joanna
+  title: "Qubes Air: Generalizing the Qubes Architecture"
+  date: 2018-01-22
+  url: "https://www.qubes-os.org/news/2018/01/22/qubes-air"
+
+download:
+  type: Web
+  title: Download Qubes OS
+  author: Qubes OS
+  url: "https://www.qubes-os.org/downloads"
+
+certified:
+  type: Web
+  title: Certified Hardware
+  author: Qubes OS
+  url: "https://www.qubes-os.org/doc/certified-hardware"

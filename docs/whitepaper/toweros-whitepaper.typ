@@ -1,6 +1,6 @@
 #import "template.typ": *
 #show: ams-article.with(
-  title: "Tower: A Network-Boundary Converged Multi-Level Secure Computing System",
+  title: "TowerOS: An Operating System for Network-Boundary Converged Multi-Level Secure Computing",
   authors: (
     (
       name: "Adam Krellenstein",
@@ -22,7 +22,7 @@ Recently, a system for hardware-level isolation with hardware-based UI compositi
 
 
 = Architecture
-Tower represents a new, hybrid design which performs _software-based user-interface compositing_ with _hardware-level isolation_ using standard network interfaces. With Tower, we relegate each security domain to an independent headless computer, each with its own application state and security policies. These *Hosts* are networked together over a LAN and accessible by the user through a *Thin Client* device that is connected to the same network. The applications running on the various hosts are composited within a single user interface running on the thin client using a combination of multi-function network protocols (such as SSH) and desktop-sharing software (such as VNC over SSL).
+TowerOS implements a new, hybrid design which performs _software-based user-interface compositing_ with _hardware-level isolation_ using standard network interfaces. TowerOS relegates each security domain to an independent headless computer, each with its own application state and security policies. These *Hosts* are networked together over a LAN and accessible by the user through a *Thin Client* device that is connected to the same network. The applications running on the various hosts are composited within a single user interface running on the thin client using a combination of multi-function network protocols (such as SSH) and desktop-sharing software (such as VNC over SSL).
 
 Instead of having to trust an operating system to be able properly to isolate different security domains all running on shared hardware, our design relies on cryptographically secure networking protocols to connect multiple independent computers together to form a single, virtual device that from the user's perspective functions very much like a normal desktop computer. Instead of running multiple virtual machines on a single computer (whether to save costs or to isolate different security domains at the level of a hypervisor) we instead merge together multiple computers into a single virtual machine, where the actual hardware that any given application runs on (for security, or, for that matter, for performance) is abstracted away. This provides for the best of both words: the security guarantees of hardware isolation plus the usability and flexibility of interfaces implemented in software.
 
@@ -43,93 +43,33 @@ Side-Channel Attacks
 
 
 = Comparison with Qubes OS
-The state-of-the-art in secure computing systems@snowden is [Qubes OS](http://qubes-os.org) is an open-source converged multi-level secure operating system that uses hardware virtualization (with Xen) to isolate security domains. There is a number of major weaknesses inherent in the design of Qubes OS, all of which stem from the fact that it has a large TCB:
+The state-of-the-art in secure computing systems@snowden is #link("http://qubes-os.org")[Qubes OS] is an open-source converged multi-level secure operating system that uses hardware virtualization (with Xen) to isolate security domains. There is a number of major weaknesses inherent in the design of Qubes OS, all of which stem from the fact that it has a large TCB.
 
-#quote[Most importantly, Qubes OS relies heavily on the security guarantees of Xen, which is large, complicated, and has a history of serious security vulnerabilities.@deraadt]]
+== Advantages
++ Most importantly, Qubes OS relies heavily on the security guarantees of Xen, which is large, complicated, and has a history of serious security vulnerabilities.@deraadt
 
-\"In recent years, as more and more top notch researchers have begun
+#quote[In recent years, as more and more top notch researchers have begun
 scrutinizing Xen, a number of have been discovered. While of them did
 not affect the security of Qubes OS, there were still too many that
-did.\"#footnote[Rutkowska, Joanna. “Qubes Air: Generalizing the Qubes
-Architecture.”Qubes OS, 22 Jan. 2018,
-www.qubes-os.org/news/2018/01/22/qubes-air.]
+did.@rutkowska]
 
 + Qubes OS relies on the security properties of the hardware it runs on.
 
-\"Other problems arise from the underlying architecture of the x86
-platform, where various inter-VM side- and covert-channels are made
-possible thanks to the aggressively optimized multi-core CPU
-architecture, most spectacularly demonstrated by the recently published
-. Fundamental problems in other areas of the underlying hardware have
-also been discovered, such as the .\"#footnote[ibid.]
+#quote[Other problems arise from the underlying architecture of the x86 platform, where various inter-VM side- and covert-channels are made possible thanks to the aggressively optimized multi-core CPU architecture, most spectacularly demonstrated by the recently published . Fundamental problems in other areas of the underlying hardware have also been discovered, such as the #link("https://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html")[Row Hammer Attack].@rutkowska]
 
-+ The complexity inherent in the design of Qubes OS makes the operating
-  system difficult both to maintain and to use. Accordingly, Qubes OS
-  development has slowed significantly in recent years: as of December
-  2022, the last release (v4.1.x, in February 2022) came almost four
-  years after the previous one (v4.0.x in March
-  2018).#footnote[“Download QubesOS.”#emph[Qubes OS],
-  www.qubes-os.org/downloads. Accessed 26 Dec. 2022.]
++ The complexity inherent in the design of Qubes OS makes the operating system difficult both to maintain and to use. Accordingly, Qubes OS development has slowed significantly in recent years: as of December 2022, the last release (v4.1.x, in February 2022) came almost four years after the previous one (v4.0.x in March 2018).@download
 
-+ Qubes OS has support only for extremely few hardware configurations.
-  As of December 2022, are only three laptops that are known to be fully
-  compatible with Qubes OS.#footnote[“Certified Hardware.”Qubes OS,
-  www.qubes-os.org/doc/certified-hardware. Accessed 26 Dec. 2022.]
++ Qubes OS has support only for extremely few hardware configurations. As of December 2022, are only three laptops that are known to be fully compatible with Qubes OS.@certified With only moderate effort, TowerOS may be hybridized with any modern operating system so long as that operating system supports the standard network interfaces required for SSH, etc. This flexibility can enable the system to run a wide variety of software and hardware.
 
-Because of these limitations, using \"physically separate qubes\" was
-actually proposed in the Qubes OS blog post cited above (in a hybrid
-design similar to what is being described here);#footnote[Rutkowska,
-Joanna. “Qubes Air: Generalizing the Qubes Architecture.”Qubes OS, 22
-Jan. 2018, www.qubes-os.org/news/2018/01/22/qubes-air.] but the
-suggested architecture would leave hardware-boundary isolation as a
-second-class citizen and, by continuing to rely on a derivative of
-today\'s Qubes OS, preserve all of the hardware-support, maintainability
-and usability issues that the OS suffers from today.
+== Disadvantages
++ The primary disadvantage of the proposed design is the additional physical bulk of the computer in comparison to a single laptop running a software-boundary solution such as Qubes OS.
 
-A pure network-boundary converged multi-level secure computing system,
-as described in this document, is simultaneously simpler, more secure
-and more user-friendly than Qubes OS. Indeed, this design addresses all
-of the major problems with QubesOS completely. It has the following
-advantages and disadvantages:
++ With Qubes OS, each security domain has no hardware footprint, so it is theoretically easier to support a greater number of security domains.
 
-(Additional) Advantages of Proposed Design over that of Qubes OS
++ In some cases, the security domain isolation within Qubes OS may be able to be more granular. For example, Qubes OS supports isolating the USB-protocol processing and the handling of the block device, when loading data from a USB key; however this would not be very practical with TowerOS.
 
-Flexibility in Hardware and Operating System
 
-With the design in question, there is complete optionality in the choice
-of hardware for the thin client and for each of the hosts. Any modern
-operating system may be used on any of the devices, as long as it
-supports the standard network interfaces required for SSH, etc.
-
-This flexibility can enable the system to run a wide variety of software
-without being limited to a particular operating system. For example,
-different hosts can run different operating systems depending upon the
-user’s needs. For example, one may run a Linux-based operating system,
-while another may run FreeBSD (for example for providing
-network-attached storage), while yet another may run Windows (for
-example, to enable access to desktop versions of popular office or
-creative applications).
-
-Disadvantages of Proposed Design over that of Qubes OS
-
-Reduced Portability
-
-The primary disadvantage of the proposed design, of course, is the
-additional physical bulk of the computer in comparison to a single
-laptop running a software-boundary solution such as Qubes OS.
-
-Fewer Security Domains
-
-With Qubes OS, each security domain has no hardware footprint, so it is
-theoretically easier to support a greater number of security domains.
-However, it is possible to use removable main storage with the hosts
-(with the minor risk that malware from one host might persist somewhere
-in the hardware device itself), to mitigate this factor.
-
-Additionally, in some cases, the security domain isolation within Qubes
-OS may be able to be more granular. For example, Qubes OS supports
-isolating the USB-protocol processing and the handling of the block
-device, when loading data from a USB key; however this would not be very
-practical with the proposed design.
+= Conclusion 
+Using “physically separate qubes” was proposed in the Qubes OS blog post cited above (in a hybrid design similar to what is being described here);@rutkowska but the suggested architecture would leave hardware-boundary isolation as a second-class citizen and, by continuing to rely on a derivative of today's Qubes OS, preserve all of the hardware-support, maintainability and usability issues that the OS suffers from today. An operating system desired specifically for pure network-boundary converged multi-level secure computing, as described in this document, is simultaneously much simpler, more secure and more user-friendly than Qubes OS. Indeed, this design addresses all of the major problems with QubesOS completely.
 
 #bibliography("refs.yml")
