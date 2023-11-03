@@ -5,10 +5,10 @@ Hosts are divided into two types: *online* and *offline*. Online hosts live on a
 ## Provisioning Hosts
 TowerOS provides tools for easily provisioning new hosts with the following steps, with the user guided through them by the `tower` CLI tool:
 
-1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the host.
-2. Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the thin client.
-3. Call the `$ tower provision` command.
-4. Insert the boot device into the target host hardware.
+1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the **host hardware**.
+2. Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the **thin client**.
+3. Call the `[thinclient]$ tower provision` command to prepare the boot device.
+4. Remove the boot device from the thin client and insert it into the target host hardware.
 5. Turn on the host hardware.
 6. Wait for the provisioning process to complete on the thin client.
 
