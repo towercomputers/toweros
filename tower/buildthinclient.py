@@ -95,7 +95,7 @@ def prepare_docs():
     makedirs(wd('overlay/var/towercomputers/docs'))
     readme_path = find_readme()
     copyfile(readme_path, wd('overlay/var/towercomputers/docs'))
-    copyfile(join_path(HOME_PATH, 'docs', 'Tower Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
+    copyfile(join_path(HOME_PATH, 'docs', 'src', 'TowerOS Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
 
 def prepare_build(builds_dir):
     makedirs(wd('overlay/var/towercomputers/builds'))
