@@ -537,7 +537,7 @@
       
         <li class="md-nav__item">
   <a href="#use-toweros-with-hatch" class="md-nav__link">
-    Use TowerOS with hatch:
+    Use TowerOS with hatch
   </a>
   
 </li>
@@ -573,14 +573,14 @@
         
           <li class="md-nav__item">
   <a href="#update-etcsudoers-and-groups" class="md-nav__link">
-    Update /etc/sudoers and groups:
+    Update /etc/sudoers and groups
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#install-the-toweros-tools" class="md-nav__link">
-    Install the toweros tools:
+    Install the toweros tools
   </a>
   
 </li>
@@ -592,7 +592,7 @@
       
         <li class="md-nav__item">
   <a href="#build-a-host-image" class="md-nav__link">
-    Build a host image:
+    Build a host image
   </a>
   
 </li>
@@ -653,7 +653,7 @@
       
         <li class="md-nav__item">
   <a href="#use-toweros-with-hatch" class="md-nav__link">
-    Use TowerOS with hatch:
+    Use TowerOS with hatch
   </a>
   
 </li>
@@ -689,14 +689,14 @@
         
           <li class="md-nav__item">
   <a href="#update-etcsudoers-and-groups" class="md-nav__link">
-    Update /etc/sudoers and groups:
+    Update /etc/sudoers and groups
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#install-the-toweros-tools" class="md-nav__link">
-    Install the toweros tools:
+    Install the toweros tools
   </a>
   
 </li>
@@ -708,7 +708,7 @@
       
         <li class="md-nav__item">
   <a href="#build-a-host-image" class="md-nav__link">
-    Build a host image:
+    Build a host image
   </a>
   
 </li>
@@ -769,7 +769,7 @@ nameserver 8.8.4.4
 </code></pre>
 </li>
 </ol>
-<h2 id="use-toweros-with-hatch">Use TowerOS with <code>hatch</code>:</h2>
+<h2 id="use-toweros-with-hatch">Use TowerOS with <code>hatch</code></h2>
 <pre><code>[thinclient]$ git clone git@github.com:towercomputers/toweros.git
 [thinclient]$ cd toweros
 [thinclient]$ pip install hatch
@@ -868,21 +868,21 @@ nameserver 8.8.4.4
 [thinclient]$ rc-update add dbus
 </code></pre>
 <p><strong>Important:</strong> Make sure you are connected to the switch and check that your first wired interface (starting with the letter <code>e</code>) has an assigned IP.</p>
-<h3 id="update-etcsudoers-and-groups">Update <code>/etc/sudoers</code> and groups:</h3>
+<h3 id="update-etcsudoers-and-groups">Update <code>/etc/sudoers</code> and groups</h3>
 <p>The <code>toweros</code> software assumes that the current user has full <code>sudo</code> access with no password. (Please refer to our <a href="../security/">threat model</a>.) Check if <code>/etc/sudoers</code> contains the following line:</p>
 <pre><code>&lt;your_username&gt; ALL=(ALL) NOPASSWD: ALL
 </code></pre>
 <p>To build an image with <code>build-tower-image</code>, you first need to add the current user in the <code>abuild</code> group:</p>
 <pre><code>[thinclient]$ addgroup &lt;you_username&gt; abuild
 </code></pre>
-<h3 id="install-the-toweros-tools">Install the <code>toweros</code> tools:</h3>
+<h3 id="install-the-toweros-tools">Install the <code>toweros</code> tools</h3>
 <p>Update <code>pip</code> to the latest version:</p>
 <pre><code>[thinclient]$ python3 -m pip install --upgrade pip
 </code></pre>
 <p>Install the <code>toweros</code> toolkit with <code>pip</code>:</p>
 <pre><code>[thinclient]$ python3 -m pip install &quot;toweros @ git+ssh://github.com/towercomputers/toweros.git&quot;
 </code></pre>
-<h2 id="build-a-host-image">Build a host image:</h2>
+<h2 id="build-a-host-image">Build a host image</h2>
 <pre><code>[thinclient]$ build-tower-image host
 </code></pre>
 <p>This will generate an image file compressed with xz in <code>~/.cache/tower/builds/</code>. Images in this folder will be used by default by the provision command (if the <code>--image</code> flag is not provided).</p>
