@@ -5,7 +5,7 @@ import logging
 import requests
 from backports.pbkdf2 import pbkdf2_hmac
 
-from tower.utils.decorators import clitask
+from towerlib.utils.decorators import clitask
 
 logger = logging.getLogger('tower')
 

@@ -6,9 +6,9 @@ import json
 
 from sh import ssh, scp, rm, Command, ErrorReturnCode
 
-from tower.utils import clitask
-from tower.utils.menu import add_installed_package
-from tower.sshconf import ROUTER_HOSTNAME, is_online_host
+from towerlib.utils import clitask
+from towerlib.utils.menu import add_installed_package
+from towerlib.sshconf import ROUTER_HOSTNAME, is_online_host
 
 logger = logging.getLogger('tower')
 

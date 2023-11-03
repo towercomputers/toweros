@@ -1,6 +1,6 @@
 import logging
 
-from tower import provision, sshconf
+from towerlib import provision, sshconf
 
 logger = logging.getLogger('tower')
 

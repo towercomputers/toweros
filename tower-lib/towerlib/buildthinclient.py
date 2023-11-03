@@ -11,9 +11,9 @@ import sh
 from sh import rm, git, pip, Command, apk
 
 
-from tower.utils import clitask
-from tower import buildhost
-from tower.__about__ import __version__
+from towerlib.utils import clitask
+from towerlib import buildhost
+from towerlib.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
@@ -23,7 +23,7 @@ ALPINE_BRANCH = "3.18"
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
-INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts', 'toweros-thinclient')
+INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-thinclient')
 HOME_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..')
 
 def wd(path):

@@ -3,10 +3,10 @@ requires = ["hatchling==1.14.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "tower-tools"
+name = "tower-lib"
 dynamic = ["version"]
-description = "Tower tools"
-readme = "README.md"
+description = "Tower library"
+readme = "../README.md"
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -26,14 +26,10 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-include = ["tower", "scripts", "docs"]
+include = ["towerlib", "toweros-installers"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"README.md" = "docs/README.md"
-
-[project.scripts]
-tower = "tower.clis.tower:main"
-build-tower-image = "tower.clis.buildtowerimage:main"
+"README.md" = "../README.md"
 
 [tool.hatch.version]
-path = "tower/__about__.py"
+path = "towerlib/__about__.py"

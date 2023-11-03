@@ -1,6 +1,6 @@
 import argparse
 
-from tower import buildhost, buildthinclient, utils
+from towerlib import buildhost, buildthinclient, utils
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""Generate TowerOS-ThinClient and TowerOS-Host images""")

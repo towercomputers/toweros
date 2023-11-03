@@ -5,8 +5,8 @@ from io import StringIO
 import sh
 from sh import ssh, mkdir, sed, scp, mv
 
-from tower.utils import clitask
-from tower.sshconf import hosts
+from towerlib.utils import clitask
+from towerlib.sshconf import hosts
 
 def get_package_binaries(host, package):
     binaries = []
@@ -64,7 +64,7 @@ def add_installed_package(host, package):
 
 @clitask("Updating xfce menu...")
 def prepare_xfce_menu():
-    INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'scripts', 'toweros-thinclient')
+    INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'toweros-installers', 'toweros-thinclient')
     # create local directories
     directories_folder = os.path.expanduser('~/.local/share/desktop-directories/')
     menu_folder = os.path.expanduser('~/.config/menus/')

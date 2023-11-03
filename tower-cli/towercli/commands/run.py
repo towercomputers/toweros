@@ -1,8 +1,8 @@
 import os
 import logging
 
-from tower import sshconf
-from tower import gui
+from towerlib import sshconf
+from towerlib import gui
 
 logger = logging.getLogger('tower')
 

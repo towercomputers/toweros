@@ -1,7 +1,7 @@
 import re
 
-from tower import sshconf
-from tower import install
+from towerlib import sshconf
+from towerlib import install
 
 def add_args(argparser):
     install_parser = argparser.add_parser(

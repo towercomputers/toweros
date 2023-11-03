@@ -1,6 +1,6 @@
 import json
 
-from tower import sshconf
+from towerlib import sshconf
 
 def add_args(argparser):
     status_parser = argparser.add_parser(

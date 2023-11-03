@@ -8,9 +8,9 @@ from sh import ssh_keygen, xz, ssh
 from rich.prompt import Confirm
 from rich.text import Text
 
-from tower import utils
-from tower import buildhost
-from tower import sshconf
+from towerlib import utils
+from towerlib import buildhost
+from towerlib import sshconf
 
 logger = logging.getLogger('tower')
 

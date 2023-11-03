@@ -3,7 +3,6 @@ import logging
 import time
 from datetime import timedelta
 import os
-import sys
 
 import sh
 from sh import lsblk, umount, ErrorReturnCode

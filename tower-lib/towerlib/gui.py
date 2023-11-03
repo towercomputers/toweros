@@ -1,6 +1,5 @@
 from io import StringIO
 import os
-import random
 import uuid
 import logging
 import time
