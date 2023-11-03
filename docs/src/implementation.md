@@ -164,14 +164,14 @@ Here are the steps taken by `gui.py` to run an application on one of the hosts:
 
 4. Launch `nxproxy` with the generated cookie and on the port associated with the SSH tunnel
 
-_At this stage `nxproxy` and `nxagent` are connected, and we have a virtual screen, on which we run the graphical application with: `ssh <host> DISPLAY=:50 <application-name>application>`.
+_At this stage `nxproxy` and `nxagent` are connected, and we have a virtual screen, on which we run the graphical application with: `ssh <host> DISPLAY=:50 <application-name>application>`._
 
 
 After the application has been closed, `gui.py` will perform the following actions:
 
-    1. Terminate `nxagent` and close the SSH tunnel
-    2. Revoke the cookie with `xauth remove`
-    3. Terminate `nxproxy`
+1. Terminate `nxagent` and close the SSH tunnel
+2. Revoke the cookie with `xauth remove`
+3. Terminate `nxproxy`
 
 The GUI system therefor works the same way as X2GO, which provided the inspiration.
 

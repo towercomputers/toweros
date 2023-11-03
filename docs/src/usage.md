@@ -76,32 +76,22 @@ TowerOS makes it easy to install new packages on any host by tunneling a connect
 
 1. Provision the router:
 
-```
-[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
-```
+        [thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
 
-2. Provision an offline host named `office`:
+1. Provision an offline host named `office`:
 
-```
-[thinclient]$ tower provision office
-```
+        [thinclient]$ tower provision office
 
-3. Install GCalculator on the `office` offline host:
+1. Install GCalculator on the `office` offline host:
 
-```
-[thinclient]$ tower install office galculator
-```
+        [thinclient]$ tower install office galculator
 
-4. Run galculator `office`:
+1. Run galculator `office`:
 
-```
-[thinclient]$ startx
-[thinclient]$ tower run office gcalculator
-```
+        [thinclient]$ startx
+        [thinclient]$ tower run office gcalculator
 
-5. Move a file from `router` to `office`:
+1. Move a file from `router` to `office`:
 
-```
-[thinclient]$ scp router:/home/tower/myfile office:/home/tower
-[thinclient]$ ssh router rm /home/tower/myfile
-```
+        [thinclient]$ scp router:/home/tower/myfile office:/home/tower
+        [thinclient]$ ssh router rm /home/tower/myfile
