@@ -67,9 +67,9 @@ prepare_drive() {
     prepare_boot_partition
     prepare_lvm_partition    
     # create swap volume
-    lvcreate -L 8G vg0 -n swap
+    lvcreate -y -L 8G vg0 -n swap
     # create root volume
-    lvcreate -l 100%FREE vg0 -n root
+    lvcreate -y -l 100%FREE vg0 -n root
     # set partitions names
     SWAP_PARTITION="/dev/vg0/swap"
     ROOT_PARTITION="/dev/vg0/root"
