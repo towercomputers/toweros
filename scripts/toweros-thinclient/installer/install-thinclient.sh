@@ -112,13 +112,13 @@ prepare_home_directory() {
     # put documentation and install-dev.sh in user's home
     cp -r /var/towercomputers/docs /home/$USERNAME/
     cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
-    # put tower-tools wheel in user's tower cache dir
+    # put toweros wheel in user's tower cache dir
     mkdir -p /home/$USERNAME/.cache/tower/builds
     cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
 
-    # install tower-tools with pip
+    # install tower with pip
     mv /var/cache/pip-packages "/home/$USERNAME/"
     chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
     runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-tools

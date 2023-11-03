@@ -5,7 +5,7 @@ TowerOS is built on [Alpine Linux](https://alpinelinux.org) for the latter's sim
 
 ## Tower Tools
 
-The `tower-tools` package contains all of the tooling necessary to build TowerOS images for both the thin client and for the hosts (a pre-built image for the thin client—containing a pre-built image for hosts---is available on the [GitHub Releases](https://github.com/towercomputers/toweros/releases) page).
+The `toweros` package contains all of the tooling necessary to build TowerOS images for both the thin client and for the hosts (a pre-built image for the thin client—containing a pre-built image for hosts---is available on the [GitHub Releases](https://github.com/towercomputers/toweros/releases) page).
 
 This package is organized into six primary modules:
 
@@ -52,7 +52,7 @@ Hosts are configured the same way, but with the following additional rules:
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command, which uses the `mkimage` tool (see <https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage>).
 
-The installer contains all the APK and pip packages necessary for installing the base system and `tower-tools`, which is ready to use after the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
+The installer contains all the APK and pip packages necessary for installing the base system and `toweros`, which is ready to use after the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.
 
 Here are the different steps taken by `buildthinclient.py` to generate an image:
 
@@ -60,17 +60,17 @@ Here are the different steps taken by `buildthinclient.py` to generate an image:
 The script starts by checking for the existence of a `./dist`, `./builds` or `~/.cache/tower/builds/` folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists, then the script creates the folder `~/.cache/tower/builds/`. Next:
 
     1. The script then verifies that the TowerOS host image is present. If not, it launches the build of a new image.
-    2. The script checks for the existence of a `tower-tools` wheel package. If it does not exist the package is retrieved from GitHub.
+    2. The script checks for the existence of a `toweros` wheel package. If it does not exist the package is retrieved from GitHub.
 
 2. Downloading `pip packages with `pip download` in a cache folder
 
 4. Creating and updating an Alpine APK overlay folder, including most importantly:
 
     1. pip cache folder
-    2. Add the system install BASH scripts (see https://github.com/towercomputers/tower-tools/tree/dev/scripts/toweros-thinclient)
+    2. Add the system install BASH scripts (see https://github.com/towercomputers/toweros/tree/dev/scripts/toweros-thinclient)
     3. Include the TowerOS documentation
     4. Add the `/etc` configuration files
-    5. Add builds required by `tower-tools` (TowerOS for the host, `tower-tools`)
+    5. Add builds required by `toweros` (TowerOS for the host, `toweros`)
 
 5. Launching `mkimage`, which takes care of the rest.
 
@@ -91,7 +91,7 @@ The script starts by checking for the existence of a `./dist`, `./builds` or `~/
 
 `buildhost.py` uses the same method as `pigen` to build an image for a Raspberry Pi (see [https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh](https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh)) but unlike `pigen`, which uses a Debian-based system, `buildhost.py` uses an Alpine Linux–based system (see https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi).
 
-The `tower provision` command finalises the configuration of the image, which is otherwise neither secure nor ready to be used by `tower-tools`.
+The `tower provision` command finalises the configuration of the image, which is otherwise neither secure nor ready to be used by `toweros`.
 
 Here are the different steps taken by `buildhost.py` to generate an image:
 
@@ -124,7 +124,7 @@ Note: A TowerOS image for the thin client is placed in the `~/.cache/tower/build
 
 ## System Configuration
 
-A TowerOS system uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, referenced in `~/.ssh/config`, is used both by `tower-tools` to maintain the list of hosts and by `ssh` to access hosts directly with `[thinclient]$ ssh <host>`. The script `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
+A TowerOS system uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, referenced in `~/.ssh/config`, is used both by `toweros` to maintain the list of hosts and by `ssh` to access hosts directly with `[thinclient]$ ssh <host>`. The script `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
 1. discovering the IP of a newly installed host and updating `tower.conf` accordingly
 2. updating `~/.ssh/know_hosts`
@@ -143,7 +143,7 @@ The steps to provision a host are as follows:
 2. Generate the host configuration (`tower.env`) with the values provided on the command line or with those retrieved from the thin client
 3. Copy of the TowerOS thin client image onto the SD card and incclude the configuration file
 4. Wait for the new host to be detected on the network after the user has inserted the SD card into the host device
-5. Update the `ssh` and `tower-tools` configuration files
+5. Update the `ssh` and `toweros` configuration files
 
 Once a host has been provisioned, it should be accessible with `$ ssh <host>` or `$ tower run <host> <command>`.
 

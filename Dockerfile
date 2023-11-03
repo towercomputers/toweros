@@ -28,7 +28,7 @@ WORKDIR /home/tower
 # generate abuild keys
 RUN abuild-keygen -a -i -n
 
-# copy and install `tower-tools` at the end so everything above is cached
+# copy and install `tower` at the end so everything above is cached
 RUN mkdir -p /home/tower/.cache/tower/builds
 COPY --chown=tower:tower $TOWER_WHEEL_PATH /home/tower/.cache/tower/builds/
 RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_WHEEL_PATH)

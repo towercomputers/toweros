@@ -159,7 +159,7 @@ def check_secure_boot_status():
         error = True
     if error:
         print_error("Please refer to the documentation to prepare your laptop firmware for secure boot:")
-        print_error("https://github.com/towercomputers/tower-tools/blob/master/docs/SecureBoot.md")
+        print_error("https://github.com/towercomputers/toweros/blob/master/docs/SecureBoot.md")
         return False
     return True
 
