@@ -3,7 +3,7 @@
 # The purpose of this script is to finish the installation for a development environment. 
 # It performs the following actions:
 #       - connects to the internet
-#       - configure git and download tower-tools sources from Github
+#       - configure git and download toweros sources from Github
 #       - possibly opens an ssh access
 #       - install hatch
 # Typically this script is called from a one line script located on a USB key which also contains
@@ -38,7 +38,7 @@ if [ ! -z "$GIT_EMAIL" ]; then
     git config --global user.email "$GIT_EMAIL"
 fi
 
-# download tower-tools sources
+# download toweros sources
 if [ ! -z "$GIT_KEY_PATH" ]; then
     mkdir -p ~/.ssh
     cp $GIT_KEY_PATH ~/.ssh
@@ -55,7 +55,7 @@ if [ ! -z "$GIT_KEY_PATH" ]; then
     chmod 600 ~/.ssh/*
     mkdir -p ~/towercomputers
     cd ~/towercomputers
-    git clone git@github.com:towercomputers/tools.git
+    git clone git@github.com:towercomputers/toweros.git
 fi
 
 

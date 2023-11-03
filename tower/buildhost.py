@@ -10,10 +10,10 @@ from io import StringIO
 import sh
 from sh import (
     Command, ErrorReturnCode,
-    mount, parted, mkdosfs, resize2fs, tee, cat, echo,
+    mount, parted, mkdosfs, tee, cat, echo,
     cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
-    losetup, abuild_sign, openssl
+    losetup, abuild_sign, openssl,
 )
 mkfs_ext4 = Command('mkfs.ext4')
 fsck_ext4 = Command('fsck.ext4')
@@ -109,6 +109,7 @@ def prepare_overlay(pub_key_path):
         _cwd=wd("EXPORT_BOOTFS_DIR/"),
         _out=print
     )
+    tee(wd("EXPORT_BOOTFS_DIR/usercfg.txt"), _in=echo("dtoverlay=dwc2,dr_mode=host"))
 
 @clitask("Creating RPI partitions...")
 def create_rpi_boot_partition():
@@ -224,7 +225,7 @@ def copy_image_in_device(image_file, device):
         dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
     except ErrorReturnCode:
         logger.error(buf.getvalue())
-        logger.error("Error copying image, please check the SD card intergirty or try again with the flag `--zero-device`.")
+        logger.error("Error copying image, please check the boot device integrity or try again with the flag `--zero-device`.")
         raise Exception("Error copying image")
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
@@ -245,9 +246,15 @@ def insert_tower_env(boot_part, config):
     logger.debug(f"Host configuration:\n{str_env}")
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
-    
+
+WAITING_MESSAGE = "TowserOS-Host installed in {0}\n"
+WAITING_MESSAGE += "- remove the boot device from the Thin Client \n"
+WAITING_MESSAGE += "- insert it into the Host computer\n"
+WAITING_MESSAGE += "- turn it on the Host computer and wait for it to be discover by the Thin Client on the network.\n"
+WAITING_MESSAGE += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
+
 @clitask("Installing TowserOS-Host in {1}...", 
-         timer_message="TowserOS-Host installed in {0}.\nPlease insert the SD Card into the Host computer, then turn it on and wait for it to be discover on the network.", 
+         timer_message=WAITING_MESSAGE, 
          sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:

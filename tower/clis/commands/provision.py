@@ -10,7 +10,7 @@ logger = logging.getLogger('tower')
 def add_args(argparser):
     provision_parser = argparser.add_parser(
         'provision',
-        help="""Command used to prepare the bootable SD Card needed to provision a host."""
+        help="""Command used to prepare the bootable device needed to provision a host."""
     )
     provision_parser.add_argument(
         'name', 
@@ -18,8 +18,8 @@ def add_args(argparser):
         help="""Host's name. This name is used to install and run an application (Required)."""
     )
     provision_parser.add_argument(
-        '-sd', '--sd-card', 
-        help="""SD Card path.""",
+        '-bd', '--boot-device', 
+        help="""SD Card or USB key path.""",
         required=False,
         default=""
     )
@@ -39,7 +39,7 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--public-key-path', 
-        help="""Public key path used to access the host (Default: automatically generated and stored in the SD card and the local ~/.ssh/ folder).""",
+        help="""Public key path used to access the host (Default: automatically generated and stored in the boot device and the local ~/.ssh/ folder).""",
         required=False
     )
     provision_parser.add_argument(
@@ -122,12 +122,12 @@ def check_args(args, parser_error):
     if sshconf.exists(args.name[0]) and not args.force:
         parser_error("Host name already used. Please use `--force` to overwrite it.")
 
-    if args.sd_card:
+    if args.boot_device:
         disk_list = utils.get_device_list()
-        if args.sd_card not in disk_list:
-            parser_error("sd-card path invalid.") 
+        if args.boot_device not in disk_list:
+            parser_error("boot device path invalid.") 
         elif len(disk_list) == 1:
-            parser_error("sd-card path invalid.") # can't right on the only disk
+            parser_error("boot device path invalid.") # can't right on the only disk
 
     if args.public_key_path:
         if not args.private_key_path :

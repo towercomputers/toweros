@@ -1,0 +1,64 @@
+soffer:
+  type: Patent
+  author: ["Soffer, Aviv", "Vaisband, Oleg"]
+  title: Secure KVM device ensuring isolation of host computers
+  date: 2014-07-01
+
+issa:
+  type: Article
+  author: ["Issa, Abdullah", "Murray, Toby", "Ernst, Gidon"]
+  title: "In search of perfect users: towards understanding the usability of converged multi-level secure user interfaces."
+  parent:
+    type: Proceedings
+    title: "Proceedings of the 30th Australian Conference on Computer-Human Interaction"
+    page-range: 572--576
+    date: 2018
+
+beaumont:
+  type: Article
+  author: ["Beaumont, Mark", "McCarthy, Jim", "Murray, Toby"]
+  title: "The cross domain desktop compositor: Using hardware-based video compositing for a multi-level secure user interface."
+  parent:
+    type: Proceedings
+    title: "Proceedings of the 32nd Annual Conference on Computer Security Applications"
+    page-range: 533--545
+    date: 2016
+
+raytheon:
+  type: Web
+  author: Raytheon Company
+  title: Raytheon Trusted Thin Client
+  date: 2014
+  url: "https://www.raytheon.com/capabilities/rtnwcm/groups/gallery/documents/digitalasset/rtn_216411.pdf"
+
+snowden:
+  type: Post
+  author: Snowden, Edward
+  date: 2016-09-29
+  url: https://twitter.com/snowden/status/781493632293605376
+
+deraadt:
+  type: Thread
+  title: "Re: About Xen: maybe a reiterative question but .."
+  author: Raadt, Theo de
+  url: "https://marc.info/?l=openbsd-misc&m=119318909016582"
+  date: 2007-10-24
+
+rutkowska:
+  type: Web
+  author: Rutkowska, Joanna
+  title: "Qubes Air: Generalizing the Qubes Architecture"
+  date: 2018-01-22
+  url: "https://www.qubes-os.org/news/2018/01/22/qubes-air"
+
+download:
+  type: Web
+  title: Download Qubes OS
+  author: Qubes OS
+  url: "https://www.qubes-os.org/downloads"
+
+certified:
+  type: Web
+  title: Certified Hardware
+  author: Qubes OS
+  url: "https://www.qubes-os.org/doc/certified-hardware"

@@ -50,15 +50,15 @@ prepare_lvm_partition() {
         # initialize the LUKS partition
         cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
         # create LVM physical volumes
-        vgcreate -y vg0 /dev/mapper/lvmcrypt
+        vgcreate -ff -y vg0 /dev/mapper/lvmcrypt
     else
         parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
         # get partition name
         LVM_PARTITION=$(ls $TARGET_DRIVE*2)
         # initialize the LVM partition
-        pvcreate -y $LVM_PARTITION
+        pvcreate -ff -y $LVM_PARTITION
         # create LVM volume group
-        vgcreate -y vg0 $LVM_PARTITION
+        vgcreate -ff -y vg0 $LVM_PARTITION
     fi
 }
 
@@ -67,9 +67,9 @@ prepare_drive() {
     prepare_boot_partition
     prepare_lvm_partition    
     # create swap volume
-    lvcreate -L 8G vg0 -n swap
+    lvcreate -y -L 8G vg0 -n swap
     # create root volume
-    lvcreate -l 100%FREE vg0 -n root
+    lvcreate -y -l 100%FREE vg0 -n root
     # set partitions names
     SWAP_PARTITION="/dev/vg0/swap"
     ROOT_PARTITION="/dev/vg0/root"
@@ -112,17 +112,21 @@ prepare_home_directory() {
     # put documentation and install-dev.sh in user's home
     cp -r /var/towercomputers/docs /home/$USERNAME/
     cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
-    # put tower-tools wheel in user's tower cache dir
+    # put toweros wheel in user's tower cache dir
     mkdir -p /home/$USERNAME/.cache/tower/builds
     cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
 
-    # install tower-tools with pip
+    # install tower with pip
     mv /var/cache/pip-packages "/home/$USERNAME/"
     chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
     runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-tools
     echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
+
+    if [ "$STARTX_ON_LOGIN" == "true" ]; then
+        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
+    fi
 }
 
 update_live_system() {
@@ -331,6 +335,7 @@ ask_configuration() {
     # ROOT_PASSWORD, USERNAME, PASSWORD, 
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
     # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE, SECURE_BOOT
+    # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
 }

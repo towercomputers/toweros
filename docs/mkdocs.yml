@@ -1,0 +1,23 @@
+site_name: TowerOS
+site_url: https://towercomputers.github.io/toweros/
+docs_dir: src
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.instant
+    - navigation.instant.prefetch
+nav:
+  - Getting Started:
+    - Introduction: index.md
+    - Hardware: hardware.md
+    - Installation: installation.md
+    - Usage: usage.md
+  - Security:
+    - Security: security.md
+    - Secure Boot: secure-boot.md
+  - Technical:
+    - Whitepaper: "TowerOS Whitepaper.pdf"
+    - Implementation: implementation.md
+    - Development: development.md
