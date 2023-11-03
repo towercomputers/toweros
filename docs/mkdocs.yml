@@ -1,6 +1,9 @@
 site_name: TowerOS
 site_url: https://towercomputers.github.io/toweros/
 docs_dir: src
+markdown_extensions:
+    - attr_list
+    - md_in_html
 theme:
   name: material
   features:

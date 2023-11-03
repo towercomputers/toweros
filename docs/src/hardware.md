@@ -21,7 +21,7 @@ TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compu
 
 ### Raspberry Pi 4B
 
-![Tower Archi](img/towerarchi.png)
+![Diagram - RPi](img/diagram-rpi.png)
 
 - Raspberry Pis may be booted either from an SD card or a USB key. For best performance, the root partition should reside on a USB key. You will need at least one SD card or USB key per host.
 - The USB key should ideally be plugged into the blue USB port, which supports USB 3.0.
@@ -33,7 +33,7 @@ TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compu
 
 ### Compute Module 4 Lite
 
-![DeskPi Super6C Board](img/deskpi.jpg)
+![Diagram - CM4](img/diagram-cm4.png)
 
 Using CM4s and the [DeskPi Super6C Board](https://deskpi.com/collections/deskpi-super6c/products/deskpi-super6c-raspberry-pi-cm4-cluster-mini-itx-board-6-rpi-cm4-supported) you can avoid most cables and put all your hosts in a single mini-ITX case.
 
