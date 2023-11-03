@@ -50,15 +50,15 @@ prepare_lvm_partition() {
         # initialize the LUKS partition
         cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
         # create LVM physical volumes
-        vgcreate -y vg0 /dev/mapper/lvmcrypt
+        vgcreate -ff -y vg0 /dev/mapper/lvmcrypt
     else
         parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
         # get partition name
         LVM_PARTITION=$(ls $TARGET_DRIVE*2)
         # initialize the LVM partition
-        pvcreate -y $LVM_PARTITION
+        pvcreate -ff -y $LVM_PARTITION
         # create LVM volume group
-        vgcreate -y vg0 $LVM_PARTITION
+        vgcreate -ff -y vg0 $LVM_PARTITION
     fi
 }
 
