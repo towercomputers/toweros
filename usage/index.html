@@ -816,32 +816,34 @@
 </code></pre>
 <h2 id="example-usage">Example Usage</h2>
 <ol>
-<li>Provision the router:</li>
-</ol>
+<li>
+<p>Provision the router:</p>
 <pre><code>[thinclient]$ tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
 </code></pre>
-<ol>
-<li>Provision an offline host named <code>office</code>:</li>
-</ol>
+</li>
+<li>
+<p>Provision an offline host named <code>office</code>:</p>
 <pre><code>[thinclient]$ tower provision office
 </code></pre>
-<ol>
-<li>Install GCalculator on the <code>office</code> offline host:</li>
-</ol>
+</li>
+<li>
+<p>Install GCalculator on the <code>office</code> offline host:</p>
 <pre><code>[thinclient]$ tower install office galculator
 </code></pre>
-<ol>
-<li>Run galculator <code>office</code>:</li>
-</ol>
+</li>
+<li>
+<p>Run galculator <code>office</code>:</p>
 <pre><code>[thinclient]$ startx
 [thinclient]$ tower run office gcalculator
 </code></pre>
-<ol>
-<li>Move a file from <code>router</code> to <code>office</code>:</li>
-</ol>
+</li>
+<li>
+<p>Move a file from <code>router</code> to <code>office</code>:</p>
 <pre><code>[thinclient]$ scp router:/home/tower/myfile office:/home/tower
 [thinclient]$ ssh router rm /home/tower/myfile
 </code></pre>
+</li>
+</ol>
 
 
 

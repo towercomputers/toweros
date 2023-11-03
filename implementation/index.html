@@ -914,12 +914,13 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 <p>Launch <code>nxproxy</code> with the generated cookie and on the port associated with the SSH tunnel</p>
 </li>
 </ol>
-<p>_At this stage <code>nxproxy</code> and <code>nxagent</code> are connected, and we have a virtual screen, on which we run the graphical application with: <code>ssh &lt;host&gt; DISPLAY=:50 &lt;application-name&gt;application&gt;</code>.</p>
+<p><em>At this stage <code>nxproxy</code> and <code>nxagent</code> are connected, and we have a virtual screen, on which we run the graphical application with: <code>ssh &lt;host&gt; DISPLAY=:50 &lt;application-name&gt;application&gt;</code>.</em></p>
 <p>After the application has been closed, <code>gui.py</code> will perform the following actions:</p>
-<pre><code>1. Terminate `nxagent` and close the SSH tunnel
-2. Revoke the cookie with `xauth remove`
-3. Terminate `nxproxy`
-</code></pre>
+<ol>
+<li>Terminate <code>nxagent</code> and close the SSH tunnel</li>
+<li>Revoke the cookie with <code>xauth remove</code></li>
+<li>Terminate <code>nxproxy</code></li>
+</ol>
 <p>The GUI system therefor works the same way as X2GO, which provided the inspiration.</p>
 <h2 id="package-management">Package Management</h2>
 <p>This module allows to use of <code>apk</code> on an offline host through an SSH tunnel through the router. To do this, it performs the following steps:</p>

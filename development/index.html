@@ -741,8 +741,8 @@
 <p>To connect the thin client to the Internet you must:</p>
 <ol>
 <li>Provision a <code>router</code>.</li>
-<li>Set the gateway on the thin client to <code>192.168.2.1</code> (the router's IP address):</li>
-</ol>
+<li>
+<p>Set the gateway on the thin client to <code>192.168.2.1</code> (the router's IP address):</p>
 <p>The file <code>/etc/network/interfaces</code> must contain the following:</p>
 <pre><code>auto lo
 iface lo inet loopback
@@ -753,21 +753,22 @@ iface eth0 inet static
 auto eth1
 iface eth1 inet static
     address 192.168.3.100/24
-EOF
 </code></pre>
-<ol>
-<li>Set the DNS server on the thin client:</li>
-</ol>
+</li>
+<li>
+<p>Set the DNS server on the thin client:</p>
 <p>The file <code>/etc/resolv.conf</code> must contain the following:</p>
 <pre><code>nameserver 8.8.8.8
 nameserver 8.8.4.4
 </code></pre>
-<ol>
-<li>Restart the network with: <code>[thinclient]$ sudo rc-service networking restart</code>:</li>
-</ol>
+</li>
+<li>
+<p>Restart the network with: <code>[thinclient]$ sudo rc-service networking restart</code>:</p>
 <p>Configure <code>git</code>, download Github repository in <code>~/towercomputers/toweros</code> and install <code>hatch</code> with:</p>
 <pre><code>[thinclient]$ ~/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
 </code></pre>
+</li>
+</ol>
 <h2 id="use-toweros-with-hatch">Use TowerOS with <code>hatch</code>:</h2>
 <pre><code>[thinclient]$ git clone git@github.com:towercomputers/toweros.git
 [thinclient]$ cd toweros
@@ -780,72 +781,68 @@ nameserver 8.8.4.4
 <ol>
 <li>
 <p>Basic checking</p>
-</li>
-<li>
-<p>The “welcome message” should refer to TowerOS.</p>
-</li>
+<ul>
+<li>The “welcome message” should refer to TowerOS.</li>
 <li>The README, whitepaper and <code>install-dev.sh</code> script should be found in <code>~/</code>.</li>
 <li>The <code>wheel</code> package and host image should be in <code>~/.cache/tower/builds</code>.</li>
 <li><code>$ iptables -L -v</code> should show firewall rules, and <code>/var/logs/iptables.log</code> should contain firewall logs.</li>
-<li>
-<p><code>lo</code> and <code>eth0</code> should be up (check  with <code>$ ip ad</code>)</p>
+<li><code>lo</code> and <code>eth0</code> should be up (check  with <code>$ ip ad</code>)</li>
+</ul>
 </li>
 <li>
 <p>Provision an online host:</p>
-</li>
-</ol>
 <pre><code>[thinclient]$ tower provision web --online --wlan-ssid &lt;ssid&gt; --wlan-password &lt;password&gt;
 </code></pre>
-<ol>
-<li>Provision an offline host:</li>
-</ol>
+</li>
+<li>
+<p>Provision an offline host:</p>
 <pre><code>[thinclient]$ tower provision office --offline
 </code></pre>
-<ol>
-<li>Check system status:</li>
-</ol>
+</li>
+<li>
+<p>Check system status:</p>
 <pre><code>[thinclient]$ tower status
 </code></pre>
-<ol>
-<li>Install a package an an offline host:</li>
-</ol>
+</li>
+<li>
+<p>Install a package an an offline host:</p>
 <pre><code>[thinclient]$ tower install office xcalc
 </code></pre>
-<ol>
-<li>Install a package on an online host:</li>
-</ol>
+</li>
+<li>
+<p>Install a package on an online host:</p>
 <pre><code>[thinclient]$ tower install web midori
 </code></pre>
-<ol>
-<li>Test installed packages:</li>
-</ol>
+</li>
+<li>
+<p>Test installed packages:</p>
 <pre><code>[thinclient]$ startx
 [thinclient]$ tower run office xcalc
 [thinclient]$ tower run web midori
 </code></pre>
 <p>Check also if the Xfce Application menu contains shortcuts for installed packages.</p>
-<ol>
+</li>
 <li>
 <p>Log out from Xfce and connect to the Internet as described above.</p>
 </li>
 <li>
 <p>Build a host TowerOS image with:</p>
-</li>
-</ol>
 <pre><code>[thinclient]$ buld-tower-image host
 </code></pre>
-<ol>
-<li>Build a thin client TowerOS image with:</li>
-</ol>
+</li>
+<li>
+<p>Build a thin client TowerOS image with:</p>
 <pre><code>[thinclient]$ buld-tower-image thinclient
 </code></pre>
-<ol>
-<li>Install the development environment with:</li>
-</ol>
+</li>
+<li>
+<p>Install the development environment with:</p>
 <pre><code>[thinclient]$ ~/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
 </code></pre>
-<ol>
-<li>If you are feeling brave, you may repeat all these steps with the thin client image you generated yourself. :)</li>
+</li>
+<li>
+<p>If you are feeling brave, you may repeat all these steps with the thin client image you generated yourself. :)</p>
+</li>
 </ol>
 <h2 id="build-your-own-custom-thin-client-linux">Build your own custom Thin Client (Linux)</h2>
 <h3 id="install-dependencies">Install Dependencies</h3>
