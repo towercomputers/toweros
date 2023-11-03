@@ -38,7 +38,7 @@ An offline host is a host without access to the Internet _via_ the router.
 ## Using TowerOS
 Once your hosts are provisioned, you are ready to use TowerOS. You can of course access each host _via_ SSH. However, you can also run GUI applications installed on a host such that the application appears to run on the thin client.
 
-### Execute a command on one of the hosts:
+### Execute a command on one of the hosts
 
 Run a command on a host with SSH:
 
@@ -46,13 +46,13 @@ Run a command on a host with SSH:
 [thinclient]$ ssh <host> <command>
 ```
 
-### Run a graphical application on a host, with its GUI appearing on the thin client:
+### Run a graphical application on a host, with its GUI appearing on the thin client
 
 ```
 [thinclient]$ tower run <host> <command>
 ```
 
-### Install an Alpine package on a host:
+### Install an Alpine package on a host
 TowerOS makes it easy to install new packages on any host by tunneling a connection through the router:
 
 ```

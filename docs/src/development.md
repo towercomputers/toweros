@@ -31,7 +31,7 @@ To connect the thin client to the Internet you must:
         [thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
     
 
-## Use TowerOS with `hatch`:
+## Use TowerOS with `hatch`
 
 ```
 [thinclient]$ git clone git@github.com:towercomputers/toweros.git
@@ -134,7 +134,7 @@ then
 
 **Important:** Make sure you are connected to the switch and check that your first wired interface (starting with the letter `e`) has an assigned IP.
 
-### Update `/etc/sudoers` and groups:
+### Update `/etc/sudoers` and groups
 
 The `toweros` software assumes that the current user has full `sudo` access with no password. (Please refer to our [threat model](security.md).) Check if `/etc/sudoers` contains the following line:
 
@@ -148,7 +148,7 @@ To build an image with `build-tower-image`, you first need to add the current us
 [thinclient]$ addgroup <you_username> abuild
 ```
 
-### Install the `toweros` tools:
+### Install the `toweros` tools
 
 Update `pip` to the latest version:
 
@@ -162,7 +162,7 @@ Install the `toweros` toolkit with `pip`:
 [thinclient]$ python3 -m pip install "toweros @ git+ssh://github.com/towercomputers/toweros.git"
 ```
 
-## Build a host image:
+## Build a host image
 
 ```
 [thinclient]$ build-tower-image host
