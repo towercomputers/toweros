@@ -62,3 +62,9 @@ certified:
   title: Certified Hardware
   author: Qubes OS
   url: "https://www.qubes-os.org/doc/certified-hardware"
+
+graphene:
+  type: Thread
+  title: "OS Security: iOS vs GrapheneOS vs stock Android"
+  author: "Micay, Daniel"
+  url: "https://www.reddit.com/r/GrapheneOS/comments/bddq5u/comment/ekze9n6/"
