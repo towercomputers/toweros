@@ -8,7 +8,7 @@ from shutil import copytree, copy as copyfile
 import sys
 
 import sh
-from sh import rm, git, pip, Command, apk
+from sh import rm, git, pip, Command, apk, hatch
 
 
 from towerlib.utils import clitask
@@ -17,14 +17,13 @@ from towerlib.__about__ import __version__
 
 logger = logging.getLogger('tower')
 
-TOWER_TOOLS_URL = "git+ssh://github.com/towercomputing/toweros.git"
 # TODO: test v3.19 on release
 ALPINE_BRANCH = "3.18"
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
 INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-thinclient')
-HOME_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..')
+REPO_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 
 def wd(path):
     return join_path(WORKING_DIR, path)
@@ -38,11 +37,6 @@ def prepare_working_dir():
 def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
-def find_tower_tools(builds_dir):
-    wheels = glob.glob(join_path(builds_dir, 'tower_tools-*.whl'))
-    tower_tools_wheel_path = f"file://{wheels.pop()}" if wheels else TOWER_TOOLS_URL
-    return tower_tools_wheel_path
-
 def find_host_image(builds_dir):
     host_images = glob.glob(join_path(builds_dir, 'toweros-host-*.xz'))
     if not host_images:
@@ -54,16 +48,10 @@ def find_host_image(builds_dir):
     return rpi_image_path
 
 def find_readme():
-    readme_path = join_path(HOME_PATH, 'README.md')
+    readme_path = join_path(REPO_PATH, 'README.md')
     if os.path.exists(readme_path):
         return readme_path
-    readme_path = join_path(HOME_PATH, 'docs', 'README.md')
-    if os.path.exists(readme_path):
-        return readme_path
-    readme_path = "/var/towercomputers/docs/README.md"
-    if os.path.exists(readme_path):
-        return readme_path
-    raise Exception("README.md not found!")
+    raise Exception("README.md not found: " + readme_path)
 
 def check_abuild_key():
     abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
@@ -73,19 +61,18 @@ def check_abuild_key():
         sys.exit()
 
 @clitask("Downloading pip packages...")
-def prepare_pip_packages(builds_dir):
+def prepare_pip_packages():
     makedirs(wd('overlay/var/cache/pip-packages'))
-    tower_tools_wheel_path = TOWER_TOOLS_URL
-    wheels = glob.glob(join_path(builds_dir, 'tower_tools-*.whl'))
-    if wheels:
-        wheel = wheels.pop()
-        tower_tools_wheel_path = f"file://{wheel}"
-        copyfile(wheel, wd('overlay/var/cache/pip-packages'))
-    pip(
-        "download", f"tower-tools @ {tower_tools_wheel_path}", 
-        '-d', wd('overlay/var/cache/pip-packages'),
-        _err_to_out=True, _out=logger.debug
-    )
+    for package in ['tower-lib', 'tower-cli']:
+        hatch('build', '-t', 'wheel', _cwd=join_path(REPO_PATH, package))
+        wheel_name = f"{package.replace('-', '_')}-{__version__}-py3-none-any.whl"
+        wheel_path = os.path.abspath(join_path(REPO_PATH, package, 'dist', wheel_name))
+        copyfile(wheel_path, wd('overlay/var/cache/pip-packages'))
+        pip(
+            "download", f"{package} @ file://{wheel_path}",
+            '-d', wd('overlay/var/cache/pip-packages'),
+            _err_to_out=True, _out=logger.debug
+        )
 
 def prepare_installer():
     makedirs(wd('overlay/var/towercomputers/'))
@@ -95,20 +82,21 @@ def prepare_docs():
     makedirs(wd('overlay/var/towercomputers/docs'))
     readme_path = find_readme()
     copyfile(readme_path, wd('overlay/var/towercomputers/docs'))
-    copyfile(join_path(HOME_PATH, 'docs', 'src', 'TowerOS Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
+    copyfile(join_path(REPO_PATH, 'docs', 'src', 'TowerOS Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
 
 def prepare_build(builds_dir):
     makedirs(wd('overlay/var/towercomputers/builds'))
     host_image_path = find_host_image(builds_dir)
     copyfile(host_image_path, wd('overlay/var/towercomputers/builds'))
-    wheels = glob.glob(join_path(wd('overlay/var/cache/pip-packages'), 'tower_tools-*.whl'))
-    copyfile(wheels[0], wd('overlay/var/towercomputers/builds'))
+    for package in ['tower_lib', 'tower_cli']:
+        wheels = glob.glob(join_path(wd('overlay/var/cache/pip-packages'), f'{package}-*.whl'))
+        copyfile(wheels[0], wd('overlay/var/towercomputers/builds'))
 
 def prepare_etc_folder():
     copytree(join_path(INSTALLER_DIR, 'etc'), wd('overlay/etc'))
 
 def prepare_overlay(builds_dir):
-    prepare_pip_packages(builds_dir)
+    prepare_pip_packages()
     prepare_installer()
     prepare_docs()
     prepare_etc_folder()

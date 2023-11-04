@@ -16,6 +16,11 @@ dependencies = [
     "tower-lib @ {root:uri}/../tower-lib/",
 ]
 
+[tool.hatch.envs.default]
+post-install-commands = [
+  "pip install -e ../tower-lib",
+]
+
 [tool.hatch.build.targets.wheel]
 include = ["towercli"]
 
