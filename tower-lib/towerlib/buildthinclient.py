@@ -102,7 +102,7 @@ def prepare_overlay(builds_dir):
     prepare_etc_folder()
     prepare_build(builds_dir)
 
-@clitask("Building image, be patient...")
+@clitask("Building Thin Client image, be patient...")
 def prepare_image(builds_dir):
     git('clone', '--depth=1', f'--branch={ALPINE_BRANCH}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))

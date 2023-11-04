@@ -1,7 +1,10 @@
 FROM alpine:3.18
 
+# docker build -f ./Dockerfile ../
+
 # hatch build -t wheel
-ARG TOWER_WHEEL_PATH="dist/tower_tools-0.0.1-py3-none-any.whl"
+ARG TOWER_LIB_WHEEL_PATH="tower-lib/dist/tower_lib-0.1.3-py3-none-any.whl"
+ARG TOWER_CLI_WHEEL_PATH="tower-cli/dist/tower_cli-0.1.3-py3-none-any.whl"
 
 # install apk packages
 RUN apk update 
@@ -29,8 +32,19 @@ WORKDIR /home/tower
 RUN abuild-keygen -a -i -n
 
 # copy and install `tower` at the end so everything above is cached
-RUN mkdir -p /home/tower/.cache/tower/builds
-COPY --chown=tower:tower $TOWER_WHEEL_PATH /home/tower/.cache/tower/builds/
-RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_WHEEL_PATH)
+# RUN mkdir -p /home/tower/.cache/tower/builds
+# COPY --chown=tower:tower $TOWER_LIB_WHEEL_PATH /home/tower/.cache/tower/builds/
+# RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_LIB_WHEEL_PATH)
+# COPY --chown=tower:tower $TOWER_CLI_WHEEL_PATH /home/tower/.cache/tower/builds/
+# RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_CLI_WHEEL_PATH)
 
-ENTRYPOINT ["build-tower-image"]
+RUN mkdir -p /home/tower/toweros
+COPY --chown=tower:tower ./tower-build-cli /home/tower/toweros/tower-build-cli
+COPY --chown=tower:tower ./tower-lib /home/tower/toweros/tower-lib
+COPY --chown=tower:tower ./docs /home/tower/toweros/docs
+COPY --chown=tower:tower ./README.md /home/tower/toweros/README.md
+
+WORKDIR /home/tower/toweros/tower-build-cli/
+RUN pip install -e ../tower-lib
+
+ENTRYPOINT ["./tower-build"]
