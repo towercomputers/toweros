@@ -4,4 +4,4 @@
 
 In contrast to existing designs, Tower offers theoretically greater security guarantees, better usability, and more flexibility. The downside is that you need multiple computers to make it work. However, with the development of cheap, powerful and small single-board computers (SBCs), it's now quite practical to carry half a dozen computers with you wherever you go. For a more formal description of the design of TowerOS, including a detailed comparison with Qubes OS, please refer to [the whitepaper](TowerOS%20Whitepaper.pdf).
 
-![Diagram - CM4](img/diagram-cm4.png)
+![Diagram - Usage](img/diagram-usage.png)
