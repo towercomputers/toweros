@@ -1,5 +1,7 @@
 ## Set Up Development Environment
 
+### Connect to internet
+
 To connect the thin client to the Internet you must:
 
 1. Provision a `router`.
@@ -24,21 +26,80 @@ To connect the thin client to the Internet you must:
         nameserver 8.8.8.8
         nameserver 8.8.4.4
 
-1. Restart the network with: `[thinclient]$ sudo rc-service networking restart`:
+1. Restart the network with: `[thinclient]$ sudo rc-service networking restart`
 
-    Configure `git`, download Github repository in `~/towercomputers/toweros` and install `hatch` with:
+### Configure Git and download Github repository
 
-        [thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
-    
+Configure `git`, download Github repository in `~/towercomputers/toweros` and install `hatch` with:
 
-## Use TowerOS with `hatch`
+```
+[thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
+```
+
+### Use `tower-cli` with `hatch`
+
+```
+[thinclient]$ cd ~/towercomputers/toweros/tower-cli
+[thinclient]$ hatch run tower --help
+```
+
+## Build TowerOS images
+
+Connect to internet and download Github repository as explained in the first paragraph above.
+
+### TowerOS Host
+
+```
+[thinclient]$ cd ~/towercomputers/toweros/tower-build-cli
+[thinclient]$ ./tower-build host
+```
+
+This will generate a TowerOS-Host image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the `provision` command (if the `--image` flag is not provided).
+
+### TowerOS Thin Client
+
+```
+[thinclient]$ ./tower-build thinclient
+```
+
+This will generate an ISO image in `~/.cache/tower/builds/`. A TowerOS Host image is embedded in the TowerOS ThinClient image. If a TowerOS Host image is present in the `~/.cache/tower/builds/` folder, it is used. Otherwise a new image is automatically generated.
+
+### With Docker
+
+Build the Docker image with:
 
 ```
 [thinclient]$ git clone git@github.com:towercomputers/toweros.git
-[thinclient]$ cd toweros
-[thinclient]$ pip install hatch
-[thinclient]$ hatch run tower --help
-[thinclient]$ hatch run build-tower-image --help
+[thinclient]$ cd toweros/tower-build-cli
+[thinclient]$ docker build -t build-tower-image:latest -f ./Dockerfile ../
+```
+
+Then build the TowerOS image inside a Docker container:
+
+```
+[thinclient]$ docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
+```
+
+Retrieve that image from the container:
+
+```
+[thinclient]$ docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
+```
+
+Finally delete the container with:
+
+```
+[thinclient]$ docker rm towerbuilder
+```
+
+**Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
+
+```
+[thinclient]$ docker buildx create --use
+[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker -f ./Dockerfile ../
+[thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
+[thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
+              build-tower-image thinclient
 ```
 
 ## Manually QA TowerOS for Thin Client
@@ -55,7 +116,8 @@ On first boot:
 
 1. Provision an online host:
 
-        [thinclient]$ tower provision web --online --wlan-ssid <ssid> --wlan-password <password>
+        [thinclient]$ tower provision router --wlan-ssid <ssid> --wlan-password <password>
+        [thinclient]$ tower provision web --online
 
 1. Provision an offline host:
 
@@ -65,11 +127,11 @@ On first boot:
 
         [thinclient]$ tower status
 
-1. Install a package an an offline host:
+1. Install a package in an offline host:
 
         [thinclient]$ tower install office xcalc
 
-1. Install a package on an online host:
+1. Install a package in an online host:
 
         [thinclient]$ tower install web midori
 
@@ -80,23 +142,6 @@ On first boot:
         [thinclient]$ tower run web midori
 
     Check also if the Xfce Application menu contains shortcuts for installed packages.
-
-1. Log out from Xfce and connect to the Internet as described above.
-
-1. Build a host TowerOS image with:
-
-        [thinclient]$ buld-tower-image host
-
-1. Build a thin client TowerOS image with:
-
-        [thinclient]$ buld-tower-image thinclient
-
-1. Install the development environment with:
-
-        [thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
-
-1. If you are feeling brave, you may repeat all these steps with the thin client image you generated yourself. :)
-
 
 ## Build your own custom Thin Client (Linux)
 
@@ -142,13 +187,13 @@ The `toweros` software assumes that the current user has full `sudo` access with
 <your_username> ALL=(ALL) NOPASSWD: ALL
 ```
 
-To build an image with `build-tower-image`, you first need to add the current user in the `abuild` group:
+To build an image with `./tower-build`, you first need to add the current user in the `abuild` group:
 
 ```
 [thinclient]$ addgroup <you_username> abuild
 ```
 
-### Install the `toweros` tools
+### Install `tower-cli`
 
 Update `pip` to the latest version:
 
@@ -156,55 +201,9 @@ Update `pip` to the latest version:
 [thinclient]$ python3 -m pip install --upgrade pip
 ```
 
-Install the `toweros` toolkit with `pip`:
+Install the `tower` CLI with `pip`:
 
 ```
-[thinclient]$ python3 -m pip install "toweros @ git+ssh://github.com/towercomputers/toweros.git"
+[thinclient]$ python3 -m pip install "tower-cli @ git+https://github.com/towercomputers/toweros.git#subdirectory=tower-cli"
 ```
 
-## Build a host image
-
-```
-[thinclient]$ build-tower-image host
-```
-
-This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command (if the `--image` flag is not provided).
-
-## Build a TowerOS image with Docker
-
-Build the Docker image with:
-
-```
-[thinclient]$ git clone git@github.com:towercomputers/toweros.git
-[thinclient]$ cd tools
-[thinclient]$ hatch build -t wheel
-[thinclient]$ docker build -t build-tower-image:latest .
-```
-
-Then build the TowerOS image inside a Docker container:
-
-```
-[thinclient]$ docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
-```
-
-Retrieve that image from the container:
-
-```
-[thinclient]$ docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
-```
-
-Finally delete the container with:
-
-```
-[thinclient]$ docker rm towerbuilder
-```
-
-**Note: **With the ARM64 architecture, you must use `buildx` and a cross-platform emulator like `tonistiigi/binfmt`.
-
-```
-[thinclient]$ docker buildx create --use
-[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
-[thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
-[thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
-              build-tower-image thinclient
-```

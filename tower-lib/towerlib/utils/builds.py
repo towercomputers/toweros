@@ -4,8 +4,8 @@ import glob
 
 from sh import shasum
 
-from tower.utils import network
-from tower.utils.decorators import clitask
+from towerlib.utils import network
+from towerlib.utils.decorators import clitask
 
 logger = logging.getLogger('tower')
 

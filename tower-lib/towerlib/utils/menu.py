@@ -5,8 +5,8 @@ from io import StringIO
 import sh
 from sh import ssh, mkdir, sed, scp, mv
 
-from tower.utils import clitask
-from tower.sshconf import hosts
+from towerlib.utils import clitask
+from towerlib.sshconf import hosts
 
 def get_package_binaries(host, package):
     binaries = []
@@ -64,7 +64,7 @@ def add_installed_package(host, package):
 
 @clitask("Updating xfce menu...")
 def prepare_xfce_menu():
-    INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'scripts', 'toweros-thinclient')
+    INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'toweros-installers', 'toweros-thinclient')
     # create local directories
     directories_folder = os.path.expanduser('~/.local/share/desktop-directories/')
     menu_folder = os.path.expanduser('~/.config/menus/')
@@ -74,7 +74,7 @@ def prepare_xfce_menu():
     for hostindex, hostname in enumerate(hosts()):
         # genereate host icon
         colors = ["#fff100", "#ff8c00", "#e81123", "#ec008c", "#68217a", "#00188f", "#00bcf2", "#00b294", "#009e49", "#bad80a"]
-        icon_path = os.path.join(INSTALLER_DIR, f'circle_icon.svg')
+        icon_path = os.path.join(INSTALLER_DIR, 'xfce', f'circle_icon.svg')
         host_icon_path = os.path.join(directories_folder, f'{hostname}_icon.svg')
         with open(icon_path, 'r') as fp:
             icon_content = fp.read()
@@ -103,7 +103,7 @@ def prepare_xfce_menu():
             tower_menu_xml.write('</Menu>')
         tower_menu_xml.write('</Menu>')
     # prepare xfce-applications.menu file
-    xfce_menu_template_path = os.path.join(INSTALLER_DIR, 'xfce-applications.menu.tmpl')
+    xfce_menu_template_path = os.path.join(INSTALLER_DIR, 'xfce', 'xfce-applications.menu.tmpl')
     with open(xfce_menu_template_path, 'r') as fp:
         xfce_menu_template = fp.read()
         tower_menus = ""

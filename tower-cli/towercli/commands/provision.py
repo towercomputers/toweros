@@ -3,7 +3,7 @@ import os
 import re
 import sys
 
-from tower import provision, utils, sshconf
+from towerlib import provision, utils, sshconf
 
 logger = logging.getLogger('tower')
 

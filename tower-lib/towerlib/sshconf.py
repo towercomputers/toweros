@@ -6,7 +6,7 @@ from ipaddress import ip_address, ip_network
 from sshconf import read_ssh_config, empty_ssh_config_file
 from sh import ssh, ErrorReturnCode, sed, touch, Command
 
-from tower.utils import clitask
+from towerlib.utils import clitask
 
 DEFAULT_SSH_USER = "tower"
 TOWER_NETWORK_ONLINE = "192.168.2.0/24"
