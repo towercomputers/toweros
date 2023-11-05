@@ -6,7 +6,7 @@ import sys
 import importlib
 
 REPO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-sys.path.append(f'{REPO_PATH}/tower-lib')
+sys.path.insert(0, f'{REPO_PATH}/tower-lib')
 
 from towerlib import buildhost, buildthinclient, utils
 
