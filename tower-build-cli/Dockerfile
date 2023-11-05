@@ -31,19 +31,14 @@ WORKDIR /home/tower
 # generate abuild keys
 RUN abuild-keygen -a -i -n
 
-# copy and install `tower` at the end so everything above is cached
-# RUN mkdir -p /home/tower/.cache/tower/builds
-# COPY --chown=tower:tower $TOWER_LIB_WHEEL_PATH /home/tower/.cache/tower/builds/
-# RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_LIB_WHEEL_PATH)
-# COPY --chown=tower:tower $TOWER_CLI_WHEEL_PATH /home/tower/.cache/tower/builds/
-# RUN pip install /home/tower/.cache/tower/builds/$(basename $TOWER_CLI_WHEEL_PATH)
-
+# copy toweros repo
 RUN mkdir -p /home/tower/toweros
 COPY --chown=tower:tower ./tower-build-cli /home/tower/toweros/tower-build-cli
 COPY --chown=tower:tower ./tower-lib /home/tower/toweros/tower-lib
 COPY --chown=tower:tower ./docs /home/tower/toweros/docs
 COPY --chown=tower:tower ./README.md /home/tower/toweros/README.md
 
+# install tower-lib
 WORKDIR /home/tower/toweros/tower-build-cli/
 RUN pip install -e ../tower-lib
 
