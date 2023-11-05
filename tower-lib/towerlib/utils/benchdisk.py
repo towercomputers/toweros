@@ -9,7 +9,6 @@ import sys
 from rich.console import Console
 from rich.table import Table
 
-
 def run_cmd(cmd, to_json=False):
     out = subprocess.run(cmd, capture_output=True, encoding="UTF-8").stdout.strip()
     if to_json:
@@ -59,6 +58,7 @@ def display_bench():
     console = Console()
     console.print(table)
 
-install_cmd = "sudo apk --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing add python3 py3-rich iozone"
-run_cmd(install_cmd.split(" "))
-display_bench()
+if __name__ == '__main__':
+    install_cmd = "sudo apk --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing add python3 py3-rich iozone"
+    run_cmd(install_cmd.split(" "))
+    display_bench()

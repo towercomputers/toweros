@@ -74,7 +74,7 @@ def prepare_xfce_menu():
     for hostindex, hostname in enumerate(hosts()):
         # genereate host icon
         colors = ["#fff100", "#ff8c00", "#e81123", "#ec008c", "#68217a", "#00188f", "#00bcf2", "#00b294", "#009e49", "#bad80a"]
-        icon_path = os.path.join(INSTALLER_DIR, f'circle_icon.svg')
+        icon_path = os.path.join(INSTALLER_DIR, 'xfce', f'circle_icon.svg')
         host_icon_path = os.path.join(directories_folder, f'{hostname}_icon.svg')
         with open(icon_path, 'r') as fp:
             icon_content = fp.read()
@@ -103,7 +103,7 @@ def prepare_xfce_menu():
             tower_menu_xml.write('</Menu>')
         tower_menu_xml.write('</Menu>')
     # prepare xfce-applications.menu file
-    xfce_menu_template_path = os.path.join(INSTALLER_DIR, 'xfce-applications.menu.tmpl')
+    xfce_menu_template_path = os.path.join(INSTALLER_DIR, 'xfce', 'xfce-applications.menu.tmpl')
     with open(xfce_menu_template_path, 'r') as fp:
         xfce_menu_template = fp.read()
         tower_menus = ""
