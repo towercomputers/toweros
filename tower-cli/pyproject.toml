@@ -13,11 +13,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "tower-lib @ file://{root}/../tower-lib",
+    "tower-lib @ git+https://github.com/towercomputers/toweros.git@monorepo#subdirectory=tower-lib",
 ]
 
 [tool.hatch.envs.default]
-pre-install-commands = [
+post-install-commands = [
   "pip install -e ../tower-lib",
 ]
 
