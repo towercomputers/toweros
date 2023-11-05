@@ -13,7 +13,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "tower-lib==0.1.3",
+    "tower-lib @ file://{root}/../tower-lib",
 ]
 
 [tool.hatch.envs.default]
