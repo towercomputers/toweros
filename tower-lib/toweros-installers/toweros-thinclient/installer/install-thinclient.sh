@@ -121,7 +121,8 @@ prepare_home_directory() {
     # install tower with pip
     mv /var/cache/pip-packages "/home/$USERNAME/"
     chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
-    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-cli
+    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-lib
+    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" --no-deps tower-cli
     echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
 
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
