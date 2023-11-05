@@ -35,6 +35,7 @@ RUN abuild-keygen -a -i -n
 RUN mkdir -p /home/tower/toweros
 COPY --chown=tower:tower ./tower-build-cli /home/tower/toweros/tower-build-cli
 COPY --chown=tower:tower ./tower-lib /home/tower/toweros/tower-lib
+COPY --chown=tower:tower ./tower-cli /home/tower/toweros/tower-cli
 COPY --chown=tower:tower ./docs /home/tower/toweros/docs
 COPY --chown=tower:tower ./README.md /home/tower/toweros/README.md
 

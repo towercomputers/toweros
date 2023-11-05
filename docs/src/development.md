@@ -55,7 +55,8 @@ On first boot:
 
 1. Provision an online host:
 
-        [thinclient]$ tower provision web --online --wlan-ssid <ssid> --wlan-password <password>
+        [thinclient]$ tower provision router --wlan-ssid <ssid> --wlan-password <password>
+        [thinclient]$ tower provision web --online
 
 1. Provision an offline host:
 
@@ -83,17 +84,21 @@ On first boot:
 
 1. Log out from Xfce and connect to the Internet as described above.
 
-1. Build a host TowerOS image with:
-
-        [thinclient]$ buld-tower-image host
-
-1. Build a thin client TowerOS image with:
-
-        [thinclient]$ buld-tower-image thinclient
+1. Connect the Thin Clien to internet as explained above.
 
 1. Install the development environment with:
 
         [thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
+
+1. Build a host TowerOS image with:
+
+        [thinclient]$ git clone git@github.com:towercomputers/toweros.git
+        [thinclient]$ cd toweros/tower-build-cli
+        [thinclient]$ ./tower-build host
+
+1. Build a thin client TowerOS image with:
+
+        [thinclient]$ ./tower-build thinclient
 
 1. If you are feeling brave, you may repeat all these steps with the thin client image you generated yourself. :)
 
@@ -142,13 +147,13 @@ The `toweros` software assumes that the current user has full `sudo` access with
 <your_username> ALL=(ALL) NOPASSWD: ALL
 ```
 
-To build an image with `build-tower-image`, you first need to add the current user in the `abuild` group:
+To build an image with `./tower-build`, you first need to add the current user in the `abuild` group:
 
 ```
 [thinclient]$ addgroup <you_username> abuild
 ```
 
-### Install the `toweros` tools
+### Install `tower-cli`
 
 Update `pip` to the latest version:
 
@@ -156,19 +161,29 @@ Update `pip` to the latest version:
 [thinclient]$ python3 -m pip install --upgrade pip
 ```
 
-Install the `toweros` toolkit with `pip`:
+Install the `tower` CLI with `pip`:
 
 ```
-[thinclient]$ python3 -m pip install "toweros @ git+ssh://github.com/towercomputers/toweros.git"
+[thinclient]$ python3 -m pip install "tower-cli @ git+https://github.com/towercomputers/toweros.git#subdirectory=tower-cli"
 ```
 
-## Build a host image
+## Build TowerOS images
 
 ```
-[thinclient]$ build-tower-image host
+[thinclient]$ git clone git@github.com:towercomputers/toweros.git
+[thinclient]$ cd toweros/tower-build-cli
+[thinclient]$ ./tower-build host
 ```
 
-This will generate an image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the provision command (if the `--image` flag is not provided).
+This will generate a TowerOS-Host image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the `provision` command (if the `--image` flag is not provided).
+
+To build a TowerOS-ThinClient image:
+
+```
+[thinclient]$ ./tower-build thinclient
+```
+
+This will generate an ISO image in `~/.cache/tower/builds/`.
 
 ## Build a TowerOS image with Docker
 
@@ -176,9 +191,8 @@ Build the Docker image with:
 
 ```
 [thinclient]$ git clone git@github.com:towercomputers/toweros.git
-[thinclient]$ cd tools
-[thinclient]$ hatch build -t wheel
-[thinclient]$ docker build -t build-tower-image:latest .
+[thinclient]$ cd toweros/tower-build-cli
+[thinclient]$ docker build -t build-tower-image:latest -f ./Dockerfile ../
 ```
 
 Then build the TowerOS image inside a Docker container:
@@ -203,7 +217,7 @@ Finally delete the container with:
 
 ```
 [thinclient]$ docker buildx create --use
-[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
+[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker -f ./Dockerfile ../
 [thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
 [thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
               build-tower-image thinclient
