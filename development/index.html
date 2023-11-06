@@ -533,12 +533,66 @@
     Set Up Development Environment
   </a>
   
+    <nav class="md-nav" aria-label="Set Up Development Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connect-to-internet" class="md-nav__link">
+    Connect to internet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-git-and-download-github-repository" class="md-nav__link">
+    Configure Git and download Github repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-tower-cli-with-hatch" class="md-nav__link">
+    Use tower-cli with hatch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-toweros-with-hatch" class="md-nav__link">
-    Use TowerOS with hatch
+  <a href="#build-toweros-images" class="md-nav__link">
+    Build TowerOS images
   </a>
+  
+    <nav class="md-nav" aria-label="Build TowerOS images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-host" class="md-nav__link">
+    TowerOS Host
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thin-client" class="md-nav__link">
+    TowerOS Thin Client
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-docker" class="md-nav__link">
+    With Docker
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -579,28 +633,14 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#install-the-toweros-tools" class="md-nav__link">
-    Install the toweros tools
+  <a href="#install-tower-cli" class="md-nav__link">
+    Install tower-cli
   </a>
   
 </li>
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-a-host-image" class="md-nav__link">
-    Build a host image
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-a-toweros-image-with-docker" class="md-nav__link">
-    Build a TowerOS image with Docker
-  </a>
   
 </li>
       
@@ -649,12 +689,66 @@
     Set Up Development Environment
   </a>
   
+    <nav class="md-nav" aria-label="Set Up Development Environment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#connect-to-internet" class="md-nav__link">
+    Connect to internet
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-git-and-download-github-repository" class="md-nav__link">
+    Configure Git and download Github repository
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-tower-cli-with-hatch" class="md-nav__link">
+    Use tower-cli with hatch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-toweros-with-hatch" class="md-nav__link">
-    Use TowerOS with hatch
+  <a href="#build-toweros-images" class="md-nav__link">
+    Build TowerOS images
   </a>
+  
+    <nav class="md-nav" aria-label="Build TowerOS images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-host" class="md-nav__link">
+    TowerOS Host
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thin-client" class="md-nav__link">
+    TowerOS Thin Client
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#with-docker" class="md-nav__link">
+    With Docker
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -695,28 +789,14 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#install-the-toweros-tools" class="md-nav__link">
-    Install the toweros tools
+  <a href="#install-tower-cli" class="md-nav__link">
+    Install tower-cli
   </a>
   
 </li>
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-a-host-image" class="md-nav__link">
-    Build a host image
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-a-toweros-image-with-docker" class="md-nav__link">
-    Build a TowerOS image with Docker
-  </a>
   
 </li>
       
@@ -738,6 +818,7 @@
   <h1>Development</h1>
 
 <h2 id="set-up-development-environment">Set Up Development Environment</h2>
+<h3 id="connect-to-internet">Connect to internet</h3>
 <p>To connect the thin client to the Internet you must:</p>
 <ol>
 <li>Provision a <code>router</code>.</li>
@@ -763,18 +844,49 @@ nameserver 8.8.4.4
 </code></pre>
 </li>
 <li>
-<p>Restart the network with: <code>[thinclient]$ sudo rc-service networking restart</code>:</p>
+<p>Restart the network with: <code>[thinclient]$ sudo rc-service networking restart</code></p>
+</li>
+</ol>
+<h3 id="configure-git-and-download-github-repository">Configure Git and download Github repository</h3>
 <p>Configure <code>git</code>, download Github repository in <code>~/towercomputers/toweros</code> and install <code>hatch</code> with:</p>
 <pre><code>[thinclient]$ ~/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
 </code></pre>
-</li>
-</ol>
-<h2 id="use-toweros-with-hatch">Use TowerOS with <code>hatch</code></h2>
-<pre><code>[thinclient]$ git clone git@github.com:towercomputers/toweros.git
-[thinclient]$ cd toweros
-[thinclient]$ pip install hatch
+<h3 id="use-tower-cli-with-hatch">Use <code>tower-cli</code> with <code>hatch</code></h3>
+<pre><code>[thinclient]$ cd ~/towercomputers/toweros/tower-cli
 [thinclient]$ hatch run tower --help
-[thinclient]$ hatch run build-tower-image --help
+</code></pre>
+<h2 id="build-toweros-images">Build TowerOS images</h2>
+<p>Connect to internet and download Github repository as explained in the first paragraph above.</p>
+<h3 id="toweros-host">TowerOS Host</h3>
+<pre><code>[thinclient]$ cd ~/towercomputers/toweros/tower-build-cli
+[thinclient]$ ./tower-build host
+</code></pre>
+<p>This will generate a TowerOS-Host image file compressed with xz in <code>~/.cache/tower/builds/</code>. Images in this folder will be used by default by the <code>provision</code> command (if the <code>--image</code> flag is not provided).</p>
+<h3 id="toweros-thin-client">TowerOS Thin Client</h3>
+<pre><code>[thinclient]$ ./tower-build thinclient
+</code></pre>
+<p>This will generate an ISO image in <code>~/.cache/tower/builds/</code>. A TowerOS Host image is embedded in the TowerOS ThinClient image. If a TowerOS Host image is present in the <code>~/.cache/tower/builds/</code> folder, it is used. Otherwise a new image is automatically generated.</p>
+<h3 id="with-docker">With Docker</h3>
+<p>Build the Docker image with:</p>
+<pre><code>[thinclient]$ git clone git@github.com:towercomputers/toweros.git
+[thinclient]$ cd toweros/tower-build-cli
+[thinclient]$ docker build -t build-tower-image:latest -f ./Dockerfile ../
+</code></pre>
+<p>Then build the TowerOS image inside a Docker container:</p>
+<pre><code>[thinclient]$ docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
+</code></pre>
+<p>Retrieve that image from the container:</p>
+<pre><code>[thinclient]$ docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
+</code></pre>
+<p>Finally delete the container with:</p>
+<pre><code>[thinclient]$ docker rm towerbuilder
+</code></pre>
+<p><strong>Note: </strong>With the ARM64 architecture, you must use <code>buildx</code> and a cross-platform emulator like <code>tonistiigi/binfmt</code>.</p>
+<pre><code>[thinclient]$ docker buildx create --use
+[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker -f ./Dockerfile ../
+[thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
+[thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
+              build-tower-image thinclient
 </code></pre>
 <h2 id="manually-qa-toweros-for-thin-client">Manually QA TowerOS for Thin Client</h2>
 <p>On first boot:</p>
@@ -791,7 +903,8 @@ nameserver 8.8.4.4
 </li>
 <li>
 <p>Provision an online host:</p>
-<pre><code>[thinclient]$ tower provision web --online --wlan-ssid &lt;ssid&gt; --wlan-password &lt;password&gt;
+<pre><code>[thinclient]$ tower provision router --wlan-ssid &lt;ssid&gt; --wlan-password &lt;password&gt;
+[thinclient]$ tower provision web --online
 </code></pre>
 </li>
 <li>
@@ -805,12 +918,12 @@ nameserver 8.8.4.4
 </code></pre>
 </li>
 <li>
-<p>Install a package an an offline host:</p>
+<p>Install a package in an offline host:</p>
 <pre><code>[thinclient]$ tower install office xcalc
 </code></pre>
 </li>
 <li>
-<p>Install a package on an online host:</p>
+<p>Install a package in an online host:</p>
 <pre><code>[thinclient]$ tower install web midori
 </code></pre>
 </li>
@@ -821,27 +934,6 @@ nameserver 8.8.4.4
 [thinclient]$ tower run web midori
 </code></pre>
 <p>Check also if the Xfce Application menu contains shortcuts for installed packages.</p>
-</li>
-<li>
-<p>Log out from Xfce and connect to the Internet as described above.</p>
-</li>
-<li>
-<p>Build a host TowerOS image with:</p>
-<pre><code>[thinclient]$ buld-tower-image host
-</code></pre>
-</li>
-<li>
-<p>Build a thin client TowerOS image with:</p>
-<pre><code>[thinclient]$ buld-tower-image thinclient
-</code></pre>
-</li>
-<li>
-<p>Install the development environment with:</p>
-<pre><code>[thinclient]$ ~/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
-</code></pre>
-</li>
-<li>
-<p>If you are feeling brave, you may repeat all these steps with the thin client image you generated yourself. :)</p>
 </li>
 </ol>
 <h2 id="build-your-own-custom-thin-client-linux">Build your own custom Thin Client (Linux)</h2>
@@ -872,42 +964,15 @@ nameserver 8.8.4.4
 <p>The <code>toweros</code> software assumes that the current user has full <code>sudo</code> access with no password. (Please refer to our <a href="../security/">threat model</a>.) Check if <code>/etc/sudoers</code> contains the following line:</p>
 <pre><code>&lt;your_username&gt; ALL=(ALL) NOPASSWD: ALL
 </code></pre>
-<p>To build an image with <code>build-tower-image</code>, you first need to add the current user in the <code>abuild</code> group:</p>
+<p>To build an image with <code>./tower-build</code>, you first need to add the current user in the <code>abuild</code> group:</p>
 <pre><code>[thinclient]$ addgroup &lt;you_username&gt; abuild
 </code></pre>
-<h3 id="install-the-toweros-tools">Install the <code>toweros</code> tools</h3>
+<h3 id="install-tower-cli">Install <code>tower-cli</code></h3>
 <p>Update <code>pip</code> to the latest version:</p>
 <pre><code>[thinclient]$ python3 -m pip install --upgrade pip
 </code></pre>
-<p>Install the <code>toweros</code> toolkit with <code>pip</code>:</p>
-<pre><code>[thinclient]$ python3 -m pip install &quot;toweros @ git+ssh://github.com/towercomputers/toweros.git&quot;
-</code></pre>
-<h2 id="build-a-host-image">Build a host image</h2>
-<pre><code>[thinclient]$ build-tower-image host
-</code></pre>
-<p>This will generate an image file compressed with xz in <code>~/.cache/tower/builds/</code>. Images in this folder will be used by default by the provision command (if the <code>--image</code> flag is not provided).</p>
-<h2 id="build-a-toweros-image-with-docker">Build a TowerOS image with Docker</h2>
-<p>Build the Docker image with:</p>
-<pre><code>[thinclient]$ git clone git@github.com:towercomputers/toweros.git
-[thinclient]$ cd tools
-[thinclient]$ hatch build -t wheel
-[thinclient]$ docker build -t build-tower-image:latest .
-</code></pre>
-<p>Then build the TowerOS image inside a Docker container:</p>
-<pre><code>[thinclient]$ docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
-</code></pre>
-<p>Retrieve that image from the container:</p>
-<pre><code>[thinclient]$ docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
-</code></pre>
-<p>Finally delete the container with:</p>
-<pre><code>[thinclient]$ docker rm towerbuilder
-</code></pre>
-<p><strong>Note: </strong>With the ARM64 architecture, you must use <code>buildx</code> and a cross-platform emulator like <code>tonistiigi/binfmt</code>.</p>
-<pre><code>[thinclient]$ docker buildx create --use
-[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker .
-[thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
-[thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
-              build-tower-image thinclient
+<p>Install the <code>tower</code> CLI with <code>pip</code>:</p>
+<pre><code>[thinclient]$ python3 -m pip install &quot;tower-cli @ git+https://github.com/towercomputers/toweros.git#subdirectory=tower-cli&quot;
 </code></pre>
 
 
@@ -929,11 +994,6 @@ nameserver 8.8.4.4
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
   
 </div>
       

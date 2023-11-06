@@ -758,7 +758,7 @@
 <h1 id="implementation">Implementation</h1>
 <p>TowerOS is built on <a href="https://alpinelinux.org">Alpine Linux</a> for the latter's simplicity, minimalism, and security-first approach. TowerOS is open-source and freely licensed (MIT). It is designed to require the smallest-possible trusted computing base, to rely only on other widely used, open-source software, and to as transparent as possible in its implementation.</p>
 <h2 id="tower-tools">Tower Tools</h2>
-<p>The <code>tower-tools</code> package contains all of the tooling necessary to build TowerOS images for both the thin client and for the hosts (a pre-built image for the thin client—containing a pre-built image for hosts---is available on the <a href="https://github.com/towercomputers/toweros/releases">GitHub Releases</a> page).</p>
+<p>The <code>toweros</code> package contains all of the tooling necessary to build TowerOS images for both the thin client and for the hosts (a pre-built image for the thin client—containing a pre-built image for hosts---is available on the <a href="https://github.com/towercomputers/toweros/releases">GitHub Releases</a> page).</p>
 <p>This package is organized into six primary modules:</p>
 <ul>
 <li><code>buildthinclient.py</code> and <code>buildhost.py</code> to build the OS images used by the thin client and the hosts</li>
@@ -794,7 +794,7 @@
 <h2 id="building-your-own-toweros-images">Building your own TowerOS Images</h2>
 <h3 id="image-for-thin-clients">Image for Thin Clients</h3>
 <p><code>buildthinclient.py</code> is the module responsible for generating an image of TowerOS with the <code>build-tower-image thinclient</code> command, which uses the <code>mkimage</code> tool (see <a href="https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage">https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage</a>).</p>
-<p>The installer contains all the APK and pip packages necessary for installing the base system and <code>tower-tools</code>, which is ready to use after the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.</p>
+<p>The installer contains all the APK and pip packages necessary for installing the base system and <code>toweros</code>, which is ready to use after the first boot. In this way, the installation of the system, as well as the provisioning of a first host, does not require an Internet connection.</p>
 <p>Here are the different steps taken by <code>buildthinclient.py</code> to generate an image:</p>
 <ol>
 <li>
@@ -802,7 +802,7 @@
 The script starts by checking for the existence of a <code>./dist</code>, <code>./builds</code> or <code>~/.cache/tower/builds/</code> folder. If one of them exists, this is where the script will fetch the builds and place the final image. If no folder exists, then the script creates the folder <code>~/.cache/tower/builds/</code>. Next:</p>
 <ol>
 <li>The script then verifies that the TowerOS host image is present. If not, it launches the build of a new image.</li>
-<li>The script checks for the existence of a <code>tower-tools</code> wheel package. If it does not exist the package is retrieved from GitHub.</li>
+<li>The script checks for the existence of a <code>toweros</code> wheel package. If it does not exist the package is retrieved from GitHub.</li>
 </ol>
 </li>
 <li>
@@ -812,10 +812,10 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 <p>Creating and updating an Alpine APK overlay folder, including most importantly:</p>
 <ol>
 <li>pip cache folder</li>
-<li>Add the system install BASH scripts (see https://github.com/towercomputers/tower-tools/tree/dev/scripts/toweros-thinclient)</li>
+<li>Add the system install BASH scripts (see https://github.com/towercomputers/toweros/tree/dev/scripts/toweros-thinclient)</li>
 <li>Include the TowerOS documentation</li>
 <li>Add the <code>/etc</code> configuration files</li>
-<li>Add builds required by <code>tower-tools</code> (TowerOS for the host, <code>tower-tools</code>)</li>
+<li>Add builds required by <code>toweros</code> (TowerOS for the host, <code>toweros</code>)</li>
 </ol>
 </li>
 <li>
@@ -837,7 +837,7 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 <h3 id="image-for-hosts">Image for Hosts</h3>
 <p><code>buildhost.py</code> is the module responsible for generating an image for the thin client when the <code>build-tower-image host</code> command is executed, and also for configuring the image when the <code>tower provision</code> command is called.</p>
 <p><code>buildhost.py</code> uses the same method as <code>pigen</code> to build an image for a Raspberry Pi (see <a href="https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh">https://github.com/RPi-Distro/pi-gen/blob/master/export-image/prerun.sh</a>) but unlike <code>pigen</code>, which uses a Debian-based system, <code>buildhost.py</code> uses an Alpine Linux–based system (see https://wiki.alpinelinux.org/wiki/Classic_install_or_sys_mode_on_Raspberry_Pi).</p>
-<p>The <code>tower provision</code> command finalises the configuration of the image, which is otherwise neither secure nor ready to be used by <code>tower-tools</code>.</p>
+<p>The <code>tower provision</code> command finalises the configuration of the image, which is otherwise neither secure nor ready to be used by <code>toweros</code>.</p>
 <p>Here are the different steps taken by <code>buildhost.py</code> to generate an image:</p>
 <ol>
 <li>
@@ -878,7 +878,7 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 </ol>
 <p>Note: A TowerOS image for the thin client is placed in the <code>~/.cache/tower/builds/</code> folder by the installer.</p>
 <h2 id="system-configuration">System Configuration</h2>
-<p>A TowerOS system uses a single configuration file in the same format as an SSH config file: <code>~/.ssh/tower.conf</code>. This file, referenced in <code>~/.ssh/config</code>, is used both by <code>tower-tools</code> to maintain the list of hosts and by <code>ssh</code> to access hosts directly with <code>[thinclient]$ ssh &lt;host&gt;</code>. The script <code>sshconf.py</code> is responsible for maintaining this file and generally anything that requires manipulation of something in the <code>~./ssh</code> folder. Notably:</p>
+<p>A TowerOS system uses a single configuration file in the same format as an SSH config file: <code>~/.ssh/tower.conf</code>. This file, referenced in <code>~/.ssh/config</code>, is used both by <code>toweros</code> to maintain the list of hosts and by <code>ssh</code> to access hosts directly with <code>[thinclient]$ ssh &lt;host&gt;</code>. The script <code>sshconf.py</code> is responsible for maintaining this file and generally anything that requires manipulation of something in the <code>~./ssh</code> folder. Notably:</p>
 <ol>
 <li>discovering the IP of a newly installed host and updating <code>tower.conf</code> accordingly</li>
 <li>updating <code>~/.ssh/know_hosts</code></li>
@@ -893,7 +893,7 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
 <li>Generate the host configuration (<code>tower.env</code>) with the values provided on the command line or with those retrieved from the thin client</li>
 <li>Copy of the TowerOS thin client image onto the SD card and incclude the configuration file</li>
 <li>Wait for the new host to be detected on the network after the user has inserted the SD card into the host device</li>
-<li>Update the <code>ssh</code> and <code>tower-tools</code> configuration files</li>
+<li>Update the <code>ssh</code> and <code>toweros</code> configuration files</li>
 </ol>
 <p>Once a host has been provisioned, it should be accessible with <code>$ ssh &lt;host&gt;</code> or <code>$ tower run &lt;host&gt; &lt;command&gt;</code>.</p>
 <h2 id="gui-application-execution">GUI Application Execution</h2>
@@ -961,11 +961,6 @@ The script starts by checking for the existence of a <code>./dist</code>, <code>
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
   
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
   
 </div>
       
