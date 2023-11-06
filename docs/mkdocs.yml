@@ -24,3 +24,6 @@ nav:
     - Whitepaper: "TowerOS Whitepaper.pdf"
     - Implementation: implementation.md
     - Development: development.md
+
+extra:
+  generator: false
