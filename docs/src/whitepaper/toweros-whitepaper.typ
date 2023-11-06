@@ -50,7 +50,11 @@ Side-Channel Attacks
 
 
 = Comparison with Qubes OS
-The state-of-the-art in secure computing systems@snowden is #link("http://qubes-os.org")[Qubes OS] is an open-source converged multi-level secure operating system that uses hardware virtualization (with Xen) to isolate security domains. There is a number of major weaknesses inherent in the design of Qubes OS, all of which stem from the fact that it has a large TCB.
+The state-of-the-art in secure computing systems@snowden is #link("http://qubes-os.org")[Qubes OS] is an open-source converged multi-level secure operating system that uses hardware virtualization (with Xen) to isolate security domains. As the former lead developer of GrapheneOS put it:
+
+#quote(attribution: "D. Micay")[You can think of QubesOS as a way of approximating having 20 laptops with their own purposes, but all on 1 laptop. The security of each compartment still matters, and beyond isolating some drivers it doesn't do much to address that, but it does successfully approximate air gapped machines to a large extent. It's still significantly more secure to have separate machines but it's very impractical / unrealistic especially at that scale. There is no better option for approximating the security of using separate computers for different sets of tasks / identities.@graphene]
+
+With TowerOS, we hope to address this deficiency in the software ecosystem. In the following, we compare TowerOS with QubesOS, and we note the advantages and disadvantages of the different architectures.
 
 == Advantages
 #enum(

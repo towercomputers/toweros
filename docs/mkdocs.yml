@@ -1,6 +1,9 @@
 site_name: TowerOS
-site_url: https://towercomputers.github.io/toweros/
+site_url: https://toweros.org
 docs_dir: src
+markdown_extensions:
+    - attr_list
+    - md_in_html
 theme:
   name: material
   features:
@@ -21,3 +24,6 @@ nav:
     - Whitepaper: "TowerOS Whitepaper.pdf"
     - Implementation: implementation.md
     - Development: development.md
+
+extra:
+  generator: false

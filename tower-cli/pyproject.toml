@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling==1.14.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tower-cli"
+dynamic = ["version"]
+description = "Tower cli"
+readme = "../README.md"
+license-files = { paths = ["../LICENSE"] }
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "tower-lib @ git+https://github.com/towercomputers/toweros.git@monorepo#subdirectory=tower-lib",
+]
+
+[tool.hatch.envs.default]
+post-install-commands = [
+  "pip install -e ../tower-lib",
+]
+
+[tool.hatch.build.targets.wheel]
+include = ["towercli"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"README.md" = "../README.md"
+
+[project.scripts]
+tower = "towercli.tower:main"
+
+[tool.hatch.version]
+path = "../tower-lib/towerlib/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
