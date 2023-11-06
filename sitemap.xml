@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://towercomputers.github.io/toweros/</loc>
+         <loc>https://toweros.org/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/development/</loc>
+         <loc>https://toweros.org/development/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/hardware/</loc>
+         <loc>https://toweros.org/hardware/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/implementation/</loc>
+         <loc>https://toweros.org/implementation/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/installation/</loc>
+         <loc>https://toweros.org/installation/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/secure-boot/</loc>
+         <loc>https://toweros.org/secure-boot/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/security/</loc>
+         <loc>https://toweros.org/security/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://towercomputers.github.io/toweros/usage/</loc>
+         <loc>https://toweros.org/usage/</loc>
          <lastmod>2023-11-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
