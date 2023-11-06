@@ -15,7 +15,7 @@ classifiers = [
 ]
 dependencies = [
     "setuptools==67.6.1",
-    "requests==2.27.1",
+    "requests==2.31.0",
     "sh==1.14.3",
     "passlib==1.7.4",
     "backports.pbkdf2==0.1",
