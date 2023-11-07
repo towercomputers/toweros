@@ -4,7 +4,7 @@ import sys
 from urllib.parse import urlparse
 import time
 
-from sh import ssh, scp, rm, Command, ErrorReturnCode, apk
+from sh import ssh, scp, rm, Command, ErrorReturnCode, cp, mv, cat
 
 from towerlib.utils import clitask
 from towerlib.utils.menu import add_installed_package
@@ -41,28 +41,31 @@ def prepare_offline_host(host):
     prepare_repositories_file(host)
     if host == 'thinclient':
         # add repo host in /etc/hosts
-        Command('sh')('-c', f"echo '127.0.0.1 {APK_REPOS_HOST}' | sudo tee -a /etc/hosts")
+        Command('sh')('-c', 'sudo cp /etc/hosts /etc/hosts.bak')
+        Command('sh')('-c', f"echo '127.0.0.1 {APK_REPOS_HOST}\n' | sudo tee /etc/hosts")
         # add iptables rule to redirect https requests to port 4443
         Command('sh')('-c', f"sudo iptables -t nat -A OUTPUT -p tcp -m tcp --dport 80 -j REDIRECT --to-ports {LOCAL_TUNNELING_PORT}")
     else:
         # add repo host in /etc/hosts
-        ssh(host, f"echo '127.0.0.1 {APK_REPOS_HOST}' | sudo tee -i /etc/hosts")
+        ssh(host, "sudo cp /etc/hosts /etc/hosts.bak")
+        ssh(host, f"echo '127.0.0.1 {APK_REPOS_HOST}\n' | sudo tee /etc/hosts")
         # add iptables rule to redirect https requests to port 4443
         ssh(host, "sudo iptables -t nat -A OUTPUT -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 4443")
 
 def cleanup_offline_host(host):
-    # remove temporary apk repositories
+    # remove temporary apk repositories in thinclient
     file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
     rm('-f', file_name)
     if host == 'thinclient':
-        # clean /etc/hosts
-        Command('sh')('-c', f"sudo sed -i '/{APK_REPOS_HOST}/d' /etc/hosts")
+        # restore /etc/hosts
+        Command('sh')('-c', 'sudo mv /etc/hosts.bak /etc/hosts')
         # clean iptables
         Command('sh')('-c', "sudo iptables -t nat -F")
     else:
+        # remove temporary apk repositories in offline host
         ssh(host, f"rm -f ~/{os.path.basename(file_name)}")
-        # clean /etc/hosts
-        ssh(host, f"sudo sed -i '/{APK_REPOS_HOST}/d' /etc/hosts")
+        # restore /etc/hosts
+        ssh(host, "sudo mv /etc/hosts.bak /etc/hosts")
         # clean iptables
         #ssh(host, "sudo iptables -t nat -D OUTPUT $(sudo iptables -nvL -t nat --line-numbers | grep -m 1 '443 redir ports 4443' | awk '{print $1}')")
         ssh(host, "sudo iptables -t nat -F")
@@ -139,7 +142,6 @@ def install_in_thinclient(packages):
         try:
             repo_file = os.path.join(os.path.expanduser('~'), f'repositories.offline.thinclient')
             apk_cmd = f"sudo apk --repositories-file {repo_file} --progress add {' '.join(packages)}"
-            print(apk_cmd)
             Command('sh')('-c',
                 apk_cmd,
                 _err_to_out=True, _out=sprint, _in=sys.stdin,
@@ -148,7 +150,6 @@ def install_in_thinclient(packages):
         except ErrorReturnCode:
             error = True # error in remote host is already displayed
     finally:
-        #pass
         cleanup("thinclient")
 
 def install_packages(host, packages):
