@@ -16,13 +16,13 @@ The thin client is typically a laptop like the Lenovo X270. The thin client shou
 ## Host Hardware
 TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compute Module 4 Lite (“CM4” for short). Whereas Raspberry Pi 4Bs must be connected with standalone switch hardware, CM4 modules may be connected with a board like the DeskPi Super6C, which provides for a much more compact form factor for a complete TowerOS system. CM4 modules may easily use M.2 SSDs as their persistent storage _via_ a DeskPi Super6C, and they should therefore perform much better.
 
-*Notes*
+### Notes
 - The amount of RAM required for each host is heavily dependent on the intended usage pattern. Generally, at least one host should have 8GB of RAM, to run a web browser. For the router host, we recommend having at least 2GB of RAM.
 - Different SD cards and USB keys may have very different performance characteristics. In general, USB keys are much faster than SD cards, and M.2 SSDs are faster still.
 - Each host needs two storage devices to function properly: one for the boot filesystem and another for the root filesystem (the one that contains your applications and data).
-  - If your system is based on Raspberry PI 4Bs, you can use either an SD card or a USB key for each file system (It is recommended to use the fastest device for the root file system).
-  - For CM4s with a DeskPi, you must use an SD card for the boot file system and an M.2 SSD for the root file system.
-  - The decryption key for the root filesystem is stored directly on the boot device, so the user may remove this device when leaving the host hardware unattended to protect against data theft by physical means.
+    - If your system is based on Raspberry PI 4Bs, you can use either an SD card or a USB key for each file system (It is recommended to use the fastest device for the root file system).
+    - For CM4s with a DeskPi, you must use an SD card for the boot file system and an M.2 SSD for the root file system.
+    - The decryption key for the root filesystem is stored directly on the boot device, so the user may remove this device when leaving the host hardware unattended to protect against data theft by physical means.
 
 
 ### Compute Module 4 Lite
