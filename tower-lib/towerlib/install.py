@@ -6,7 +6,7 @@ import time
 
 from rich.prompt import Confirm
 from rich.text import Text
-from sh import ssh, scp, rm, Command, ErrorReturnCode, cp, mv, cat
+from sh import ssh, scp, rm, Command, ErrorReturnCode
 
 from towerlib.utils import clitask
 from towerlib.utils.menu import add_installed_package
@@ -19,7 +19,6 @@ APK_REPOS_URL = [
     f"http://{APK_REPOS_HOST}/alpine/latest-stable/main",
     f"http://{APK_REPOS_HOST}/alpine/latest-stable/community",
 ]
-
 LOCAL_TUNNELING_PORT = 8666
 
 sprint = lambda str: print(str.decode("utf-8", 'ignore') if isinstance(str, bytes) else str, end='', flush=True)

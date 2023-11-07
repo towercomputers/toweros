@@ -19,6 +19,7 @@ TowerOS currently supports two kinds of host hardware: Raspberry Pi 4B and Compu
 *Notes*
 - The amount of RAM required for each host is heavily dependent on the intended usage pattern. Generally, at least one host should have 8GB of RAM, to run a web browser. For the router host, we recommend having at least 2GB of RAM.
 - Different SD cards and USB keys may have very different performance characteristics. In general, USB keys are much faster than SD cards, and M.2 SSDs are faster still.
+- Each host needs two storage devices to function properly: one for the boot filesystem and another for the root filesystem (the one that contains your applications and data). The root filesystem is fully encrypted and the key to decrypt it is located in the boot filesystem. If you are using Raspberry PI 4b, you can use either an SD card or a USB key for each file system (It is recommended to use the fastest device for the root file system). For CM4s with a DeskPi, on the other hand, you must use an SD card for the boot file system and an M.2 SSD for the root file system.
 
 
 ### Compute Module 4 Lite
