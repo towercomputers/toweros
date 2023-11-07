@@ -24,10 +24,10 @@ def check_args(args, parser_error):
     name = args.host_name[0]
     config = sshconf.get(name)
 
-    if config is None:
+    if config is None and name != "thinclient":
         parser_error("Unkown host name.")
-    
-    if not sshconf.is_online_host(name) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+
+    if (name == "thinclient" or not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
         parser_error(message=f"`{name}` is an offline host and `{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
     
     for pkg_name in args.packages:
