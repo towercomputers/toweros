@@ -1,6 +1,6 @@
 # Implementation
 
-TowerOS is built on [Alpine Linux](https://alpinelinux.org), because of Alpine's simplicity, minimalism, and security-first approach. TowerOS is open-source and freely licensed (MIT). It is designed to require the smallest-possible trusted computing base, to rely only on other widely used open-source software, and to be as transparent as possible in its implementation.
+TowerOS is built on [Alpine Linux](https://alpinelinux.org), because of Alpine's simplicity, minimalism, and security-first approach. TowerOS is open-source and freely licensed (under the Apache License 2.0). It is designed to require the smallest-possible trusted computing base, to rely only on other widely used open-source software, and to be as transparent as possible in its implementation.
 
 
 ## Tower Tools
