@@ -132,6 +132,8 @@ def install_in_thinclient(packages):
             ROUTER_HOSTNAME,
             _err_to_out=True, _out=logger.debug, _bg=True, _bg_exc=False
         )
+        # wait for ssh tunnel to be ready
+        time.sleep(1)
         # run apk in thinclient
         error = False
         try:
