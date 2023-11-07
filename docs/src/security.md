@@ -8,6 +8,7 @@
 	- *via* Ethernet.
 - All communication between the thin client and a host must be directly triggered by user action.
 - SSH tunnels from the thin client or an online host to the Internet, through the router, are allowed.
+- Risks of data compromise by device theft are mitigated using encryption of the root filesystem of every host. However, for usability reasons, it's not practical to require passphrase input on each boot—the decryption key is stored on a separate boot device, and the user may remove this device when leaving the host hardware unattended.
 
 
 ## Operating System
@@ -29,10 +30,10 @@ In general, operating system configuration is outside the scope of TowerOS's res
 | Class | Attack | Mitigated | If so, how? |
 | --- | --- | --- | --- |
 | Theft | Theft of Device | Yes | Encrypted root disks |
-| Physical Tampering | Evil-Maid Attack | Optional | Raspberry Pis: https://www.zymbit.com/ |
-| Physical Tampering | Cold-Boot Attack | Optional | Raspberry Pis: https://www.zymbit.com/ |
+| Physical Tampering | Evil-Maid Attack | Optional | Raspberry Pis: [Zymbit](https://www.zymbit.com/) |
+| Physical Tampering | Cold-Boot Attack | Optional | Raspberry Pis: [Zymbit](https://www.zymbit.com/) |
 | Microarchitectural | RowHammer; RowPress | Yes | Host-Isolation |
 | Microarchitectural | Speculative Execution | Yes | Host-Isolation |
-| Physical Side-Channel | Power Consumption (https://www.hertzbleed.com/) | Optional | Disable DVFS |
+| Physical Side-Channel | Power Consumption (e.g. [Hertzbleed](https://www.hertzbleed.com/) | Optional | Disable DVFS |
 | Physical Side-Channel | Acoustic Emissions | No |  |
 | Physical Side-Channel | Electromagnetic Radiation | No |  |
