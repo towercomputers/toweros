@@ -120,6 +120,7 @@ def save_config_file(config_path, config_str):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, 'w') as f:
         f.write(config_str)
+    os.chmod(config_path, 0o600)
 
 def save_host_config(config):
     config_filename = f"{config['HOSTNAME']}-{datetime.now().strftime('%Y%m%d%H%M%S')}.env"
