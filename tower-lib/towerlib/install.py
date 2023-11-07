@@ -4,6 +4,8 @@ import sys
 from urllib.parse import urlparse
 import time
 
+from rich.prompt import Confirm
+from rich.text import Text
 from sh import ssh, scp, rm, Command, ErrorReturnCode, cp, mv, cat
 
 from towerlib.utils import clitask
@@ -154,7 +156,9 @@ def install_in_thinclient(packages):
 
 def install_packages(host, packages):
     if host == 'thinclient':
-        install_in_thinclient(packages)
+        confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
+        if Confirm.ask(confirmation):
+            install_in_thinclient(packages)
     elif is_online_host(host):
         install_in_online_host(host, packages)
     else:
