@@ -410,6 +410,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#operating-system" class="md-nav__link">
+    Operating System
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trusted-computing-base" class="md-nav__link">
     Trusted Computing Base
   </a>
@@ -599,6 +606,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#operating-system" class="md-nav__link">
+    Operating System
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#trusted-computing-base" class="md-nav__link">
     Trusted Computing Base
   </a>
@@ -631,12 +645,19 @@
 
 <h2 id="security-model">Security Model</h2>
 <ul>
-<li>Direct communication between Hosts is forbidden.</li>
-<li>All communication between the Thin Client and a Host is over SSH and on port 22.</li>
-<li>All communication with a Host must originate with the Thin Client.</li>
-<li>All network connections between the Thin Client and a Host must be directly triggered by user action.</li>
-<li>SSH tunnels from the Thin Client or a Host through the Router are allowed.</li>
+<li>Direct communication between hosts is forbidden.</li>
+<li>Incoming connections to the thin client are forbidden.</li>
+<li>All communication with a host must originate with the thin client and be:<ul>
+<li>over SSH,</li>
+<li>on port 22, and</li>
+<li><em>via</em> Ethernet.</li>
 </ul>
+</li>
+<li>All communication between the thin client and a host must be directly triggered by user action.</li>
+<li>SSH tunnels from the thin client or an online host to the Internet, through the router, are allowed.</li>
+</ul>
+<h2 id="operating-system">Operating System</h2>
+<p>In general, operating system configuration is outside the scope of TowerOS's responsibilities; TowerOS does attempt to be <em>secure by default</em>, however. Of course, the core architecture of TowerOS is designed to mitigate the severity of any compromise of a host. For information on how best to securing your thin client and hosts at the level of the operating system, please see this <a href="https://madaidans-insecurities.github.io/guides/linux-hardening.html">Linux Hardening Guide</a>.</p>
 <h2 id="trusted-computing-base">Trusted Computing Base</h2>
 <ul>
 <li>TowerOS Tooling</li>
