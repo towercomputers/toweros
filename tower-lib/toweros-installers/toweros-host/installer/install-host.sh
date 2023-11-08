@@ -119,6 +119,9 @@ EOF
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		rc-update add chronyd default
 	fi
+	if [ "$HOSTNAME" == "router" ]; then
+		rc-update add tor default
+	fi
 
 	# update sshd configuration
 	sed -i "s/#ListenAddress 0.0.0.0/ListenAddress $STATIC_HOST_IP/g" /etc/ssh/sshd_config

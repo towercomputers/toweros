@@ -32,3 +32,4 @@ chrony
 linux-firmware-brcm
 cryptsetup
 lvm2
+tor
