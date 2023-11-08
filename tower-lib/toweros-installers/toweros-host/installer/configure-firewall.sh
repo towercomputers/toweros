@@ -62,7 +62,7 @@ else
     if [ "$ONLINE" == "true" ]; then
         # reject traffic from computers to thin client and other computers
         # except router
-        iptables -A OUTPUT -s $ROUTER_IP  -j logaccept
+        iptables -A OUTPUT -d $ROUTER_IP  -j logaccept
         iptables -A OUTPUT -d $TOWER_NETWORK -j logdrop
         # allow all outbound traffic
         iptables -A OUTPUT -j logaccept
