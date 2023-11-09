@@ -20,6 +20,7 @@ fsck_ext4 = Command('fsck.ext4')
 from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
+from towerlib.sshconf import TOWER_NETWORK_ONLINE, TOWER_NETWORK_OFFLINE
 
 logger = logging.getLogger('tower')
 
@@ -247,10 +248,14 @@ def insert_tower_env(boot_part, config):
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
 
 WAITING_MESSAGE = "TowserOS-Host installed in {0}\n"
-WAITING_MESSAGE += "- remove the boot device from the Thin Client \n"
+WAITING_MESSAGE += "- make sure the host and client are connected to the same switch and to the correct interface and network "
+WAITING_MESSAGE += f"({TOWER_NETWORK_OFFLINE} for offline host and {TOWER_NETWORK_ONLINE} for online host)\n"
+WAITING_MESSAGE += "- make sure the device for the root system file is plugged into the host computer.\n"
+WAITING_MESSAGE += "- remove the boot device from the Thin Client\n"
 WAITING_MESSAGE += "- insert it into the Host computer\n"
 WAITING_MESSAGE += "- turn it on the Host computer and wait for it to be discover by the Thin Client on the network.\n"
-WAITING_MESSAGE += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
+WAITING_MESSAGE += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. "
+WAITING_MESSAGE += "If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
 
 @clitask("Installing TowserOS-Host in {1}...", 
          timer_message=WAITING_MESSAGE, 

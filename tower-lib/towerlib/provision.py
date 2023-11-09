@@ -131,20 +131,20 @@ def save_host_config(config):
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args):
     image_path, boot_device, host_config, private_key_path = prepare_provision(args)
-    confirmation1 = Text(f"Are you sure you want to completely wipe {boot_device}?", style='red')
-    if args.no_confirm or Confirm.ask(confirmation1):
-        confirmation2 = Text(f"Please make sure you have plugged a hard drive device (USB 3 key or SD-Card) into the host and confirm that you want to completely wipe it.", style='red')
-        if args.no_confirm or Confirm.ask(confirmation2):
-            save_host_config(host_config)
-            del(host_config['PASSWORD'])
-            buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-            sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
-            sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
-            utils.menu.prepare_xfce_menu()
-            logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
-            logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
-            logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
-            logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+    confirm_message = f"Are you sure you want to completely wipe the boot device `{boot_device}` plugged into the Thin Client "
+    confirm_message += f"and the root device plugged into the host `{name}` and install TowerOS-Host on them?"
+    confirm_text = Text(confirm_message, style='red')
+    if args.no_confirm or Confirm.ask(confirm_text):
+        save_host_config(host_config)
+        del(host_config['PASSWORD'])
+        buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
+        sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
+        sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+        utils.menu.prepare_xfce_menu()
+        logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
+        logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
+        logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
+        logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
