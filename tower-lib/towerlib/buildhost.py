@@ -224,9 +224,10 @@ def copy_image_in_device(image_file, device):
         buf = StringIO()
         dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
     except ErrorReturnCode:
+        error_message = "Error copying image, please check the boot device integrity or try again with the flag `--zero-device`."
         logger.error(buf.getvalue())
-        logger.error("Error copying image, please check the boot device integrity or try again with the flag `--zero-device`.")
-        raise Exception("Error copying image")
+        logger.error(error_message)
+        raise Exception(error_message)
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     if not boot_part:
