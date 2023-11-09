@@ -128,6 +128,7 @@ EOF
 	sed -i "s/#PermitRootLogin prohibit-password/PermitRootLogin no/g" /etc/ssh/sshd_config
 	sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
 	sed -i "s/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/g" /etc/ssh/sshd_config
+	sed -i "s/AllowTcpForwarding no/#AllowTcpForwarding no/g" /etc/ssh/sshd_config
 	echo "rc_need=networking" >> /etc/conf.d/sshd
 }
 
