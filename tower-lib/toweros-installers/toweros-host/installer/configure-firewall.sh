@@ -54,10 +54,12 @@ iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j logaccept
 iptables -A TCP -p tcp -s $THIN_CLIENT_IP --dport 22 -j logaccept
 
 if [ "$HOSTNAME" == "router" ]; then
+    # allow tor proxy
+    iptables -A TCP -p tcp -s $TOWER_NETWORK --dport 9050 -j logaccept
     # enable ip forwarding
     iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
-    iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-    iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT
+    iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j logaccept
+    iptables -A FORWARD -i eth0 -o wlan0 -j logaccept
 else
     if [ "$ONLINE" == "true" ]; then
         # reject traffic from computers to thin client and other computers
