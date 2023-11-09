@@ -47,12 +47,6 @@ def find_host_image(builds_dir):
         logger.info(f"Using host image {rpi_image_path}")
     return rpi_image_path
 
-def find_readme():
-    readme_path = join_path(REPO_PATH, 'README.md')
-    if os.path.exists(readme_path):
-        return readme_path
-    raise Exception("README.md not found: " + readme_path)
-
 def check_abuild_key():
     abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
     abuild_conf = join_path(abuild_folder, 'abuild.conf')
@@ -75,14 +69,12 @@ def prepare_pip_packages():
         )
 
 def prepare_installer():
-    makedirs(wd('overlay/var/towercomputers/'))
+    makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
     copytree(join_path(INSTALLER_DIR, 'installer'), wd('overlay/var/towercomputers/installer'))
 
 def prepare_docs():
-    makedirs(wd('overlay/var/towercomputers/docs'))
-    readme_path = find_readme()
-    copyfile(readme_path, wd('overlay/var/towercomputers/docs'))
-    copyfile(join_path(REPO_PATH, 'docs', 'src', 'TowerOS Whitepaper.pdf'), wd('overlay/var/towercomputers/docs'))
+    makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
+    copytree(join_path(REPO_PATH, 'docs', 'src'), wd('overlay/var/towercomputers/docs'))
 
 def prepare_build(builds_dir):
     makedirs(wd('overlay/var/towercomputers/builds'))

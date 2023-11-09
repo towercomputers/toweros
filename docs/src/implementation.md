@@ -141,7 +141,7 @@ The steps to provision a host are as follows:
 
 1. Gereate a key pair.
 2. Generate the host configuration (`tower.env`) with the values provided on the command line or with those retrieved from the thin client
-3. Copy of the TowerOS thin client image onto the SD card and incclude the configuration file
+3. Copy of the TowerOS thin client image onto the SD card and include the configuration file
 4. Wait for the new host to be detected on the network after the user has inserted the SD card into the host device
 5. Update the `ssh` and `toweros` configuration files
 

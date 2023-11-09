@@ -2,8 +2,10 @@ import os
 import logging
 import sys
 from urllib.parse import urlparse
-import json
+import time
 
+from rich.prompt import Confirm
+from rich.text import Text
 from sh import ssh, scp, rm, Command, ErrorReturnCode
 
 from towerlib.utils import clitask
@@ -17,14 +19,13 @@ APK_REPOS_URL = [
     f"http://{APK_REPOS_HOST}/alpine/latest-stable/main",
     f"http://{APK_REPOS_HOST}/alpine/latest-stable/community",
 ]
-
 LOCAL_TUNNELING_PORT = 8666
 
-sprint = lambda str: print(str, end='', flush=True)
+sprint = lambda str: print(str.decode("utf-8", 'ignore') if isinstance(str, bytes) else str, end='', flush=True)
 
-def prepare_repositories_file(host, arch="armv7h"):
+def prepare_repositories_file(host):
     file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
-    # use temporary repositories as lock file
+    # use temporary file as lock file
     if os.path.exists(file_name):
         raise Exception(f"f{file_name} already exists! Is another install in progress? if not, delete this file and try again.")
     # generate temporary apk repositories 
@@ -32,68 +33,48 @@ def prepare_repositories_file(host, arch="armv7h"):
         for repo in APK_REPOS_URL:
             fp.write(f"{repo}\n")
     # copy apk repositories in offline host
-    scp(file_name, f"{host}:~/")
+    if host != 'thinclient':
+        scp(file_name, f"{host}:~/")
+        rm('-f', file_name)
+
+def offline_cmd(host, cmd):
+    if host == 'thinclient':
+        Command('sh')('-c', cmd)
+    else:
+        ssh(host, cmd)
 
 @clitask("Preparing installation...")
-def prepare_offline_host(host, arch="armv7h"):
+def prepare_offline_host(host):
     # prepare apk repositories in offline host
-    prepare_repositories_file(host, arch)
+    prepare_repositories_file(host)
     # add repo host in /etc/hosts
-    ssh(host, f"echo '127.0.0.1 {APK_REPOS_HOST}' | sudo tee -a /etc/hosts")
-    # add iptables rule to redirect https requests to port 4443
-    ssh(host, "sudo iptables -t nat -A OUTPUT -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 4443")
+    offline_cmd(host, 'sudo cp /etc/hosts /etc/hosts.bak')
+    offline_cmd(host, f"echo '127.0.0.1 {APK_REPOS_HOST}\n' | sudo tee /etc/hosts")
+    # add iptables rule to redirect http requests to port
+    tunnel_port = LOCAL_TUNNELING_PORT if host == 'thinclient' else 4443
+    offline_cmd(host, f"sudo iptables -t nat -A OUTPUT -p tcp -m tcp --dport 80 -j REDIRECT --to-ports {tunnel_port}")
 
-def cleanup_offline_host(host, arch="armv7h"):
-    # remove temporary apk repositories
-    file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
-    rm('-f', file_name)
-    ssh(host, f"rm -f ~/{os.path.basename(file_name)}")
-    # clean /etc/hosts
-    ssh(host, f"sudo sed -i '/{APK_REPOS_HOST}/d' /etc/hosts")
+def cleanup_offline_host(host):
+    # remove temporary apk repositories in thinclient
+    file_name = f'~/repositories.offline.{host}'
+    if host == 'thinclient':
+        file_name = os.path.expanduser(file_name)
+    offline_cmd(host, f"rm -f {file_name}")
+    # restore /etc/hosts
+    offline_cmd(host, "sudo mv /etc/hosts.bak /etc/hosts")
     # clean iptables
-    #ssh(host, "sudo iptables -t nat -D OUTPUT $(sudo iptables -nvL -t nat --line-numbers | grep -m 1 '443 redir ports 4443' | awk '{print $1}')")
-    ssh(host, "sudo iptables -t nat -F")
+    # sudo iptables -t nat -D OUTPUT $(sudo iptables -nvL -t nat --line-numbers | grep -m 1 '443 redir ports 4443' | awk '{print $1}'
+    offline_cmd(host, "sudo iptables -t nat -F")
 
-def kill_ssh(arch="armv7h"):
+def kill_ssh():
     killcmd = f"ps -ef | grep '{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     #print(killcmd)
     Command('sh')('-c', killcmd)
 
 @clitask("Cleaning up...")
-def cleanup(host, arch="armv7h"):
-    kill_ssh(arch)
-    cleanup_offline_host(host, arch)
-
-@clitask("Installing {1} in {0}...", task_parent=True)
-def install_in_offline_host(host, packages):
-    try:
-        # prepare offline host
-        prepare_offline_host(host)
-        # run ssh tunnel with online host in background
-        ssh(
-            '-L', f"{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80", '-N', '-v',
-            ROUTER_HOSTNAME,
-            _err_to_out=True, _out=logger.debug, _bg=True, _bg_exc=False
-        )
-        # run apk in offline host
-        logger.info(f"Running apk in {host}...")
-        error = False
-        try:
-            ssh(
-                '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
-                host,
-                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress add {' '.join(packages)}",
-                _err=sprint, _out=sprint, _in=sys.stdin,
-                _out_bufsize=0, _err_bufsize=0,
-            )  
-        except ErrorReturnCode:
-            error = True # error in remote host is already displayed
-        if not error:
-            for package in packages:
-                add_installed_package(host, package)
-    finally:
-        cleanup(host, "armv7h")
-
+def cleanup(host):
+    kill_ssh()
+    cleanup_offline_host(host)
 
 @clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_online_host(host, packages):
@@ -110,9 +91,65 @@ def install_in_online_host(host, packages):
     except ErrorReturnCode:
         pass # error in remote host is already displayed
 
+def open_router_tunnel():
+    # run ssh tunnel with router host in background
+    ssh(
+        '-L', f"{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80", '-N',
+        ROUTER_HOSTNAME,
+        _err_to_out=True, _out=logger.debug, _bg=True, _bg_exc=False
+    )
+    # wait for ssh tunnel to be ready
+    time.sleep(1)
+
+@clitask("Installing {1} in {0}...", task_parent=True)
+def install_in_offline_host(host, packages):
+    try:
+        prepare_offline_host(host)
+        open_router_tunnel()
+        logger.info(f"Running apk in {host}...")
+        error = False
+        try:
+            # open the second ssh tunnel with the offline host and run `apk add`
+            ssh(
+                '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
+                host,
+                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress add {' '.join(packages)}",
+                _err=sprint, _out=sprint, _in=sys.stdin,
+                _out_bufsize=0, _err_bufsize=0,
+            )  
+        except ErrorReturnCode:
+            error = True # error in remote host is already displayed
+        if not error:
+            for package in packages:
+                add_installed_package(host, package)
+    finally:
+        cleanup(host)
+
+@clitask("Installing {0} in Thin Client...", task_parent=True)
+def install_in_thinclient(packages):
+    try:
+        prepare_offline_host("thinclient")
+        open_router_tunnel()
+        logger.info(f"Running apk in thinclient...")
+        try:
+            repo_file = os.path.expanduser(f'~/repositories.offline.thinclient')
+            apk_cmd = f"sudo apk --repositories-file {repo_file} --progress add {' '.join(packages)}"
+            Command('sh')('-c',
+                apk_cmd,
+                _err_to_out=True, _out=sprint, _in=sys.stdin,
+                _out_bufsize=0, _err_bufsize=0,
+            )  
+        except ErrorReturnCode:
+            pass # error in remote host is already displayed
+    finally:
+        cleanup("thinclient")
 
 def install_packages(host, packages):
-    if is_online_host(host):
+    if host == 'thinclient':
+        confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
+        if Confirm.ask(confirmation):
+            install_in_thinclient(packages)
+    elif is_online_host(host):
         install_in_online_host(host, packages)
     else:
         install_in_offline_host(host, packages)

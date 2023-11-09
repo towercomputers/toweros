@@ -169,7 +169,9 @@ def check_args(args, parser_error):
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}")
     
-    if args.name[0] == sshconf.ROUTER_HOSTNAME:
+    if args.name[0] == "thinclient":
+        parser_error(message="You can't use `thinclient` as host name.")
+    elif args.name[0] == sshconf.ROUTER_HOSTNAME:
         if not args.wlan_ssid:
             parser_error(message="You must provide a wifi SSID for the router.")
         if not args.wlan_password:

@@ -14,7 +14,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "tower-lib @ git+https://github.com/towercomputers/toweros.git@monorepo#subdirectory=tower-lib",
+    "tower-lib @ git+https://github.com/towercomputers/toweros.git@v0.1.4#subdirectory=tower-lib",
 ]
 
 [tool.hatch.envs.default]
