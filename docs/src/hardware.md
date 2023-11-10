@@ -34,6 +34,7 @@ Using CM4s and the [DeskPi Super6C Board](https://deskpi.com/collections/deskpi-
 #### Requirements
 - Only the CM4 *Lite* is supported.
 - Only the CM4 Lite module used for the router must have on-board WiFi (the others may be entirely wireless).
+  - N.B. With the DeskPi, it's possible to disable wireless connectivity for each CM4 with a jumper.
 - CM4s must be booted from an SD card, which will hold the boot partition.
 - Accordingly, you must have an SD Card reader for the thin client.
 - CM4s must use an M.2 SSD for the root partition.
