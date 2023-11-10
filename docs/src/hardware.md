@@ -4,7 +4,7 @@ TowerOS is designed to run on a thin client device and several hosts connected _
 
 
 ## Thin Client Hardware
-The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from if you are using CM4s. (Raspberry Pi 4Bs may be booted from a second USB key, however.) The thin client should also have one or two RJ-45 ports, depending on the number of networks in use.
+The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from if you are using CM4s. (Raspberry Pi 4Bs may be booted from a second USB key, however.) The thin client should also have one or two RJ-45 ports, depending on the number of networks in use. Finally, a dedicated USB key for installing / upgrading the thin client (which will host the boot volume for the device).
 
 
 ## Networking Hardware
