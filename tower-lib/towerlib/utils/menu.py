@@ -61,6 +61,12 @@ def add_installed_package(host, package):
         save_installed_packages(installed_packages)
         copy_desktop_files(host, package)
 
+def restore_installed_packages():
+    installed_packages = get_installed_packages()
+    for host, packages in installed_packages.items():
+        for package, binaries in packages.items():
+            copy_desktop_files(host, package)
+
 @clitask("Updating xfce menu...")
 def prepare_xfce_menu():
     INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'toweros-installers', 'toweros-thinclient')
