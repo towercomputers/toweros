@@ -124,7 +124,7 @@ def save_config_file(config_path, config_str):
 
 def save_host_config(config):
     config_filename = f"{config['HOSTNAME']}-{datetime.now().strftime('%Y%m%d%H%M%S')}.env"
-    config_path = os.path.join(os.path.expanduser('~'), '.config', 'tower', config_filename)
+    config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config_filename)
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
     
