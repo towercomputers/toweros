@@ -137,13 +137,16 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
                 return get_next_host_ip(tower_network, first=first + 1)
     return f"{network}{first}"
 
-def try_to_update_known_hosts_until_success(ip):
+def try_to_update_known_hosts_until_success(name, ip):
     try:
         update_known_hosts(ip)
     except ErrorReturnCode:
         time.sleep(5)
         try_to_update_known_hosts_until_success(ip)
+    if not is_up(name):
+        time.sleep(5)
+        try_to_update_known_hosts_until_success(ip)
 
 @clitask("Waiting for host to be ready...")
-def wait_for_host_sshd(ip):
-    try_to_update_known_hosts_until_success(ip)
+def wait_for_host_sshd(name, ip):
+    try_to_update_known_hosts_until_success(name, ip)
