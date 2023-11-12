@@ -10,56 +10,37 @@ update_passord() {
 }
 
 initialize_disks() {
-    # zeroing hard drive
+    # zeroing root drive
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
     parted $TARGET_DRIVE mklabel gpt
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
-        parted $CRYPTKEY_DRIVE mklabel gpt
-    fi
+    # zeroing boot drive
+    dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
+    parted $CRYPTKEY_DRIVE mklabel gpt
 }
 
 prepare_boot_partition() {
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        # create boot partition (/dev/sda1)
-        parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
-        parted $CRYPTKEY_DRIVE set 1 esp on
-        # get partition name
-        BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
-    else
-        # create boot partition (/dev/sda1)
-        parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
-        parted $TARGET_DRIVE set 1 esp on
-        # get partition name
-        BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
-    fi
+    # create boot partition
+    parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
+    parted $CRYPTKEY_DRIVE set 1 esp on
+    # get partition name
+    BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
 }
 
 prepare_lvm_partition() {
     # create LVM partition (/dev/sda2)
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        parted $TARGET_DRIVE mkpart primary ext4 0% 100%
-        # get partition name
-        LVM_PARTITION=$(ls $TARGET_DRIVE*1)
-        # generate LUKS key
-        dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
-        chmod 0400 /crypto_keyfile.bin
-        # create LUKS partition
-        cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
-        cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
-        # initialize the LUKS partition
-        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
-        # create LVM physical volumes
-        vgcreate -ff -y vg0 /dev/mapper/lvmcrypt
-    else
-        parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
-        # get partition name
-        LVM_PARTITION=$(ls $TARGET_DRIVE*2)
-        # initialize the LVM partition
-        pvcreate -ff -y $LVM_PARTITION
-        # create LVM volume group
-        vgcreate -ff -y vg0 $LVM_PARTITION
-    fi
+    parted $TARGET_DRIVE mkpart primary ext4 0% 100%
+    # get partition name
+    LVM_PARTITION=$(ls $TARGET_DRIVE*1)
+    # generate LUKS key
+    dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
+    chmod 0400 /crypto_keyfile.bin
+    # create LUKS partition
+    cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
+    cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
+    # initialize the LUKS partition
+    cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
+    # create LVM physical volumes
+    vgcreate -ff -y vg0 /dev/mapper/lvmcrypt 
 }
 
 prepare_drive() {
@@ -89,9 +70,7 @@ prepare_drive() {
     # remove boot partition from fstab
     sed -i '/\/boot/d' /mnt/etc/fstab
      # copy LUKS key to the disk
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
-    fi
+    cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
 }
 
 prepare_home_directory() {
@@ -220,9 +199,7 @@ clone_live_system_to_disk() {
     mkdir -p /mnt/etc/mkinitfs/features.d
 
     features="ata base ide scsi usb virtio vfat ext4 nvme vmd lvm keymap"
-    if [ "$ENCRYPT_DISK" = "true" ]; then
-        features="$features cryptsetup cryptkey resume"
-    fi
+    features="$features cryptsetup cryptkey resume"
     echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 
     # apk reads config from target root so we need to copy the config
@@ -271,11 +248,9 @@ install_bootloader() {
     # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
     kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
     modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
-    
-    if [ "$ENCRYPT_DISK" = "true" ]; then
-        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
-        modules="$modules,cryptsetup,cryptkey"
-    fi
+    # add cryptsetup and cryptkey to kernel options
+    kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
+    modules="$modules,cryptsetup,cryptkey"
 
     # setup syslinux
     sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
@@ -335,7 +310,7 @@ ask_configuration() {
     # initialize coniguration variables:
     # ROOT_PASSWORD, USERNAME, PASSWORD, 
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
-    # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE, SECURE_BOOT
+    # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
     # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env

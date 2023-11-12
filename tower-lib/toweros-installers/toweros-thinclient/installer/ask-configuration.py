@@ -132,10 +132,6 @@ def get_user_information():
     
     return login, password_hash
 
-def get_disk_encryption():
-    print_title("Full disk encryption")
-    return Confirm.ask("Do you want to encrypt the disk with a keyfile stored in an external device ?")
-
 def get_target_drive():
     drive = select_value(
         disk_list(),
@@ -169,7 +165,7 @@ def get_cryptkey_drive(os_target):
     no_selected_drives.append(please_refresh)
     drive = select_value(
         no_selected_drives,
-        "Please select the drive where you want to put the disk encryption keyfile",
+        "Please select the external drive where you want to put the disk encryption keyfile",
         "Target keyfile drive",
         no_columns=True
     )
@@ -260,9 +256,7 @@ def ask_config():
     config = {}
     while not confirmed:
         config['TARGET_DRIVE'] = get_target_drive()
-        config['ENCRYPT_DISK'] = "true" if get_disk_encryption() else "false"
-        if config['ENCRYPT_DISK'] == "true":
-            config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'])
+        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'])
         config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
         config['LANG'] = get_lang()
         config['TIMEZONE'] = get_timezone()
