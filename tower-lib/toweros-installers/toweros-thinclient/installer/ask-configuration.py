@@ -107,39 +107,41 @@ def select_by_letter(title, ask1, ask2, values):
         return select_by_letter(title, ask1, ask2, values)
     return value
 
-def get_user_information():
-    print_title("Please enter the first user information")
-    login = ""
-    retry = 0
-    while re.match(r'^[a-zA-Z0-0_-]{3,32}$', login) is None:
-        if retry:
-            print_error("Incorrect login, please retry.")
-        login = Prompt.ask("Enter the username (between 3 and 32 alphanumerics characters):", default="tower")
-        retry += 1
-    password = ""
-    confirm_password = ""
-    retry = 0
-    while password == "" or password != confirm_password:
-        if retry:
-            print_error("Incorrect password, please retry.")
-        password = Prompt.ask("Enter the password", password=True)
-        confirm_password = Prompt.ask("Confirm the password", password=True)
-        retry += 1
-    
-    salt = b64encode(os.urandom(16)).decode('utf-8')
-    cmd = f"openssl passwd -6 -salt {salt} {password}"
-    password_hash = run_cmd(cmd.split(" ")).split("\n")[0]
-    
-    return login, password_hash
+def get_installation_type():
+    return select_value(
+        ['Install TowerOS-Thinclient', 'Update TowerOS-Thinclient'],
+        "Do you want to install a new system or upgrade an already installed system?",
+        "Select the installation type",
+        no_columns=True
+    ).split(" ")[0].lower()
 
-def get_target_drive():
+def get_target_drive(update=False):
+    install_title = "Please select the drive where you want to install TowerOS-Thinclient"
+    update_title = "Please select the drive where TowerOS-Thinclient is installed"
     drive = select_value(
         disk_list(),
-        "Please select the drive where you want to install TowerOS",
+        update_title if update else install_title,
         "Target drive",
         no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
+
+def get_cryptkey_drive(os_target, update=False):
+    no_selected_drives = disk_list(exclude=os_target)
+    please_refresh = '<-- Let me insert a drive and refresh the list!'
+    no_selected_drives.append(please_refresh)
+    install_title = "Please select the external drive where you want to put the disk encryption keyfile"
+    update_title = "Please select the external boot device containing the disk encryption keyfile"
+    drive = select_value(
+        no_selected_drives,
+        update_title if update else install_title,
+        "Target keyfile drive",
+        no_columns=True
+    )
+    if drive == please_refresh:
+        return get_cryptkey_drive(os_target)
+    else:
+        return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def check_secure_boot_status():
     sbctl_status = run_cmd(["sbctl", "status", "--json"], to_json=True)
@@ -158,21 +160,6 @@ def check_secure_boot_status():
         print_error("https://github.com/towercomputers/toweros/blob/master/docs/SecureBoot.md")
         return False
     return True
-
-def get_cryptkey_drive(os_target):
-    no_selected_drives = disk_list(exclude=os_target)
-    please_refresh = '<-- Let me insert a drive and refresh the list!'
-    no_selected_drives.append(please_refresh)
-    drive = select_value(
-        no_selected_drives,
-        "Please select the external drive where you want to put the disk encryption keyfile",
-        "Target keyfile drive",
-        no_columns=True
-    )
-    if drive == please_refresh:
-        return get_cryptkey_drive(os_target)
-    else:
-        return drive[drive.index('/dev/'):].split(" ")[0].strip()
     
 def get_secure_boot():
     print_title("Secure boot")
@@ -219,29 +206,56 @@ def get_startx_on_login():
     print_title("Start X on login")
     return Confirm.ask("Do you want to automatically start X on login ?")
 
+def get_user_information():
+    print_title("Please enter the first user information")
+    login = ""
+    retry = 0
+    while re.match(r'^[a-zA-Z0-0_-]{3,32}$', login) is None:
+        if retry:
+            print_error("Incorrect login, please retry.")
+        login = Prompt.ask("Enter the username (between 3 and 32 alphanumerics characters):", default="tower")
+        retry += 1
+    password = ""
+    confirm_password = ""
+    retry = 0
+    while password == "" or password != confirm_password:
+        if retry:
+            print_error("Incorrect password, please retry.")
+        password = Prompt.ask("Enter the password", password=True)
+        confirm_password = Prompt.ask("Confirm the password", password=True)
+        retry += 1
+    # Generate password hash
+    salt = b64encode(os.urandom(16)).decode('utf-8')
+    cmd = f"openssl passwd -6 -salt {salt} {password}"
+    password_hash = run_cmd(cmd.split(" ")).split("\n")[0]
+    return login, password_hash
+
 def print_value(label, value):
     rprint(Text.assemble((f"{label}: ", "bold"), value))
 
 def confirm_config(config):
     print_title("Please confirm the current configuration:")
+    print_value("Installation type", config['INSTALLATION_TYPE'])
     print_value("Target drive", config['TARGET_DRIVE'])
-    print_value("Full Disk Encryption", config['ENCRYPT_DISK'])
-    if config['ENCRYPT_DISK'] == "true":
-        print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
-    print_value("Secure Boot", config['SECURE_BOOT'])
-    print_value("Language", config['LANG'])
-    print_value("Timezone", config['TIMEZONE'])
-    print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
-    print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
-    print_value("Username", config['USERNAME'])
-    rprint("\n")
-    print_error(f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased.")
-    if config['ENCRYPT_DISK'] == "true":
-        print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
-        print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
-    if config['SECURE_BOOT'] == "true":
-        print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
-        print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
+    print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
+    if config['INSTALLATION_TYPE'] != 'update':
+        print_value("Secure Boot", config['SECURE_BOOT'])
+        print_value("Language", config['LANG'])
+        print_value("Timezone", config['TIMEZONE'])
+        print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
+        print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
+        print_value("Username", config['USERNAME'])
+        print_value("Start X on login", config['STARTX_ON_LOGIN'])
+        rprint("\n")
+        if config['SECURE_BOOT'] == "true":
+            print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
+            print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
+    target_warning = f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased."
+    if config['INSTALLATION_TYPE'] == 'update':
+        target_warning += " Only the /home directory will be kept, if you have data outside this directory please backup them before."
+    print_error(target_warning)
+    print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
+    print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def ask_config():
@@ -255,15 +269,18 @@ def ask_config():
     confirmed = False
     config = {}
     while not confirmed:
-        config['TARGET_DRIVE'] = get_target_drive()
-        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'])
-        config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
-        config['LANG'] = get_lang()
-        config['TIMEZONE'] = get_timezone()
-        config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
-        config['STARTX_ON_LOGIN'] = "true" if get_startx_on_login() else "false"
-        config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
-        config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']
+        config['INSTALLATION_TYPE'] = get_installation_type()
+        is_update = config['INSTALLATION_TYPE'] == 'update'
+        config['TARGET_DRIVE'] = get_target_drive(is_update)
+        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_update)
+        if not is_update:
+            config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
+            config['LANG'] = get_lang()
+            config['TIMEZONE'] = get_timezone()
+            config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
+            config['STARTX_ON_LOGIN'] = "true" if get_startx_on_login() else "false"
+            config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
+            config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']
         confirmed = confirm_config(config)
     return config
 
