@@ -156,7 +156,7 @@ def prepare_rpi_partitions(loop_dev):
 
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir, owner):
-    image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img')
+    image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
     tmp_image_path = os.path.join("/tmp", image_name)
     image_path = os.path.join(builds_dir, image_name)
     xz(
