@@ -2,7 +2,7 @@ import os
 import logging
 import glob
 
-from sh import shasum
+from sh import shasum, mkdir, contrib
 
 from towerlib.utils import network
 from towerlib.utils.decorators import clitask
@@ -35,7 +35,8 @@ def init_builds_dir(args_builds_dir):
             return builds_dir
     # if not exists, create it
     if not os.path.isdir(builds_dir):
-        os.makedirs(builds_dir)
+        with contrib.sudo(password="", _with=True):
+            mkdir('-p', builds_dir)
     return builds_dir
 
 def sha_sum(file_path):

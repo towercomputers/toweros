@@ -156,13 +156,16 @@ def prepare_rpi_partitions(loop_dev):
 
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir, owner):
-    image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz'))
+    image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img')
+    tmp_image_path = os.path.join("/tmp", image_name)
+    image_path = os.path.join(builds_dir, image_name)
     xz(
         '--compress', '--force', 
         '--threads', 0, '--memlimit-compress=90%', '--best',
 	    '--stdout', wd("toweros-host.img"),
-        _out=image_path
+        _out=tmp_image_path
     )
+    cp(tmp_image_path, image_path)
     chown(f"{owner}:{owner}", image_path)
     return image_path
 
