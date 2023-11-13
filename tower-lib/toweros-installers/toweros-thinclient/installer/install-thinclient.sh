@@ -104,7 +104,7 @@ create_root_disk() {
     # create swap volume
     lvcreate -y -L 8G vg0 -n swap
     # create home volume
-    lvcreate -y -L 8G vg0 -n home
+    lvcreate -y -L 20%FREE vg0 -n home
     # create root volume
     lvcreate -y -l 100%FREE vg0 -n root
     # set partitions names
