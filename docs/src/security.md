@@ -15,6 +15,11 @@
 In general, operating system configuration is outside the scope of TowerOS's responsibilities; TowerOS does attempt to be *secure by default*, however. Of course, the core architecture of TowerOS is designed to mitigate the severity of any compromise of a host. For information on how best to securing your thin client and hosts at the level of the operating system, please see this [Linux Hardening Guide](https://madaidans-insecurities.github.io/guides/linux-hardening.html).
 
 
+## Full-Disk Encryption
+
+TowerOS requires that the *root device* used by the thin client and hosts be encrypted. The decryption keys for these drives are stored on the *boot device*, which is itself a removable drive: the thin client's boot device should be a USB key; the host's may be either an SD card or a USB key (when using Compute Modules, they must be SD cards). It is therefore best practice to remove these drives from the relevant devices as soon as they have been booted up, and especially before they are left unattended.
+
+
 ## Trusted Computing Base
 
 - TowerOS Tooling
