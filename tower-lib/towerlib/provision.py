@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh
+from sh import ssh_keygen, xz, ssh, cp
 from rich.prompt import Confirm
 from rich.text import Text
 
@@ -86,10 +86,12 @@ def prepare_host_config(args):
         'ROUTER_IP': sshconf.ROUTER_IP
     }
 
-@utils.clitask("Decompressing {0}...")
+@utils.clitask("Decompressing {0}...", sudo=True)
 def decompress_image(image_path):
     out_file = image_path.replace('.xz', '')
-    xz('--stdout', '-d', image_path, _out=out_file)
+    tmp_file = os.path.join('/tmp', os.path.basename(out_file))
+    xz('--stdout', '-d', image_path, _out=tmp_file)
+    cp(tmp_file, out_file)
     return out_file
 
 def prepare_host_image(image_arg):
