@@ -45,7 +45,7 @@ prepare_lvm_partition() {
 
 check_and_copy_key_from_boot_disk() {
     BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
-    if [ -z "$BOOT_PARTITION" ]; then
+    if [ -b "$BOOT_PARTITION" ]; then
         echo "Boot partition not found"
         exit 1
     fi
@@ -56,7 +56,7 @@ check_and_copy_key_from_boot_disk() {
         exit 1
     fi
     LVM_PARTITION=$(ls $TARGET_DRIVE*1)
-    if [ -z "$LVM_PARTITION" ]; then
+    if [ -b "$LVM_PARTITION" ]; then
         echo "Target partition not found"
         exit 1
     fi
