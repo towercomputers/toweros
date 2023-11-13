@@ -108,11 +108,11 @@ install_tower_tools() {
     cp -r /var/towercomputers/docs $TOWER_FOLDER
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
-    cp /var/towercomputers/builds $TOWER_FOLDER
+    cp -r /var/towercomputers/builds $TOWER_FOLDER
 
     # install tower with pip
-    pip install --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
-    pip install --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
+    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
+    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
 }
 
 update_live_system() {
@@ -308,6 +308,7 @@ install_thinclient() {
 unmount_and_reboot() {
     rm -f /mnt/crypto_keyfile.bin
     umount /mnt/boot
+    umount /mnt/home
     umount /mnt
     reboot
 }
