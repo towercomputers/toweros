@@ -45,7 +45,7 @@ prepare_lvm_partition() {
 
 check_and_copy_key_from_boot_disk() {
     BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
-    if [ -b "$BOOT_PARTITION" ]; then
+    if ! [ -b "$BOOT_PARTITION" ]; then
         echo "Boot partition not found"
         exit 1
     fi
@@ -56,7 +56,7 @@ check_and_copy_key_from_boot_disk() {
         exit 1
     fi
     LVM_PARTITION=$(ls $TARGET_DRIVE*1)
-    if [ -b "$LVM_PARTITION" ]; then
+    if ! [ -b "$LVM_PARTITION" ]; then
         echo "Target partition not found"
         exit 1
     fi
@@ -97,22 +97,36 @@ set_config_from_root_partition() {
     umount /ROOT
 }
 
-prepare_drive() {
-    if [ "$INSTALLATION_TYPE" == "install" ]; then
-        initialize_disks
-        prepare_boot_partition
-        prepare_lvm_partition
-        # create swap volume
-        lvcreate -y -L 8G vg0 -n swap
-        # create home volume
-        lvcreate -y -L 8G vg0 -n home
-        # create root volume
-        lvcreate -y -l 100%FREE vg0 -n root
-    fi
+create_root_disk() {
+    initialize_disks
+    prepare_boot_partition
+    prepare_lvm_partition
+    # create swap volume
+    lvcreate -y -L 8G vg0 -n swap
+    # create home volume
+    lvcreate -y -L 8G vg0 -n home
+    # create root volume
+    lvcreate -y -l 100%FREE vg0 -n root
     # set partitions names
     SWAP_PARTITION="/dev/vg0/swap"
     HOME_PARTITION="/dev/vg0/home"
     ROOT_PARTITION="/dev/vg0/root"
+}
+
+activate_root_disk() {
+    # initialize the LUKS partition
+    cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
+    vgchange -ay vg0
+    # set partitions names
+    SWAP_PARTITION="/dev/vg0/swap"
+    HOME_PARTITION="/dev/vg0/home"
+    ROOT_PARTITION="/dev/vg0/root"
+}
+
+prepare_drive() {
+    if [ "$INSTALLATION_TYPE" == "install" ]; then
+        create_root_disk
+    fi
     # format partitions
     mkfs.fat -F 32 "$BOOT_PARTITION"
     mkswap "$SWAP_PARTITION"
@@ -385,8 +399,7 @@ set_configuration() {
     source /root/tower.env
     if [ "$INSTALLATION_TYPE" == "update" ]; then
         check_and_copy_key_from_boot_disk
-        # initialize the LUKS partition
-        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
+        activate_root_disk
         set_config_from_root_partition
     fi
 }
