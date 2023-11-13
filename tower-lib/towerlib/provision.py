@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh
+from sh import ssh_keygen, xz, ssh, cp
 from rich.prompt import Confirm
 from rich.text import Text
 
@@ -86,10 +86,12 @@ def prepare_host_config(args):
         'ROUTER_IP': sshconf.ROUTER_IP
     }
 
-@utils.clitask("Decompressing {0}...")
+@utils.clitask("Decompressing {0}...", sudo=True)
 def decompress_image(image_path):
     out_file = image_path.replace('.xz', '')
-    xz('--stdout', '-d', image_path, _out=out_file)
+    tmp_file = os.path.join('/tmp', os.path.basename(out_file))
+    xz('--stdout', '-d', image_path, _out=tmp_file)
+    cp(tmp_file, out_file)
     return out_file
 
 def prepare_host_image(image_arg):
@@ -145,6 +147,7 @@ def provision(name, args):
         logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
         logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
         logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+        logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

@@ -10,88 +10,148 @@ update_passord() {
 }
 
 initialize_disks() {
-    # zeroing hard drive
+    # zeroing root drive
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
     parted $TARGET_DRIVE mklabel gpt
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
-        parted $CRYPTKEY_DRIVE mklabel gpt
-    fi
+    # zeroing boot drive
+    dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
+    parted $CRYPTKEY_DRIVE mklabel gpt
 }
 
 prepare_boot_partition() {
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        # create boot partition (/dev/sda1)
-        parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
-        parted $CRYPTKEY_DRIVE set 1 esp on
-        # get partition name
-        BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
-    else
-        # create boot partition (/dev/sda1)
-        parted $TARGET_DRIVE mkpart primary fat32 0% 1GB
-        parted $TARGET_DRIVE set 1 esp on
-        # get partition name
-        BOOT_PARTITION=$(ls $TARGET_DRIVE*1)
-    fi
+    # create boot partition
+    parted $CRYPTKEY_DRIVE mkpart primary fat32 0% 100%
+    parted $CRYPTKEY_DRIVE set 1 esp on
+    # get partition name
+    BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
 }
 
 prepare_lvm_partition() {
     # create LVM partition (/dev/sda2)
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        parted $TARGET_DRIVE mkpart primary ext4 0% 100%
-        # get partition name
-        LVM_PARTITION=$(ls $TARGET_DRIVE*1)
-        # generate LUKS key
-        dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
-        chmod 0400 /crypto_keyfile.bin
-        # create LUKS partition
-        cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
-        cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
-        # initialize the LUKS partition
-        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
-        # create LVM physical volumes
-        vgcreate -ff -y vg0 /dev/mapper/lvmcrypt
-    else
-        parted $TARGET_DRIVE mkpart primary ext4 1GB 100%
-        # get partition name
-        LVM_PARTITION=$(ls $TARGET_DRIVE*2)
-        # initialize the LVM partition
-        pvcreate -ff -y $LVM_PARTITION
-        # create LVM volume group
-        vgcreate -ff -y vg0 $LVM_PARTITION
-    fi
+    parted $TARGET_DRIVE mkpart primary ext4 0% 100%
+    # get partition name
+    LVM_PARTITION=$(ls $TARGET_DRIVE*1)
+    # generate LUKS key
+    dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
+    chmod 0400 /crypto_keyfile.bin
+    # create LUKS partition
+    cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
+    cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
+    # initialize the LUKS partition
+    cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
+    # create LVM physical volumes
+    vgcreate -ff -y vg0 /dev/mapper/lvmcrypt 
 }
 
-prepare_drive() {
+check_and_copy_key_from_boot_disk() {
+    BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
+    if ! [ -b "$BOOT_PARTITION" ]; then
+        echo "Boot partition not found"
+        exit 1
+    fi
+    mkdir -p /BOOTKEY
+    mount "$BOOT_PARTITION" /BOOTKEY
+    if ! [ -f "/BOOTKEY/crypto_keyfile.bin" ]; then
+        echo "Key file not found in boot partition"
+        exit 1
+    fi
+    LVM_PARTITION=$(ls $TARGET_DRIVE*1)
+    if ! [ -b "$LVM_PARTITION" ]; then
+        echo "Target partition not found"
+        exit 1
+    fi
+    key_is_ok=$(sudo cryptsetup luksOpen --key-file /BOOTKEY/crypto_keyfile.bin --test-passphrase $LVM_PARTITION && echo "OK" || echo "NOK")
+    if [ "$key_is_ok" == "NOK" ]; then
+        echo "Key file is not valid"
+        exit 1
+    fi
+    cp /BOOTKEY/crypto_keyfile.bin /crypto_keyfile.bin
+    chmod 0400 /crypto_keyfile.bin
+    umount /BOOTKEY
+}
+
+set_config_from_root_partition() {
+    mkdir -p /ROOT
+    mount -t ext4 "$ROOT_PARTITION" /ROOT
+    # set username
+    USERNAME=$(cat /ROOT/etc/sudoers.d/01_tower_nopasswd | awk '{print $1}')
+    # set user password hash
+    PASSWORD_HASH=$(cat /ROOT/etc/shadow | grep $USERNAME | cut -d ':' -f 2)
+    # set root password hash
+    ROOT_PASSWORD_HASH=$(cat /ROOT/etc/shadow | grep root | cut -d ':' -f 2)
+    # set keyboard layout and variant
+    KEYBOARD_LAYOUT=$(cat /ROOT/etc/vconsole.conf | grep XKBLAYOUT | cut -d '=' -f 2)
+    KEYBOARD_VARIANT=$(cat /ROOT/etc/vconsole.conf | grep XKBVARIANT | cut -d '=' -f 2)
+    # set timezone
+    region=$(ls -al /ROOT/etc/localtime | cut -d '>' -f 2 | cut -d '/' -f 4)
+    zone=$(ls -al /ROOT/etc/localtime | cut -d '>' -f 2 | cut -d '/' -f 5)
+    TIMEZONE="$region/$zone"
+    # set secure boot
+    if [ -d /ROOT/mnt/usr/share/secureboot ]; then
+        SECURE_BOOT="true"
+    else
+        SECURE_BOOT="false"
+    fi
+    # set startx on login
+    STARTX_ON_LOGIN="false" # in any case, already present in /home if needed
+    umount /ROOT
+}
+
+create_root_disk() {
     initialize_disks
     prepare_boot_partition
-    prepare_lvm_partition    
+    prepare_lvm_partition
     # create swap volume
     lvcreate -y -L 8G vg0 -n swap
+    # create home volume
+    lvcreate -y -L 20%FREE vg0 -n home
     # create root volume
     lvcreate -y -l 100%FREE vg0 -n root
     # set partitions names
     SWAP_PARTITION="/dev/vg0/swap"
+    HOME_PARTITION="/dev/vg0/home"
     ROOT_PARTITION="/dev/vg0/root"
+}
+
+activate_root_disk() {
+    # initialize the LUKS partition
+    cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
+    vgchange -ay vg0
+    # set partitions names
+    SWAP_PARTITION="/dev/vg0/swap"
+    HOME_PARTITION="/dev/vg0/home"
+    ROOT_PARTITION="/dev/vg0/root"
+}
+
+prepare_drive() {
+    if [ "$INSTALLATION_TYPE" == "install" ]; then
+        create_root_disk
+    fi
     # format partitions
     mkfs.fat -F 32 "$BOOT_PARTITION"
     mkswap "$SWAP_PARTITION"
+    # don't format home partition if we are updating the system
+    if [ "$INSTALLATION_TYPE" == "install" ]; then
+        mkfs.ext4 -F "$HOME_PARTITION"
+    fi
     mkfs.ext4 -F "$ROOT_PARTITION"
     # mount partitions
     mkdir -p /mnt
     mount -t ext4 "$ROOT_PARTITION" /mnt
     mkdir -p /mnt/boot
     mount "$BOOT_PARTITION" /mnt/boot
+    mkdir -p /mnt/home
+    mount "$HOME_PARTITION" /mnt/home
     swapon "$SWAP_PARTITION"
     # update fstab
     mkdir -p /mnt/etc/
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
     # remove boot partition from fstab
     sed -i '/\/boot/d' /mnt/etc/fstab
-     # copy LUKS key to the disk
-    if [ "$ENCRYPT_DISK" == "true" ]; then
-        cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
-    fi
+    # copy LUKS key to the disk
+    cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
+    # copy LUKS key to the boot disk
+    cp /crypto_keyfile.bin /mnt/boot/crypto_keyfile.bin
 }
 
 prepare_home_directory() {
@@ -108,26 +168,27 @@ prepare_home_directory() {
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-
-    # put documentation and install-dev.sh in user's home
-    cp -r /var/towercomputers/docs /home/$USERNAME/
-    cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
-    # put toweros wheel in user's tower cache dir
-    mkdir -p /home/$USERNAME/.cache/tower/builds
-    cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
-
-    # install tower with pip
-    mv /var/cache/pip-packages "/home/$USERNAME/"
-    chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
-    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-lib
-    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" --no-deps tower-cli
-    echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
-
+    # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
         echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
     fi
+}
+
+install_tower_tools() {
+    TOWER_FOLDER=/mnt/var/towercomputers
+    mkdir -p $TOWER_FOLDER
+    # put documentation and install-dev.sh in Tower folder
+    cp -r /var/towercomputers/docs $TOWER_FOLDER
+    ln -s /var/towercomputers/docs /home/$USERNAME/docs
+    cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
+    # put toweros builds in Tower folder
+    cp -r /var/towercomputers/builds $TOWER_FOLDER
+
+    # install tower with pip
+    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
+    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
 }
 
 update_live_system() {
@@ -220,9 +281,7 @@ clone_live_system_to_disk() {
     mkdir -p /mnt/etc/mkinitfs/features.d
 
     features="ata base ide scsi usb virtio vfat ext4 nvme vmd lvm keymap"
-    if [ "$ENCRYPT_DISK" = "true" ]; then
-        features="$features cryptsetup cryptkey resume"
-    fi
+    features="$features cryptsetup cryptkey resume"
     echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 
     # apk reads config from target root so we need to copy the config
@@ -263,7 +322,7 @@ EOF
     rm /mnt/usr/share/applications/xfce4-mail-reader.desktop
 
     # copy user's home to the new system
-    cp -r "/home/$USERNAME" "/mnt/home/"
+    cp -rf "/home/$USERNAME" "/mnt/home/"
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
@@ -271,11 +330,9 @@ install_bootloader() {
     # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
     kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
     modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
-    
-    if [ "$ENCRYPT_DISK" = "true" ]; then
-        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
-        modules="$modules,cryptsetup,cryptkey"
-    fi
+    # add cryptsetup and cryptkey to kernel options
+    kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
+    modules="$modules,cryptsetup,cryptkey"
 
     # setup syslinux
     sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
@@ -300,7 +357,7 @@ install_bootloader() {
 }
 
 install_secure_boot() {
-    if [ "$SECURE_DISK" = "true" ]; then
+    if [ "$SECURE_BOOT" = "true" ]; then
         sbctl create-keys
         cp /mnt/boot/EFI/boot/bootx64.efi /mnt/boot/EFI/boot/bootx64.efi.unsigned
         sbctl sign /mnt/boot/EFI/boot/bootx64.efi
@@ -318,6 +375,7 @@ install_thinclient() {
     
     prepare_drive
     update_live_system
+    install_tower_tools
     clone_live_system_to_disk
     install_bootloader
     install_secure_boot
@@ -326,21 +384,27 @@ install_thinclient() {
 unmount_and_reboot() {
     rm -f /mnt/crypto_keyfile.bin
     umount /mnt/boot
+    umount /mnt/home
     umount /mnt
     reboot
 }
 
-ask_configuration() {
+set_configuration() {
     SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
     # initialize coniguration variables:
-    # ROOT_PASSWORD, USERNAME, PASSWORD, 
-    # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
-    # TARGET_DRIVE, ENCRYPT_DISK, CRYPTKEY_DRIVE, SECURE_BOOT
+    # INSTALLATION_TYPE, ROOT_PASSWORD_HASH, USERNAME, PASSWORD_HASH,
+    # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
+    # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
     # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
+    if [ "$INSTALLATION_TYPE" == "update" ]; then
+        check_and_copy_key_from_boot_disk
+        activate_root_disk
+        set_config_from_root_partition
+    fi
 }
 
-ask_configuration
+set_configuration
 install_thinclient
 unmount_and_reboot

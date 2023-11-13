@@ -33,7 +33,7 @@ To connect the thin client to the Internet you must:
 Configure `git`, download Github repository in `~/towercomputers/toweros` and install `hatch` with:
 
 ```
-[thinclient]$ ~/install-dev.sh <git-name> <git-email> <git-private-key-path>
+[thinclient]$ /var/towercomputers/install-dev.sh <git-name> <git-email> <git-private-key-path>
 ```
 
 ### Use `tower-cli` with `hatch`

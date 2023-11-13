@@ -124,9 +124,9 @@ Note: A TowerOS image for the thin client is placed in the `~/.cache/tower/build
 
 ## System Configuration
 
-A TowerOS system uses a single configuration file in the same format as an SSH config file: `~/.ssh/tower.conf`. This file, referenced in `~/.ssh/config`, is used both by `toweros` to maintain the list of hosts and by `ssh` to access hosts directly with `[thinclient]$ ssh <host>`. The script `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
+A TowerOS system uses a single configuration file in the same format as an SSH config file: `~/.local/tower/config`. This file, referenced in `~/.ssh/config`, is used both by `toweros` to maintain the list of hosts and by `ssh` to access hosts directly with `[thinclient]$ ssh <host>`. The script `sshconf.py` is responsible for maintaining this file and generally anything that requires manipulation of something in the `~./ssh` folder. Notably:
 
-1. discovering the IP of a newly installed host and updating `tower.conf` accordingly
+1. discovering the IP of a newly installed host and updating `~/.local/tower/config` accordingly
 2. updating `~/.ssh/know_hosts`
 3. checking the status of a host and if it is online
 

@@ -8,4 +8,7 @@ else
     echo "Please see files in ~/docs/ to know how to get started with TowerOS-ThinClient." >> /etc/issue
     echo "You can use the \`bat\` tool to view markdown files; For example \`bat ~/docs/usage.md\`." >> /etc/issue
     echo "" >> /etc/issue
+    
+    echo "WARNING: For security reasons, make sure to remove the external device containing the boot partition." >> /etc/issue
+    echo "" >> /etc/issue
 fi

@@ -142,10 +142,10 @@ def try_to_update_known_hosts_until_success(name, ip):
         update_known_hosts(ip)
     except ErrorReturnCode:
         time.sleep(5)
-        try_to_update_known_hosts_until_success(ip)
+        try_to_update_known_hosts_until_success(name, ip)
     if not is_up(name):
         time.sleep(5)
-        try_to_update_known_hosts_until_success(ip)
+        try_to_update_known_hosts_until_success(name, ip)
 
 @clitask("Waiting for host to be ready...")
 def wait_for_host_sshd(name, ip):
