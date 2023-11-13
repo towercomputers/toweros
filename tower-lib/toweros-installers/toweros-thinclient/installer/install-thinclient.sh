@@ -181,6 +181,7 @@ install_tower_tools() {
     mkdir -p $TOWER_FOLDER
     # put documentation and install-dev.sh in Tower folder
     cp -r /var/towercomputers/docs $TOWER_FOLDER
+    ln -s /var/towercomputers/docs /home/$USERNAME/docs
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
     cp -r /var/towercomputers/builds $TOWER_FOLDER
