@@ -75,8 +75,10 @@ prepare_drive() {
     sh $SCRIPT_DIR/genfstab.sh /mnt > /mnt/etc/fstab
     # remove boot partition from fstab
     sed -i '/\/boot/d' /mnt/etc/fstab
-     # copy LUKS key to the disk
+    # copy LUKS key to the disk
     cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
+    # copy LUKS key to the boot disk
+    cp /crypto_keyfile.bin /mnt/boot/crypto_keyfile.bin
 }
 
 prepare_home_directory() {
