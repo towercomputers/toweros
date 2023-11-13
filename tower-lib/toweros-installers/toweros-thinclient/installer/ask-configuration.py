@@ -213,7 +213,7 @@ def get_user_information():
     while re.match(r'^[a-zA-Z0-0_-]{3,32}$', login) is None:
         if retry:
             print_error("Incorrect login, please retry.")
-        login = Prompt.ask("Enter the username (between 3 and 32 alphanumerics characters):", default="tower")
+        login = Prompt.ask("Enter the username (between 3 and 32 alphanumeric characters):", default="tower")
         retry += 1
     password = ""
     confirm_password = ""
