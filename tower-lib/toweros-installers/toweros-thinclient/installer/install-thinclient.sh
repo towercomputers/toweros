@@ -43,16 +43,72 @@ prepare_lvm_partition() {
     vgcreate -ff -y vg0 /dev/mapper/lvmcrypt 
 }
 
+check_and_copy_key_from_boot_disk() {
+    BOOT_PARTITION=$(ls $CRYPTKEY_DRIVE*1)
+    if [ -z "$BOOT_PARTITION" ]; then
+        echo "Boot partition not found"
+        exit 1
+    fi
+    mkdir -p /BOOTKEY
+    mount "$BOOT_PARTITION" /BOOTKEY
+    if ! [ -f "/BOOTKEY/crypto_keyfile.bin" ]; then
+        echo "Key file not found in boot partition"
+        exit 1
+    fi
+    LVM_PARTITION=$(ls $TARGET_DRIVE*1)
+    if [ -z "$LVM_PARTITION" ]; then
+        echo "Target partition not found"
+        exit 1
+    fi
+    key_is_ok=$(sudo cryptsetup luksOpen --key-file /BOOTKEY/crypto_keyfile.bin --test-passphrase $LVM_PARTITION && echo "OK" || echo "NOK")
+    if [ "$key_is_ok" == "NOK" ]; then
+        echo "Key file is not valid"
+        exit 1
+    fi
+    cp /BOOTKEY/crypto_keyfile.bin /crypto_keyfile.bin
+    chmod 0400 /crypto_keyfile.bin
+    umount /BOOTKEY
+}
+
+set_config_from_root_partition() {
+    mkdir -p /ROOT
+    mount -t ext4 "$ROOT_PARTITION" /ROOT
+    # set username
+    USERNAME=$(cat /ROOT/etc/sudoers.d/01_tower_nopasswd | awk '{print $1}')
+    # set user password hash
+    PASSWORD_HASH=$(cat /ROOT/etc/shadow | grep $USERNAME | cut -d ':' -f 2)
+    # set root password hash
+    ROOT_PASSWORD_HASH=$(cat /ROOT/etc/shadow | grep root | cut -d ':' -f 2)
+    # set keyboard layout and variant
+    KEYBOARD_LAYOUT=$(cat /ROOT/etc/vconsole.conf | grep XKBLAYOUT | cut -d '=' -f 2)
+    KEYBOARD_VARIANT=$(cat /ROOT/etc/vconsole.conf | grep XKBVARIANT | cut -d '=' -f 2)
+    # set timezone
+    region=$(ls -al /ROOT/etc/localtime | cut -d '>' -f 2 | cut -d '/' -f 4)
+    zone=$(ls -al /ROOT/etc/localtime | cut -d '>' -f 2 | cut -d '/' -f 5)
+    TIMEZONE="$region/$zone"
+    # set secure boot
+    if [ -d /ROOT/mnt/usr/share/secureboot ]; then
+        SECURE_BOOT="true"
+    else
+        SECURE_BOOT="false"
+    fi
+    # set startx on login
+    STARTX_ON_LOGIN="false" # in any case, already present in /home if needed
+    umount /ROOT
+}
+
 prepare_drive() {
-    initialize_disks
-    prepare_boot_partition
-    prepare_lvm_partition    
-    # create swap volume
-    lvcreate -y -L 8G vg0 -n swap
-    # create home volume
-    lvcreate -y -L 8G vg0 -n home
-    # create root volume
-    lvcreate -y -l 100%FREE vg0 -n root
+    if [ "$INSTALLATION_TYPE" == "install" ]; then
+        initialize_disks
+        prepare_boot_partition
+        prepare_lvm_partition
+        # create swap volume
+        lvcreate -y -L 8G vg0 -n swap
+        # create home volume
+        lvcreate -y -L 8G vg0 -n home
+        # create root volume
+        lvcreate -y -l 100%FREE vg0 -n root
+    fi
     # set partitions names
     SWAP_PARTITION="/dev/vg0/swap"
     HOME_PARTITION="/dev/vg0/home"
@@ -60,7 +116,10 @@ prepare_drive() {
     # format partitions
     mkfs.fat -F 32 "$BOOT_PARTITION"
     mkswap "$SWAP_PARTITION"
-    mkfs.ext4 -F "$HOME_PARTITION"
+    # don't format home partition if we are updating the system
+    if [ "$INSTALLATION_TYPE" == "install" ]; then
+        mkfs.ext4 -F "$HOME_PARTITION"
+    fi
     mkfs.ext4 -F "$ROOT_PARTITION"
     # mount partitions
     mkdir -p /mnt
@@ -248,7 +307,7 @@ EOF
     rm /mnt/usr/share/applications/xfce4-mail-reader.desktop
 
     # copy user's home to the new system
-    cp -r "/home/$USERNAME" "/mnt/home/"
+    cp -rf "/home/$USERNAME" "/mnt/home/"
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
@@ -283,7 +342,7 @@ install_bootloader() {
 }
 
 install_secure_boot() {
-    if [ "$SECURE_DISK" = "true" ]; then
+    if [ "$SECURE_BOOT" = "true" ]; then
         sbctl create-keys
         cp /mnt/boot/EFI/boot/bootx64.efi /mnt/boot/EFI/boot/bootx64.efi.unsigned
         sbctl sign /mnt/boot/EFI/boot/bootx64.efi
@@ -315,17 +374,23 @@ unmount_and_reboot() {
     reboot
 }
 
-ask_configuration() {
+set_configuration() {
     SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
     # initialize coniguration variables:
-    # INSTALLATION_TYPE, ROOT_PASSWORD, USERNAME, PASSWORD,
+    # INSTALLATION_TYPE, ROOT_PASSWORD_HASH, USERNAME, PASSWORD_HASH,
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
     # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
+    if [ "$INSTALLATION_TYPE" == "update" ]; then
+        check_and_copy_key_from_boot_disk
+        # initialize the LUKS partition
+        cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
+        set_config_from_root_partition
+    fi
 }
 
-ask_configuration
+set_configuration
 install_thinclient
 unmount_and_reboot
