@@ -147,6 +147,7 @@ def provision(name, args):
         logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
         logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
         logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+        logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
