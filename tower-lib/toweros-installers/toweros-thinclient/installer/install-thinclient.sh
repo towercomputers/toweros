@@ -49,20 +49,26 @@ prepare_drive() {
     prepare_lvm_partition    
     # create swap volume
     lvcreate -y -L 8G vg0 -n swap
+    # create home volume
+    lvcreate -y -L 8G vg0 -n home
     # create root volume
     lvcreate -y -l 100%FREE vg0 -n root
     # set partitions names
     SWAP_PARTITION="/dev/vg0/swap"
+    HOME_PARTITION="/dev/vg0/home"
     ROOT_PARTITION="/dev/vg0/root"
     # format partitions
     mkfs.fat -F 32 "$BOOT_PARTITION"
     mkswap "$SWAP_PARTITION"
+    mkfs.ext4 -F "$HOME_PARTITION"
     mkfs.ext4 -F "$ROOT_PARTITION"
     # mount partitions
     mkdir -p /mnt
     mount -t ext4 "$ROOT_PARTITION" /mnt
     mkdir -p /mnt/boot
     mount "$BOOT_PARTITION" /mnt/boot
+    mkdir -p /mnt/home
+    mount "$HOME_PARTITION" /mnt/home
     swapon "$SWAP_PARTITION"
     # update fstab
     mkdir -p /mnt/etc/
@@ -87,26 +93,26 @@ prepare_home_directory() {
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
-
-    # put documentation and install-dev.sh in user's home
-    cp -r /var/towercomputers/docs /home/$USERNAME/
-    cp $SCRIPT_DIR/install-dev.sh /home/$USERNAME/
-    # put toweros wheel in user's tower cache dir
-    mkdir -p /home/$USERNAME/.cache/tower/builds
-    cp /var/towercomputers/builds/* /home/$USERNAME/.cache/tower/builds/
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
-
-    # install tower with pip
-    mv /var/cache/pip-packages "/home/$USERNAME/"
-    chown -R "$USERNAME:$USERNAME" "/home/$USERNAME/"
-    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" tower-lib
-    runuser -u $USERNAME -- pip install --no-index --no-warn-script-location --find-links="/home/$USERNAME/pip-packages" --no-deps tower-cli
-    echo 'export PATH=~/.local/bin:$PATH' > /home/$USERNAME/.profile
-
+    # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
         echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
     fi
+}
+
+install_tower_tools() {
+    TOWER_FOLDER=/mnt/var/towercomputers
+    mkdir -p $TOWER_FOLDER
+    # put documentation and install-dev.sh in Tower folder
+    cp -r /var/towercomputers/docs $TOWER_FOLDER
+    cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
+    # put toweros builds in Tower folder
+    cp /var/towercomputers/builds $TOWER_FOLDER
+
+    # install tower with pip
+    pip install --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
+    pip install --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
 }
 
 update_live_system() {
@@ -293,6 +299,7 @@ install_thinclient() {
     
     prepare_drive
     update_live_system
+    install_tower_tools
     clone_live_system_to_disk
     install_bootloader
     install_secure_boot
@@ -308,8 +315,8 @@ unmount_and_reboot() {
 ask_configuration() {
     SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
     # initialize coniguration variables:
-    # ROOT_PASSWORD, USERNAME, PASSWORD, 
-    # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
+    # INSTALLATION_TYPE, ROOT_PASSWORD, USERNAME, PASSWORD,
+    # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
     # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py

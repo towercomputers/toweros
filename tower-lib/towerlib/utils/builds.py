@@ -22,7 +22,7 @@ REQUIRED_BUILDS = {
 
 def init_builds_dir(args_builds_dir):
     builds_dir = args_builds_dir
-    # if not provided check if builds is in ./ or in ~/.cache/tower/
+    # if not provided check if builds is in ./ or in /var/towercomputers
     if not builds_dir:
         builds_dir = os.path.join(os.getcwd(), 'dist')
         if os.path.isdir(builds_dir):
@@ -30,7 +30,7 @@ def init_builds_dir(args_builds_dir):
         builds_dir = os.path.join(os.getcwd(), 'builds')
         if os.path.isdir(builds_dir):
             return builds_dir
-        builds_dir = os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+        builds_dir = "/var/towercomputers/builds/"
         if os.path.isdir(builds_dir):
             return builds_dir
     # if not exists, create it
@@ -62,7 +62,7 @@ def find_host_image():
     builds_dirs = [
         os.path.join(os.getcwd(), 'dist'),
         os.path.join(os.getcwd(), 'builds'),
-        os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+        "/var/towercomputers/builds/"
     ]
     for builds_dir in builds_dirs:
         if os.path.isdir(builds_dir):
