@@ -9,8 +9,22 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
-prepare_root_partition() {
-	# zeroing usb drive
+check_and_copy_key_from_boot_disk() {
+	if ! [ -f "$BOOT_MEDIAcrypto_keyfile.bin" ]; then
+        echo "Key file not found in boot partition"
+        exit 1
+    fi
+    key_is_ok=$(cryptsetup luksOpen --key-file $BOOT_MEDIA/crypto_keyfile.bin --test-passphrase $LVM_DISK && echo "OK" || echo "NOK")
+    if [ "$key_is_ok" == "NOK" ]; then
+        echo "Key file is not valid"
+        exit 1
+    fi
+    cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
+    chmod 0400 /crypto_keyfile.bin
+}
+
+create_lvm_partitions() {
+	# zeroing root drive
     dd if=/dev/zero of=$LVM_DISK bs=512 count=1 conv=notrunc
 	# generate LUKS key
 	dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
@@ -22,18 +36,47 @@ prepare_root_partition() {
 	cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
 	# create LVM physical volumes
 	vgcreate -y vg0 /dev/mapper/lvmcrypt
+	# create home volume
+    lvcreate -l 20%FREE vg0 -n home
 	# create root volume
     lvcreate -l 100%FREE vg0 -n root
     # set partition name
     ROOT_PARTITION="/dev/vg0/root"
+	HOME_PARTITION="/dev/vg0/home"
+}
+
+activate_lvm_disk() {
+    # initialize the LUKS partition
+    cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
+    vgchange -ay vg0
+    # set partitions names
+    HOME_PARTITION="/dev/vg0/home"
+    ROOT_PARTITION="/dev/vg0/root"
+}
+
+prepare_root_partition() {
+	if [ "$INSTALLATION_TYPE" == "install" ]; then
+		create_lvm_partitions
+	else
+		check_and_copy_key_from_boot_disk
+		activate_lvm_disk
+	fi
     # format partition
     mkfs.ext4 -F "$ROOT_PARTITION"
+	# don't format home partition if we are updating the system
+    if [ "$INSTALLATION_TYPE" == "install" ]; then
+		mkfs.ext4 -F "$HOME_PARTITION"
+	fi
 	# create mount point
 	mkdir -p /mnt
 	# mount root partition
 	mount $ROOT_PARTITION /mnt
+	# mount home partition
+	mkdir -p /mnt/home
+	mount $HOME_PARTITION /mnt/home
 	# copy LUKS key
 	cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
+	cp /crypto_keyfile.bin $BOOT_MEDIA/crypto_keyfile.bin
 }
 
 prepare_home_directory() {
@@ -220,7 +263,7 @@ init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env

@@ -83,7 +83,8 @@ def prepare_host_config(args):
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
         'STATIC_HOST_IP': host_ip,
-        'ROUTER_IP': sshconf.ROUTER_IP
+        'ROUTER_IP': sshconf.ROUTER_IP,
+        'INSTALLATION_TYPE': "install",
     }
 
 @utils.clitask("Decompressing {0}...", sudo=True)

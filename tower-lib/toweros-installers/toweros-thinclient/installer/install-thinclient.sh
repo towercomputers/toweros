@@ -60,7 +60,7 @@ check_and_copy_key_from_boot_disk() {
         echo "Target partition not found"
         exit 1
     fi
-    key_is_ok=$(sudo cryptsetup luksOpen --key-file /BOOTKEY/crypto_keyfile.bin --test-passphrase $LVM_PARTITION && echo "OK" || echo "NOK")
+    key_is_ok=$(cryptsetup luksOpen --key-file /BOOTKEY/crypto_keyfile.bin --test-passphrase $LVM_PARTITION && echo "OK" || echo "NOK")
     if [ "$key_is_ok" == "NOK" ]; then
         echo "Key file is not valid"
         exit 1
