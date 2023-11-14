@@ -248,13 +248,14 @@ def confirm_config(config):
         print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
         print_value("Username", config['USERNAME'])
         print_value("Start X on login", config['STARTX_ON_LOGIN'])
-        rprint("\n")
         if config['SECURE_BOOT'] == "true":
+            rprint("\n")
             print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
             print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
     target_warning = f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased."
     if config['INSTALLATION_TYPE'] == 'update':
         target_warning += " Only the /home directory will be kept, if you have data outside this directory please backup them before."
+    rprint("\n")
     print_error(target_warning)
     print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
     print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
