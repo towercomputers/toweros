@@ -10,7 +10,7 @@ update_passord() {
 }
 
 check_and_copy_key_from_boot_disk() {
-	if ! [ -f "$BOOT_MEDIAcrypto_keyfile.bin" ]; then
+	if ! [ -f "$BOOT_MEDIA/crypto_keyfile.bin" ]; then
         echo "Key file not found in boot partition"
         exit 1
     fi
@@ -26,8 +26,8 @@ check_and_copy_key_from_boot_disk() {
 create_lvm_partitions() {
 	# zeroing root drive
     dd if=/dev/zero of=$LVM_DISK bs=512 count=1 conv=notrunc
-	# generate LUKS key
-	dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
+	# copy LUKS key from boot disk
+	cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
 	chmod 0400 /crypto_keyfile.bin
 	# create LUKS partition
 	cryptsetup -q luksFormat $LVM_DISK /crypto_keyfile.bin
@@ -76,7 +76,6 @@ prepare_root_partition() {
 	mount $HOME_PARTITION /mnt/home
 	# copy LUKS key
 	cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
-	cp /crypto_keyfile.bin $BOOT_MEDIA/crypto_keyfile.bin
 }
 
 prepare_home_directory() {
@@ -223,6 +222,7 @@ clone_live_system_to_disk() {
 	sed -i '/cdrom/d' /mnt/etc/fstab 
 	sed -i '/floppy/d' /mnt/etc/fstab
 	sed -i '/\/boot/d' /mnt/etc/fstab
+	echo  "/dev/vg0/home /home ext4 rw,relatime 0 0" >> /mnt/etc/fstab
 
 	# update cmdline.txt
 	kernel_opts="quiet console=tty1 rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"

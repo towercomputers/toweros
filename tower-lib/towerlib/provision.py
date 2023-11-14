@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh, cp
+from sh import ssh_keygen, xz, ssh, cp, dd
 from rich.prompt import Confirm
 from rich.text import Text
 
@@ -29,6 +29,11 @@ def generate_key_pair(name):
         os.remove(f'{key_path}.pub')
     ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
     return f'{key_path}.pub', key_path
+
+def generate_luks_key(name):
+    keys_path = os.path.join(sshconf.TOWER_DIR, 'luks', f"{name}_crypto_keyfile.bin")
+    os.makedirs(os.path.dirname(keys_path), exist_ok=True)
+    dd('if=/dev/urandom', f'of={keys_path}', 'bs=512', 'count=4')
 
 @utils.clitask("Preparing host configuration...")
 def prepare_host_config(args):
@@ -107,6 +112,8 @@ def prepare_provision(args):
     # generate key pair
     if not args.public_key_path:
         args.public_key_path, private_key_path = generate_key_pair(args.name[0])
+    # generate luks key
+    generate_luks_key(args.name[0])
     # generate host configuration
     host_config = prepare_host_config(args)
     # determine target device
