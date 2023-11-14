@@ -45,6 +45,8 @@ def disk_list(exclude=None):
         path = disk[disk.index('/dev/'):].split(" ")[0].strip()
         if exclude and path == exclude:
             continue
+        if path not in mountpoints:
+            continue
         if mountpoints[path] is not None:
             continue
         disks.append(disk)
