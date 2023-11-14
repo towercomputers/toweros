@@ -7,6 +7,7 @@ from passlib.hash import sha512_crypt
 from sh import ssh_keygen, xz, ssh, cp, dd
 from rich.prompt import Confirm
 from rich.text import Text
+from rich import print as rprint
 
 from towerlib import utils
 from towerlib import buildhost
@@ -155,10 +156,14 @@ def save_host_config(config):
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args):
     image_path, boot_device, host_config, private_key_path = prepare_provision(args)
-    confirm_message = f"Are you sure you want to completely wipe the boot device `{boot_device}` plugged into the Thin Client "
-    confirm_message += f"and the root device plugged into the host `{name}` and install TowerOS-Host on them?"
-    confirm_text = Text(confirm_message, style='red')
-    if args.no_confirm or Confirm.ask(confirm_text):
+    warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."
+    if not args.update:
+        warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{name}`"
+    else:
+        warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your /home directory will be preserved."
+    warning_text = Text(warning_message, style='red')
+    rprint(warning_text)
+    if args.no_confirm or Confirm.ask("Do you want to continue?"):
         if not args.update:
             save_host_config(host_config)
         del(host_config['PASSWORD'])

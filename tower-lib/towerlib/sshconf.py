@@ -70,6 +70,7 @@ def update_config(name, ip, private_key_path):
     # if name already used, update the IP
     if name in existing_hosts:
         config.set(name, Hostname=ip)
+        config.set(name, IdentityFile=private_key_path)
         config.save()
         return
     # if IP already used, update the name
