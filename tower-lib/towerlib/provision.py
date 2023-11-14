@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh
+from sh import ssh_keygen, xz, ssh, cp
 from rich.prompt import Confirm
 from rich.text import Text
 
@@ -86,10 +86,12 @@ def prepare_host_config(args):
         'ROUTER_IP': sshconf.ROUTER_IP
     }
 
-@utils.clitask("Decompressing {0}...")
+@utils.clitask("Decompressing {0}...", sudo=True)
 def decompress_image(image_path):
     out_file = image_path.replace('.xz', '')
-    xz('--stdout', '-d', image_path, _out=out_file)
+    tmp_file = os.path.join('/tmp', os.path.basename(out_file))
+    xz('--stdout', '-d', image_path, _out=tmp_file)
+    cp(tmp_file, out_file)
     return out_file
 
 def prepare_host_image(image_arg):
@@ -124,7 +126,7 @@ def save_config_file(config_path, config_str):
 
 def save_host_config(config):
     config_filename = f"{config['HOSTNAME']}-{datetime.now().strftime('%Y%m%d%H%M%S')}.env"
-    config_path = os.path.join(os.path.expanduser('~'), '.config', 'tower', config_filename)
+    config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config_filename)
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
     
@@ -138,13 +140,14 @@ def provision(name, args):
         save_host_config(host_config)
         del(host_config['PASSWORD'])
         buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-        sshconf.wait_for_host_sshd(host_config['STATIC_HOST_IP'])
         sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+        sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
         utils.menu.prepare_xfce_menu()
         logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
         logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
         logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
         logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+        logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

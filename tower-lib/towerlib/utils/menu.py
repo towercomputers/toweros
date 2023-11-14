@@ -6,7 +6,7 @@ import sh
 from sh import ssh, mkdir, sed, scp, mv
 
 from towerlib.utils import clitask
-from towerlib.sshconf import hosts
+from towerlib.sshconf import hosts, TOWER_DIR
 
 def get_package_binaries(host, package):
     binaries = []
@@ -40,16 +40,15 @@ def copy_desktop_files(host, package):
                 mv(locale_file_path, desktop_folder)
 
 def get_installed_packages():
-    json_file = os.path.join(os.path.expanduser('~'), '.config', 'tower', 'desktop.json')
+    json_file = os.path.join(TOWER_DIR, 'desktop.json')
     if os.path.exists(json_file):
         return json.load(open(json_file, 'r'))
     return {}
 
 def save_installed_packages(installed_packages):
-    conf_dir = os.path.join(os.path.expanduser('~'), '.config', 'tower')
-    if not os.path.exists(conf_dir):
-        os.makedirs(conf_dir)
-    json_file = os.path.join(conf_dir, 'desktop.json')
+    if not os.path.exists(TOWER_DIR):
+        os.makedirs(TOWER_DIR, exist_ok=True)
+    json_file = os.path.join(TOWER_DIR, 'desktop.json')
     json.dump(installed_packages, open(json_file, 'w'))
 
 def add_installed_package(host, package):
@@ -61,6 +60,12 @@ def add_installed_package(host, package):
         installed_packages[host][package] = binaries
         save_installed_packages(installed_packages)
         copy_desktop_files(host, package)
+
+def restore_installed_packages():
+    installed_packages = get_installed_packages()
+    for host, packages in installed_packages.items():
+        for package, binaries in packages.items():
+            copy_desktop_files(host, package)
 
 @clitask("Updating xfce menu...")
 def prepare_xfce_menu():

@@ -2,7 +2,7 @@ import os
 import logging
 import glob
 
-from sh import shasum
+from sh import shasum, mkdir, contrib
 
 from towerlib.utils import network
 from towerlib.utils.decorators import clitask
@@ -22,7 +22,7 @@ REQUIRED_BUILDS = {
 
 def init_builds_dir(args_builds_dir):
     builds_dir = args_builds_dir
-    # if not provided check if builds is in ./ or in ~/.cache/tower/
+    # if not provided check if builds is in ./ or in /var/towercomputers
     if not builds_dir:
         builds_dir = os.path.join(os.getcwd(), 'dist')
         if os.path.isdir(builds_dir):
@@ -30,12 +30,13 @@ def init_builds_dir(args_builds_dir):
         builds_dir = os.path.join(os.getcwd(), 'builds')
         if os.path.isdir(builds_dir):
             return builds_dir
-        builds_dir = os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+        builds_dir = "/var/towercomputers/builds/"
         if os.path.isdir(builds_dir):
             return builds_dir
     # if not exists, create it
     if not os.path.isdir(builds_dir):
-        os.makedirs(builds_dir)
+        with contrib.sudo(password="", _with=True):
+            mkdir('-p', builds_dir)
     return builds_dir
 
 def sha_sum(file_path):
@@ -62,7 +63,7 @@ def find_host_image():
     builds_dirs = [
         os.path.join(os.getcwd(), 'dist'),
         os.path.join(os.getcwd(), 'builds'),
-        os.path.join(os.path.expanduser('~'), '.cache', 'tower', 'builds')
+        "/var/towercomputers/builds/"
     ]
     for builds_dir in builds_dirs:
         if os.path.isdir(builds_dir):

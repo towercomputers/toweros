@@ -4,6 +4,7 @@ import logging
 
 import requests
 from backports.pbkdf2 import pbkdf2_hmac
+from sh import contrib, cp
 
 from towerlib.utils.decorators import clitask
 
@@ -23,8 +24,11 @@ def get_interfaces():
 
 @clitask("Downloading {0}...")
 def download_file(url, dest_path):
+    tmp_dest_path = "/tmp/" + dest_path.split("/")[-1]
     with requests.get(url, stream=True) as resp:
         resp.raise_for_status()
-        with open(dest_path, "wb") as f:
+        with open(tmp_dest_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=4096):
                 f.write(chunk)
+    with contrib.sudo(password="", _with=True):
+        cp(tmp_dest_path, dest_path)

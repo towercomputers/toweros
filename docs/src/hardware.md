@@ -4,7 +4,7 @@ TowerOS is designed to run on a thin client device and several hosts connected _
 
 
 ## Thin Client Hardware
-The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from if you are using CM4s. (Raspberry Pi 4Bs may be booted from a second USB key, however.) The thin client should also have one or two RJ-45 ports, depending on the number of networks in use.
+The thin client is typically a laptop like the Lenovo X270. The thin client should have an SD card reader for provisioning SD cards that the hosts will boot from if you are using CM4s. (Raspberry Pi 4Bs may be booted from a second USB key, however.) The thin client should also have one or two RJ-45 ports, depending on the number of networks in use. Finally, a dedicated USB key for installing / upgrading the thin client (which will host the boot volume for the device).
 
 
 ## Networking Hardware
@@ -34,6 +34,7 @@ Using CM4s and the [DeskPi Super6C Board](https://deskpi.com/collections/deskpi-
 #### Requirements
 - Only the CM4 *Lite* is supported.
 - Only the CM4 Lite module used for the router must have on-board WiFi (the others may be entirely wireless).
+  - N.B. With the DeskPi, it's possible to disable wireless connectivity for each CM4 with a jumper.
 - CM4s must be booted from an SD card, which will hold the boot partition.
 - Accordingly, you must have an SD Card reader for the thin client.
 - CM4s must use an M.2 SSD for the root partition.

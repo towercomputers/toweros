@@ -16,6 +16,10 @@ THIN_CLIENT_IP_ETH1 = "192.168.3.100"
 ROUTER_IP = "192.168.2.1"
 ROUTER_HOSTNAME = "router"
 FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
+TOWER_DIR = os.path.expanduser('~/.local/tower')
+TOWER_SSH_CONFIG_PATH = os.path.join(TOWER_DIR, 'config')
+SSH_CONFIG_PATH = os.path.expanduser('~/.ssh/config')
+KNOWN_HOSTS_PATH = os.path.expanduser('~/.ssh/known_hosts')
 
 logger = logging.getLogger('tower')
 
@@ -23,26 +27,21 @@ class UnkownHost(Exception):
     pass
 
 def insert_include_directive():
-    config_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
-    master_config_path = os.path.join(config_dir, 'config')
-    tower_config_path = os.path.join(config_dir, 'tower.conf')
-    directive = f"Include {tower_config_path}"
-    if os.path.exists(master_config_path):
-        with open(master_config_path, 'r') as f:
+    directive = f"Include {TOWER_SSH_CONFIG_PATH}"
+    if os.path.exists(SSH_CONFIG_PATH):
+        with open(SSH_CONFIG_PATH, 'r') as f:
             current_config = f.read()
         if directive not in current_config:
-            with open(master_config_path, 'r+') as f:
+            with open(SSH_CONFIG_PATH, 'r+') as f:
                 content = f.read()
                 f.seek(0, 0)
                 f.write(directive + '\n\n' + content)
     else:
-        with open(master_config_path, 'w') as f:
+        with open(SSH_CONFIG_PATH, 'w') as f:
             f.write(directive + '\n\n')
 
 def ssh_config():
-    config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
-    config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
-    return config
+    return read_ssh_config(TOWER_SSH_CONFIG_PATH) if os.path.exists(TOWER_SSH_CONFIG_PATH) else empty_ssh_config_file()
 
 def get(name):
     config = ssh_config()
@@ -52,24 +51,21 @@ def get(name):
         return None
 
 def clean_known_hosts(ip):
-    known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
-    if os.path.exists(known_hosts_path):
-        sed('-i', f'/{ip}/d', known_hosts_path)
+    if os.path.exists(KNOWN_HOSTS_PATH):
+        sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
 
 def update_known_hosts(ip):
-    known_hosts_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'known_hosts')
-    if os.path.exists(known_hosts_path):
-        sed('-i', f'/{ip}/d', known_hosts_path)
+    if os.path.exists(KNOWN_HOSTS_PATH):
+        sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
     else:
-        touch(known_hosts_path)
-    Command('sh')('-c', f'ssh-keyscan {ip} >> {known_hosts_path}')
+        touch(KNOWN_HOSTS_PATH)
+    Command('sh')('-c', f'ssh-keyscan {ip} >> {KNOWN_HOSTS_PATH}')
     
-@clitask("Updating Tower config file ~/.ssh/tower.conf...")
+@clitask(f"Updating Tower config file {TOWER_SSH_CONFIG_PATH}...")
 def update_config(name, ip, private_key_path):
     insert_include_directive()
     # get existing hosts
-    config_path = os.path.join(os.path.expanduser('~'), '.ssh/', 'tower.conf')
-    config = read_ssh_config(config_path) if os.path.exists(config_path) else empty_ssh_config_file()
+    config = ssh_config()
     existing_hosts = config.hosts()
     # if name already used, update the IP
     if name in existing_hosts:
@@ -91,7 +87,9 @@ def update_config(name, ip, private_key_path):
         IdentityFile=private_key_path,
         LogLevel="FATAL"
     )
-    config.write(config_path)
+    if not os.path.exists(TOWER_DIR):
+        os.makedirs(TOWER_DIR, exist_ok=True)
+    config.write(TOWER_SSH_CONFIG_PATH)
     
 def hosts():
     return ssh_config().hosts()
@@ -139,13 +137,16 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
                 return get_next_host_ip(tower_network, first=first + 1)
     return f"{network}{first}"
 
-def try_to_update_known_hosts_until_success(ip):
+def try_to_update_known_hosts_until_success(name, ip):
     try:
         update_known_hosts(ip)
     except ErrorReturnCode:
         time.sleep(5)
-        try_to_update_known_hosts_until_success(ip)
+        try_to_update_known_hosts_until_success(name, ip)
+    if not is_up(name):
+        time.sleep(5)
+        try_to_update_known_hosts_until_success(name, ip)
 
 @clitask("Waiting for host to be ready...")
-def wait_for_host_sshd(ip):
-    try_to_update_known_hosts_until_success(ip)
+def wait_for_host_sshd(name, ip):
+    try_to_update_known_hosts_until_success(name, ip)

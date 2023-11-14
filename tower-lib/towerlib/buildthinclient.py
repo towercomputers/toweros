@@ -8,7 +8,7 @@ from shutil import copytree, copy as copyfile
 import sys
 
 import sh
-from sh import rm, git, pip, Command, apk, hatch
+from sh import rm, git, pip, Command, apk, hatch, cp, contrib
 
 
 from towerlib.utils import clitask
@@ -117,7 +117,8 @@ def prepare_image(builds_dir):
         builds_dir, 
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
-    copyfile(image_src_path, image_dest_path)
+    with contrib.sudo(password="", _with=True):
+        cp(image_src_path, image_dest_path)
     return image_dest_path
     
 
