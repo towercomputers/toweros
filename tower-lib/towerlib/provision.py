@@ -22,8 +22,8 @@ def check_environment_value(key, value):
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
 def generate_key_pair(name):
-    ssh_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
-    key_path = os.path.join(ssh_dir, f'{name}')
+    os.makedirs(os.path.join(sshconf.TOWER_DIR, 'ssh'), exist_ok=True)
+    key_path = os.path.join(sshconf.TOWER_DIR, 'ssh', f'{name}')
     if os.path.exists(key_path):
         os.remove(key_path)
         os.remove(f'{key_path}.pub')
@@ -109,13 +109,27 @@ def prepare_host_image(image_arg):
     return image_path
 
 def prepare_provision(args):
-    # generate key pair
-    if not args.public_key_path:
-        args.public_key_path, private_key_path = generate_key_pair(args.name[0])
-    # generate luks key
-    generate_luks_key(args.name[0])
-    # generate host configuration
-    host_config = prepare_host_config(args)
+    if args.update:
+        # use existing key pair
+        private_key_path = os.path.join(sshconf.TOWER_DIR, 'ssh', f'{args.name[0]}')
+        # load configuration
+        conf_path = os.path.join(sshconf.TOWER_DIR, 'hosts', f"{args.name[0]}.env")
+        with open(conf_path, 'r') as f:
+            config_str = f.read()
+        host_config = {}
+        for line in config_str.strip().split("\n"):
+            key = line[0:line.index('=')]
+            value = line[line.index('=') + 2:-1]
+            host_config[key] = value
+        host_config['INSTALLATION_TYPE'] = "update"
+    else:
+        # generate key pair
+        if not args.public_key_path:
+            args.public_key_path, private_key_path = generate_key_pair(args.name[0])
+        # generate luks key
+        generate_luks_key(args.name[0])
+        # generate host configuration
+        host_config = prepare_host_config(args)
     # determine target device
     boot_device = args.boot_device or utils.select_boot_device()
     check_environment_value('boot-device', boot_device)
@@ -133,7 +147,7 @@ def save_config_file(config_path, config_str):
     os.chmod(config_path, 0o600)
 
 def save_host_config(config):
-    config_filename = f"{config['HOSTNAME']}-{datetime.now().strftime('%Y%m%d%H%M%S')}.env"
+    config_filename = f"{config['HOSTNAME']}.env"
     config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config_filename)
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
@@ -145,10 +159,12 @@ def provision(name, args):
     confirm_message += f"and the root device plugged into the host `{name}` and install TowerOS-Host on them?"
     confirm_text = Text(confirm_message, style='red')
     if args.no_confirm or Confirm.ask(confirm_text):
-        save_host_config(host_config)
+        if not args.update:
+            save_host_config(host_config)
         del(host_config['PASSWORD'])
         buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-        sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+        if not args.update:
+            sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
         sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
         utils.menu.prepare_xfce_menu()
         logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")

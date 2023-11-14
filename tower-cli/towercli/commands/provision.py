@@ -114,13 +114,23 @@ def add_args(argparser):
         action='store_true',
         default=False
     )
+    provision_parser.add_argument(
+        '--update',
+        help="""Update existing (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-z0-9-]{1,15}$/', args.name[0]):
         parser_error(message="Host name invalid. Must be between one and 15 minuscule alphanumeric chars.")
 
-    if sshconf.exists(args.name[0]) and not args.force:
-        parser_error("Host name already used. Please use `--force` to overwrite it.")
+    if sshconf.exists(args.name[0]) and not args.force and not args.update:
+        parser_error("Host name already used. Please use `--update` to update it or `--force` to overwrite it.")
+
+    if args.update and not sshconf.exists(args.name[0]):
+        parser_error("Host name not found.")
 
     if args.boot_device:
         disk_list = utils.get_device_list()

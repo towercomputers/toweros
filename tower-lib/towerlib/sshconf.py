@@ -88,7 +88,7 @@ def update_config(name, ip, private_key_path):
         LogLevel="FATAL"
     )
     if not os.path.exists(TOWER_DIR):
-        os.makedirs(TOWER_DIR, exist_ok=True)
+        os.makedirs(TOWER_DIR)
     config.write(TOWER_SSH_CONFIG_PATH)
     
 def hosts():
@@ -141,10 +141,10 @@ def try_to_update_known_hosts_until_success(name, ip):
     try:
         update_known_hosts(ip)
     except ErrorReturnCode:
-        time.sleep(5)
+        time.sleep(3)
         try_to_update_known_hosts_until_success(name, ip)
     if not is_up(name):
-        time.sleep(5)
+        time.sleep(3)
         try_to_update_known_hosts_until_success(name, ip)
 
 @clitask("Waiting for host to be ready...")
