@@ -286,6 +286,9 @@ init_configuration() {
 		else
 			LVM_DISK=/dev/sda
 		fi
+	else
+		echo "tower.env not found. Please ensure the root drive is not bootable."
+		exit 1
 	fi
 
 	SCRIPT_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
