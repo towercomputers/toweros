@@ -12,6 +12,7 @@ from rich import print as rprint
 from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
+from towerlib.install import reinstall_all_packages
 
 logger = logging.getLogger('tower')
 
@@ -172,6 +173,12 @@ def provision(name, args, update=False):
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
         sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
         utils.menu.prepare_xfce_menu()
+        if update:
+            if (not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+                no_connection_message = f"\nWARNING: Impossible to re-install packages: this host is an offline host and the router host `{sshconf.ROUTER_HOSTNAME}` was not found."
+                rprint(Text(no_connection_message, style='red'))
+            else:
+                reinstall_all_packages(name)
         logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
         logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
         logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
