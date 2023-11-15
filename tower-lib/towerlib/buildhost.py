@@ -268,6 +268,8 @@ WAITING_MESSAGE += "If the host is still not discovered in 10 minutes you can de
          sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:
+        # make sur the password is not shown in logs
+        del(config['PASSWORD'])
         prepare_working_dir()
         if zero_device:
             zeroing_device(device)

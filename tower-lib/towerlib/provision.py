@@ -12,7 +12,7 @@ from rich import print as rprint
 from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
-from towerlib.install import reinstall_all_packages
+from towerlib import install
 
 logger = logging.getLogger('tower')
 
@@ -161,11 +161,8 @@ def check_network(online):
         raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is up.")
     if not utils.is_ip_attached(interface, ip):
         raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is attached to the ip `{ip}`.")
-    
-@utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
-def provision(name, args, update=False):
-    check_network(args.online or name == sshconf.ROUTER_HOSTNAME)
-    image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
+
+def display_pre_provision_warning(name, boot_device, update):
     warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."
     if not update:
         warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{name}`"
@@ -173,26 +170,37 @@ def provision(name, args, update=False):
         warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your /home directory will be preserved."
     warning_text = Text(warning_message, style='red')
     rprint(warning_text)
+
+def display_post_provision_message(name, ip):
+    logger.info(f"Host ready with IP: {ip}")
+    logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
+    logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
+    logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+    logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
+
+def reinstall_packages(name):
+    if (not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+        no_connection_message = f"\nWARNING: Impossible to re-install packages: this host is an offline host and the router host `{sshconf.ROUTER_HOSTNAME}` was not found."
+        rprint(Text(no_connection_message, style='red'))
+    else:
+        install.reinstall_all_packages(name)
+
+@utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
+def provision(name, args, update=False):
+    check_network(args.online or name == sshconf.ROUTER_HOSTNAME)
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
+    display_pre_provision_warning(name, boot_device, update)
     if args.no_confirm or Confirm.ask("Do you want to continue?"):
         if not update:
             save_host_config(host_config)
-        del(host_config['PASSWORD'])
         buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
+        utils.menu.prepare_xfce_menu()
         if not update:
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
         sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
-        utils.menu.prepare_xfce_menu()
         if update:
-            if (not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
-                no_connection_message = f"\nWARNING: Impossible to re-install packages: this host is an offline host and the router host `{sshconf.ROUTER_HOSTNAME}` was not found."
-                rprint(Text(no_connection_message, style='red'))
-            else:
-                reinstall_all_packages(name)
-        logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
-        logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
-        logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
-        logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
-        logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
+            reinstall_packages(name)
+        display_post_provision_message(name, host_config['STATIC_HOST_IP'])
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
