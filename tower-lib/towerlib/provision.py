@@ -4,7 +4,7 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh, cp, dd
+from sh import ssh_keygen, xz, ssh, cp, dd, Command
 from rich.prompt import Confirm
 from rich.text import Text
 from rich import print as rprint
@@ -153,9 +153,18 @@ def save_host_config(config):
     config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config_filename)
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
+
+def check_network(online):
+    ip = sshconf.THIN_CLIENT_IP_ETH0 if online else sshconf.THIN_CLIENT_IP_ETH1
+    interface = 'eth0' if online else 'eth1'
+    if not utils.interface_is_up(interface):
+        raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is up.")
+    if not utils.is_ip_attached(interface, ip):
+        raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is attached to the ip `{ip}`.")
     
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args, update=False):
+    check_network(args.online or name == sshconf.ROUTER_HOSTNAME)
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
     warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."
     if not update:
