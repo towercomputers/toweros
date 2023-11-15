@@ -109,8 +109,8 @@ def prepare_host_image(image_arg):
             image_path = decompress_image(image_path)
     return image_path
 
-def prepare_provision(args):
-    if args.update:
+def prepare_provision(args, update=False):
+    if update:
         # use existing key pair
         private_key_path = os.path.join(sshconf.TOWER_DIR, 'ssh', f'{args.name[0]}')
         # load configuration
@@ -154,21 +154,21 @@ def save_host_config(config):
     save_config_file(config_path, config_str)
     
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
-def provision(name, args):
-    image_path, boot_device, host_config, private_key_path = prepare_provision(args)
+def provision(name, args, update=False):
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
     warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."
-    if not args.update:
+    if not update:
         warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{name}`"
     else:
         warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your /home directory will be preserved."
     warning_text = Text(warning_message, style='red')
     rprint(warning_text)
     if args.no_confirm or Confirm.ask("Do you want to continue?"):
-        if not args.update:
+        if not update:
             save_host_config(host_config)
         del(host_config['PASSWORD'])
         buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-        if not args.update:
+        if not update:
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
         sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
         utils.menu.prepare_xfce_menu()

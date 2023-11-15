@@ -1,7 +1,7 @@
 import argparse
 
 import towercli
-from towercli.commands import provision, install, run, status, wlanconnect
+from towercli.commands import provision, install, run, status, wlanconnect, update
 from towerlib import utils
 
 def parse_arguments():
@@ -24,6 +24,7 @@ def parse_arguments():
     )
     subparser = parser.add_subparsers(dest='command', required=True, help="Use `tower {provision|install|run|status|wlan-connect} --help` to get options list for each command.")
     towercli.commands.provision.add_args(subparser)
+    towercli.commands.update.add_args(subparser)
     towercli.commands.install.add_args(subparser)
     towercli.commands.run.add_args(subparser)
     towercli.commands.status.add_args(subparser)
