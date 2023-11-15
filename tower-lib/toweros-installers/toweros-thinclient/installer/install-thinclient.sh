@@ -406,6 +406,7 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
+    read -p "Installation done. Make sure to remove the drive that contains the installation image, then press any key to reboot."
     reboot
 }
 
