@@ -174,12 +174,6 @@ prepare_home_directory() {
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
         echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
     fi
-    # prepare ssh folder
-    mkdir -p /home/$USERNAME/.ssh
-    touch /home/$USERNAME/.ssh/config
-    touch /home/$USERNAME/.ssh/know_hosts
-    chmod 700 /home/$USERNAME/.ssh
-    chmod 600 /home/$USERNAME/.ssh/*
 }
 
 install_tower_tools() {

@@ -28,6 +28,12 @@ logger = logging.getLogger('tower')
 class UnkownHost(Exception):
     pass
 
+def create_ssh_dir():
+    ssh_dir = os.path.dirname(SSH_CONFIG_PATH)
+    if not os.path.exists(ssh_dir):
+        os.makedirs(ssh_dir)
+        os.chmod(ssh_dir, 0o700)
+
 def insert_include_directive():
     directive = f"Include {TOWER_SSH_CONFIG_PATH}"
     if os.path.exists(SSH_CONFIG_PATH):
@@ -39,8 +45,10 @@ def insert_include_directive():
                 f.seek(0, 0)
                 f.write(directive + '\n\n' + content)
     else:
+        create_ssh_dir()
         with open(SSH_CONFIG_PATH, 'w') as f:
             f.write(directive + '\n\n')
+        os.chmod(SSH_CONFIG_PATH, 0o600)
 
 def ssh_config():
     return read_ssh_config(TOWER_SSH_CONFIG_PATH) if os.path.exists(TOWER_SSH_CONFIG_PATH) else empty_ssh_config_file()
@@ -60,6 +68,7 @@ def update_known_hosts(ip):
     if os.path.exists(KNOWN_HOSTS_PATH):
         sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
     else:
+        create_ssh_dir()
         touch(KNOWN_HOSTS_PATH)
     Command('sh')('-c', f'ssh-keyscan {ip} >> {KNOWN_HOSTS_PATH}')
     
