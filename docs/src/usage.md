@@ -109,7 +109,12 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 1. Initialize restic repo in each host
         
         [thinclient]$ ssh -t storage restic -r /home/tower/backup init
-        [thinclient]$ ssh -t office restic -r /home/tower/backup init
+        [thinclient]$ ssh -t office restic -r /home/tower/backup init \
+                                           --from-repo sftp:storage:/home/tower/backup \
+                                           --copy-chunker-params
+
+    Note: `--copy-chunker-params` is important to ensure deduplication. 
+    See "[Copying snapshots between repositories](https://restic.readthedocs.io/en/latest/045_working_with_repos.html#copying-snapshots-between-repositories)" for more options.
 
 1. Backup `office`
 
