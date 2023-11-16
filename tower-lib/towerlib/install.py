@@ -156,6 +156,6 @@ def install_packages(host, packages):
 
 @clitask("Re-installing all packages in {0}...", task_parent=True)
 def reinstall_all_packages(host):
-    packages = list(get_installed_packages().get(host, {}).keys())
+    packages = get_installed_packages(host)
     if packages:
         install_packages(host, packages)
