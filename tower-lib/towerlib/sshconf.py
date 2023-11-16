@@ -7,6 +7,7 @@ from sshconf import read_ssh_config, empty_ssh_config_file
 from sh import ssh, ErrorReturnCode, sed, touch, Command
 
 from towerlib.utils import clitask
+from towerlib.utils.exceptions import DiscoveringTimeOut
 
 DEFAULT_SSH_USER = "tower"
 TOWER_NETWORK_ONLINE = "192.168.2.0/24"
@@ -138,16 +139,20 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
                 return get_next_host_ip(tower_network, first=first + 1)
     return f"{network}{first}"
 
-def try_to_update_known_hosts_until_success(name, ip):
+def try_to_update_known_hosts_until_success(name, ip, start_time):
+    duration = time.time() - start_time
+    if duration > 60 * 10: # 10 minutes
+        raise DiscoveringTimeOut("Host discovering timeout")
     try:
         update_known_hosts(ip)
     except ErrorReturnCode:
         time.sleep(3)
-        try_to_update_known_hosts_until_success(name, ip)
+        try_to_update_known_hosts_until_success(name, ip, start_time)
     if not is_up(name):
         time.sleep(3)
-        try_to_update_known_hosts_until_success(name, ip)
+        try_to_update_known_hosts_until_success(name, ip, start_time)
 
 @clitask("Waiting for host to be ready...")
 def wait_for_host_sshd(name, ip):
-    try_to_update_known_hosts_until_success(name, ip)
+    start_time = time.time()
+    try_to_update_known_hosts_until_success(name, ip, start_time)

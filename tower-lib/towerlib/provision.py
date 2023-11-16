@@ -13,6 +13,7 @@ from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
 from towerlib import install
+from towerlib.utils.exceptions import DiscoveringTimeOut
 
 logger = logging.getLogger('tower')
 
@@ -178,6 +179,11 @@ def display_post_provision_message(name, ip):
     logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
     logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
 
+def diplay_discovering_error_message():
+    error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem you can refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
+    rprint(Text(error_message, style='red'))
+    exit(1)
+
 def reinstall_packages(name):
     if (not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
         no_connection_message = f"\nWARNING: Impossible to re-install packages: this host is an offline host and the router host `{sshconf.ROUTER_HOSTNAME}` was not found."
@@ -197,10 +203,17 @@ def provision(name, args, update=False):
         utils.menu.prepare_xfce_menu()
         if not update:
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
-        sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
-        if update:
-            reinstall_packages(name)
-        display_post_provision_message(name, host_config['STATIC_HOST_IP'])
+        try:
+            sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
+            if update:
+                reinstall_packages(name)
+            display_post_provision_message(name, host_config['STATIC_HOST_IP'])
+        except KeyboardInterrupt:
+            logger.info("Discovering interrupted.")
+            diplay_discovering_error_message()
+        except DiscoveringTimeOut:
+            logger.info("Discovering timed out.")
+            diplay_discovering_error_message()
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
