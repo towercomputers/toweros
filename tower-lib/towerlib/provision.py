@@ -116,14 +116,7 @@ def prepare_provision(args, update=False):
         # use existing key pair
         private_key_path = os.path.join(sshconf.TOWER_DIR, 'ssh', f'{args.name[0]}')
         # load configuration
-        conf_path = os.path.join(sshconf.TOWER_DIR, 'hosts', f"{args.name[0]}.env")
-        with open(conf_path, 'r') as f:
-            config_str = f.read()
-        host_config = {}
-        for line in config_str.strip().split("\n"):
-            key = line[0:line.index('=')]
-            value = line[line.index('=') + 2:-1]
-            host_config[key] = value
+        host_config = sshconf.get_host_config(args.name[0])
         host_config['INSTALLATION_TYPE'] = "update"
     else:
         # generate key pair
@@ -139,6 +132,8 @@ def prepare_provision(args, update=False):
     # find TowerOS-Host image
     image_path = prepare_host_image(args.image)
     check_environment_value('image', image_path)
+    # inject image version in host config
+    host_config['TOWEROS_VERSION'] = f"v{image_path.split('-')[-2]}"
     # return everything needed to provision the host
     return image_path, boot_device, host_config, private_key_path
 

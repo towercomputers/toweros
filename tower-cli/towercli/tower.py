@@ -1,7 +1,7 @@
 import argparse
 
 import towercli
-from towercli.commands import provision, install, run, status, wlanconnect, update
+from towercli.commands import provision, install, run, status, wlanconnect, update, version
 from towerlib import utils
 
 def parse_arguments():
@@ -29,6 +29,7 @@ def parse_arguments():
     towercli.commands.run.add_args(subparser)
     towercli.commands.status.add_args(subparser)
     towercli.commands.wlanconnect.add_args(subparser)
+    towercli.commands.version.add_args(subparser)
     args = parser.parse_args()
     getattr(towercli.commands, args.command.replace("-", "")).check_args(args, parser.error)
     return args

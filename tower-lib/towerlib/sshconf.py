@@ -8,6 +8,7 @@ from sh import ssh, ErrorReturnCode, sed, touch, Command
 
 from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut
+from towerlib.__about__ import __version__
 
 DEFAULT_SSH_USER = "tower"
 TOWER_NETWORK_ONLINE = "192.168.2.0/24"
@@ -156,3 +157,24 @@ def try_to_update_known_hosts_until_success(name, ip, start_time):
 def wait_for_host_sshd(name, ip):
     start_time = time.time()
     try_to_update_known_hosts_until_success(name, ip, start_time)
+
+def get_host_config(name):
+    conf_path = os.path.join(TOWER_DIR, 'hosts', f"{name}.env")
+    with open(conf_path, 'r') as f:
+        config_str = f.read()
+    host_config = {}
+    for line in config_str.strip().split("\n"):
+        key = line[0:line.index('=')]
+        value = line[line.index('=') + 2:-1]
+        host_config[key] = value
+    return host_config
+
+def get_version():
+    versions = {
+        "thinclient": __version__,
+        "hosts": {}
+    }
+    for host_name in hosts():
+        host_config = get_host_config(host_name)
+        versions['hosts'][host_name] = host_config.get('TOWEROS_VERSION', 'N/A')
+    return versions
