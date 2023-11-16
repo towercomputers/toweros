@@ -25,8 +25,8 @@ def check_environment_value(key, value):
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
 def generate_key_pair(name):
-    os.makedirs(os.path.join(sshconf.TOWER_DIR, name), exist_ok=True)
-    key_path = os.path.join(sshconf.TOWER_DIR, name, 'id_ed25519')
+    os.makedirs(os.path.join(sshconf.TOWER_DIR, 'hosts', name), exist_ok=True)
+    key_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, 'id_ed25519')
     if os.path.exists(key_path):
         os.remove(key_path)
         os.remove(f'{key_path}.pub')
@@ -34,7 +34,7 @@ def generate_key_pair(name):
     return f'{key_path}.pub', key_path
 
 def generate_luks_key(name):
-    keys_path = os.path.join(sshconf.TOWER_DIR, name, "crypto_keyfile.bin")
+    keys_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, "crypto_keyfile.bin")
     os.makedirs(os.path.dirname(keys_path), exist_ok=True)
     dd('if=/dev/urandom', f'of={keys_path}', 'bs=512', 'count=4')
 
@@ -114,7 +114,7 @@ def prepare_host_image(image_arg):
 def prepare_provision(args, update=False):
     if update:
         # use existing key pair
-        private_key_path = os.path.join(sshconf.TOWER_DIR, args.name[0], 'id_ed25519')
+        private_key_path = os.path.join(sshconf.TOWER_DIR, 'hosts', args.name[0], 'id_ed25519')
         # load configuration
         host_config = sshconf.get_host_config(args.name[0])
         host_config['INSTALLATION_TYPE'] = "update"
@@ -145,7 +145,7 @@ def save_config_file(config_path, config_str):
     os.chmod(config_path, 0o600)
 
 def save_host_config(config):
-    config_path = os.path.join(sshconf.TOWER_DIR, config['HOSTNAME'], 'tower.env')
+    config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config['HOSTNAME'], 'tower.env')
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
 

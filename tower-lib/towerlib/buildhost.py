@@ -251,7 +251,7 @@ def insert_tower_env(boot_part, config):
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
-    keys_path = os.path.join(TOWER_DIR, config['HOSTNAME'], "crypto_keyfile.bin")
+    keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], "crypto_keyfile.bin")
     cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
 
 WAITING_MESSAGE = "TowserOS-Host installed in {0}\n"

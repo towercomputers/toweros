@@ -30,13 +30,13 @@ def copy_desktop_files(host, package):
                 mv(locale_file_path, desktop_folder)
 
 def get_installed_packages(host):
-    apk_world = os.path.join(TOWER_DIR, host, 'world')
+    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
     if os.path.exists(apk_world):
         return open(apk_world, 'r').read().strip().split("\n")
     return []
 
 def save_installed_packages(host, installed_packages):
-    apk_world = os.path.join(TOWER_DIR, host, 'world')
+    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
     with open(apk_world, 'w') as fp:
         fp.write("\n".join(installed_packages))
 

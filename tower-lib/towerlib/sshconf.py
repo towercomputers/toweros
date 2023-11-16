@@ -159,7 +159,7 @@ def wait_for_host_sshd(name, ip):
     try_to_update_known_hosts_until_success(name, ip, start_time)
 
 def get_host_config(name):
-    conf_path = os.path.join(TOWER_DIR, name, "tower.env")
+    conf_path = os.path.join(TOWER_DIR, 'hosts', name, "tower.env")
     with open(conf_path, 'r') as f:
         config_str = f.read()
     host_config = {}
