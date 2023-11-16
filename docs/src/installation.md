@@ -16,10 +16,10 @@ To use TowerOS, you must first install the image for the thin client on the devi
 
 2. Update hosts
 
-        [thinclient]$ tower update <hostname>
+        [thinclient]$ tower update <host>
 
     During an update the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the update.
-    Once the system is updated, all applications installed with `tower install <hostname>` are automatically re-installed.
+    Once the system is updated, all applications installed with `tower install <host>` are automatically re-installed.
     Note: Start by updating the `router` and then the other hosts.
 
 ## Troubleshooting
@@ -27,7 +27,7 @@ To use TowerOS, you must first install the image for the thin client on the devi
 In case a host is not accessible:
 
 - either by the provisioning script
-- either with `ssh <hostname>`
+- either with `ssh <host>`
 - either appears as "down" with `tower status`
 
 The most likely cause is a network problem. Here is the list of checks to carry out:
