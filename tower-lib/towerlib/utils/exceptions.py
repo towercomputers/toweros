@@ -1,0 +1,2 @@
+class DiscoveringTimeOut(Exception):
+    pass

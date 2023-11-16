@@ -8,16 +8,6 @@ from sh import ssh, mkdir, sed, scp, mv
 from towerlib.utils import clitask
 from towerlib.sshconf import hosts, TOWER_DIR
 
-def get_package_binaries(host, package):
-    binaries = []
-    for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
-        if '/bin/' in line and not line.strip().endswith('/'):
-            binary = line.split(" ").pop().strip()
-            if not binary.startswith('/'):
-                binary = f"/{binary}"
-            binaries.append(binary)
-    return binaries
-
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
     for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
@@ -39,32 +29,30 @@ def copy_desktop_files(host, package):
                 mkdir('-p', desktop_folder)
                 mv(locale_file_path, desktop_folder)
 
-def get_installed_packages():
-    json_file = os.path.join(TOWER_DIR, 'desktop.json')
-    if os.path.exists(json_file):
-        return json.load(open(json_file, 'r'))
-    return {}
+def get_installed_packages(host):
+    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    if os.path.exists(apk_world):
+        return open(apk_world, 'r').read().strip().split("\n")
+    return []
 
-def save_installed_packages(installed_packages):
-    if not os.path.exists(TOWER_DIR):
-        os.makedirs(TOWER_DIR, exist_ok=True)
-    json_file = os.path.join(TOWER_DIR, 'desktop.json')
-    json.dump(installed_packages, open(json_file, 'w'))
+def save_installed_packages(host, installed_packages):
+    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    with open(apk_world, 'w') as fp:
+        fp.write("\n".join(installed_packages))
 
 def add_installed_package(host, package):
-    installed_packages = get_installed_packages()
-    if host not in installed_packages:
-        installed_packages[host] = {}
-    binaries = get_package_binaries(host, package)
-    if binaries:
-        installed_packages[host][package] = binaries
-        save_installed_packages(installed_packages)
-        copy_desktop_files(host, package)
+    # save package in host world
+    installed_packages = get_installed_packages(host)
+    if not (package in installed_packages):
+        installed_packages.append(package)
+        save_installed_packages(host, installed_packages)
+    # update desktop shortcuts
+    copy_desktop_files(host, package)
 
 def restore_installed_packages():
-    installed_packages = get_installed_packages()
-    for host, packages in installed_packages.items():
-        for package, binaries in packages.items():
+    for host in hosts():
+        installed_packages = get_installed_packages(host)
+        for package in installed_packages:
             copy_desktop_files(host, package)
 
 @clitask("Updating xfce menu...")

@@ -44,3 +44,13 @@ Note: The reason that the decryption keys are stored on removable drives---rathe
 | Physical Side-Channel | Power Consumption (e.g. [Hertzbleed](https://www.hertzbleed.com/) | Optional | Disable DVFS |
 | Physical Side-Channel | Acoustic Emissions | No |  |
 | Physical Side-Channel | Electromagnetic Radiation | No |  |
+
+## Tor Proxy
+
+Tor is installed by default on the router and a Socks5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.
+
+For example if you have an online host called `web`:
+
+```
+[thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip
+```

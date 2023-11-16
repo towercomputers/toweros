@@ -4,13 +4,16 @@ import logging
 from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh, cp
+from sh import ssh_keygen, xz, ssh, cp, dd, Command
 from rich.prompt import Confirm
 from rich.text import Text
+from rich import print as rprint
 
 from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
+from towerlib import install
+from towerlib.utils.exceptions import DiscoveringTimeOut
 
 logger = logging.getLogger('tower')
 
@@ -22,13 +25,20 @@ def check_environment_value(key, value):
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
 def generate_key_pair(name):
-    ssh_dir = os.path.join(os.path.expanduser('~'), '.ssh/')
-    key_path = os.path.join(ssh_dir, f'{name}')
+    host_dir = os.path.join(sshconf.TOWER_DIR, 'hosts', name)
+    os.makedirs(host_dir, exist_ok=True)
+    os.chmod(host_dir, 0o700)
+    key_path = os.path.join(host_dir, 'id_ed25519')
     if os.path.exists(key_path):
         os.remove(key_path)
         os.remove(f'{key_path}.pub')
     ssh_keygen('-t', 'ed25519', '-C', name, '-f', key_path, '-N', "")
     return f'{key_path}.pub', key_path
+
+def generate_luks_key(name):
+    keys_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, "crypto_keyfile.bin")
+    os.makedirs(os.path.dirname(keys_path), exist_ok=True)
+    dd('if=/dev/urandom', f'of={keys_path}', 'bs=512', 'count=4')
 
 @utils.clitask("Preparing host configuration...")
 def prepare_host_config(args):
@@ -83,7 +93,8 @@ def prepare_host_config(args):
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
         'STATIC_HOST_IP': host_ip,
-        'ROUTER_IP': sshconf.ROUTER_IP
+        'ROUTER_IP': sshconf.ROUTER_IP,
+        'INSTALLATION_TYPE': "install",
     }
 
 @utils.clitask("Decompressing {0}...", sudo=True)
@@ -102,18 +113,29 @@ def prepare_host_image(image_arg):
             image_path = decompress_image(image_path)
     return image_path
 
-def prepare_provision(args):
-    # generate key pair
-    if not args.public_key_path:
-        args.public_key_path, private_key_path = generate_key_pair(args.name[0])
-    # generate host configuration
-    host_config = prepare_host_config(args)
+def prepare_provision(args, update=False):
+    if update:
+        # use existing key pair
+        private_key_path = os.path.join(sshconf.TOWER_DIR, 'hosts', args.name[0], 'id_ed25519')
+        # load configuration
+        host_config = sshconf.get_host_config(args.name[0])
+        host_config['INSTALLATION_TYPE'] = "update"
+    else:
+        # generate key pair
+        if not args.public_key_path:
+            args.public_key_path, private_key_path = generate_key_pair(args.name[0])
+        # generate luks key
+        generate_luks_key(args.name[0])
+        # generate host configuration
+        host_config = prepare_host_config(args)
     # determine target device
     boot_device = args.boot_device or utils.select_boot_device()
     check_environment_value('boot-device', boot_device)
     # find TowerOS-Host image
     image_path = prepare_host_image(args.image)
     check_environment_value('image', image_path)
+    # inject image version in host config
+    host_config['TOWEROS_VERSION'] = f"v{image_path.split('-')[-2]}"
     # return everything needed to provision the host
     return image_path, boot_device, host_config, private_key_path
 
@@ -125,29 +147,82 @@ def save_config_file(config_path, config_str):
     os.chmod(config_path, 0o600)
 
 def save_host_config(config):
-    config_filename = f"{config['HOSTNAME']}-{datetime.now().strftime('%Y%m%d%H%M%S')}.env"
-    config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config_filename)
+    config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config['HOSTNAME'], 'tower.env')
     config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
     save_config_file(config_path, config_str)
-    
+
+def check_network(online):
+    ip = sshconf.THIN_CLIENT_IP_ETH0 if online else sshconf.THIN_CLIENT_IP_ETH1
+    interface = 'eth0' if online else 'eth1'
+    if not utils.interface_is_up(interface):
+        raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is up.")
+    if not utils.is_ip_attached(interface, ip):
+        raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is attached to the ip `{ip}`.")
+
+def display_pre_provision_warning(name, boot_device, update):
+    warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."
+    if not update:
+        warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{name}`"
+    else:
+        warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your /home directory will be preserved."
+    warning_text = Text(warning_message, style='red')
+    rprint(warning_text)
+
+def display_pre_discovering_message():
+    message = "Boot device ready:\n"
+    message += "- make sure the host and client are connected to the same switch and to the correct interface and network "
+    message += f"({sshconf.TOWER_NETWORK_OFFLINE} for offline host and {sshconf.TOWER_NETWORK_ONLINE} for online host)\n"
+    message += "- make sure the device for the root system file is plugged into the host computer.\n"
+    message += "- remove the boot device from the Thin Client\n"
+    message += "- insert it into the Host computer\n"
+    message += "- turn it on the Host computer and wait for it to be discover by the Thin Client on the network.\n"
+    message += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. "
+    message += "If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
+    rprint(Text(message, style='green'))
+
+def display_post_discovering_message(name, ip):
+    logger.info(f"Host ready with IP: {ip}")
+    logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
+    logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
+    logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
+    logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
+
+def diplay_discovering_error_message():
+    error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem you can refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
+    rprint(Text(error_message, style='red'))
+    exit(1)
+
+def reinstall_packages(name):
+    if (not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+        no_connection_message = f"\nWARNING: Impossible to re-install packages: this host is an offline host and the router host `{sshconf.ROUTER_HOSTNAME}` was not found."
+        rprint(Text(no_connection_message, style='red'))
+    else:
+        install.reinstall_all_packages(name)
+
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
-def provision(name, args):
-    image_path, boot_device, host_config, private_key_path = prepare_provision(args)
-    confirm_message = f"Are you sure you want to completely wipe the boot device `{boot_device}` plugged into the Thin Client "
-    confirm_message += f"and the root device plugged into the host `{name}` and install TowerOS-Host on them?"
-    confirm_text = Text(confirm_message, style='red')
-    if args.no_confirm or Confirm.ask(confirm_text):
-        save_host_config(host_config)
-        del(host_config['PASSWORD'])
+def provision(name, args, update=False):
+    check_network(args.online or name == sshconf.ROUTER_HOSTNAME)
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
+    display_pre_provision_warning(name, boot_device, update)
+    if args.no_confirm or Confirm.ask("Do you want to continue?"):
+        if not update:
+            save_host_config(host_config)
         buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-        sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
-        sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
         utils.menu.prepare_xfce_menu()
-        logger.info(f"Host ready with IP: {host_config['STATIC_HOST_IP']}")
-        logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
-        logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
-        logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
-        logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
+        if not update:
+            sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+        display_pre_discovering_message()
+        try:
+            sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
+            if update:
+                reinstall_packages(name)
+            display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
+        except KeyboardInterrupt:
+            logger.info("Discovering interrupted.")
+            diplay_discovering_error_message()
+        except DiscoveringTimeOut:
+            logger.info("Discovering timed out.")
+            diplay_discovering_error_message()
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

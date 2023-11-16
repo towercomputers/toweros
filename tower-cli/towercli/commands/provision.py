@@ -120,7 +120,7 @@ def check_args(args, parser_error):
         parser_error(message="Host name invalid. Must be between one and 15 minuscule alphanumeric chars.")
 
     if sshconf.exists(args.name[0]) and not args.force:
-        parser_error("Host name already used. Please use `--force` to overwrite it.")
+        parser_error(f"Host name already used. Please use the flag `--force` to overwrite it or `tower update {args.name[0]}`to update it.")
 
     if args.boot_device:
         disk_list = utils.get_device_list()

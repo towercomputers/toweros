@@ -4,7 +4,7 @@ import logging
 
 import requests
 from backports.pbkdf2 import pbkdf2_hmac
-from sh import contrib, cp
+from sh import contrib, cp, Command
 
 from towerlib.utils.decorators import clitask
 
@@ -32,3 +32,11 @@ def download_file(url, dest_path):
                 f.write(chunk)
     with contrib.sudo(password="", _with=True):
         cp(tmp_dest_path, dest_path)
+
+def interface_is_up(interface):
+    is_up = Command('sh')('-c', f'ip link show {interface} | grep -q "state UP" && echo "OK" || echo "NOK"').strip()
+    return is_up == "OK"
+
+def is_ip_attached(interface, ip):
+    is_attached = Command('sh')('-c', f'ip addr show {interface} | grep -q {ip} && echo "OK" || echo "NOK"').strip()
+    return is_attached == "OK"

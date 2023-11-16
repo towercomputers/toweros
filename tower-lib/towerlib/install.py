@@ -9,7 +9,7 @@ from rich.text import Text
 from sh import ssh, scp, rm, Command, ErrorReturnCode
 
 from towerlib.utils import clitask
-from towerlib.utils.menu import add_installed_package
+from towerlib.utils.menu import add_installed_package, get_installed_packages
 from towerlib.sshconf import ROUTER_HOSTNAME, is_online_host
 
 logger = logging.getLogger('tower')
@@ -153,3 +153,9 @@ def install_packages(host, packages):
         install_in_online_host(host, packages)
     else:
         install_in_offline_host(host, packages)
+
+@clitask("Re-installing all packages in {0}...", task_parent=True)
+def reinstall_all_packages(host):
+    packages = get_installed_packages(host)
+    if packages:
+        install_packages(host, packages)
