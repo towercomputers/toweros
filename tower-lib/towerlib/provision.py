@@ -168,7 +168,19 @@ def display_pre_provision_warning(name, boot_device, update):
     warning_text = Text(warning_message, style='red')
     rprint(warning_text)
 
-def display_post_provision_message(name, ip):
+def display_pre_discovering_message():
+    message = "Boot device ready:\n"
+    message += "- make sure the host and client are connected to the same switch and to the correct interface and network "
+    message += f"({sshconf.TOWER_NETWORK_OFFLINE} for offline host and {sshconf.TOWER_NETWORK_ONLINE} for online host)\n"
+    message += "- make sure the device for the root system file is plugged into the host computer.\n"
+    message += "- remove the boot device from the Thin Client\n"
+    message += "- insert it into the Host computer\n"
+    message += "- turn it on the Host computer and wait for it to be discover by the Thin Client on the network.\n"
+    message += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. "
+    message += "If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
+    rprint(Text(message, style='green'))
+
+def display_post_discovering_message(name, ip):
     logger.info(f"Host ready with IP: {ip}")
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
@@ -199,11 +211,12 @@ def provision(name, args, update=False):
         utils.menu.prepare_xfce_menu()
         if not update:
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+        display_pre_discovering_message()
         try:
             sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
             if update:
                 reinstall_packages(name)
-            display_post_provision_message(name, host_config['STATIC_HOST_IP'])
+            display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
         except KeyboardInterrupt:
             logger.info("Discovering interrupted.")
             diplay_discovering_error_message()
