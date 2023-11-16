@@ -25,8 +25,10 @@ def check_environment_value(key, value):
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
 
 def generate_key_pair(name):
-    os.makedirs(os.path.join(sshconf.TOWER_DIR, 'hosts', name), exist_ok=True)
-    key_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, 'id_ed25519')
+    host_dir = os.path.join(sshconf.TOWER_DIR, 'hosts', name)
+    os.makedirs(host_dir, exist_ok=True)
+    os.chmod(host_dir, 0o700)
+    key_path = os.path.join(host_dir, 'id_ed25519')
     if os.path.exists(key_path):
         os.remove(key_path)
         os.remove(f'{key_path}.pub')
