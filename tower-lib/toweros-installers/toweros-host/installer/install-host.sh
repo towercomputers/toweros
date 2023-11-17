@@ -115,7 +115,7 @@ address $STATIC_HOST_IP/24
 EOF
 
 	# disable wireless devices
-    rfkill block all
+    rfkill block all || true
 
 	# enable connection if requested
 	if [ "$HOSTNAME" == "router" ]; then
