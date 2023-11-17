@@ -201,7 +201,8 @@ def reinstall_packages(name):
 
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args, update=False):
-    check_network(args.online or name == sshconf.ROUTER_HOSTNAME)
+    if not args.force:
+        check_network(args.online or name == sshconf.ROUTER_HOSTNAME)
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
     display_pre_provision_warning(name, boot_device, update)
     if args.no_confirm or Confirm.ask("Do you want to continue?"):

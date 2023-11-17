@@ -29,6 +29,7 @@ INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '
 
 ALPINE_BRANCH_FOR_UNVERSIONED = "v3.17"
 ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
+USERNAME = getpass.getuser()
 
 sprint = lambda str: print(str, end='', flush=True)
 
@@ -58,6 +59,8 @@ def prepare_apk_repos(private_key_path):
     unversioned_apks, versioned_apks = [], []
     for line in cat(world_path, _iter=True):
         package = line.strip()
+        if package == "linux-firmware-brcm-cm4":
+            continue
         if "=" in package:
             versioned_apks.append(package.split("=")[0])
         else:
@@ -65,6 +68,13 @@ def prepare_apk_repos(private_key_path):
     # download packages
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_UNVERSIONED, unversioned_apks)
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_VERSIONED, versioned_apks)
+    # build and copy linux-firmware-brcm-cm4
+    Command('sh')(
+        '-c',
+        f'runuser -u {USERNAME} -- abuild -r',
+        _cwd=os.path.join(INSTALLER_DIR, 'linux-firmware-brcm-cm4')
+    )
+    cp("/home/tower/packages/toweros-host/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
     # prepare index
     apks = glob.glob(wd("EXPORT_BOOTFS_DIR/apks/armv7/*.apk"))
     apk_index_path = wd("EXPORT_BOOTFS_DIR/apks/armv7/APKINDEX.tar.gz")
@@ -155,7 +165,7 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-rtxv', wd("EXPORT_BOOTFS_DIR/"), wd("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
-def compress_image(builds_dir, owner):
+def compress_image(builds_dir):
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
     tmp_image_path = os.path.join("/tmp", image_name)
     image_path = os.path.join(builds_dir, image_name)
@@ -166,14 +176,14 @@ def compress_image(builds_dir, owner):
         _out=tmp_image_path
     )
     cp(tmp_image_path, image_path)
-    chown(f"{owner}:{owner}", image_path)
+    chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
 
 @clitask("Copying image...")
-def copy_image(builds_dir, owner):
+def copy_image(builds_dir):
     image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wd("toweros-host.img"), image_path)
-    chown(f"{owner}:{owner}", image_path)
+    chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
 
 def unmount_all():
@@ -197,7 +207,6 @@ def prepare_apk_key():
 @clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
 def build_image(builds_dir, uncompressed=False):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
-    user = getpass.getuser()
     loop_dev = None
     image_path = None
     try:
@@ -210,9 +219,9 @@ def build_image(builds_dir, uncompressed=False):
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         if uncompressed:
-            image_path = copy_image(builds_dir, user)
+            image_path = copy_image(builds_dir)
         else:
-            image_path = compress_image(builds_dir, user)
+            image_path = compress_image(builds_dir)
     finally:
         cleanup()
     if image_path:
