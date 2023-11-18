@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.9">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.78cf6014.min.css">
       
       
 
@@ -279,8 +279,17 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
-        
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Installation
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         
@@ -291,6 +300,50 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -513,6 +566,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/towercomputers/toweros" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Repository
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -537,8 +610,41 @@
   
   
   
-    
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Installation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#update" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -553,13 +659,46 @@
                   
 
 
-<h1 id="installation">Installation</h1>
+  <h1>Installation</h1>
+
+<h2 id="installation">Installation</h2>
 <p>To use TowerOS, you must first install the image for the thin client on the device you wish to use (normally a laptop):</p>
 <ol>
 <li>Download the latest image here: <a href="https://github.com/towercomputers/toweros/releases/latest">https://github.com/towercomputers/toweros/releases/latest</a>.</li>
 <li>Prepare a bootable USB medium using the above image.</li>
 <li>Boot the thin client with the USB drive and follow the instructions.</li>
 </ol>
+<h2 id="update">Update</h2>
+<ol>
+<li>
+<p>Update TowerOS-Thinclient</p>
+<p>To update the Thin Client you must proceed in exactly the same way as for the installation and select "Update TowerOS-Thinclient" in the first question.</p>
+<p>During an update the system is completely reinstalled. Only the /home folder with hosts configurations and keys are kept. If you have data outside of /home, make sure to make a backup before starting the update.</p>
+</li>
+<li>
+<p>Update hosts</p>
+<pre><code>[thinclient]$ tower update &lt;host&gt;
+</code></pre>
+<p>During an update the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the update.
+Once the system is updated, all applications installed with <code>tower install &lt;host&gt;</code> are automatically re-installed.
+Note: Start by updating the <code>router</code> and then the other hosts.</p>
+</li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<p>In case a host is not accessible:</p>
+<ul>
+<li>either by the provisioning script</li>
+<li>either with <code>ssh &lt;host&gt;</code></li>
+<li>either appears as "down" with <code>tower status</code></li>
+</ul>
+<p>The most likely cause is a network problem. Here is the list of checks to carry out:</p>
+<ol>
+<li>With <code>ip ad</code> check that the interface <code>eth0</code> is UP and with the ip <code>192.168.2.100</code> and that the interface <code>eth1</code> is UP with the ip <code>192.168.3.100</code>.</li>
+<li>check that the Thin Client is connected to the online switch with <code>eth0</code> and to the offline switch with <code>eth1</code>.</li>
+<li>check that the host is connected to the correct switch</li>
+<li>check that the host is visible with <code>nmap -sn 192.168.2.0/24</code> for an online host and <code>nmap -sn 192.168.3.0/24</code> for an offline host.</li>
+</ol>
+<p>If all of these checks are ok and you still cannot access the host, you must connect a screen and keyboard to the host and check for any error messages.</p>
 
 
 
@@ -596,7 +735,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.instant", "navigation.instant.prefetch"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.6c14ae12.min.js"></script>
       
     
   </body>
