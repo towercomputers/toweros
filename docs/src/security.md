@@ -41,13 +41,13 @@ Note: The reason that the decryption keys are stored on removable drives---rathe
 | Physical Tampering | Cold-Boot Attack | Optional | Raspberry Pis: [Zymbit](https://www.zymbit.com/) |
 | Microarchitectural | RowHammer; RowPress | Yes | Host-Isolation |
 | Microarchitectural | Speculative Execution | Yes | Host-Isolation |
-| Physical Side-Channel | Power Consumption (e.g. [Hertzbleed](https://www.hertzbleed.com/) | Optional | Disable DVFS |
+| Physical Side-Channel | Power Consumption (e.g. [Hertzbleed](https://www.hertzbleed.com/)) | Optional | Disable DVFS |
 | Physical Side-Channel | Acoustic Emissions | No |  |
 | Physical Side-Channel | Electromagnetic Radiation | No |  |
 
 ## Tor Proxy
 
-Tor is installed by default on the router and a Socks5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.
+Tor is installed by default on the router and a SOCKS5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.
 
 For example if you have an online host called `web`:
 
