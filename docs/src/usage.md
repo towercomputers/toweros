@@ -65,12 +65,18 @@ TowerOS makes it easy to install new packages on any host by tunneling a connect
 [thinclient]$ tower status
 ```
 
-### Move a file from one host to another
+### Get ThinClient and hosts versions
 
 ```
-[thinclient]$ scp <host_source>:<file_path_in_host_source> <host_dest>:<file_path_in_host_dest>
-[thinclient]$ ssh <host_source> rm <file_path_in_host_source>
+[thinclient]$ tower version
 ```
+
+### Update `router` wifi credentials
+
+```
+[thinclient]$ tower wlan-connect --ssid <ssid> --password <password>
+```
+
 
 ## Example Usage
 
