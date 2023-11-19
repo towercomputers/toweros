@@ -44,3 +44,29 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
                              --from-repo sftp:storage:/home/tower/backup \
                              latest --host office
         [thinclient]$ ssh -t office restic -r /home/tower/backup restore latest --target /
+
+
+## Install `pip` package in offline host using online host
+
+1. Install `pip` in online and offline host
+
+        [thinclient]$ tower install router python3 py3-pip
+        [thinclient]$ tower install office python3 py3-pip
+
+1. Download package and dependencies in online host
+
+        [thinclient]$ ssh router mkdir mypackages
+        [thinclient]$ ssh router pip download <package_name> -d mypackages 
+
+1. Copy package and dependencies to offline host
+
+        [thinclient]$ scp -r router:mypackages office:
+
+1. Install `pip` package in offline host
+
+        [thinclient]$ ssh office pip install --no-index --find-links="~/mypackages" <package_name>
+
+1. Clean cache in online and offline host
+
+        [thinclient]$ ssh office rm -rf mypackages
+        [thinclient]$ ssh router rm -rf mypackages
