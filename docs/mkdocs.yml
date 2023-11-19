@@ -15,8 +15,9 @@ nav:
   - Getting Started:
     - Introduction: index.md
     - Hardware: hardware.md
-    - Installation: installation.md
+    - Installation and upgrade: installation.md
     - Usage: usage.md
+    - Guides: guides.md
   - Security:
     - Security: security.md
     - Secure Boot: secure-boot.md

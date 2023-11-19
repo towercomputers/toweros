@@ -6,7 +6,7 @@ To use TowerOS, you must first install the image for the thin client on the devi
 2. Prepare a bootable USB medium using the above image.
 3. Boot the thin client with the USB drive and follow the instructions.
 
-## Update
+## Upgrade
 
 1. Update TowerOS-Thinclient
 
