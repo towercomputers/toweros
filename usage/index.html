@@ -427,9 +427,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#move-a-file-from-one-host-to-another" class="md-nav__link">
+  <a href="#get-thinclient-and-hosts-versions" class="md-nav__link">
     <span class="md-ellipsis">
-      Move a file from one host to another
+      Get ThinClient and hosts versions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-router-wifi-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update router wifi credentials
     </span>
   </a>
   
@@ -816,9 +825,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#move-a-file-from-one-host-to-another" class="md-nav__link">
+  <a href="#get-thinclient-and-hosts-versions" class="md-nav__link">
     <span class="md-ellipsis">
-      Move a file from one host to another
+      Get ThinClient and hosts versions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-router-wifi-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update router wifi credentials
     </span>
   </a>
   
@@ -894,9 +912,11 @@
 <h3 id="list-your-hosts-and-their-statuses">List your hosts and their statuses</h3>
 <pre><code>[thinclient]$ tower status
 </code></pre>
-<h3 id="move-a-file-from-one-host-to-another">Move a file from one host to another</h3>
-<pre><code>[thinclient]$ scp &lt;host_source&gt;:&lt;file_path_in_host_source&gt; &lt;host_dest&gt;:&lt;file_path_in_host_dest&gt;
-[thinclient]$ ssh &lt;host_source&gt; rm &lt;file_path_in_host_source&gt;
+<h3 id="get-thinclient-and-hosts-versions">Get ThinClient and hosts versions</h3>
+<pre><code>[thinclient]$ tower version
+</code></pre>
+<h3 id="update-router-wifi-credentials">Update <code>router</code> wifi credentials</h3>
+<pre><code>[thinclient]$ tower wlan-connect --ssid &lt;ssid&gt; --password &lt;password&gt;
 </code></pre>
 <h2 id="example-usage">Example Usage</h2>
 <ol>
