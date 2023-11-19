@@ -143,6 +143,10 @@ net.ipv6.conf.all.forwarding=1
 EOF
 		# Allow tcp forwarding for ssh tunneling (used by `install` and `run` commands)
 		sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
+
+		# randomize wlan0 mac address
+		echo "macchanger -r wlan0" >> /etc/local.d/macchanger.start
+		chmod +x /etc/local.d/macchanger.start
 	else
 		if [ "$ONLINE" == "true" ]; then
 			# update network configuration
