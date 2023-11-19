@@ -14,7 +14,7 @@
         <link rel="prev" href="../installation/">
       
       
-        <link rel="next" href="../security/">
+        <link rel="next" href="../guides/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -277,7 +277,7 @@
         
   
   <span class="md-ellipsis">
-    Installation
+    Installation and upgrade
   </span>
   
 
@@ -449,19 +449,30 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#backup-hosts-with-restic" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backup hosts with restic
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../guides/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Guides
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -827,15 +838,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#backup-hosts-with-restic" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backup hosts with restic
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -917,56 +919,6 @@
 <p>Run galculator <code>office</code>:</p>
 <pre><code>[thinclient]$ startx
 [thinclient]$ tower run office gcalculator
-</code></pre>
-</li>
-<li>
-<p>Move a file from <code>router</code> to <code>office</code>:</p>
-<pre><code>[thinclient]$ scp router:/home/tower/myfile office:/home/tower
-[thinclient]$ ssh router rm /home/tower/myfile
-</code></pre>
-</li>
-</ol>
-<h2 id="backup-hosts-with-restic">Backup hosts with <code>restic</code></h2>
-<p>It is recommended to reserve one of your hosts, for example <code>storage</code>, to store the backups of all the other hosts there. Here's how, using <code>restic</code>, you can store the backup of an <code>office</code> host on a <code>storage</code> host:</p>
-<ol>
-<li>
-<p>Install restic</p>
-<pre><code>[thinclient]$ tower install storage restic
-[thinclient]$ tower install office restic
-[thinclient]$ tower install thinclient restic
-</code></pre>
-</li>
-<li>
-<p>Initialize restic repo in each host</p>
-<pre><code>[thinclient]$ ssh -t storage restic -r /home/tower/backup init
-[thinclient]$ ssh -t office restic -r /home/tower/backup init \
-                                   --from-repo sftp:storage:/home/tower/backup \
-                                   --copy-chunker-params
-</code></pre>
-<p>Note: <code>--copy-chunker-params</code> is important to ensure deduplication. 
-See "<a href="https://restic.readthedocs.io/en/latest/045_working_with_repos.html#copying-snapshots-between-repositories">Copying snapshots between repositories</a>" for more options.</p>
-</li>
-<li>
-<p>Backup <code>office</code></p>
-<pre><code>[thinclient]$ ssh -t office restic -r /home/tower/backup backup /home/tower/mydata
-</code></pre>
-</li>
-<li>
-<p>Copy <code>office</code> snapshot into <code>storage</code> repo</p>
-<pre><code>[thinclient]$ restic -r sftp:storage:/home/tower/backup copy \
-                     --from-repo sftp:office:/home/tower/backup \
-                     latest
-</code></pre>
-<p>Note: here <code>restic</code> copies the backup from the <code>office</code> host to the Thin Client, and then copies it to the <code>storage</code> host. You can optionally clear the cache stored on the Thin Client:</p>
-<pre><code>[thinclient]$ rm -rf ~/.cache/restic
-</code></pre>
-</li>
-<li>
-<p>Restore backup into <code>office</code></p>
-<pre><code>[thinclient]$ restic -r sftp:office:/home/tower/backup copy \
-                     --from-repo sftp:storage:/home/tower/backup \
-                     latest --host office
-[thinclient]$ ssh -t office restic -r /home/tower/backup restore latest --target /
 </code></pre>
 </li>
 </ol>
