@@ -21,6 +21,7 @@ from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
 from towerlib.sshconf import TOWER_NETWORK_ONLINE, TOWER_NETWORK_OFFLINE, TOWER_DIR
+from towerlib.utils.exceptions import LockException, BuildException
 
 logger = logging.getLogger('tower')
 
@@ -38,7 +39,7 @@ def wd(path):
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
-        raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
 
 def fetch_apk_packages(repo_path, branch, packages):
@@ -151,7 +152,7 @@ def create_loop_device(image_file):
         loop_dev = losetup('--show', '--find', '--partscan', image_file).strip()
     if loop_dev:
         return loop_dev
-    raise Exception("losetup failed; exiting")
+    raise BuildException("losetup failed; exiting")
 
 @clitask("Copying Alpine Linux system in RPI partitions...")
 def prepare_rpi_partitions(loop_dev):
@@ -239,11 +240,11 @@ def copy_image_in_device(image_file, device):
         error_message = "Error copying image, please check the boot device integrity or try again with the flag `--zero-device`."
         logger.error(buf.getvalue())
         logger.error(error_message)
-        raise Exception(error_message)
+        raise BuildException(error_message)
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     if not boot_part:
-        raise Exception("Invalid partitions")
+        raise BuildException("Invalid partitions")
     return boot_part
 
 @clitask("Zeroing {0} please be patient...")
@@ -262,7 +263,6 @@ def insert_tower_env(boot_part, config):
     # insert luks key in boot partition
     keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], "crypto_keyfile.bin")
     cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
-
 
 @clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):

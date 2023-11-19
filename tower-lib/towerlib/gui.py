@@ -7,6 +7,8 @@ import time
 import sh
 from sh import ssh, nxproxy, xsetroot, mcookie
 
+from towerlib.utils.exceptions import NxTimeoutException
+
 logger = logging.getLogger('tower')
 
 NXAGENT_FIRST_PORT = 4000
@@ -34,9 +36,6 @@ DEFAULTS_NXPROXY_ARGS = dict(
 )
 
 NX_TIMEOUT = 5
-
-class NxTimeoutException(Exception):
-    pass
 
 def ssh_command(hostname, *cmd):
     cmd_uuid = str(uuid.uuid1())

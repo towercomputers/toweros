@@ -14,6 +14,7 @@ from sh import rm, git, pip, Command, apk, hatch, cp, contrib
 from towerlib.utils import clitask
 from towerlib import buildhost
 from towerlib.__about__ import __version__
+from towerlib.utils.exceptions import LockException
 
 logger = logging.getLogger('tower')
 
@@ -30,7 +31,7 @@ def wd(path):
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
-        raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
     makedirs(WORKING_DIR)
 
 @clitask("Cleaning up...")

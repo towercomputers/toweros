@@ -6,11 +6,9 @@ from sh import shasum, mkdir, contrib
 
 from towerlib.utils import network
 from towerlib.utils.decorators import clitask
+from towerlib.utils.exceptions import InvalidChecksum
 
 logger = logging.getLogger('tower')
-
-class InvalidChecksum(Exception):
-    pass
 
 REQUIRED_BUILDS = {
     "alpine-rpi": {

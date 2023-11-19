@@ -11,6 +11,7 @@ from sh import ssh, scp, rm, Command, ErrorReturnCode
 from towerlib.utils import clitask
 from towerlib.utils.menu import add_installed_package, get_installed_packages
 from towerlib.sshconf import ROUTER_HOSTNAME, is_online_host
+from towerlib.utils.exceptions import LockException
 
 logger = logging.getLogger('tower')
 
@@ -27,7 +28,7 @@ def prepare_repositories_file(host):
     file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
     # use temporary file as lock file
     if os.path.exists(file_name):
-        raise Exception(f"f{file_name} already exists! Is another install in progress? if not, delete this file and try again.")
+        raise LockException(f"f{file_name} already exists! Is another install in progress? if not, delete this file and try again.")
     # generate temporary apk repositories 
     with open(file_name, 'w') as fp:
         for repo in APK_REPOS_URL:

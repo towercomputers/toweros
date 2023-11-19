@@ -13,12 +13,9 @@ from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
 from towerlib import install
-from towerlib.utils.exceptions import DiscoveringTimeOut
+from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException
 
 logger = logging.getLogger('tower')
-
-class MissingEnvironmentValue(Exception):
-    pass
 
 def check_environment_value(key, value):
     if not value:
@@ -155,9 +152,9 @@ def check_network(online):
     ip = sshconf.THIN_CLIENT_IP_ETH0 if online else sshconf.THIN_CLIENT_IP_ETH1
     interface = 'eth0' if online else 'eth1'
     if not utils.interface_is_up(interface):
-        raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is up.")
+        raise NetworkException(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is up.")
     if not utils.is_ip_attached(interface, ip):
-        raise Exception(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is attached to the ip `{ip}`.")
+        raise NetworkException(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is attached to the ip `{ip}`.")
 
 def display_pre_provision_warning(name, boot_device, update):
     warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."

@@ -7,7 +7,7 @@ from sshconf import read_ssh_config, empty_ssh_config_file
 from sh import ssh, ErrorReturnCode, sed, touch, Command
 
 from towerlib.utils import clitask
-from towerlib.utils.exceptions import DiscoveringTimeOut
+from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost
 from towerlib.__about__ import __version__
 
 DEFAULT_SSH_USER = "tower"
@@ -24,9 +24,6 @@ SSH_CONFIG_PATH = os.path.expanduser('~/.ssh/config')
 KNOWN_HOSTS_PATH = os.path.expanduser('~/.ssh/known_hosts')
 
 logger = logging.getLogger('tower')
-
-class UnkownHost(Exception):
-    pass
 
 def create_ssh_dir():
     ssh_dir = os.path.dirname(SSH_CONFIG_PATH)

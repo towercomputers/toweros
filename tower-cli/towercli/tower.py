@@ -3,6 +3,7 @@ import argparse
 import towercli
 from towercli.commands import provision, install, run, status, wlanconnect, update, version
 from towerlib import utils
+from towerlib.utils.exceptions import TowerException
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
@@ -35,6 +36,10 @@ def parse_arguments():
     return args
 
 def main():
-    args = parse_arguments()
-    utils.clilogger.initialize(args.verbose, args.quiet)
-    getattr(towercli.commands, args.command.replace("-", "")).execute(args)
+    try:
+        args = parse_arguments()
+        utils.clilogger.initialize(args.verbose, args.quiet)
+        getattr(towercli.commands, args.command.replace("-", "")).execute(args)
+    except TowerException as e:
+        utils.clilogger.print_error(str(e))
+        exit(1)
