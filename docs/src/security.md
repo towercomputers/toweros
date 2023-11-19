@@ -17,6 +17,9 @@ In general, operating system configuration is outside the scope of TowerOS's res
 ## Thin-Client Security
 The thin client is the root of trust of the system. To avoid accidentally compromising the thin client, avoid installing unnecessary software and never open any untrusted files, except on a host.
 
+## Router Security
+Best practice is never to install any software on the router host, nor open any untrusted files on it either.
+
 
 ## Full-Disk Encryption
 
