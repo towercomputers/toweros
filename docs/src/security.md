@@ -14,6 +14,9 @@
 ## Operating System
 In general, operating system configuration is outside the scope of TowerOS's responsibilities; TowerOS does attempt to be *secure by default*, however. Of course, the core architecture of TowerOS is designed to mitigate the severity of any compromise of a host. For information on how best to securing your thin client and hosts at the level of the operating system, please see this [Linux Hardening Guide](https://madaidans-insecurities.github.io/guides/linux-hardening.html).
 
+## Thin-Client Security
+The thin client is the root of trust of the system. To avoid accidentally compromising the thin client, avoid installing unnecessary software and never open any untrusted files, except on a host.
+
 
 ## Full-Disk Encryption
 
