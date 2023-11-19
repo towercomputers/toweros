@@ -1,6 +1,7 @@
 import os
 import logging
 import time
+import getpass
 from ipaddress import ip_address, ip_network
 
 from sshconf import read_ssh_config, empty_ssh_config_file
@@ -10,7 +11,7 @@ from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost
 from towerlib.__about__ import __version__
 
-DEFAULT_SSH_USER = "tower"
+DEFAULT_SSH_USER = getpass.getuser()
 TOWER_NETWORK_ONLINE = "192.168.2.0/24"
 TOWER_NETWORK_OFFLINE = "192.168.3.0/24"
 THIN_CLIENT_IP_ETH0 = "192.168.2.100"
