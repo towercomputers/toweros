@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.9">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.78cf6014.min.css">
       
       
 
@@ -472,42 +472,72 @@
       
         <li class="md-nav__item">
   <a href="#security-model" class="md-nav__link">
-    Security Model
+    <span class="md-ellipsis">
+      Security Model
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#operating-system" class="md-nav__link">
-    Operating System
+    <span class="md-ellipsis">
+      Operating System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thin-client-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thin-Client Security
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#router-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Router Security
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#full-disk-encryption" class="md-nav__link">
-    Full-Disk Encryption
+    <span class="md-ellipsis">
+      Full-Disk Encryption
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#trusted-computing-base" class="md-nav__link">
-    Trusted Computing Base
+    <span class="md-ellipsis">
+      Trusted Computing Base
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#threat-analysis" class="md-nav__link">
-    Threat Analysis
+    <span class="md-ellipsis">
+      Threat Analysis
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#tor-proxy" class="md-nav__link">
-    Tor Proxy
+    <span class="md-ellipsis">
+      Tor Proxy
+    </span>
   </a>
   
 </li>
@@ -702,42 +732,72 @@
       
         <li class="md-nav__item">
   <a href="#security-model" class="md-nav__link">
-    Security Model
+    <span class="md-ellipsis">
+      Security Model
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#operating-system" class="md-nav__link">
-    Operating System
+    <span class="md-ellipsis">
+      Operating System
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#thin-client-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Thin-Client Security
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#router-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Router Security
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#full-disk-encryption" class="md-nav__link">
-    Full-Disk Encryption
+    <span class="md-ellipsis">
+      Full-Disk Encryption
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#trusted-computing-base" class="md-nav__link">
-    Trusted Computing Base
+    <span class="md-ellipsis">
+      Trusted Computing Base
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#threat-analysis" class="md-nav__link">
-    Threat Analysis
+    <span class="md-ellipsis">
+      Threat Analysis
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#tor-proxy" class="md-nav__link">
-    Tor Proxy
+    <span class="md-ellipsis">
+      Tor Proxy
+    </span>
   </a>
   
 </li>
@@ -775,6 +835,10 @@
 </ul>
 <h2 id="operating-system">Operating System</h2>
 <p>In general, operating system configuration is outside the scope of TowerOS's responsibilities; TowerOS does attempt to be <em>secure by default</em>, however. Of course, the core architecture of TowerOS is designed to mitigate the severity of any compromise of a host. For information on how best to securing your thin client and hosts at the level of the operating system, please see this <a href="https://madaidans-insecurities.github.io/guides/linux-hardening.html">Linux Hardening Guide</a>.</p>
+<h2 id="thin-client-security">Thin-Client Security</h2>
+<p>The thin client is the root of trust of the system. To avoid accidentally compromising the thin client, avoid installing unnecessary software and never open any untrusted files, except on a host.</p>
+<h2 id="router-security">Router Security</h2>
+<p>Best practice is never to install any software on the router host, nor open any untrusted files on it either.</p>
 <h2 id="full-disk-encryption">Full-Disk Encryption</h2>
 <p>TowerOS requires that the <em>root device</em> used by the thin client and hosts be encrypted. The decryption keys for these drives are stored on the <em>boot device</em>, which is itself a removable drive: the thin client's boot device should be a USB key; the host's may be either an SD card or a USB key (when using Compute Modules, they must be SD cards). It is therefore best practice to remove these drives from the relevant devices as soon as they have been booted up, and especially before they are left unattended.</p>
 <p>Note: The reason that the decryption keys are stored on removable drives---rather than themselves being stored locally  and decrypted with passphrases---is the impracticaly of requiring the user to give direct keyboard input to all of the devices on booting the system. In case you would like to store these device decryption keys more securely, it is recommended that you use for a boot device a USB key with hardware-based encryption that can be accessed with a PIN, for instance a <a href="https://www.amazon.com/Kingston-16GB-Protection-Multi-Password-IKLP50">Kingston Ironkey Locker+ 50</a> or an <a href="https://www.amazon.com/Apricorn-256-bit-Encrypted-Validated-ASK3-NX-8GB">Apricorn Aegis Secure Key 3 NX</a>.</p>
@@ -830,7 +894,7 @@
 </tr>
 <tr>
 <td>Physical Side-Channel</td>
-<td>Power Consumption (e.g. <a href="https://www.hertzbleed.com/">Hertzbleed</a></td>
+<td>Power Consumption (e.g. <a href="https://www.hertzbleed.com/">Hertzbleed</a>)</td>
 <td>Optional</td>
 <td>Disable DVFS</td>
 </tr>
@@ -849,7 +913,7 @@
 </tbody>
 </table>
 <h2 id="tor-proxy">Tor Proxy</h2>
-<p>Tor is installed by default on the router and a Socks5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.</p>
+<p>Tor is installed by default on the router and a SOCKS5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.</p>
 <p>For example if you have an online host called <code>web</code>:</p>
 <pre><code>[thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip
 </code></pre>
@@ -889,7 +953,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.instant", "navigation.instant.prefetch"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.6c14ae12.min.js"></script>
       
     
   </body>
