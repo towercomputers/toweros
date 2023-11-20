@@ -8,6 +8,7 @@ import sh
 from sh import ssh, nxproxy, xsetroot, mcookie
 
 from towerlib.utils.exceptions import NxTimeoutException
+from towerlib import sshconf
 
 logger = logging.getLogger('tower')
 
@@ -71,13 +72,16 @@ def authorize_cookie(hostname, cookie, display_num):
         _out=logger.debug
     )
 
-def get_next_display_num(hostname):
-    xauth_list = ssh_command(hostname, 'xauth', 'list')
-    if xauth_list == "":
+def get_next_display_num():
+    used_nums = []
+    for host in sshconf.hosts():
+        xauth_list = ssh_command(host, 'xauth', 'list')
+        if xauth_list == "": continue
+        used_nums += [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
+    if len(used_nums) == 0:
         return NXAGENT_FIRST_DISPLAY_NUM
-    used_num = [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
-    used_num.sort()
-    return used_num.pop() + 1
+    used_nums.sort()
+    return used_nums.pop() + 1
    
 def revoke_cookies(hostname, display_num):
     return ssh(hostname, 'xauth', 
@@ -154,9 +158,9 @@ def cleanup(hostname, display_num):
 
 def run(hostname, *cmd):
     app_process = None
+    display_num = get_next_display_num()
     try:
         xsetroot('-cursor_name', 'watch')
-        display_num = get_next_display_num(hostname)
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
         start_nx_agent(hostname, display_num, cookie)
