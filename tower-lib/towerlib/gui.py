@@ -74,7 +74,7 @@ def authorize_cookie(hostname, cookie, display_num):
 
 def get_next_display_num():
     used_nums = []
-    for host in sshconf.hosts():
+    for host in sshconf.hosts() and sshconf.is_up(host):
         xauth_list = ssh_command(host, 'xauth', 'list')
         if xauth_list == "": continue
         used_nums += [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
