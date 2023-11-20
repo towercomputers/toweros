@@ -202,13 +202,6 @@ def diplay_discovering_error_message():
     rprint(Text(error_message, style='red'))
     exit(1)
 
-def reinstall_packages(name):
-    if (not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
-        no_connection_message = f"\nWARNING: Impossible to re-install packages: this host is an offline host and the router host `{sshconf.ROUTER_HOSTNAME}` was not found."
-        rprint(Text(no_connection_message, style='red'))
-    else:
-        install.reinstall_all_packages(name)
-
 def wait_for_host(name, timeout):
     try:
         sshconf.wait_for_host_sshd(name, timeout)
@@ -219,30 +212,36 @@ def wait_for_host(name, timeout):
         logger.info("Discovering timed out.")
         diplay_discovering_error_message()
 
+def prepare_thin_client(name, host_config, private_key_path):
+    # save host configuration in Thin Client
+    save_host_config(host_config)
+    # prepare ssh config and known hosts
+    sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+    # prepare xcfce menu with new host
+    utils.menu.prepare_xfce_menu()
+
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args, update=False):
+    # prepare provisioning
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
-    if not args.force:
-        check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
+    # check network
+    if not args.force: check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
+    # display warnings
     display_pre_provision_warning(name, boot_device, update)
-    if not args.no_confirm and not Confirm.ask("Do you want to continue?"):
-        logger.info("Provisioning aborted.")
-        exit(0)
-    if not update:
-        save_host_config(host_config)
+    # ask confirmation
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?"): return       
+    # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-    utils.menu.prepare_xfce_menu()
-    if not update:
-        sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+    # save necessary files in Thin Client
+    if not update: prepare_thin_client(name, host_config, private_key_path)
+    # display pre discovering message
     display_pre_discovering_message()
-    if not args.no_wait:
-        wait_for_host(name, args.timeout)
+    # wait for host to be ready
+    if not args.no_wait: wait_for_host(name, args.timeout)
+    # display post discovering message
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
-    if update:
-        if sshconf.is_up(name):
-            reinstall_packages(name)
-        else:
-            raise TowerException(f"Host not up. Packages will not be re-installed.")
+    # re-install packages
+    if update: install.reinstall_all_packages(name)
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

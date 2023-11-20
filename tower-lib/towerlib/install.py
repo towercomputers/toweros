@@ -11,7 +11,8 @@ from sh import ssh, scp, rm, Command, ErrorReturnCode
 from towerlib.utils import clitask
 from towerlib.utils.menu import add_installed_package, get_installed_packages
 from towerlib.sshconf import ROUTER_HOSTNAME, is_online_host
-from towerlib.utils.exceptions import LockException
+from towerlib.utils.exceptions import LockException, TowerException
+from towerlib import sshconf
 
 logger = logging.getLogger('tower')
 
@@ -145,7 +146,14 @@ def install_in_thinclient(packages):
     finally:
         cleanup("thinclient")
 
+def can_install(host):
+    if not sshconf.is_up(host):
+        raise TowerException(message=f"`{host}` is down. Please start it first.")
+    if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
+        raise TowerException(message=f"`{host}` is an offline host and `{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
+
 def install_packages(host, packages):
+    can_install(host)
     if host == 'thinclient':
         confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
@@ -163,6 +171,7 @@ def install_packages(host, packages):
 
 @clitask("Re-installing all packages in {0}...", task_parent=True)
 def reinstall_all_packages(host):
+    can_install(host)
     packages = get_installed_packages(host)
     if packages:
         install_packages(host, packages)
