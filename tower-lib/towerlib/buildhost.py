@@ -263,6 +263,11 @@ def insert_tower_env(boot_part, config):
     # insert luks key in boot partition
     keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], "crypto_keyfile.bin")
     cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
+    # insert host ssh keys in boot partition
+    for key_type in ['ecdsa', 'rsa', 'ed25519']:
+        host_keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], f"ssh_host_{key_type}_key")
+        cp(host_keys_path, wd(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
+        cp(f"{host_keys_path}.pub", wd(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
 @clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):

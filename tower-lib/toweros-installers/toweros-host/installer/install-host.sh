@@ -176,6 +176,11 @@ EOF
 	sed -i "s/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/g" /etc/ssh/sshd_config
 	sed -i "s/AllowTcpForwarding no/#AllowTcpForwarding no/g" /etc/ssh/sshd_config
 	echo "rc_need=networking" >> /etc/conf.d/sshd
+
+	# copy sshd host key from boot device
+	mkdir -p /etc/ssh
+	cp $BOOT_MEDIA/ssh_host_* /etc/ssh/
+	chmod 600 /etc/ssh/ssh_host_*
 }
 
 clone_live_system_to_disk() {
@@ -257,6 +262,8 @@ clean_and_reboot() {
 	mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
 	# remove configuration file
 	rm $BOOT_MEDIA/tower.env
+	# remove sshd host keys
+	rm $BOOT_MEDIA/ssh_host_*
 	# remove keyfile
 	rm /mnt/crypto_keyfile.bin
 	# reboot

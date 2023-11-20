@@ -58,21 +58,20 @@ def get(name):
     else:
         return None
 
-def clean_known_hosts(ip):
-    if os.path.exists(KNOWN_HOSTS_PATH):
-        sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
-
-def update_known_hosts(ip):
+def update_known_hosts(name, ip):
     if os.path.exists(KNOWN_HOSTS_PATH):
         sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
     else:
         create_ssh_dir()
         touch(KNOWN_HOSTS_PATH)
-    Command('sh')('-c', f'ssh-keyscan {ip} >> {KNOWN_HOSTS_PATH}')
+    for key_type in ['ecdsa', 'rsa', 'ed25519']:
+        host_key_path = os.path.join(TOWER_DIR, 'hosts', name, f"ssh_host_{key_type}_key.pub")
+        Command('sh')('-c', f'echo "{ip} $(cat {host_key_path})" >> {KNOWN_HOSTS_PATH}')
     
 @clitask(f"Updating Tower config file {TOWER_SSH_CONFIG_PATH}...")
 def update_config(name, ip, private_key_path):
     insert_include_directive()
+    update_known_hosts(name, ip)
     # get existing hosts
     config = ssh_config()
     existing_hosts = config.hosts()
@@ -100,7 +99,7 @@ def update_config(name, ip, private_key_path):
     if not os.path.exists(TOWER_DIR):
         os.makedirs(TOWER_DIR)
     config.write(TOWER_SSH_CONFIG_PATH)
-    
+
 def hosts():
     return ssh_config().hosts()
 
@@ -145,25 +144,16 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
             if num == first:
                 first += 1
                 return get_next_host_ip(tower_network, first=first + 1)
-    return f"{network}{first}"
-
-def try_to_update_known_hosts_until_success(name, ip, start_time):
-    duration = time.time() - start_time
-    if duration > 60 * 10: # 10 minutes
-        raise DiscoveringTimeOut("Host discovering timeout")
-    try:
-        update_known_hosts(ip)
-    except ErrorReturnCode:
-        time.sleep(3)
-        try_to_update_known_hosts_until_success(name, ip, start_time)
-    if not is_up(name):
-        time.sleep(3)
-        try_to_update_known_hosts_until_success(name, ip, start_time)
+    return f"{network}{first}"  
 
 @clitask("Waiting for host to be ready...")
-def wait_for_host_sshd(name, ip):
+def wait_for_host_sshd(name):
     start_time = time.time()
-    try_to_update_known_hosts_until_success(name, ip, start_time)
+    while not is_up(name):
+        duration = time.time() - start_time
+        if duration > 60 * 10: # 10 minutes
+            raise DiscoveringTimeOut("Host discovering timeout")
+        time.sleep(3)
 
 def get_host_config(name):
     conf_path = os.path.join(TOWER_DIR, 'hosts', name, "tower.env")

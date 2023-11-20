@@ -37,6 +37,14 @@ def generate_luks_key(name):
     os.makedirs(os.path.dirname(keys_path), exist_ok=True)
     dd('if=/dev/urandom', f'of={keys_path}', 'bs=512', 'count=4')
 
+def generate_ssh_host_keys(name):
+    for key_type in ['ecdsa', 'rsa', 'ed25519']:
+        host_keys_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, f"ssh_host_{key_type}_key")
+        if os.path.exists(host_keys_path):
+            os.remove(host_keys_path)
+            os.remove(f'{host_keys_path}.pub')
+        ssh_keygen('-t', key_type, '-f', host_keys_path, '-N', "")
+
 @utils.clitask("Preparing host configuration...")
 def prepare_host_config(args):
     name = args.name[0]
@@ -123,6 +131,8 @@ def prepare_provision(args, update=False):
             args.public_key_path, private_key_path = generate_key_pair(args.name[0])
         # generate luks key
         generate_luks_key(args.name[0])
+        # generate ssh host keys
+        generate_ssh_host_keys(args.name[0])
         # generate host configuration
         host_config = prepare_host_config(args)
     # determine target device
@@ -211,7 +221,7 @@ def provision(name, args, update=False):
             sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
         display_pre_discovering_message()
         try:
-            sshconf.wait_for_host_sshd(name, host_config['STATIC_HOST_IP'])
+            sshconf.wait_for_host_sshd(name)
             if update:
                 reinstall_packages(name)
             display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
