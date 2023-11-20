@@ -148,8 +148,14 @@ def install_in_thinclient(packages):
 def install_packages(host, packages):
     if host == 'thinclient':
         confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
-        if Confirm.ask(confirmation):
-            install_in_thinclient(packages)
+        if not Confirm.ask(confirmation):
+            return
+    if host == 'router':
+        confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the `router`?", style='red')
+        if not Confirm.ask(confirmation):
+            return
+    if host == 'thinclient':
+        install_in_thinclient(packages)
     elif is_online_host(host):
         install_in_online_host(host, packages)
     else:
