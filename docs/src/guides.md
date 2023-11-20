@@ -22,7 +22,7 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
     Note: `--copy-chunker-params` is important to ensure deduplication. 
     See "[Copying snapshots between repositories](https://restic.readthedocs.io/en/latest/045_working_with_repos.html#copying-snapshots-between-repositories)" for more options.
 
-1. Backup `office`
+1. Backup `~/mydata` folder in `office` host
 
         [thinclient]$ ssh -t office restic -r backup backup mydata
 
