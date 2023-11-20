@@ -222,20 +222,7 @@ EOF
         echo "eth0 not found"
         exit 1
     fi
-    INSTALL_ETH0_MAC=$(cat /sys/class/net/eth0/address)
-    cat <<EOF > /etc/local.d/01_check_ifnames.start
-INSTALL_ETH0_MAC=$INSTALL_ETH0_MAC
-BOOT_ETH0_MAC=\$(cat /sys/class/net/eth0/address)
-# we assume that if the mac has changed it is because there is an eth1
-if [ ! \$INSTALL_ETH0_MAC == \$BOOT_ETH0_MAC ]; then
-    ip link set eth0 down
-    ip link set eth1 down
-    ip link set eth0 name tmp0
-    ip link set eth1 name eth0
-    ip link set tmp0 name eth1
-    rc-service networking restart
-fi
-EOF
+    cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
     chmod a+x /etc/local.d/01_check_ifnames.start
 
     # set locales
