@@ -151,7 +151,7 @@ def wait_for_host_sshd(name, timeout):
     start_time = time.time()
     while not is_up(name):
         duration = time.time() - start_time
-        if duration > timeout:
+        if timeout > 0 and duration > timeout:
             raise DiscoveringTimeOut("Host discovering timeout")
         time.sleep(3)
 

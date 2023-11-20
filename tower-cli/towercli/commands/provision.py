@@ -123,7 +123,7 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--timeout', 
-        help="""Maximum wait time for the host to be ready in seconds (Default: 600)""",
+        help="""Maximum wait time for the host to be ready in seconds. Use 0 for not limit. (Default: 600)""",
         type=int,
         required=False,
         default=600
