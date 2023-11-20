@@ -147,11 +147,11 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     return f"{network}{first}"  
 
 @clitask("Waiting for host to be ready...")
-def wait_for_host_sshd(name):
+def wait_for_host_sshd(name, timeout):
     start_time = time.time()
     while not is_up(name):
         duration = time.time() - start_time
-        if duration > 60 * 10: # 10 minutes
+        if duration > timeout:
             raise DiscoveringTimeOut("Host discovering timeout")
         time.sleep(3)
 

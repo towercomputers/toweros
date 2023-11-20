@@ -121,6 +121,13 @@ def add_args(argparser):
         action='store_true',
         default=False
     )
+    provision_parser.add_argument(
+        '--timeout', 
+        help="""Maximum wait time for the host to be ready in seconds (Default: 600)""",
+        type=int,
+        required=False,
+        default=600
+    )
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-z0-9-]{1,15}$/', args.name[0]):

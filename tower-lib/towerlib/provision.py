@@ -209,9 +209,9 @@ def reinstall_packages(name):
     else:
         install.reinstall_all_packages(name)
 
-def wait_for_host(name):
+def wait_for_host(name, timeout):
     try:
-        sshconf.wait_for_host_sshd(name)
+        sshconf.wait_for_host_sshd(name, timeout)
     except KeyboardInterrupt:
         logger.info("Discovering interrupted.")
         diplay_discovering_error_message()
@@ -236,7 +236,7 @@ def provision(name, args, update=False):
         sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
     display_pre_discovering_message()
     if not args.no_wait:
-        wait_for_host(name)
+        wait_for_host(name, args.timeout)
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
     if update:
         if sshconf.is_up(name):
