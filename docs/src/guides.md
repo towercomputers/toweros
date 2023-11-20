@@ -16,23 +16,19 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 
 1. Initialize restic repo in each host
         
-        [thinclient]$ ssh -t storage restic -r /home/tower/backup init
-        [thinclient]$ ssh -t office restic -r /home/tower/backup init \
-                                           --from-repo sftp:storage:/home/tower/backup \
-                                           --copy-chunker-params
+        [thinclient]$ restic -r sftp:storage:backup init
+        [thinclient]$ restic -r sftp:office:backup init --from-repo sftp:storage:backup --copy-chunker-params
 
     Note: `--copy-chunker-params` is important to ensure deduplication. 
     See "[Copying snapshots between repositories](https://restic.readthedocs.io/en/latest/045_working_with_repos.html#copying-snapshots-between-repositories)" for more options.
 
 1. Backup `office`
 
-        [thinclient]$ ssh -t office restic -r /home/tower/backup backup /home/tower/mydata
+        [thinclient]$ ssh -t office restic -r backup backup mydata
 
 1. Copy `office` snapshot into `storage` repo
 
-        [thinclient]$ restic -r sftp:storage:/home/tower/backup copy \
-                             --from-repo sftp:office:/home/tower/backup \
-                             latest
+        [thinclient]$ restic -r sftp:storage:backup copy --from-repo sftp:office:backup latest
 
     Note: here `restic` copies the backup from the `office` host to the Thin Client, and then copies it to the `storage` host. You can optionally clear the cache stored on the Thin Client:
         
@@ -40,10 +36,8 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 
 1. Restore backup into `office`
 
-        [thinclient]$ restic -r sftp:office:/home/tower/backup copy \
-                             --from-repo sftp:storage:/home/tower/backup \
-                             latest --host office
-        [thinclient]$ ssh -t office restic -r /home/tower/backup restore latest --target /
+        [thinclient]$ restic -r sftp:office:backup copy --from-repo sftp:storage:backup latest --host office
+        [thinclient]$ ssh -t office restic -r backup restore latest --target ~/
 
 
 ## Install `pip` package in offline host using online host
