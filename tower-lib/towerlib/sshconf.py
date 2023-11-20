@@ -116,7 +116,7 @@ def is_online_host(name):
 def is_up(name):
     if exists(name):
         try:
-            ssh(name, 'ls') # Running a command over SSH command should tell us if the host is up.
+            ssh(name,  '-o', 'ConnectTimeout=2', 'ls') # Running a command over SSH command should tell us if the host is up.
         except ErrorReturnCode:
             return False
         return True

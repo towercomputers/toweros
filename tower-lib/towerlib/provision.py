@@ -13,7 +13,7 @@ from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
 from towerlib import install
-from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException
+from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException, TowerException
 
 logger = logging.getLogger('tower')
 
@@ -188,7 +188,10 @@ def display_pre_discovering_message():
     rprint(Text(message, style='green'))
 
 def display_post_discovering_message(name, ip):
-    logger.info(f"Host ready with IP: {ip}")
+    if sshconf.is_up(name):
+        logger.info(f"Host ready with IP: {ip}")
+    else:
+        logger.info(f"Host IP: {ip}")
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
     logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
@@ -206,31 +209,40 @@ def reinstall_packages(name):
     else:
         install.reinstall_all_packages(name)
 
+def wait_for_host(name):
+    try:
+        sshconf.wait_for_host_sshd(name)
+    except KeyboardInterrupt:
+        logger.info("Discovering interrupted.")
+        diplay_discovering_error_message()
+    except DiscoveringTimeOut:
+        logger.info("Discovering timed out.")
+        diplay_discovering_error_message()
+
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args, update=False):
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
     if not args.force:
         check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
     display_pre_provision_warning(name, boot_device, update)
-    if args.no_confirm or Confirm.ask("Do you want to continue?"):
-        if not update:
-            save_host_config(host_config)
-        buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-        utils.menu.prepare_xfce_menu()
-        if not update:
-            sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
-        display_pre_discovering_message()
-        try:
-            sshconf.wait_for_host_sshd(name)
-            if update:
-                reinstall_packages(name)
-            display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
-        except KeyboardInterrupt:
-            logger.info("Discovering interrupted.")
-            diplay_discovering_error_message()
-        except DiscoveringTimeOut:
-            logger.info("Discovering timed out.")
-            diplay_discovering_error_message()
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?"):
+        logger.info("Provisioning aborted.")
+        exit(0)
+    if not update:
+        save_host_config(host_config)
+    buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
+    utils.menu.prepare_xfce_menu()
+    if not update:
+        sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+    display_pre_discovering_message()
+    if not args.no_wait:
+        wait_for_host(name)
+    display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
+    if update:
+        if sshconf.is_up(name):
+            reinstall_packages(name)
+        else:
+            raise TowerException(f"Host not up. Packages will not be re-installed.")
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
