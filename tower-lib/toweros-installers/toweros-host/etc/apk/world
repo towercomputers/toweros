@@ -25,6 +25,7 @@ font-dejavu
 adw-gtk3
 adwaita-xfce-icon-theme
 mesa-dri-gallium
+gtkmm4
 xinit
 udev
 syslog-ng
