@@ -42,6 +42,7 @@ nano
 vim
 net-tools
 losetup
+dbus
 eudev
 mesa-dri-gallium
 mesa-va-gallium
@@ -61,7 +62,6 @@ swaybg
 swayidle
 waybar
 pipewire
-copyq
 setxkbmap
 syslog-ng
 cryptsetup
