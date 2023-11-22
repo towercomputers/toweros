@@ -60,3 +60,7 @@ For example if you have an online host called `web`:
 ```
 [thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip
 ```
+
+## Common Attack Vectors
+
+![Diagram - Attack Vectors](img/diagram-attackvectors.png)
