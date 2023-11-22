@@ -108,6 +108,8 @@ def prepare_image(builds_dir):
         '--outdir', WORKING_DIR,
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/community',
+        # TODO: temporary for copyq
+        '--repository', 'http://dl-cdn.alpinelinux.org/alpine/edge/testing',
         '--profile', 'tower',
         '--tag', __version__,
          _err_to_out=True, _out=logger.debug,
