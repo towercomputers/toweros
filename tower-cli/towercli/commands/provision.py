@@ -39,12 +39,12 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--public-key-path', 
-        help="""Path to public key used to access the host (Default: automatically generated and stored on the boot device and locally in `~/.ssh/`)""",
+        help="""Path to public key used to access the host (Default: automatically generated and stored on the boot device and locally in `~/.local/tower/hosts/`)""",
         required=False
     )
     provision_parser.add_argument(
         '--private-key-path', 
-        help="""Path to private key used to access the host (Default: automatically generated and stored locally in `~/.ssh/`)""",
+        help="""Path to private key used to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)""",
         required=False
     )
     provision_parser.add_argument(
@@ -104,7 +104,7 @@ def add_args(argparser):
     )
     provision_parser.add_argument(
         '--ifname', 
-        help="""Network interface (Default: first interface starting with 'e') """,
+        help="""Network interface (Default: `eth0` for online host, `eth1` for offline host) """,
         required=False,
     )
     provision_parser.add_argument(

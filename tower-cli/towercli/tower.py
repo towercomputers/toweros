@@ -7,7 +7,7 @@ from towerlib.utils.exceptions import TowerException
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
-        TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with `x2go`.
+        TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with `NX` protocol.
     """)
     parser.add_argument(
         '--quiet',
