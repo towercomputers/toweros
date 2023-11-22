@@ -165,6 +165,7 @@ prepare_home_directory() {
     addgroup "$USERNAME" video
     addgroup "$USERNAME" audio
     addgroup "$USERNAME" input
+    addgroup "$USERNAME" seat
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
@@ -172,8 +173,16 @@ prepare_home_directory() {
     touch /home/$USERNAME/.Xauthority
     # start X on login if necessary
     echo "export PS1='[\\u@\\H \\W]\\$ '" >> /home/$USERNAME/.profile
+    # set XDG_RUNTIME_DIR to a suitable location
+    cat <<EOF >> /home/$USERNAME/.profile
+if [ -z "\$XDG_RUNTIME_DIR" ]; then
+    XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
+	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
+	export XDG_RUNTIME_DIR
+fi
+EOF
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
-        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
+        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /home/$USERNAME/.profile
     fi
 }
 
@@ -264,6 +273,7 @@ EOF
     rc-update add networking
     rc-update add dbus
     rc-update add local
+    rc-update add seatd
 
     # enabling udev service
     setup-devd udev
