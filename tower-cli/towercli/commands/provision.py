@@ -128,6 +128,15 @@ def add_args(argparser):
         required=False,
         default=600
     )
+    next_color_name = sshconf.get_next_color_name()
+    provision_parser.add_argument(
+        '--color',
+        help=f"Color used for shell prompt and GUI. (Default: sequentially from the list, next: {next_color_name})",
+        type=str,
+        required=False,
+        choices=sshconf.color_name_list(),
+        default=next_color_name
+    )
 
 def check_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-z0-9-]{1,15}$/', args.name[0]):

@@ -24,3 +24,6 @@ class LockException(TowerException):
 
 class BuildException(TowerException):
     pass
+
+class InvalidColor(TowerException):
+    pass

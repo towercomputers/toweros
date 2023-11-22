@@ -126,7 +126,7 @@ def prepare_overlay(pub_key_path):
 def create_rpi_boot_partition():
     image_file = wd("toweros-host.img")
     # caluclate sizes
-    boot_size = 256 * 1024 * 1024
+    boot_size = 512 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
     # Add this much space to the calculated file size. This allows for

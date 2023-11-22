@@ -91,6 +91,8 @@ prepare_home_directory() {
 	chown -R $USERNAME:$USERNAME /home/$USERNAME
 	chmod 700 /home/$USERNAME/.ssh
 	chmod 600 /home/$USERNAME/.ssh/*
+	# set shell prompt color
+	echo "export PS1='\e[${COLOR}m[\\u@\\H \\W]\e[0m\\$ '" >> /home/$USERNAME/.profile
 }
 
 update_live_system() {
@@ -274,7 +276,7 @@ init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env

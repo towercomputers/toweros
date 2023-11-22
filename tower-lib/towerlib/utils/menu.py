@@ -6,7 +6,7 @@ import sh
 from sh import ssh, mkdir, sed, scp, mv
 
 from towerlib.utils import clitask
-from towerlib.sshconf import hosts, TOWER_DIR
+from towerlib.sshconf import hosts, TOWER_DIR, get_hex_host_color
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
@@ -66,12 +66,11 @@ def prepare_xfce_menu():
     # prepare desktop-directories folder
     for hostindex, hostname in enumerate(hosts()):
         # genereate host icon
-        colors = ["#fff100", "#ff8c00", "#e81123", "#ec008c", "#68217a", "#00188f", "#00bcf2", "#00b294", "#009e49", "#bad80a"]
         icon_path = os.path.join(INSTALLER_DIR, 'xfce', f'circle_icon.svg')
         host_icon_path = os.path.join(directories_folder, f'{hostname}_icon.svg')
         with open(icon_path, 'r') as fp:
             icon_content = fp.read()
-            color = colors[hostindex % len(colors)]
+            color = "#" + get_hex_host_color(hostname)
             host_icon = icon_content.replace('#000000', color)
         with open(host_icon_path, 'w') as fp:
             fp.write(host_icon)

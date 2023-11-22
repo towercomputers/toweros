@@ -81,6 +81,7 @@ def prepare_host_config(args):
         host_ip =sshconf.ROUTER_IP
     else:
         host_ip = sshconf.get_next_host_ip(tower_network)
+    host_color = sshconf.color_code(args.color or sshconf.get_next_host_color())
     # return complete configuration
     return {
         'HOSTNAME': name,
@@ -99,6 +100,7 @@ def prepare_host_config(args):
         'TOWER_NETWORK': tower_network,
         'STATIC_HOST_IP': host_ip,
         'ROUTER_IP': sshconf.ROUTER_IP,
+        'COLOR': host_color,
         'INSTALLATION_TYPE': "install",
     }
 

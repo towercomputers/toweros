@@ -171,6 +171,7 @@ prepare_home_directory() {
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
     # start X on login if necessary
+    echo "export PS1='[\\u@\\H \\W]\\$ '" >> /home/$USERNAME/.profile
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
         echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
     fi
@@ -203,7 +204,7 @@ EOF
 
 update_live_system() {
     # set hostname
-    setup-hostname -n tower
+    setup-hostname -n thinclient
 
     # change root password
     update_passord "root" "$ROOT_PASSWORD_HASH"
