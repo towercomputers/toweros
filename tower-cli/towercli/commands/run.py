@@ -19,7 +19,7 @@ def add_args(argparser):
     )
     run_parser.add_argument(
         'run_command', 
-        help="""Command to execute on the host with `NX` protocol. (Required)""",
+        help="""Command to execute on the host with NX protocol. (Required)""",
         nargs='+'
     )    
 
