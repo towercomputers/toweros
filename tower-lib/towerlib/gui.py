@@ -176,7 +176,7 @@ def run(hostname, *cmd):
         xsetroot('-cursor_name', 'left_ptr')
         app_process.wait()
     except NxTimeoutException:
-        logger.error("Failed to initialize NX, please check the log above.")
+        logger.error("Failed to initialize NX. Please check the log above.")
     finally:
         # kill bakground processes when done
         try:

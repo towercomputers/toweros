@@ -31,7 +31,7 @@ def wd(path):
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
-        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? If not, delete this folder and try again.")
     makedirs(WORKING_DIR)
 
 @clitask("Cleaning up...")
@@ -52,7 +52,7 @@ def check_abuild_key():
     abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
     abuild_conf = join_path(abuild_folder, 'abuild.conf')
     if not os.path.exists(abuild_folder) or not os.path.exists(abuild_conf):
-        logger.error("ERROR: You must have an abuild key to build the image. Please use `abuild-keygen -a -i`.")
+        logger.error("ERROR: You must have an `abuild` key to build the image. Please use `abuild-keygen -a -i`.")
         sys.exit()
 
 @clitask("Downloading pip packages...")

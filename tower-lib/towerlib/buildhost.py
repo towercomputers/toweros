@@ -39,7 +39,7 @@ def wd(path):
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
-        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? If not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
 
 def fetch_apk_packages(repo_path, branch, packages):
@@ -237,7 +237,7 @@ def copy_image_in_device(image_file, device):
         buf = StringIO()
         dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
     except ErrorReturnCode:
-        error_message = "Error copying image, please check the boot device integrity or try again with the flag `--zero-device`."
+        error_message = "Error copying image. Please check the boot device integrity and try again with the flag `--zero-device`."
         logger.error(buf.getvalue())
         logger.error(error_message)
         raise BuildException(error_message)
@@ -269,10 +269,10 @@ def insert_tower_env(boot_part, config):
         cp(host_keys_path, wd(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
         cp(f"{host_keys_path}.pub", wd(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
-@clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
+@clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:
-        # make sur the password is not shown in logs
+        # make sure the password is not shown in the logs
         del(config['PASSWORD'])
         prepare_working_dir()
         if zero_device:

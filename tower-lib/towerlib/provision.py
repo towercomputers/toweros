@@ -19,7 +19,7 @@ logger = logging.getLogger('tower')
 
 def check_environment_value(key, value):
     if not value:
-        raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option --{key}.")
+        raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option `--{key}`.")
 
 def generate_key_pair(name):
     host_dir = os.path.join(sshconf.TOWER_DIR, 'hosts', name)
@@ -120,13 +120,13 @@ def prepare_host_image(image_arg):
             image_path = decompress_image(image_path)
     return image_path
 
-def prepare_provision(args, update=False):
-    if update:
+def prepare_provision(args, upgrade=False):
+    if upgrade:
         # use existing key pair
         private_key_path = os.path.join(sshconf.TOWER_DIR, 'hosts', args.name[0], 'id_ed25519')
         # load configuration
         host_config = sshconf.get_host_config(args.name[0])
-        host_config['INSTALLATION_TYPE'] = "update"
+        host_config['INSTALLATION_TYPE'] = "upgrade"
     else:
         # generate key pair
         if not args.public_key_path:
@@ -164,29 +164,29 @@ def check_network(online):
     ip = sshconf.THIN_CLIENT_IP_ETH0 if online else sshconf.THIN_CLIENT_IP_ETH1
     interface = 'eth0' if online else 'eth1'
     if not utils.interface_is_up(interface):
-        raise NetworkException(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is up.")
+        raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is up.")
     if not utils.is_ip_attached(interface, ip):
-        raise NetworkException(f"Impossible to connect to the network. Please make sure that the interface `{interface}` is attached to the ip `{ip}`.")
+        raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is attached to the IP `{ip}`.")
 
-def display_pre_provision_warning(name, boot_device, update):
-    warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the Thin Client."
-    if not update:
+def display_pre_provision_warning(name, boot_device, upgrade):
+    warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the thin client."
+    if not upgrade:
         warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{name}`"
     else:
-        warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your /home directory will be preserved."
+        warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your home directory will be preserved."
     warning_text = Text(warning_message, style='red')
     rprint(warning_text)
 
 def display_pre_discovering_message():
     message = "Boot device ready:\n"
-    message += "- make sure the host and client are connected to the same switch and to the correct interface and network "
+    message += "- make sure that the host and thin client are connected to the same switch and to the correct interface and network "
     message += f"({sshconf.TOWER_NETWORK_OFFLINE} for offline host and {sshconf.TOWER_NETWORK_ONLINE} for online host)\n"
     message += "- make sure the device for the root system file is plugged into the host computer.\n"
-    message += "- remove the boot device from the Thin Client\n"
-    message += "- insert it into the Host computer\n"
-    message += "- turn it on the Host computer and wait for it to be discover by the Thin Client on the network.\n"
-    message += "This step can take between 2 and 10 minutes depending mostly on the speed of the root device. "
-    message += "If the host is still not discovered in 10 minutes you can debug by connecting a screen and a keyboard."
+    message += "- remove the boot device from the thin client\n"
+    message += "- insert it into the host\n"
+    message += "- turn on the host computer and wait for it to be discovered by the thin client on the network.\n"
+    message += "This step can take between 2 and 10 minutes, depending mostly on the speed of the root device. "
+    message += "If the host is still not discovered in 10 minutes, you can troubleshoot by connecting a screen and a keyboard to it."
     rprint(Text(message, style='green'))
 
 def display_post_discovering_message(name, ip):
@@ -200,7 +200,7 @@ def display_post_discovering_message(name, ip):
     logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
 
 def diplay_discovering_error_message():
-    error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem you can refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
+    error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
     rprint(Text(error_message, style='red'))
     exit(1)
 
@@ -223,19 +223,19 @@ def prepare_thin_client(name, host_config, private_key_path):
     utils.menu.prepare_xfce_menu()
 
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
-def provision(name, args, update=False):
+def provision(name, args, upgrade=False):
     # prepare provisioning
-    image_path, boot_device, host_config, private_key_path = prepare_provision(args, update)
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args, upgrade)
     # check network
     if not args.force: check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
     # display warnings
-    display_pre_provision_warning(name, boot_device, update)
+    display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
     if not args.no_confirm and not Confirm.ask("Do you want to continue?"): return       
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
     # save necessary files in Thin Client
-    if not update: prepare_thin_client(name, host_config, private_key_path)
+    if not upgrade: prepare_thin_client(name, host_config, private_key_path)
     # display pre discovering message
     display_pre_discovering_message()
     # wait for host to be ready
@@ -243,7 +243,7 @@ def provision(name, args, update=False):
     # display post discovering message
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
     # re-install packages
-    if update: install.reinstall_all_packages(name)
+    if upgrade: install.reinstall_all_packages(name)
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

@@ -7,17 +7,17 @@ logger = logging.getLogger('tower')
 def add_args(argparser):
     connect_parser = argparser.add_parser(
         'wlan-connect',
-        help="""Command used to update wifi credentials in the `router` host."""
+        help="""Command used to update WiFi credentials on the router."""
     )
 
     connect_parser.add_argument(
         '--ssid', 
-        help="""Wifi SSID""",
+        help="""WiFi SSID""",
         required=True,
     )
     connect_parser.add_argument(
         '--password', 
-        help="""Wifi password""",
+        help="""WiFi password""",
         required=True,
     )
 

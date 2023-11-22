@@ -29,7 +29,7 @@ def prepare_repositories_file(host):
     file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
     # use temporary file as lock file
     if os.path.exists(file_name):
-        raise LockException(f"f{file_name} already exists! Is another install in progress? if not, delete this file and try again.")
+        raise LockException(f"f{file_name} already exists! Is another install in progress? If not, delete this file and try again.")
     # generate temporary apk repositories 
     with open(file_name, 'w') as fp:
         for repo in APK_REPOS_URL:
@@ -150,16 +150,16 @@ def can_install(host):
     if not sshconf.is_up(host):
         raise TowerException(message=f"`{host}` is down. Please start it first.")
     if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
-        raise TowerException(message=f"`{host}` is an offline host and `{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
+        raise TowerException(message=f"`{host}` is an offline host and `{sshconf.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
 
 def install_packages(host, packages):
     can_install(host)
     if host == 'thinclient':
-        confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
+        confirmation = Text(f"This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'router':
-        confirmation = Text(f"This is a *dangerous* operation and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the `router`?", style='red')
+        confirmation = Text(f"This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the router?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'thinclient':
@@ -169,7 +169,7 @@ def install_packages(host, packages):
     else:
         install_in_offline_host(host, packages)
 
-@clitask("Re-installing all packages in {0}...", task_parent=True)
+@clitask("Re-installing all packages on {0}...", task_parent=True)
 def reinstall_all_packages(host):
     can_install(host)
     packages = get_installed_packages(host)
