@@ -418,7 +418,7 @@ set_configuration() {
     # STARTX_ON_LOGIN
     python $SCRIPT_DIR/ask-configuration.py
     source /root/tower.env
-    if [ "$INSTALLATION_TYPE" == "update" ]; then
+    if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
         check_and_copy_key_from_boot_disk
         activate_root_disk
         set_config_from_root_partition

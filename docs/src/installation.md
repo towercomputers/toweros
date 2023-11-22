@@ -63,20 +63,20 @@ If all of these checks are ok and you still cannot access the host, you must con
 
 ## Thin Client Upgrades
 
-To update the thin client you must proceed in exactly the same way as for the installation and select "Update TowerOS-Thinclient" in the first question.
+To upgrade the thin client you must proceed in exactly the same way as for the installation and select "Upgrade TowerOS-Thinclient" in the first question.
 
-During an update the system is completely reinstalled. Only the `/home` folder with hosts configurations and keys are kept. If you have data outside of `/home`, make sure to make a backup before starting the update.
+During an upgrade the system is completely reinstalled. Only the `/home` folder with hosts configurations and keys are kept. If you have data outside of `/home`, make sure to make a backup before starting the upgrade.
 
 
 ## Host Upgrades
 
 ```
-[thinclient]$ tower update <host>
+[thinclient]$ tower upgrade <host>
 ```
 
-During an update the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the update.
+During an upgrade the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the upgrade.
   
-Once the system is updated, all applications installed with `tower install <host>` are automatically re-installed.
+Once the system is upgrade, all applications installed with `tower install <host>` are automatically re-installed.
 
-Note: Always update the router before other hosts.
+Note: Always upgrade the router before other hosts.
 
