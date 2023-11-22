@@ -6,12 +6,12 @@ from towerlib import install
 def add_args(argparser):
     install_parser = argparser.add_parser(
         'install',
-        help="""Command used to install an application in a host prepared with the `provision` command."""
+        help="""Install an application on a host with APK"""
     )
 
     install_parser.add_argument(
         'host_name', 
-        help="""Host name where to install the package (Required).""",
+        help="""Host to install the package on (Required)""",
         nargs=1
     )
     install_parser.add_argument(
@@ -25,7 +25,7 @@ def check_args(args, parser_error):
     config = sshconf.get(name)
 
     if config is None and name != "thinclient":
-        parser_error("Unkown host name.")
+        parser_error("Unkown host.")
 
     for pkg_name in args.packages:
         if re.match(r'^[a-z0-9]{1}[a-z0-9\-\+\.]+$', pkg_name) is None:

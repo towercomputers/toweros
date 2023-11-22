@@ -5,7 +5,7 @@ from towerlib import sshconf
 def add_args(argparser):
     status_parser = argparser.add_parser(
         'status',
-        help="Get status of all the hosts."
+        help="Check the status of all hosts in the Tower system."
     )
 
 def check_args(args, parser_error):

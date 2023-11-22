@@ -111,32 +111,32 @@ def select_by_letter(title, ask1, ask2, values):
 
 def get_installation_type():
     return select_value(
-        ['Install TowerOS-Thinclient', 'Update TowerOS-Thinclient'],
+        ['Install TowerOS-Thinclient', 'Upgrade TowerOS-Thinclient'],
         "Do you want to install a new system or upgrade an already installed system?",
         "Select the installation type",
         no_columns=True
     ).split(" ")[0].lower()
 
-def get_target_drive(update=False):
+def get_target_drive(upgrade=False):
     install_title = "Please select the drive where you want to install TowerOS-Thinclient"
-    update_title = "Please select the drive where TowerOS-Thinclient is installed"
+    upgrade_title = "Please select the drive where TowerOS-Thinclient is installed"
     drive = select_value(
         disk_list(),
-        update_title if update else install_title,
+        upgrade_title if upgrade else install_title,
         "Target drive",
         no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
-def get_cryptkey_drive(os_target, update=False):
+def get_cryptkey_drive(os_target, upgrade=False):
     no_selected_drives = disk_list(exclude=os_target)
     please_refresh = '<-- Let me insert a drive and refresh the list!'
     no_selected_drives.append(please_refresh)
     install_title = "Please select the external drive where you want to put the disk encryption keyfile"
-    update_title = "Please select the external boot device containing the disk encryption keyfile"
+    upgrade_title = "Please select the external boot device containing the disk encryption keyfile"
     drive = select_value(
         no_selected_drives,
-        update_title if update else install_title,
+        upgrade_title if upgrade else install_title,
         "Target keyfile drive",
         no_columns=True
     )
@@ -240,7 +240,7 @@ def confirm_config(config):
     print_value("Installation type", config['INSTALLATION_TYPE'])
     print_value("Target drive", config['TARGET_DRIVE'])
     print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
-    if config['INSTALLATION_TYPE'] != 'update':
+    if config['INSTALLATION_TYPE'] != 'upgrade':
         print_value("Secure Boot", config['SECURE_BOOT'])
         print_value("Language", config['LANG'])
         print_value("Timezone", config['TIMEZONE'])
@@ -253,7 +253,7 @@ def confirm_config(config):
             print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
             print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
     target_warning = f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased."
-    if config['INSTALLATION_TYPE'] == 'update':
+    if config['INSTALLATION_TYPE'] == 'upgrade':
         target_warning += " Only the /home directory will be kept, if you have data outside this directory please backup them before."
     rprint("\n")
     print_error(target_warning)
@@ -273,10 +273,10 @@ def ask_config():
     config = {}
     while not confirmed:
         config['INSTALLATION_TYPE'] = get_installation_type()
-        is_update = config['INSTALLATION_TYPE'] == 'update'
-        config['TARGET_DRIVE'] = get_target_drive(is_update)
-        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_update)
-        if not is_update:
+        is_upgrade = config['INSTALLATION_TYPE'] == 'upgrade'
+        config['TARGET_DRIVE'] = get_target_drive(is_upgrade)
+        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_upgrade)
+        if not is_upgrade:
             config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
             config['LANG'] = get_lang()
             config['TIMEZONE'] = get_timezone()
