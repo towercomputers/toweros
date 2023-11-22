@@ -201,7 +201,7 @@ def check_args(args, parser_error):
             parser_error(message="You must provide a WiFi password for the router.")
     else:
         if args.online == args.offline:
-            parser_error(message="You must specify `--online` or `--offline` and not both.")
+            parser_error(message="You cannot specify both `--online` and `--offline` simultaneously.")
         if args.online:
             if not sshconf.exists(sshconf.ROUTER_HOSTNAME) and not args.force:
                 parser_error(message=f"`{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
