@@ -76,7 +76,9 @@ def generate_host_menu(host):
     if len(executables) > 0:
         menu.write(f'<menu id="{host}_menu" label="{host}" icon="{host_icon_path}">')
         for executable in executables:
-            menu.write(f'<item label="{executable["name"]}" icon="{executable["icon"]}" exec="tower run {host} {executable["exec"]}" />')
+            menu.write(f'<item label="{executable["name"]}" icon="{executable["icon"]}">')
+            menu.write(f'<action name="Execute" command="tower run {host} {executable["exec"]}" />')
+            menu.write('</item>')
         menu.write('</menu>')
     return menu.getvalue()
 

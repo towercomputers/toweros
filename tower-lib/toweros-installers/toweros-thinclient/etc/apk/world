@@ -52,6 +52,7 @@ libva-intel-driver
 linux-firmware-i915
 linux-firmware-amdgpu
 font-dejavu
+font-awesome
 seatd
 labwc
 labwc-doc
