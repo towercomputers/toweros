@@ -23,9 +23,9 @@ xorg-server
 xf86-input-libinput
 font-dejavu
 adw-gtk3
-adwaita-xfce-icon-theme
 mesa-dri-gallium
 gtkmm4
+gtk+3.0-dev
 xinit
 udev
 syslog-ng

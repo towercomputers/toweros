@@ -165,6 +165,7 @@ prepare_home_directory() {
     addgroup "$USERNAME" video
     addgroup "$USERNAME" audio
     addgroup "$USERNAME" input
+    addgroup "$USERNAME" seat
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
@@ -172,9 +173,20 @@ prepare_home_directory() {
     touch /home/$USERNAME/.Xauthority
     # start X on login if necessary
     echo "export PS1='[\\u@\\H \\W]\\$ '" >> /home/$USERNAME/.profile
+    # set XDG_RUNTIME_DIR to a suitable location
+    cat <<EOF >> /home/$USERNAME/.profile
+if [ -z "\$XDG_RUNTIME_DIR" ]; then
+    XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
+	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
+	export XDG_RUNTIME_DIR
+fi
+EOF
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
-        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
+        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /home/$USERNAME/.profile
     fi
+    # configure labwc
+    mkdir -p /home/$USERNAME/.config/
+    cp -r /var/towercomputers/labwc /home/$USERNAME/.config/
 }
 
 install_tower_tools() {
@@ -186,16 +198,10 @@ install_tower_tools() {
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
     cp -r /var/towercomputers/builds $TOWER_FOLDER
+    # put labwc default config files
+    cp -r /var/towercomputers/labwc $TOWER_FOLDER
     # install custom copyq auto start script
     cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
-    mkdir -p /etc/xdg/autostart
-    cat <<EOF > /etc/xdg/autostart/copyq.desktop
-[Desktop Entry]
-Name=copyq
-Exec=sh /var/towercomputers/start-copyq.sh
-Terminal=false
-Type=Application
-EOF
     # install tower with pip
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
@@ -264,6 +270,7 @@ EOF
     rc-update add networking
     rc-update add dbus
     rc-update add local
+    rc-update add seatd
 
     # enabling udev service
     setup-devd udev
@@ -314,7 +321,7 @@ clone_live_system_to_disk() {
     mount --bind /dev /mnt/dev
 
     # install packages
-    local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
+    local apkflags="--quiet --progress --update-cache --clean-protected"
     local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
     pkgs="$pkgs linux-lts alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
@@ -322,7 +329,9 @@ clone_live_system_to_disk() {
     for i in $repos; do
         repoflags="$repoflags --repository $i"
     done
-    apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+    apk add --root /mnt $apkflags --initdb --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+    # install edge packages
+    apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/*.apk
 
     # clean chroot
     umount /mnt/proc
@@ -336,12 +345,9 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
 
-    # remove unistalled packages from xfce menu
-    rm /mnt/usr/share/applications/xfce4-web-browser.desktop
-    rm /mnt/usr/share/applications/xfce4-mail-reader.desktop
-
     # copy user's home to the new system
-    cp -rf "/home/$USERNAME" "/mnt/home/"
+    mkdir -p "/mnt/home/$USERNAME"
+    rsync -a --ignore-existing "/home/$USERNAME" "/mnt/home/$USERNAME"
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
