@@ -184,6 +184,9 @@ EOF
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
         echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /home/$USERNAME/.profile
     fi
+    # configure labwc
+    mkdir -p /home/$USERNAME/.config/
+    cp -r /var/towercomputers/labwc /home/$USERNAME/.config/
 }
 
 install_tower_tools() {
@@ -346,9 +349,6 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
 
-    # remove unistalled packages from xfce menu
-    rm /mnt/usr/share/applications/xfce4-web-browser.desktop
-    rm /mnt/usr/share/applications/xfce4-mail-reader.desktop
 
     # copy user's home to the new system
     cp -rf "/home/$USERNAME" "/mnt/home/"

@@ -43,6 +43,7 @@ vim
 net-tools
 losetup
 dbus
+dbus-x11
 eudev
 mesa-dri-gallium
 mesa-va-gallium
