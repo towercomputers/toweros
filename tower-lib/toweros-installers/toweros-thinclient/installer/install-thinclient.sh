@@ -319,7 +319,7 @@ clone_live_system_to_disk() {
     mount --bind /dev /mnt/dev
 
     # install packages
-    local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
+    local apkflags="--quiet --progress --update-cache --clean-protected"
     local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
     pkgs="$pkgs linux-lts alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
@@ -327,7 +327,9 @@ clone_live_system_to_disk() {
     for i in $repos; do
         repoflags="$repoflags --repository $i"
     done
-    apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+    apk add --root /mnt $apkflags --initdb --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+    # install edge packages
+    apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/*.apk
 
     # clean chroot
     umount /mnt/proc
