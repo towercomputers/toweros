@@ -27,3 +27,6 @@ swayidle -w \
 	timeout 600 'wlopm --off \*' \
 	resume 'wlopm --on \*' \
 	before-sleep 'swaylock -f -c 000000' >/dev/null 2>&1 &
+
+sleep 1 # wait for waybar to be ready
+sh /var/towercomputers/start-copyq.sh  >/dev/null 2>&1 &

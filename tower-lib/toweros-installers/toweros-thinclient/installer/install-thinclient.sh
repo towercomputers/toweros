@@ -200,14 +200,6 @@ install_tower_tools() {
     cp -r /var/towercomputers/builds $TOWER_FOLDER
     # install custom copyq auto start script
     cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
-    mkdir -p /etc/xdg/autostart
-    cat <<EOF > /etc/xdg/autostart/copyq.desktop
-[Desktop Entry]
-Name=copyq
-Exec=sh /var/towercomputers/start-copyq.sh
-Terminal=false
-Type=Application
-EOF
     # install tower with pip
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
