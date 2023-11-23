@@ -198,6 +198,8 @@ install_tower_tools() {
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
     cp -r /var/towercomputers/builds $TOWER_FOLDER
+    # put labwc default config files
+    cp -r /var/towercomputers/labwc $TOWER_FOLDER
     # install custom copyq auto start script
     cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
     # install tower with pip
