@@ -343,9 +343,9 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
 
-
     # copy user's home to the new system
-    cp -rf "/home/$USERNAME" "/mnt/home/"
+    mkdir -p "/mnt/home/$USERNAME"
+    rsync -a --ignore-existing "/home/$USERNAME" "/mnt/home/$USERNAME"
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
