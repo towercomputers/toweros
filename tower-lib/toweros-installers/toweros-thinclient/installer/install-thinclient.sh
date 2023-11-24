@@ -3,6 +3,8 @@
 set -e
 set -x
 
+ARCH="x86_64"
+
 update_passord() {
     REPLACE="$1:$2:"
     ESCAPED_REPLACE=$(printf '%s\n' "$REPLACE" | sed -e 's/[\/&]/\\&/g')
@@ -331,12 +333,10 @@ clone_live_system_to_disk() {
     done
     apk add --root /mnt $apkflags --initdb --overlay-from-stdin $repoflags $pkgs <$ovlfiles
     # install edge packages
-    apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/*.apk
+    apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/$ARCH/*.apk
     # install sfwbar
-    unzip /var/towercomputers/installer/alpine-edge/sfwbar-b29ee39.zip
+    tar -xzf /var/towercomputers/installer/alpine-edge/$ARCH/sfwbar-b29ee39.tar.gz
     cd sfwbar-main
-    meson setup build
-    ninja -C build
     DESTDIR=/mnt/ ninja -C build install
     cd ..
     # clean chroot
