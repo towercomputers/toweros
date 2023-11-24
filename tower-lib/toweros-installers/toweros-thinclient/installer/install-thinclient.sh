@@ -173,22 +173,20 @@ prepare_home_directory() {
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
-    # start X on login if necessary
-    echo "export PS1='[\\u@\\H \\W]\\$ '" >> /home/$USERNAME/.profile
-    # set XDG_RUNTIME_DIR to a suitable location
+    # set XDG_RUNTIME_DIR, XDG_CONFIG_HOME and PS1
     cat <<EOF >> /home/$USERNAME/.profile
+export XDG_CONFIG_HOME=/etc/xdg/labwc
+export PS1='[\\u@\\H \\W]\\$ '
 if [ -z "\$XDG_RUNTIME_DIR" ]; then
     XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
 	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
 	export XDG_RUNTIME_DIR
 fi
 EOF
+    # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
         echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /home/$USERNAME/.profile
     fi
-    # configure labwc
-    mkdir -p /home/$USERNAME/.config/
-    cp -r /var/towercomputers/labwc /home/$USERNAME/.config/
 }
 
 install_tower_tools() {
@@ -200,8 +198,6 @@ install_tower_tools() {
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
     cp -r /var/towercomputers/builds $TOWER_FOLDER
-    # put labwc default config files
-    cp -r /var/towercomputers/labwc $TOWER_FOLDER
     # install custom copyq auto start script
     cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
     # install tower with pip
@@ -356,6 +352,10 @@ EOF
     # copy user's home to the new system
     mkdir -p "/mnt/home/$USERNAME"
     rsync -a --ignore-existing "/home/$USERNAME" "/mnt/home/$USERNAME"
+    # make a backup and copy new .profile
+    cp "/mnt/home/$USERNAME/.profile" "/mnt/home/$USERNAME/.profile.bak" || true
+    cp /home/$USERNAME/.profile "/mnt/home/$USERNAME/.profile"
+    # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 

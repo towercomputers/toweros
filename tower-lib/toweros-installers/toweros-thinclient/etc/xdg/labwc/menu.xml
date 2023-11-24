@@ -39,9 +39,6 @@
   <item label="Terminal">
     <action name="Execute" command="foot" />
   </item>
-  <separator label="Hosts" />
-  <!-- <TowerMenu /> -->
-  <separator />
   <item label="Exit">
     <action name="Exit" />
   </item>
