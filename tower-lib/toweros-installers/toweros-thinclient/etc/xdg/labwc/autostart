@@ -24,8 +24,8 @@ sfwbar >/dev/null 2>&1 &
 # https://git.sr.ht/~leon_plickat/wlopm
 swayidle -w \
 	timeout 300 'swaylock -f -c 000000' \
-	timeout 600 'wlopm --off \*' \
-	resume 'wlopm --on \*' \
+	#timeout 600 'wlopm --off \*' \
+	#resume 'wlopm --on \*' \
 	before-sleep 'swaylock -f -c 000000' >/dev/null 2>&1 &
 
 sleep 1 # wait for waybar to be ready
