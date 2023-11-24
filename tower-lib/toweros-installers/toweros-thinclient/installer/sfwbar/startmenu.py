@@ -1,92 +1,116 @@
 import string, sys, fileinput, getopt, os, glob
 
-def map_category ( catmap, catlist ):
-  for cat in catlist.strip().split(';'):
-    try:
-      mycat = catmap[cat]
-    except LookupError:
-      mycat = ''
-    if mycat != '':
-      return mycat
-  return 'Other'
+XDG_CATEGORIES = {
+    'Development': 'Development',
+    'Education': 'Education',
+    'Game': 'Games',
+    'Graphics': 'Graphics',
+    'Internet': 'Internet',
+    'Settings': 'Settings',
+    'Screensaver': 'Settings',
+    'System': 'System',
+    'Emulator': 'System',
+    'Network': 'Internet',
+    'AudioVideo': 'Multimedia',
+    'Audio': 'Multimedia',
+    'Video': 'Multimedia',
+    'Utility': 'Accessories',
+    'Accessibility': 'Accessories',
+    'Core': 'Accessories',
+    'Office': 'Office'
+}
 
-def main():
-  # Use categories from XDG spec
-  catmap = {
-  'Development': 'Development',
-  'Education': 'Education',
-  'Game': 'Games',
-  'Graphics': 'Graphics',
-  'Internet': 'Internet',
-  'Settings': 'Settings',
-  'Screensaver': 'Settings',
-  'System': 'System',
-  'Emulator': 'System',
-  'Network': 'Internet',
-  'AudioVideo': 'Multimedia',
-  'Audio': 'Multimedia',
-  'Video': 'Multimedia',
-  'Utility': 'Accessories',
-  'Accessibility': 'Accessories',
-  'Core': 'Accessories',
-  'Office': 'Office'}
+APPLICATIONS_DIR = '/usr/share/applications/'
 
-  cats = list()
-  outp = list()
-  print('MenuClear(\'Menugen_Applications\')')
-  dirlist = os.environ.get('XDG_DATA_DIRS')
-  if not dirlist:
-    dirlist = '/usr/local/share:/usr/share'
-  dhome = os.environ.get('XDG_DATA_HOME')
-  if not dhome:
-    dhome = os.environ.get('HOME')
-    if dhome:
-      dhome = dhome + '/.local/share'
-  if dhome:
-    dirlist = dirlist + ':' + dhome
-  dlist = []
-  for dir in dirlist.split(':'):
-    dlist = dlist + sorted(glob.glob(dir + '/applications/*.desktop'))
-  for dfile in dlist:
-    de_name = de_icon = de_exec = de_cat = de_disp = ''
-    fchan = open(dfile)
-    for dline in fchan.readlines():
-      try:
-        (tag, value) = dline.strip().split('=',1)
-        if tag.strip() == 'Name' and not de_name: # Grab first name
-          de_name = value.strip()
-        if tag.strip() == 'Icon':
-          de_icon = value.strip()
-        if tag.strip() == 'Exec':
-          de_exec = value.strip()
-        if tag.strip() == 'Categories':
-          de_cat = value.strip()
-        if tag.strip() == 'NoDisplay':
-          de_disp = value.strip()
-      except:
-        pass
-    fchan.close()
-    if (de_name != '') and (de_exec != '') and (de_disp.lower() != 'true'):
-      if de_cat.startswith('X-tower-'):
-        de_cat = '0_' + de_cat[8:].split(';')[0].capitalize()
-      else:
-        de_cat = map_category ( catmap, de_cat )
-      de_exec = de_exec.replace(' %f','').replace(' %F','').replace(' %u','')
-      de_exec = de_exec.replace(' %U','').replace(' %c',' '+de_name)
-      de_exec = de_exec.replace(' %k',' '+dfile).replace(' %i',' '+de_icon)
-      if not (de_cat in cats):
-        cats.append(de_cat)
-        print('MenuClear(\'Menugen_' + de_cat.replace('0_', '') + '\')')
-        sub_icon = '%applications-' + de_cat.lower()
-        if (de_cat.lower() == 'settings'): # these is no applications-settings icon
-            sub_icon = '%preferences-system'
-        outp.append('Menu(\'Menugen_Applications\') { SubMenu(\'' + de_cat +
-        sub_icon + '\',\'Menugen_' + de_cat + '\') }')
-      outp.append('Menu(\'Menugen_' + de_cat + '\') { Item(\'' + de_name + '%' +
-      de_icon + '\',Exec \'' + de_exec +'\') }')
-  for token in sorted(outp):
-    print(token.replace('0_', ''))
+def get_desktop_files():
+    desktop_files = []
+    for root, dirs, files in os.walk(APPLICATIONS_DIR):
+        for file in files:
+            if file.endswith(".desktop"):
+                desktop_files.append(os.path.join(root, file))
+    return desktop_files
 
+def clean_exec(desktop_file_info):
+    if not 'Exec' in desktop_file_info:
+       desktop_file_info['Exec'] = ''
+       return desktop_file_info
+    exec_line = desktop_file_info['Exec']
+    exec_line = exec_line.replace(' %f', '')
+    exec_line = exec_line.replace(' %F', '')
+    exec_line = exec_line.replace(' %u', '')
+    exec_line = exec_line.replace(' %U', '')
+    exec_line = exec_line.replace(' %c', f" {desktop_file_info['Name']}")
+    exec_line = exec_line.replace( '%k', f" {desktop_file_info['Filename']}")
+    exec_line = exec_line.replace(' %i', f" {desktop_file_info['Icon']}")
+    desktop_file_info['Exec'] = exec_line
+    return desktop_file_info
+
+def clean_categories(desktop_file_info):
+    if not 'Categories' in desktop_file_info:
+       desktop_file_info["InHost"] = False
+       desktop_file_info['Categories'] = 'Other'
+       return desktop_file_info
+    categories = desktop_file_info['Categories'].split(';')
+    if categories[0].startswith('X-tower-'):
+       desktop_file_info["InHost"] = True
+       desktop_file_info['Categories'] = categories[0][8:].capitalize()
+    else:
+       desktop_file_info["InHost"] = False
+       categories = [XDG_CATEGORIES[category] for category in categories if category in XDG_CATEGORIES]
+       desktop_file_info['Categories'] = categories[0] if len(categories) > 0 else "Other"
+    return desktop_file_info
+
+def get_desktop_file_info(desktop_file):
+    fields = ['Categories', 'Name', 'Icon', 'Exec', 'NoDisplay']
+    desktop_file_info = {
+       "Filename": desktop_file,
+    }
+    with open(desktop_file) as fp:
+        for line in fp.readlines():
+            if '=' in line:
+                key, value = line.split('=', 1)
+                if key in fields and not key in desktop_file_info:
+                  desktop_file_info[key] = value.strip()
+    return clean_categories(clean_exec(desktop_file_info))
+
+def get_desktop_applications():
+    desktop_applications = []
+    for desktop_file in get_desktop_files():
+        desktop_file_info = get_desktop_file_info(desktop_file)
+        if not 'Name' in desktop_file_info or not 'Exec' in desktop_file_info:
+           continue
+        if 'NoDisplay' in desktop_file_info and desktop_file_info['NoDisplay'].lower() == 'true':
+           continue
+        desktop_applications.append(desktop_file_info)
+    return desktop_applications
+
+def generate_menu_group(desktop_applications):
+    menu = []
+    categories = []
+    desktop_applications.sort(key=lambda x: x['Name'])
+    for desktop_file_info in desktop_applications:
+        if not desktop_file_info['Categories'] in categories:
+           categories.append(desktop_file_info['Categories'])
+    categories.sort()
+    for category in categories:
+        menu.append(f"MenuClear('Menugen_{category}')")
+    for category in categories:
+        sub_icon = f"applications-{category.lower()}" if category.lower() != 'settings' else "preferences-system"
+        menu.append(f"Menu('Menugen_Applications') {{ SubMenu('{category}%{sub_icon}', 'Menugen_{category}') }}")
+    for desktop_file_info in desktop_applications:
+        menu.append(f"Menu('Menugen_{desktop_file_info['Categories']}') {{ Item('{desktop_file_info['Name']}%{desktop_file_info['Icon']}',Exec '{desktop_file_info['Exec']}') }}")
+    return menu
+   
+def generate_menu():
+    desktop_applications = get_desktop_applications()
+    menu = ["MenuClear('Menugen_Applications')"]
+    in_host_apps = [info for info in desktop_applications if info["InHost"]]
+    if len(in_host_apps) > 0:
+       menu += generate_menu_group(in_host_apps)
+       menu += ["Menu('Menugen_Applications') { Separator }"]
+    no_in_host_apps = [info for info in desktop_applications if not info["InHost"]]
+    menu += generate_menu_group(no_in_host_apps)
+    return "\n".join(menu)
 
 if __name__ == '__main__':
-  main()
+  print(generate_menu())
