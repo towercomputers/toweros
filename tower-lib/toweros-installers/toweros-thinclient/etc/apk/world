@@ -58,11 +58,9 @@ labwc
 labwc-doc
 xwayland
 foot
-rofi
 swaylock
 swaybg
 swayidle
-waybar
 pipewire
 setxkbmap
 syslog-ng
@@ -87,3 +85,11 @@ xset-doc
 qt6-qtbase-doc
 xprop-doc
 xdg-utils-doc
+pulseaudio-dev
+alsa-lib-dev
+libmpdclient-dev
+gtk-layer-shell-dev
+json-c-dev
+gtk+3.0-dev
+cmake
+meson
