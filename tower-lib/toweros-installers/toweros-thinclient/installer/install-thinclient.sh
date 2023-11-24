@@ -332,7 +332,13 @@ clone_live_system_to_disk() {
     apk add --root /mnt $apkflags --initdb --overlay-from-stdin $repoflags $pkgs <$ovlfiles
     # install edge packages
     apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/*.apk
-
+    # install sfwbar
+    unzip /var/towercomputers/installer/alpine-edge/sfwbar-b29ee39.zip
+    cd sfwbar-main
+    meson setup build
+    ninja -C build
+    DESTDIR=/mnt/ ninja -C build install
+    cd ..
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
