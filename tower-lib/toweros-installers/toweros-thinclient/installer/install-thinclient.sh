@@ -339,6 +339,8 @@ clone_live_system_to_disk() {
     cd sfwbar-main
     DESTDIR=/mnt/ ninja -C build install
     cd ..
+    cp /var/towercomputers/installer/sfwbar/startmenu.widget /mnt/usr/local/share/sfwbar/
+    cp /var/towercomputers/installer/sfwbar/startmenu.py /mnt/var/towercomputers/
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
