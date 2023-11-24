@@ -3,10 +3,10 @@ import json
 from io import StringIO
 
 import sh
-from sh import ssh, mkdir, sed, scp, mv
+from sh import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils import clitask
-from towerlib.sshconf import hosts, TOWER_DIR, get_hex_host_color
+from towerlib.sshconf import hosts, TOWER_DIR, get_host_color_name
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
@@ -24,6 +24,7 @@ def copy_desktop_files(host, package):
             sed('-i', f's/Exec=/Exec=tower run {host} /g', locale_file_path)
             # update application categories
             sed('-i', f's/Categories=/Categories=X-tower-{host};/g', locale_file_path)
+            Command('sh')('-c', f"echo 'Color={get_host_color_name(host)}' >> {locale_file_path}")
             # with sudo copy .desktop file in the same folder as the host
             with sh.contrib.sudo(password="", _with=True):
                 mkdir('-p', desktop_folder)

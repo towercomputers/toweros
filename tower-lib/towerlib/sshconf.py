@@ -214,7 +214,14 @@ def color_hex(code_or_name):
 def get_next_color_name():
     return COLORS[len(hosts()) % len(COLORS)][1]
 
+def get_host_color_name(host):
+    host_config = get_host_config(host)
+    host_color_code = int(host_config.get('COLOR', COLORS[0][0]))
+    for color in COLORS:
+        if color[0] == host_color_code:
+            return color[1]
+
 def get_hex_host_color(host):
     host_config = get_host_config(host)
-    host_color_name = int(host_config.get('COLOR', COLORS[0][0]))
-    return color_hex(host_color_name)
+    host_color_code= int(host_config.get('COLOR', COLORS[0][0]))
+    return color_hex(host_color_code)

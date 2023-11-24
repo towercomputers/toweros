@@ -61,7 +61,7 @@ def clean_categories(desktop_file_info):
     return desktop_file_info
 
 def get_desktop_file_info(desktop_file):
-    fields = ['Categories', 'Name', 'Icon', 'Exec', 'NoDisplay']
+    fields = ['Categories', 'Name', 'Icon', 'Exec', 'NoDisplay', 'Color']
     desktop_file_info = {
        "Filename": desktop_file,
     }
@@ -87,15 +87,24 @@ def get_desktop_applications():
 def generate_menu_group(desktop_applications):
     menu = []
     categories = []
+    color_by_category = {}
     desktop_applications.sort(key=lambda x: x['Name'])
     for desktop_file_info in desktop_applications:
         if not desktop_file_info['Categories'] in categories:
            categories.append(desktop_file_info['Categories'])
+           if 'Color' in desktop_file_info and not desktop_file_info['Categories'] in color_by_category:
+              color_by_category[desktop_file_info['Categories']] = desktop_file_info['Color']
+
     categories.sort()
     for category in categories:
         menu.append(f"MenuClear('Menugen_{category}')")
     for category in categories:
-        sub_icon = f"applications-{category.lower()}" if category.lower() != 'settings' else "preferences-system"
+        if category in color_by_category:
+            sub_icon = f"circle-{color_by_category[category].replace(' ', '-').lower()}"
+        elif category.lower() == 'settings':
+            sub_icon = "preferences-system"
+        else:
+            sub_icon = f"applications-{category.lower()}"
         menu.append(f"Menu('Menugen_Applications') {{ SubMenu('{category}%{sub_icon}', 'Menugen_{category}') }}")
     for desktop_file_info in desktop_applications:
         menu.append(f"Menu('Menugen_{desktop_file_info['Categories']}') {{ Item('{desktop_file_info['Name']}%{desktop_file_info['Icon']}',Exec '{desktop_file_info['Exec']}') }}")

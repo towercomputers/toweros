@@ -335,8 +335,12 @@ clone_live_system_to_disk() {
     cd sfwbar-main
     DESTDIR=/mnt/ ninja -C build install
     cd ..
+    # install custom startmenu widget
     cp /var/towercomputers/installer/sfwbar/startmenu.widget /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/startmenu.py /mnt/var/towercomputers/
+    # install custom icons
+    mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
+    cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
