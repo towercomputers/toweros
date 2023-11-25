@@ -6,7 +6,6 @@ import glob
 import getpass
 from io import StringIO
 
-import sh
 from sh import (
     Command, ErrorReturnCode,
     mount, parted, mkdosfs, tee, cat, echo,
@@ -20,7 +19,7 @@ fsck_ext4 = Command('fsck.ext4')
 from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
-from towerlib.sshconf import TOWER_NETWORK_ONLINE, TOWER_NETWORK_OFFLINE, TOWER_DIR
+from towerlib.sshconf import TOWER_DIR
 from towerlib.utils.exceptions import LockException, BuildException
 
 logger = logging.getLogger('tower')
@@ -88,7 +87,7 @@ def prepare_apk_repos(private_key_path):
 def prepare_system_image(alpine_tar_path, private_key_path):
     # prepare disk image
     mkfs_ext4(
-        '-O', '^has_journal,^resize_inode', 
+        '-O', '^has_journal,^resize_inode',
         '-E', 'lazy_itable_init=0,root_owner=0:0',
         '-m', '0',
         '-U', 'clear',
@@ -171,7 +170,7 @@ def compress_image(builds_dir):
     tmp_image_path = os.path.join("/tmp", image_name)
     image_path = os.path.join(builds_dir, image_name)
     xz(
-        '--compress', '--force', 
+        '--compress', '--force',
         '--threads', 0, '--memlimit-compress=90%', '--best',
 	    '--stdout', wd("toweros-host.img"),
         _out=tmp_image_path

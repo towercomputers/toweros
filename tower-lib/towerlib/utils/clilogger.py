@@ -2,7 +2,6 @@ import logging
 
 from rich import print as rprint
 from rich.text import Text
-from rich.console import Console
 
 def initialize(verbose=False, quiet=False):
     level = logging.INFO

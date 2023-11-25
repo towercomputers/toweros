@@ -1,12 +1,10 @@
 import os
-import json
-from io import StringIO
 
 import sh
 from sh import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils import clitask
-from towerlib.sshconf import hosts, TOWER_DIR, get_host_color_name
+from towerlib.sshconf import TOWER_DIR, get_host_color_name
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
@@ -44,7 +42,7 @@ def save_installed_packages(host, installed_packages):
 def add_installed_package(host, package):
     # save package in host world
     installed_packages = get_installed_packages(host)
-    if not (package in installed_packages):
+    if package not in installed_packages:
         installed_packages.append(package)
         save_installed_packages(host, installed_packages)
     # copy desktop files from host to thinclient

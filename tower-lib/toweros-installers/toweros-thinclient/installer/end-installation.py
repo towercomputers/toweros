@@ -2,17 +2,16 @@
 
 import sys
 import subprocess
-from base64 import b64encode
 
 from rich import print as rprint
 from rich.text import Text
 from rich.console import Console
-    
+
 
 def main():
     Console().clear()
     title = subprocess.run(
-        ['figlet', '-w', '160', 'TowerOS-ThinClient'], 
+        ['figlet', '-w', '160', 'TowerOS-ThinClient'],
         capture_output=True, encoding="UTF-8"
     ).stdout
     print(title)

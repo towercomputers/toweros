@@ -12,37 +12,37 @@ def add_args(argparser):
         help="""Prepare the boot device needed to upgrade a host."""
     )
     provision_parser.add_argument(
-        'name', 
+        'name',
         nargs=1,
         help="""Host's name, used to refer to the host when performing other actions (Required)"""
     )
     provision_parser.add_argument(
-        '-bd', '--boot-device', 
+        '-bd', '--boot-device',
         help="""Path to target SD card or USB drive""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--zero-device', 
+        '--zero-device',
         help="""Zero the target device before copying the installation image to it. (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
     provision_parser.add_argument(
-        '--no-confirm', 
+        '--no-confirm',
         help="""Don't ask for confirmation. (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
     provision_parser.add_argument(
-        '--image', 
+        '--image',
         help="""Path to installation image""",
         required=False,
     )
     provision_parser.add_argument(
-        '--ifname', 
+        '--ifname',
         help="""Network interface (Default: first interface starting with 'e') """,
         required=False,
     )
@@ -54,7 +54,7 @@ def check_args(args, parser_error):
     if args.boot_device:
         disk_list = utils.get_device_list()
         if args.boot_device not in disk_list:
-            parser_error("Boot device path invalid.") 
+            parser_error("Boot device path invalid.")
         elif len(disk_list) == 1:
             parser_error("Boot device path invalid.") # can't write to the only disk
 

@@ -162,7 +162,7 @@ def check_secure_boot_status():
         print_error("https://github.com/towercomputers/toweros/blob/master/docs/SecureBoot.md")
         return False
     return True
-    
+
 def get_secure_boot():
     print_title("Secure boot")
     with_secure_boot = Confirm.ask("Do you want to install TowerOS-Thinclient with secure boot ?")
@@ -176,7 +176,7 @@ def get_secure_boot():
 
 def get_lang():
     return select_by_letter(
-        "Please select your language:", 
+        "Please select your language:",
         "Enter the first letter of your lang",
         "Enter the number of your lang",
         LANGS
@@ -184,8 +184,8 @@ def get_lang():
 
 def get_timezone():
     return "/".join(select_sub_value(
-        TIMEZONES["regions"], 
-        "Please select the region of your timezone:", 
+        TIMEZONES["regions"],
+        "Please select the region of your timezone:",
         "Enter the number of your region",
         TIMEZONES["zonesByRegions"],
         "Enter the number of your zone",
@@ -264,7 +264,7 @@ def confirm_config(config):
 def ask_config():
     Console().clear()
     title = subprocess.run(
-        ['figlet', '-w', '160', 'TowerOS-ThinClient'], 
+        ['figlet', '-w', '160', 'TowerOS-ThinClient'],
         capture_output=True, encoding="UTF-8"
     ).stdout
     print(title)

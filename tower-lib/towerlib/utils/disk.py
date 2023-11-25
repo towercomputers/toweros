@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-from datetime import timedelta
 import os
 
 import sh
@@ -12,7 +11,7 @@ logger = logging.getLogger('tower')
 def unmount_all(device):
     result = lsblk('-J', '-T', device)
     result = json.loads(str(result))
-    if not 'children' in result['blockdevices'][0]:
+    if 'children' not in result['blockdevices'][0]:
         return
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoints'][0]:
@@ -37,7 +36,7 @@ def select_boot_device():
     while k is None:
         k = input("Please ensure the boot device is *NOT* connected to the Thin Client and press ENTER.")
     devices_before = get_device_list()
-    
+
     k = None
     while k is None:
         k = input("Please insert now the boot device to the Thin Client and press ENTER.")

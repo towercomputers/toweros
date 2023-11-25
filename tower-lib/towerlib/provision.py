@@ -1,10 +1,9 @@
 import os
 import secrets
 import logging
-from datetime import datetime
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh, cp, dd, Command
+from sh import ssh_keygen, xz, ssh, cp, dd
 from rich.prompt import Confirm
 from rich.text import Text
 from rich import print as rprint
@@ -13,7 +12,7 @@ from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
 from towerlib import install
-from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException, TowerException
+from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException
 
 logger = logging.getLogger('tower')
 
@@ -197,7 +196,7 @@ def display_post_discovering_message(name, ip):
     logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
     logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
     logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
-    logger.info(f"WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
+    logger.info("WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
 
 def diplay_discovering_error_message():
     error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
@@ -229,7 +228,7 @@ def provision(name, args, upgrade=False):
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
-    if not args.no_confirm and not Confirm.ask("Do you want to continue?"): return       
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?"): return
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
     # save necessary files in Thin Client

@@ -11,12 +11,12 @@ def add_args(argparser):
     )
 
     connect_parser.add_argument(
-        '--ssid', 
+        '--ssid',
         help="""WiFi SSID""",
         required=True,
     )
     connect_parser.add_argument(
-        '--password', 
+        '--password',
         help="""WiFi password""",
         required=True,
     )

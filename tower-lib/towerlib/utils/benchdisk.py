@@ -26,8 +26,8 @@ def to_mbps(value):
 
 def parse_bench(benchmark):
     lines = "_".join([
-        re.sub(' +', ' ', line.strip().replace('"', "")) 
-        if line != '' else '_' 
+        re.sub(' +', ' ', line.strip().replace('"', ""))
+        if line != '' else '_'
         for line in benchmark.split('\n')
     ]).split("___")
     lines = [line.split("_") for line in lines]
@@ -38,11 +38,11 @@ def display_bench():
     record_size = sys.argv[1] if len(sys.argv) > 1 else '4k'
     file_size = sys.argv[2] if len(sys.argv) > 2 else '100M'
     slow = True if len(sys.argv) > 3 else False
-        
-    values = parse_bench(get_disk_bench(record_size, file_size, not slow)) 
+
+    values = parse_bench(get_disk_bench(record_size, file_size, not slow))
 
     table = Table(
-        title=f"\nTest with: {record_size} record size, {file_size} file\n", 
+        title=f"\nTest with: {record_size} record size, {file_size} file\n",
         show_header=False,
         title_style="bold magenta"
     )

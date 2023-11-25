@@ -13,15 +13,15 @@ def add_args(argparser):
     )
 
     run_parser.add_argument(
-        'host_name', 
+        'host_name',
         help="""Host's name. This name must match the `name` used with the `provision` command. (Required)""",
         nargs=1
     )
     run_parser.add_argument(
-        'run_command', 
+        'run_command',
         help="""Command to execute on the host with NX protocol. (Required)""",
         nargs='+'
-    )    
+    )
 
 def check_args(args, parser_error):
     config = sshconf.get(args.host_name[0])
@@ -33,4 +33,4 @@ def execute(args):
         gui.run(args.host_name[0], *args.run_command)
     else:
         logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to start X.Org.")
-    
+

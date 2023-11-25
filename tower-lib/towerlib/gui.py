@@ -66,8 +66,8 @@ def generate_magic_cookie():
 def authorize_cookie(hostname, cookie, display_num):
     xauthority_path = os.path.join(get_home(hostname), ".Xauthority")
     ssh(hostname, "touch", xauthority_path)
-    ssh(hostname, 'xauth', 
-        'add', f"{get_real_hostname(hostname)}/unix:{display_num}", 
+    ssh(hostname, 'xauth',
+        'add', f"{get_real_hostname(hostname)}/unix:{display_num}",
         'MIT-MAGIC-COOKIE-1', cookie,
         _out=logger.debug
     )
@@ -83,9 +83,9 @@ def get_next_display_num():
         return NXAGENT_FIRST_DISPLAY_NUM
     used_nums.sort()
     return used_nums.pop() + 1
-   
+
 def revoke_cookies(hostname, display_num):
-    return ssh(hostname, 'xauth', 
+    return ssh(hostname, 'xauth',
         'remove', f"{hostname}/unix:{display_num}", _out=logger.debug
     )
 
@@ -112,19 +112,19 @@ def wait_for_output(_out, expected_output):
 def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
     display = gen_display_args(
-        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args, 
+        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args,
         {'listen': nxagent_port}
     )
     authorize_cookie(hostname, cookie, display_num)
     buf = StringIO()
-    ssh(hostname, 
+    ssh(hostname,
         '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
         f'DISPLAY={display}',
         'LD_LIBRARY_PATH=/usr/lib/nx/X11/',
         'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    wait_for_output(buf, "Waiting for connection")     
+    wait_for_output(buf, "Waiting for connection")
     logger.info("nxagent is waiting for connection...")
 
 def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
@@ -135,11 +135,11 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     )
     buf = StringIO()
     nxproxy(
-        '-S', display, 
+        '-S', display,
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    #wait_for_output(buf, "Established X server connection") 
-    wait_for_output(buf, "Session started")  
+    #wait_for_output(buf, "Established X server connection")
+    wait_for_output(buf, "Session started")
     logger.info("nxproxy connected to nxagent.")
 
 def kill_nx_processes(hostname, display_num):

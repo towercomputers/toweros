@@ -10,12 +10,12 @@ def add_args(argparser):
     )
 
     install_parser.add_argument(
-        'host_name', 
+        'host_name',
         help="""Host to install the package on (Required)""",
         nargs=1
     )
     install_parser.add_argument(
-        'packages', 
+        'packages',
         help="""Package(s) to install (Required).""",
         nargs='+'
     )

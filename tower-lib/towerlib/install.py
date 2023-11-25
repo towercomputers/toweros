@@ -1,7 +1,6 @@
 import os
 import logging
 import sys
-from urllib.parse import urlparse
 import time
 
 from rich.prompt import Confirm
@@ -30,7 +29,7 @@ def prepare_repositories_file(host):
     # use temporary file as lock file
     if os.path.exists(file_name):
         raise LockException(f"f{file_name} already exists! Is another install in progress? If not, delete this file and try again.")
-    # generate temporary apk repositories 
+    # generate temporary apk repositories
     with open(file_name, 'w') as fp:
         for repo in APK_REPOS_URL:
             fp.write(f"{repo}\n")
@@ -118,7 +117,7 @@ def install_in_offline_host(host, packages):
                 f"sudo apk --repositories-file ~/repositories.offline.{host} --progress add {' '.join(packages)}",
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
-            )  
+            )
         except ErrorReturnCode:
             error = True # error in remote host is already displayed
         if not error:
@@ -132,15 +131,15 @@ def install_in_thinclient(packages):
     try:
         prepare_offline_host("thinclient")
         open_router_tunnel()
-        logger.info(f"Running apk in thinclient...")
+        logger.info("Running apk in thinclient...")
         try:
-            repo_file = os.path.expanduser(f'~/repositories.offline.thinclient')
+            repo_file = os.path.expanduser('~/repositories.offline.thinclient')
             apk_cmd = f"sudo apk --repositories-file {repo_file} --progress add {' '.join(packages)}"
             Command('sh')('-c',
                 apk_cmd,
                 _err_to_out=True, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
-            )  
+            )
         except ErrorReturnCode:
             pass # error in remote host is already displayed
     finally:
@@ -155,11 +154,11 @@ def can_install(host):
 def install_packages(host, packages):
     can_install(host)
     if host == 'thinclient':
-        confirmation = Text(f"This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
+        confirmation = Text("This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'router':
-        confirmation = Text(f"This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the router?", style='red')
+        confirmation = Text("This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the router?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'thinclient':

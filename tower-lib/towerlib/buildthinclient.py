@@ -116,13 +116,13 @@ def prepare_image(builds_dir):
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
-        builds_dir, 
+        builds_dir,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
     with contrib.sudo(password="", _with=True):
         cp(image_src_path, image_dest_path)
     return image_dest_path
-    
+
 
 @clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
 def build_image(builds_dir):

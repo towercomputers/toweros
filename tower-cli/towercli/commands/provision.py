@@ -13,66 +13,66 @@ def add_args(argparser):
         help="""Prepare the bootable device needed to provision a host."""
     )
     provision_parser.add_argument(
-        'name', 
+        'name',
         nargs=1,
         help="""Host's name, used to refer to the host when performing other actions (Required)"""
     )
     provision_parser.add_argument(
-        '-bd', '--boot-device', 
+        '-bd', '--boot-device',
         help="""Path to virtual device for the SD card or USB drive""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--zero-device', 
+        '--zero-device',
         help="""Zero the target device before copying the installation image to it. (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
     provision_parser.add_argument(
-        '--no-confirm', 
+        '--no-confirm',
         help="""Don't ask for confirmation. (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
     provision_parser.add_argument(
-        '--public-key-path', 
+        '--public-key-path',
         help="""Path to public key used to access the host (Default: automatically generated and stored on the boot device and locally in `~/.local/tower/hosts/`)""",
         required=False
     )
     provision_parser.add_argument(
-        '--private-key-path', 
+        '--private-key-path',
         help="""Path to private key used to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)""",
         required=False
     )
     provision_parser.add_argument(
-        '--keyboard-layout', 
+        '--keyboard-layout',
         help="""Keyboard layout code (Default: same as that of the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--keyboard-variant', 
+        '--keyboard-variant',
         help="""Keyboard variant code (Default: same as that of the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--timezone', 
+        '--timezone',
         help="""Timezone of the host. e.g. `Europe/Paris` (Default: same as that of the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--lang', 
+        '--lang',
         help="""Language of the host. e.g. `en_US` (Default: same as that of the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--online', 
+        '--online',
         help="""Host *WILL* be able to access the Internet via the router. (Default: False)""",
         required=False,
         action='store_true',
@@ -86,43 +86,43 @@ def add_args(argparser):
         default=False
     )
     provision_parser.add_argument(
-        '--wlan-ssid', 
+        '--wlan-ssid',
         help="""WiFi SSID (Default: same as that currently in use by the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--wlan-password', 
+        '--wlan-password',
         help="""WiFi password (Default: same as that currently currently in use by the thin client)""",
         required=False,
         default=""
     )
     provision_parser.add_argument(
-        '--image', 
+        '--image',
         help="""Path to installation image""",
         required=False,
     )
     provision_parser.add_argument(
-        '--ifname', 
+        '--ifname',
         help="""Network interface (Default: `eth0` for online host, `eth1` for offline host) """,
         required=False,
     )
     provision_parser.add_argument(
-        '--force', 
+        '--force',
         help="""Overwrite the configuration for an existing host (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
     provision_parser.add_argument(
-        '--no-wait', 
+        '--no-wait',
         help="""Do not wait for the host to be ready (Default: False)""",
         required=False,
         action='store_true',
         default=False
     )
     provision_parser.add_argument(
-        '--timeout', 
+        '--timeout',
         help="""Maximum wait time for the host to be ready, in seconds. Specify `0` for no limit. (Default: 600)""",
         type=int,
         required=False,
@@ -148,7 +148,7 @@ def check_args(args, parser_error):
     if args.boot_device:
         disk_list = utils.get_device_list()
         if args.boot_device not in disk_list:
-            parser_error("Boot device path invalid.") 
+            parser_error("Boot device path invalid.")
         elif len(disk_list) == 1:
             parser_error("Boot device path invalid.") # can't write to the only disk
 
@@ -167,7 +167,7 @@ def check_args(args, parser_error):
     if args.keyboard_layout:
         if re.match(r'^[a-zA-Z]{2}$', args.keyboard_layout) is None:
             parser_error(message="Keyboard layout invalid. Must be 2 characters long.")
-    
+
     if args.keyboard_variant:
         if re.match(r'^[a-zA-Z0-9-_]{2,32}$', args.keyboard_variant) is None:
             parser_error(message="Keyboard layout invalid. Must be alphanumeric between 2 and 32 characters in length.")
@@ -191,7 +191,7 @@ def check_args(args, parser_error):
         interaces = utils.get_interfaces()
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}.")
-    
+
     if args.name[0] == "thinclient":
         parser_error(message="You can't use `thinclient` as host name.")
     elif args.name[0] == sshconf.ROUTER_HOSTNAME:

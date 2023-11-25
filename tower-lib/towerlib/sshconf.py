@@ -2,7 +2,6 @@ import os
 import logging
 import time
 import getpass
-from ipaddress import ip_address, ip_network
 
 from sshconf import read_ssh_config, empty_ssh_config_file
 from sh import ssh, ErrorReturnCode, sed, touch, Command
@@ -83,7 +82,7 @@ def update_known_hosts(name, ip):
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
         host_key_path = os.path.join(TOWER_DIR, 'hosts', name, f"ssh_host_{key_type}_key.pub")
         Command('sh')('-c', f'echo "{ip} $(cat {host_key_path})" >> {KNOWN_HOSTS_PATH}')
-    
+
 @clitask(f"Updating Tower config file {TOWER_SSH_CONFIG_PATH}...")
 def update_config(name, ip, private_key_path):
     insert_include_directive()
@@ -160,7 +159,7 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
             if num == first:
                 first += 1
                 return get_next_host_ip(tower_network, first=first + 1)
-    return f"{network}{first}"  
+    return f"{network}{first}"
 
 @clitask("Waiting for host to be ready...")
 def wait_for_host_sshd(name, timeout):

@@ -1,4 +1,4 @@
-import string, sys, fileinput, getopt, os, glob
+import os
 
 XDG_CATEGORIES = {
     'Development': 'Development',
@@ -31,7 +31,7 @@ def get_desktop_files():
     return desktop_files
 
 def clean_exec(desktop_file_info):
-    if not 'Exec' in desktop_file_info:
+    if 'Exec' not in desktop_file_info:
        desktop_file_info['Exec'] = ''
        return desktop_file_info
     exec_line = desktop_file_info['Exec']
@@ -46,7 +46,7 @@ def clean_exec(desktop_file_info):
     return desktop_file_info
 
 def clean_categories(desktop_file_info):
-    if not 'Categories' in desktop_file_info:
+    if 'Categories' not in desktop_file_info:
        desktop_file_info["InHost"] = False
        desktop_file_info['Categories'] = 'Other'
        return desktop_file_info
@@ -69,7 +69,7 @@ def get_desktop_file_info(desktop_file):
         for line in fp.readlines():
             if '=' in line:
                 key, value = line.split('=', 1)
-                if key in fields and not key in desktop_file_info:
+                if key in fields and key not in desktop_file_info:
                   desktop_file_info[key] = value.strip()
     return clean_categories(clean_exec(desktop_file_info))
 
@@ -77,7 +77,7 @@ def get_desktop_applications():
     desktop_applications = []
     for desktop_file in get_desktop_files():
         desktop_file_info = get_desktop_file_info(desktop_file)
-        if not 'Name' in desktop_file_info or not 'Exec' in desktop_file_info:
+        if 'Name' not in desktop_file_info or 'Exec' not in desktop_file_info:
            continue
         if 'NoDisplay' in desktop_file_info and desktop_file_info['NoDisplay'].lower() == 'true':
            continue
@@ -90,9 +90,9 @@ def generate_menu_group(desktop_applications):
     color_by_category = {}
     desktop_applications.sort(key=lambda x: x['Name'])
     for desktop_file_info in desktop_applications:
-        if not desktop_file_info['Categories'] in categories:
+        if desktop_file_info['Categories'] not in categories:
            categories.append(desktop_file_info['Categories'])
-           if 'Color' in desktop_file_info and not desktop_file_info['Categories'] in color_by_category:
+           if 'Color' in desktop_file_info and desktop_file_info['Categories'] not in color_by_category:
               color_by_category[desktop_file_info['Categories']] = desktop_file_info['Color']
 
     categories.sort()
@@ -109,7 +109,7 @@ def generate_menu_group(desktop_applications):
     for desktop_file_info in desktop_applications:
         menu.append(f"Menu('Menugen_{desktop_file_info['Categories']}') {{ Item('{desktop_file_info['Name']}%{desktop_file_info['Icon']}',Exec '{desktop_file_info['Exec']}') }}")
     return menu
-   
+
 def generate_menu():
     desktop_applications = get_desktop_applications()
     menu = ["MenuClear('Menugen_Applications')"]

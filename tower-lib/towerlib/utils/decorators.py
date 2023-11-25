@@ -16,7 +16,7 @@ def exec_task(function, sudo, *args, **kwargs):
             return function(*args, **kwargs)
     else:
         return function(*args, **kwargs)
-    
+
 def get_duration_text(start_time, timer_message, message=""):
     duration = timedelta(seconds=time.time() - start_time)
     if duration.seconds > 0:
