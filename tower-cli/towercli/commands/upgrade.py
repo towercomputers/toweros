@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import sys
 
 from towerlib import provision, utils, sshconf

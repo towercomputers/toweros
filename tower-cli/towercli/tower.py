@@ -1,8 +1,8 @@
 import argparse
 
 import towercli
-from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version
 from towerlib import utils
+from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version
 from towerlib.utils.exceptions import TowerException
 
 def parse_arguments():
