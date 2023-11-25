@@ -49,8 +49,10 @@ def ssh_command(hostname, *cmd):
         if line.startswith(f'SSHBEGIN:{cmd_uuid}'):
             is_ssh_data = True
             continue
-        if not is_ssh_data: continue
-        if line.startswith(f'SSHEND:{cmd_uuid}'): break
+        if not is_ssh_data:
+            continue
+        if line.startswith(f'SSHEND:{cmd_uuid}'):
+            break
         sanitized_stdout += line + "\n"
     return sanitized_stdout.strip()
 
@@ -143,7 +145,7 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
     logger.info("nxproxy connected to nxagent.")
 
 def kill_nx_processes(hostname, display_num):
-    logger.info(f"closing nxproxy and nxagent ({hostname}:{display_num})..")
+    logger.info("closing nxproxy and nxagent (%s)..", f"{hostname}:{display_num}")
     # for alpine 3.17
     killcmd_legacy = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
     killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
@@ -168,7 +170,7 @@ def run(hostname, *cmd):
         start_nx_agent(hostname, display_num, cookie)
         start_nx_proxy(display_num, cookie)
         # run the command in foreground
-        logger.info(f"run {' '.join(cmd)}")
+        logger.info(f"run %s", ' '.join(cmd))
         app_process = ssh(
             hostname, f"DISPLAY=:{display_num}", *cmd,
             _out=logger.info, _err_to_out=True, _bg=True

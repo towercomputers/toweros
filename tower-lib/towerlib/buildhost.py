@@ -13,14 +13,15 @@ from sh import (
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl,
 )
-mkfs_ext4 = Command('mkfs.ext4')
-fsck_ext4 = Command('fsck.ext4')
 
 from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
 from towerlib.sshconf import TOWER_DIR
 from towerlib.utils.exceptions import LockException, BuildException
+
+mkfs_ext4 = Command('mkfs.ext4')
+fsck_ext4 = Command('fsck.ext4')
 
 logger = logging.getLogger('tower')
 
@@ -225,7 +226,7 @@ def build_image(builds_dir, uncompressed=False):
     finally:
         cleanup()
     if image_path:
-        logger.info(f"Image ready: {image_path}")
+        logger.info("Image ready: %s", image_path)
     return image_path
 
 @clitask("Copying {0} in {1}...")
@@ -256,7 +257,7 @@ def insert_tower_env(boot_part, config):
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
-    logger.debug(f"Host configuration:\n{str_env}")
+    logger.debug("Host configuration:\n%s", str_env)
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition

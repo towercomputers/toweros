@@ -51,7 +51,7 @@ def prepare_required_build(build_name, builds_dir):
     build = REQUIRED_BUILDS[build_name]
     file_path = os.path.join(builds_dir, build["filename"])
     if not os.path.isfile(file_path):
-        logger.info(f'{build["filename"]} not found in builds directory.')
+        logger.info('%s not found in builds directory.', build["filename"])
         network.download_file(build["url"], file_path)
     chek_sha_sum(file_path, build["checksum"])
     return file_path

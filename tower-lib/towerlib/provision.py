@@ -190,13 +190,14 @@ def display_pre_discovering_message():
 
 def display_post_discovering_message(name, ip):
     if sshconf.is_up(name):
-        logger.info(f"Host ready with IP: {ip}")
+        message = f"Host ready with IP: {ip}\n"
     else:
-        logger.info(f"Host IP: {ip}")
-    logger.info(f"Access the host `{name}` with the command `$ ssh {name}`.")
-    logger.info(f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`")
-    logger.info(f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`")
-    logger.info("WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host.")
+        message = f"Host IP: {ip}\n"
+    message += f"Access the host `{name}` with the command `$ ssh {name}`.\n"
+    message += f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`\n"
+    message += f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`\n"
+    message += "WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host."
+    rprint(Text(message))
 
 def diplay_discovering_error_message():
     error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
@@ -224,23 +225,28 @@ def provision(name, args, upgrade=False):
     # prepare provisioning
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, upgrade)
     # check network
-    if not args.force: check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
+    if not args.force:
+        check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
-    if not args.no_confirm and not Confirm.ask("Do you want to continue?"): return
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?"):
+        return
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
     # save necessary files in Thin Client
-    if not upgrade: prepare_thin_client(name, host_config, private_key_path)
+    if not upgrade:
+        prepare_thin_client(name, host_config, private_key_path)
     # display pre discovering message
     display_pre_discovering_message()
     # wait for host to be ready
-    if not args.no_wait: wait_for_host(name, args.timeout)
+    if not args.no_wait:
+        wait_for_host(name, args.timeout)
     # display post discovering message
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
     # re-install packages
-    if upgrade: install.reinstall_all_packages(name)
+    if upgrade:
+        install.reinstall_all_packages(name)
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):
