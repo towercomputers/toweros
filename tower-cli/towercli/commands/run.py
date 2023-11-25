@@ -3,6 +3,7 @@ import logging
 
 from towerlib import sshconf
 from towerlib import gui
+from towerlib.utils.exceptions import TowerException
 
 logger = logging.getLogger('tower')
 
@@ -32,5 +33,4 @@ def execute(args):
     if os.getenv('DISPLAY'):
         gui.run(args.host_name[0], *args.run_command)
     else:
-        logger.error("ERROR: `tower run` requires a running desktop environment. Use `startx` to start X.Org.")
-
+        raise TowerException("`tower run` requires a running desktop environment. Use `startx` to start X.Org.")

@@ -21,6 +21,7 @@ def add_args(argparser):
         required=True,
     )
 
+# pylint: disable=unused-argument
 def check_args(args, parser_error):
     if not sshconf.exists(sshconf.ROUTER_HOSTNAME):
         parser_error(message=f"`{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")

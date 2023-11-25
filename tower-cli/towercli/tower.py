@@ -1,9 +1,13 @@
 import argparse
+import sys
+
+from towerlib import utils
+from towerlib.utils.exceptions import TowerException
 
 import towercli
-from towerlib import utils
+# import needed for getattr() in parse_arguments()
+# pylint: disable=unused-import
 from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version
-from towerlib.utils.exceptions import TowerException
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="""
@@ -42,4 +46,4 @@ def main():
         getattr(towercli.commands, args.command.replace("-", "")).execute(args)
     except TowerException as e:
         utils.clilogger.print_error(str(e))
-        exit(1)
+        sys.exit()
