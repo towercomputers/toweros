@@ -193,7 +193,6 @@ install_tower_tools() {
     mkdir -p $TOWER_FOLDER
     # put documentation and install-dev.sh in Tower folder
     cp -r /var/towercomputers/docs $TOWER_FOLDER
-    ln -s /var/towercomputers/docs /home/$USERNAME/docs
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
     cp -r /var/towercomputers/builds $TOWER_FOLDER
@@ -330,7 +329,7 @@ clone_live_system_to_disk() {
     # install edge packages
     apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/$ARCH/*.apk
     # install sfwbar
-    unzip /var/towercomputers/installer/alpine-edge/sfwbar-b29ee39.zip
+    unzip /var/towercomputers/installer/alpine-edge/$ARCH/sfwbar-b29ee39.zip
     cd sfwbar-main
     meson setup build
     ninja -C build
@@ -342,6 +341,8 @@ clone_live_system_to_disk() {
     # install custom icons
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
+    # update icon cache
+    gtk-update-icon-cache -f -t /mnt/usr/share/icons/hicolor
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
@@ -360,6 +361,8 @@ EOF
     # make a backup and copy new .profile
     cp "/mnt/home/$USERNAME/.profile" "/mnt/home/$USERNAME/.profile.bak" || true
     cp /home/$USERNAME/.profile "/mnt/home/$USERNAME/.profile"
+    # create symlink to doc
+    ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
     # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
