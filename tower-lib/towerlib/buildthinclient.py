@@ -71,7 +71,6 @@ def prepare_pip_packages():
 def prepare_installer():
     makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
     copytree(join_path(INSTALLER_DIR, 'installer'), wd('overlay/var/towercomputers/installer'))
-    copytree(join_path(INSTALLER_DIR, 'labwc'), wd('overlay/var/towercomputers/labwc'))
 
 def prepare_docs():
     makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
