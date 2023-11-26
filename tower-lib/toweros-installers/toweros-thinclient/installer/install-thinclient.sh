@@ -175,7 +175,6 @@ prepare_home_directory() {
     touch /home/$USERNAME/.Xauthority
     # set XDG_RUNTIME_DIR, XDG_CONFIG_HOME and PS1
     cat <<EOF >> /home/$USERNAME/.profile
-export XDG_CONFIG_HOME=/etc/xdg/labwc
 export PS1='[\\u@\\H \\W]\\$ '
 if [ -z "\$XDG_RUNTIME_DIR" ]; then
     XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
