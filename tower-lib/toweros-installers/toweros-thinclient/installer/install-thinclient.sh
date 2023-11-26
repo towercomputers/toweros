@@ -423,7 +423,7 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    python $SCRIPT_DIR/end-installation.py
+    python $SCRIPT_DIR/endinstallation.py
     reboot
 }
 
@@ -434,7 +434,7 @@ set_configuration() {
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
     # STARTX_ON_LOGIN
-    python $SCRIPT_DIR/ask-configuration.py
+    python $SCRIPT_DIR/askconfiguration.py
     source /root/tower.env
     if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
         check_and_copy_key_from_boot_disk

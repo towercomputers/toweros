@@ -7,6 +7,9 @@ class UnkownHost(TowerException):
 class DiscoveringTimeOut(TowerException):
     pass
 
+class DiscoveringException(TowerException):
+    pass
+
 class MissingEnvironmentValue(TowerException):
     pass
 

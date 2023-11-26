@@ -2,9 +2,10 @@ import os
 import logging
 import glob
 
-from sh import shasum, mkdir, contrib
+from sh import shasum, mkdir
 
 from towerlib.utils import network
+from towerlib.utils.sh import sh_sudo
 from towerlib.utils.decorators import clitask
 from towerlib.utils.exceptions import InvalidChecksum
 
@@ -33,7 +34,7 @@ def init_builds_dir(args_builds_dir):
             return builds_dir
     # if not exists, create it
     if not os.path.isdir(builds_dir):
-        with contrib.sudo(password="", _with=True):
+        with sh_sudo(password="", _with=True):
             mkdir('-p', builds_dir)
     return builds_dir
 
@@ -57,7 +58,6 @@ def prepare_required_build(build_name, builds_dir):
     return file_path
 
 def find_host_image():
-    image_path = None
     builds_dirs = [
         os.path.join(os.getcwd(), 'dist'),
         os.path.join(os.getcwd(), 'builds'),
@@ -73,15 +73,10 @@ def find_host_image():
                 compressed_name = os.path.basename(compressed_host_images[-1]).replace('.img.xz', '')
                 uncompressed_name = os.path.basename(uncompressed_host_images[-1]).replace('.img', '')
                 if compressed_name > uncompressed_name:
-                    image_path = compressed_host_images.pop()
-                    break
-                else:
-                    image_path = uncompressed_host_images.pop()
-                    break
-            elif compressed_host_images:
-                image_path = compressed_host_images.pop()
-                break
-            elif uncompressed_host_images:
-                image_path = uncompressed_host_images.pop()
-                break
-    return image_path
+                    return compressed_host_images.pop()
+                return uncompressed_host_images.pop()
+            if compressed_host_images:
+                return compressed_host_images.pop()
+            if uncompressed_host_images:
+                return uncompressed_host_images.pop()
+    return None

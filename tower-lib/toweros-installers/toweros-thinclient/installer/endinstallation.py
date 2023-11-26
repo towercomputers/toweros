@@ -12,7 +12,7 @@ def main():
     Console().clear()
     title = subprocess.run(
         ['figlet', '-w', '160', 'TowerOS-ThinClient'],
-        capture_output=True, encoding="UTF-8"
+        capture_output=True, encoding="UTF-8", check=False
     ).stdout
     print(title)
     print("\n")

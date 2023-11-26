@@ -15,26 +15,26 @@ logger = logging.getLogger('tower')
 NXAGENT_FIRST_PORT = 4000
 NXAGENT_FIRST_DISPLAY_NUM = 50
 
-DEFAULTS_NXAGENT_ARGS=dict(
-    link="lan",
-    limit="0",
-    cache="8M",
-    images="32M",
-    accept="127.0.0.1",
-    clipboard="both",
-    client="linux",
-    menu="0",
-    keyboard="clone",
-    composite="1",
-    autodpi="1",
-    rootless="1",
-)
+DEFAULTS_NXAGENT_ARGS = {
+    "link": "lan",
+    "limit": "0",
+    "cache": "8M",
+    "images": "32M",
+    "accept": "127.0.0.1",
+    "clipboard": "both",
+    "client": "linux",
+    "menu": "0",
+    "keyboard": "clone",
+    "composite": "1",
+    "autodpi": "1",
+    "rootless": "1",
+}
 
-DEFAULTS_NXPROXY_ARGS = dict(
-    retry="5",
-    connect="127.0.0.1",
-    cleanup="0"
-)
+DEFAULTS_NXPROXY_ARGS = {
+    "retry": "5",
+    "connect": "127.0.0.1",
+    "cleanup": "0"
+}
 
 NX_TIMEOUT = 5
 
@@ -77,9 +77,11 @@ def authorize_cookie(hostname, cookie, display_num):
 def get_next_display_num():
     used_nums = []
     for host in sshconf.hosts():
-        if not sshconf.is_up(host): continue
+        if not sshconf.is_up(host):
+            continue
         xauth_list = ssh_command(host, 'xauth', 'list')
-        if xauth_list == "": continue
+        if xauth_list == "":
+            continue
         used_nums += [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
     if len(used_nums) == 0:
         return NXAGENT_FIRST_DISPLAY_NUM
@@ -111,10 +113,10 @@ def wait_for_output(_out, expected_output):
             raise NxTimeoutException("NX agent or proxy not ready after {NX_TIMEOUT}s")
     logger.debug(process_output)
 
-def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
+def start_nx_agent(hostname, display_num, cookie, nxagent_args=None):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
     display = gen_display_args(
-        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args,
+        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args or {},
         {'listen': nxagent_port}
     )
     authorize_cookie(hostname, cookie, display_num)
@@ -129,10 +131,10 @@ def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
     wait_for_output(buf, "Waiting for connection")
     logger.info("nxagent is waiting for connection...")
 
-def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
+def start_nx_proxy(display_num, cookie, nxproxy_args=None):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
     display = gen_display_args(
-        display_num, DEFAULTS_NXPROXY_ARGS, nxproxy_args,
+        display_num, DEFAULTS_NXPROXY_ARGS, nxproxy_args or {},
         {'cookie': cookie, 'port': nxagent_port}
     )
     buf = StringIO()
@@ -170,7 +172,7 @@ def run(hostname, *cmd):
         start_nx_agent(hostname, display_num, cookie)
         start_nx_proxy(display_num, cookie)
         # run the command in foreground
-        logger.info(f"run %s", ' '.join(cmd))
+        logger.info("run %s", ' '.join(cmd))
         app_process = ssh(
             hostname, f"DISPLAY=:{display_num}", *cmd,
             _out=logger.info, _err_to_out=True, _bg=True
@@ -184,6 +186,7 @@ def run(hostname, *cmd):
         try:
             if app_process is not None and app_process.is_alive():
                 app_process.terminate()
-        except:
+        # pylint: disable=broad-exception-caught
+        except Exception:
             pass # we want to cleanup anyway
         cleanup(hostname, display_num)

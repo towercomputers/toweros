@@ -12,7 +12,7 @@ from towerlib import utils
 from towerlib import buildhost
 from towerlib import sshconf
 from towerlib import install
-from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException
+from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException, DiscoveringException
 
 logger = logging.getLogger('tower')
 
@@ -49,7 +49,7 @@ def prepare_host_config(args):
     name = args.name[0]
     # public key for ssh
     check_environment_value('public-key-path', args.public_key_path)
-    with open(args.public_key_path) as f:
+    with open(args.public_key_path, encoding="UTF-8") as f:
         public_key = f.read().strip()
     # generate random password
     password = secrets.token_urlsafe(16)
@@ -80,7 +80,7 @@ def prepare_host_config(args):
         host_ip =sshconf.ROUTER_IP
     else:
         host_ip = sshconf.get_next_host_ip(tower_network)
-    host_color = sshconf.color_code(args.color or sshconf.get_next_host_color())
+    host_color = sshconf.color_code(args.color or sshconf.get_next_color_name())
     # return complete configuration
     return {
         'HOSTNAME': name,
@@ -150,7 +150,7 @@ def prepare_provision(args, upgrade=False):
 @utils.clitask("Saving host configuration in {0}...")
 def save_config_file(config_path, config_str):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
-    with open(config_path, 'w') as f:
+    with open(config_path, 'w', encoding="UTF-8") as f:
         f.write(config_str)
     os.chmod(config_path, 0o600)
 
@@ -199,20 +199,16 @@ def display_post_discovering_message(name, ip):
     message += "WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host."
     rprint(Text(message))
 
-def diplay_discovering_error_message():
-    error_message = "ERROR: Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
-    rprint(Text(error_message, style='red'))
-    exit(1)
-
 def wait_for_host(name, timeout):
+    error_message = "Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
     try:
         sshconf.wait_for_host_sshd(name, timeout)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt as exc1:
         logger.info("Discovering interrupted.")
-        diplay_discovering_error_message()
-    except DiscoveringTimeOut:
+        raise DiscoveringException(error_message) from exc1
+    except DiscoveringTimeOut as exc2:
         logger.info("Discovering timed out.")
-        diplay_discovering_error_message()
+        raise DiscoveringException(error_message) from exc2
 
 def prepare_thin_client(name, host_config, private_key_path):
     # save host configuration in Thin Client

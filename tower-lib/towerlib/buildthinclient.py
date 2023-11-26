@@ -7,11 +7,10 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-import sh
-from sh import rm, git, pip, Command, apk, hatch, cp, contrib
+from sh import rm, git, pip, Command, apk, hatch, cp
 
-
-from towerlib.utils import clitask
+from towerlib.utils.decorators import clitask
+from towerlib.utils.sh import sh_sudo
 from towerlib import buildhost
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException
@@ -45,7 +44,7 @@ def find_host_image(builds_dir):
         rpi_image_path = buildhost.build_image(builds_dir)
     else:
         rpi_image_path = host_images.pop()
-        logger.info(f"Using host image {rpi_image_path}")
+        logger.info("Using host image %s", rpi_image_path)
     return rpi_image_path
 
 def check_abuild_key():
@@ -102,7 +101,7 @@ def prepare_image(builds_dir):
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
-    with sh.contrib.sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True):
         apk('update')
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
@@ -119,7 +118,7 @@ def prepare_image(builds_dir):
         builds_dir,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
-    with contrib.sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True):
         cp(image_src_path, image_dest_path)
     return image_dest_path
 
@@ -135,4 +134,4 @@ def build_image(builds_dir):
     finally:
         cleanup()
     if image_path:
-        logger.info(f"Image ready: {image_path}")
+        logger.info("Image ready: %s", image_path)

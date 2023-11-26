@@ -1,9 +1,9 @@
 import os
 
-import sh
 from sh import ssh, mkdir, sed, scp, mv, Command
 
-from towerlib.utils import clitask
+from towerlib.utils.decorators import clitask
+from towerlib.utils.sh import sh_sudo
 from towerlib.sshconf import TOWER_DIR, get_host_color_name
 
 @clitask("Copying desktop files from host to thinclient...")
@@ -24,19 +24,19 @@ def copy_desktop_files(host, package):
             sed('-i', f's/Categories=/Categories=X-tower-{host};/g', locale_file_path)
             Command('sh')('-c', f"echo 'Color={get_host_color_name(host)}' >> {locale_file_path}")
             # with sudo copy .desktop file in the same folder as the host
-            with sh.contrib.sudo(password="", _with=True):
+            with sh_sudo(password="", _with=True):
                 mkdir('-p', desktop_folder)
                 mv(locale_file_path, desktop_folder)
 
 def get_installed_packages(host):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
     if os.path.exists(apk_world):
-        return open(apk_world, 'r').read().strip().split("\n")
+        return open(apk_world, 'r', encoding="UTF-8").read().strip().split("\n")
     return []
 
 def save_installed_packages(host, installed_packages):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    with open(apk_world, 'w') as fp:
+    with open(apk_world, 'w', encoding="UTF-8") as fp:
         fp.write("\n".join(installed_packages))
 
 def add_installed_package(host, package):

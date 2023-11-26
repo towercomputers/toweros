@@ -32,7 +32,8 @@ ALPINE_BRANCH_FOR_UNVERSIONED = "v3.17"
 ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
 USERNAME = getpass.getuser()
 
-sprint = lambda str: print(str, end='', flush=True)
+def sprint(value):
+    print(value, end='', flush=True)
 
 def wd(path):
     return os.path.join(WORKING_DIR, path)
@@ -236,11 +237,11 @@ def copy_image_in_device(image_file, device):
     try:
         buf = StringIO()
         dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
-    except ErrorReturnCode:
+    except ErrorReturnCode as exc:
         error_message = "Error copying image. Please check the boot device integrity and try again with the flag `--zero-device`."
         logger.error(buf.getvalue())
         logger.error(error_message)
-        raise BuildException(error_message)
+        raise BuildException(error_message) from exc
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     if not boot_part:
@@ -273,7 +274,7 @@ def insert_tower_env(boot_part, config):
 def burn_image(image_file, device, config, zero_device=False):
     try:
         # make sure the password is not shown in the logs
-        del(config['PASSWORD'])
+        del config['PASSWORD']
         prepare_working_dir()
         if zero_device:
             zeroing_device(device)

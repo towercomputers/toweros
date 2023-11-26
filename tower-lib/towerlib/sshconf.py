@@ -50,16 +50,16 @@ def create_ssh_dir():
 def insert_include_directive():
     directive = f"Include {TOWER_SSH_CONFIG_PATH}"
     if os.path.exists(SSH_CONFIG_PATH):
-        with open(SSH_CONFIG_PATH, 'r') as f:
+        with open(SSH_CONFIG_PATH, 'r', encoding="UTF-8") as f:
             current_config = f.read()
         if directive not in current_config:
-            with open(SSH_CONFIG_PATH, 'r+') as f:
+            with open(SSH_CONFIG_PATH, 'r+', encoding="UTF-8") as f:
                 content = f.read()
                 f.seek(0, 0)
                 f.write(directive + '\n\n' + content)
     else:
         create_ssh_dir()
-        with open(SSH_CONFIG_PATH, 'w') as f:
+        with open(SSH_CONFIG_PATH, 'w', encoding="UTF-8") as f:
             f.write(directive + '\n\n')
         os.chmod(SSH_CONFIG_PATH, 0o600)
 
@@ -70,8 +70,7 @@ def get(name):
     config = ssh_config()
     if name in config.hosts():
         return config.host(name)
-    else:
-        return None
+    return None
 
 def update_known_hosts(name, ip):
     if os.path.exists(KNOWN_HOSTS_PATH):
@@ -94,7 +93,7 @@ def update_config(name, ip, private_key_path):
     if name in existing_hosts:
         config.set(name, Hostname=ip)
         config.set(name, IdentityFile=private_key_path)
-        config.save()
+        config.write(TOWER_SSH_CONFIG_PATH)
         return
     # if IP already used, update the name
     for host_name in existing_hosts:
@@ -102,7 +101,7 @@ def update_config(name, ip, private_key_path):
         if host['hostname'] == ip:
             config.rename(host_name, name)
             config.set(name, IdentityFile=private_key_path)
-            config.save()
+            config.write(TOWER_SSH_CONFIG_PATH)
             return
     # if not exists, create a new host
     config.add(name,
@@ -166,13 +165,13 @@ def wait_for_host_sshd(name, timeout):
     start_time = time.time()
     while not is_up(name):
         duration = time.time() - start_time
-        if timeout > 0 and duration > timeout:
+        if timeout and duration > timeout:
             raise DiscoveringTimeOut("Host discovering timeout")
         time.sleep(3)
 
 def get_host_config(name):
     conf_path = os.path.join(TOWER_DIR, 'hosts', name, "tower.env")
-    with open(conf_path, 'r') as f:
+    with open(conf_path, 'r', encoding="UTF-8") as f:
         config_str = f.read()
     host_config = {}
     for line in config_str.strip().split("\n"):
@@ -202,10 +201,10 @@ def color_code(name):
 
 def color_hex(code_or_name):
     for color in COLORS:
-        if type(code_or_name) == int:
+        if isinstance(code_or_name, int):
             if color[0] == code_or_name:
                 return color[2]
-        if type(code_or_name) == str:
+        if isinstance(code_or_name, str):
             if color[1] == code_or_name:
                 return color[2]
     raise InvalidColor(f"Invalid color code or name: {code_or_name}")
@@ -219,6 +218,7 @@ def get_host_color_name(host):
     for color in COLORS:
         if color[0] == host_color_code:
             return color[1]
+    return COLORS[0][1]
 
 def get_hex_host_color(host):
     host_config = get_host_config(host)

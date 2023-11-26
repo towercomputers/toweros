@@ -16,7 +16,7 @@ from rich.console import Console
 #from sh import lsscsi, figlet
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
-with open(LOCALE_FILE, "r") as fp:
+with open(LOCALE_FILE, "r", encoding="UTF-8") as fp:
     LOCALE = json.load(fp)
 
 TIMEZONES = LOCALE["timezones"]
@@ -24,7 +24,7 @@ KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
 
 def run_cmd(cmd, to_json=False):
-    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8").stdout.strip()
+    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8", check=False).stdout.strip()
     if to_json:
         return json.loads(out)
     return out
@@ -115,7 +115,7 @@ def get_installation_type():
         "Do you want to install a new system or upgrade an already installed system?",
         "Select the installation type",
         no_columns=True
-    ).split(" ")[0].lower()
+    ).split(" ", maxsplit=1)[0].lower()
 
 def get_target_drive(upgrade=False):
     install_title = "Please select the drive where you want to install TowerOS-Thinclient"
@@ -142,16 +142,15 @@ def get_cryptkey_drive(os_target, upgrade=False):
     )
     if drive == please_refresh:
         return get_cryptkey_drive(os_target)
-    else:
-        return drive[drive.index('/dev/'):].split(" ")[0].strip()
+    return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def check_secure_boot_status():
     sbctl_status = run_cmd(["sbctl", "status", "--json"], to_json=True)
     error = False
-    if sbctl_status['secure_boot'] != False:
+    if sbctl_status['secure_boot'] is not False:
         print_error("Error: Secure boot is enabled, you must disable it to install TowerOS-Thinclient with secure boot.")
         error = True
-    if sbctl_status['setup_mode'] != True:
+    if sbctl_status['setup_mode'] is not True:
         print_error("Error: Secure boot's 'Setup Mode' is disable, you must enbale it to install TowerOS-Thinclient with secure boot.")
         error = True
     if len(sbctl_status['vendors']) > 0:
@@ -170,8 +169,7 @@ def get_secure_boot():
         continue_without_secure_boot = Confirm.ask("Do you want to continue without secure boot (y) or reboot (n) ?")
         if continue_without_secure_boot:
             return False
-        else:
-            os.system('reboot')
+        os.system('reboot')
     return with_secure_boot
 
 def get_lang():
@@ -265,7 +263,7 @@ def ask_config():
     Console().clear()
     title = subprocess.run(
         ['figlet', '-w', '160', 'TowerOS-ThinClient'],
-        capture_output=True, encoding="UTF-8"
+        capture_output=True, encoding="UTF-8", check=False
     ).stdout
     print(title)
     #figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
@@ -289,9 +287,9 @@ def ask_config():
 
 def main():
     config = "\n".join([f"{key}='{value}'" for key, value in ask_config().items()])
-    with open("/root/tower.env", 'w') as fp:
-        fp.write(config)
-        fp.write("\n")
+    with open("/root/tower.env", 'w', encoding="UTF-8") as fptower:
+        fptower.write(config)
+        fptower.write("\n")
     return 0
 
 if __name__ == '__main__':

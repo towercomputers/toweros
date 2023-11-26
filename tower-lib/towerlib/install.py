@@ -22,7 +22,8 @@ APK_REPOS_URL = [
 ]
 LOCAL_TUNNELING_PORT = 8666
 
-sprint = lambda str: print(str.decode("utf-8", 'ignore') if isinstance(str, bytes) else str, end='', flush=True)
+def sprint(value):
+    print(value.decode("utf-8", 'ignore') if isinstance(value, bytes) else value, end='', flush=True)
 
 def prepare_repositories_file(host):
     file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
@@ -30,7 +31,7 @@ def prepare_repositories_file(host):
     if os.path.exists(file_name):
         raise LockException(f"f{file_name} already exists! Is another install in progress? If not, delete this file and try again.")
     # generate temporary apk repositories
-    with open(file_name, 'w') as fp:
+    with open(file_name, 'w', encoding="UTF-8") as fp:
         for repo in APK_REPOS_URL:
             fp.write(f"{repo}\n")
     # copy apk repositories in offline host
@@ -107,7 +108,7 @@ def install_in_offline_host(host, packages):
     try:
         prepare_offline_host(host)
         open_router_tunnel()
-        logger.info(f"Running apk in {host}...")
+        logger.info("Running apk in %s...", host)
         error = False
         try:
             # open the second ssh tunnel with the offline host and run `apk add`

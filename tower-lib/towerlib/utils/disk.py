@@ -3,8 +3,9 @@ import logging
 import time
 import os
 
-import sh
 from sh import lsblk, umount, ErrorReturnCode
+
+from towerlib.utils.sh import sh_sudo
 
 logger = logging.getLogger('tower')
 
@@ -15,10 +16,10 @@ def unmount_all(device):
         return
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoints'][0]:
-            with sh.contrib.sudo(password="", _with=True):
+            with sh_sudo(password="", _with=True):
                 umount(partition['mountpoints'][0])
 
-def lazy_umount(path, retry=0):
+def lazy_umount(path):
     if not os.path.exists(path):
         return
     try:
@@ -45,12 +46,11 @@ def select_boot_device():
     devices_after = get_device_list()
     new_devices = list(set(devices_after) - set(devices_before))
 
-    if (len(new_devices) == 0):
+    if len(new_devices) == 0:
         logger.error("boot device not found.")
         return None
-    elif (len(new_devices) > 1):
+    if len(new_devices) > 1:
         logger.error("More than one disk found.")
         return None
-    else:
-        logger.info(f"boot device found: {new_devices[0]}")
-        return new_devices[0]
+    logger.info("Boot device found: %s", new_devices[0])
+    return new_devices[0]
