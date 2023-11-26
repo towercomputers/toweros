@@ -331,8 +331,10 @@ clone_live_system_to_disk() {
     # install edge packages
     apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/$ARCH/*.apk
     # install sfwbar
-    tar -xzf /var/towercomputers/installer/alpine-edge/$ARCH/sfwbar-b29ee39.tar.gz
+    unzip /var/towercomputers/installer/alpine-edge/sfwbar-b29ee39.zip
     cd sfwbar-main
+    meson setup build
+    ninja -C build
     DESTDIR=/mnt/ ninja -C build install
     cd ..
     # install custom startmenu widget
