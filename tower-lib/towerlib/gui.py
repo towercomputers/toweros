@@ -16,7 +16,7 @@ NXAGENT_FIRST_PORT = 4000
 NXAGENT_FIRST_DISPLAY_NUM = 50
 
 DEFAULTS_NXAGENT_ARGS = {
-    "link": "lan",
+    "link": "adsl",
     "limit": "0",
     "cache": "8M",
     "images": "32M",
