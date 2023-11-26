@@ -22,6 +22,9 @@ TowerOS provides tools for easily provisioning new hosts with the following step
 
 *NOTE:* You must provision a router before you provision any other online hosts.
 
+*NOTE:* It is a good idea to reserve one (offline) host for managing removable storage (esp. when using the DeskPi Super6C and CM4s, since then only one host has USB ports exposed).
+
+
 ### Provision the Router
 The first online host that you must provision is the router, which connect to the Internet _via_ a WiFi network: 
 
