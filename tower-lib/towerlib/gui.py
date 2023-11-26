@@ -162,14 +162,14 @@ def cleanup(hostname, display_num):
     revoke_cookies(hostname, display_num)
     xsetroot('-cursor_name', 'left_ptr')
 
-def run(hostname, *cmd):
+def run(hostname, nxagent_args, *cmd):
     app_process = None
     display_num = get_next_display_num()
     try:
         xsetroot('-cursor_name', 'watch')
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
-        start_nx_agent(hostname, display_num, cookie)
+        start_nx_agent(hostname, display_num, cookie, nxagent_args)
         start_nx_proxy(display_num, cookie)
         # run the command in foreground
         logger.info("run %s", ' '.join(cmd))
