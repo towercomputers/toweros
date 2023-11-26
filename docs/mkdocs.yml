@@ -15,8 +15,10 @@ nav:
   - Getting Started:
     - Introduction: index.md
     - Hardware: hardware.md
-    - Installation: installation.md
-    - Usage: usage.md
+    - Installation and Upgrades: installation.md
+  - Usage:
+    - Using TowerOS: usage.md
+    - Guides: guides.md
   - Security:
     - Security: security.md
     - Secure Boot: secure-boot.md

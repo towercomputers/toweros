@@ -137,7 +137,7 @@ On first boot:
 
 1. Test installed packages:
 
-        [thinclient]$ startx
+        [thinclient]$ dbus-launch labwc
         [thinclient]$ tower run office xcalc
         [thinclient]$ tower run web midori
 

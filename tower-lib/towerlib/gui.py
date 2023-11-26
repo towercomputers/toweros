@@ -7,36 +7,36 @@ import time
 import sh
 from sh import ssh, nxproxy, xsetroot, mcookie
 
+from towerlib.utils.exceptions import NxTimeoutException
+from towerlib import sshconf
+
 logger = logging.getLogger('tower')
 
 NXAGENT_FIRST_PORT = 4000
 NXAGENT_FIRST_DISPLAY_NUM = 50
 
-DEFAULTS_NXAGENT_ARGS=dict(
-    link="lan",
-    limit="0",
-    cache="8M",
-    images="32M",
-    accept="127.0.0.1",
-    clipboard="both",
-    client="linux",
-    menu="0",
-    keyboard="clone",
-    composite="1",
-    autodpi="1",
-    rootless="1",
-)
+DEFAULTS_NXAGENT_ARGS = {
+    "link": "adsl",
+    "limit": "0",
+    "cache": "8M",
+    "images": "32M",
+    "accept": "127.0.0.1",
+    "clipboard": "both",
+    "client": "linux",
+    "menu": "0",
+    "keyboard": "clone",
+    "composite": "1",
+    "autodpi": "1",
+    "rootless": "1",
+}
 
-DEFAULTS_NXPROXY_ARGS = dict(
-    retry="5",
-    connect="127.0.0.1",
-    cleanup="0"
-)
+DEFAULTS_NXPROXY_ARGS = {
+    "retry": "5",
+    "connect": "127.0.0.1",
+    "cleanup": "0"
+}
 
 NX_TIMEOUT = 5
-
-class NxTimeoutException(Exception):
-    pass
 
 def ssh_command(hostname, *cmd):
     cmd_uuid = str(uuid.uuid1())
@@ -49,8 +49,10 @@ def ssh_command(hostname, *cmd):
         if line.startswith(f'SSHBEGIN:{cmd_uuid}'):
             is_ssh_data = True
             continue
-        if not is_ssh_data: continue
-        if line.startswith(f'SSHEND:{cmd_uuid}'): break
+        if not is_ssh_data:
+            continue
+        if line.startswith(f'SSHEND:{cmd_uuid}'):
+            break
         sanitized_stdout += line + "\n"
     return sanitized_stdout.strip()
 
@@ -66,22 +68,28 @@ def generate_magic_cookie():
 def authorize_cookie(hostname, cookie, display_num):
     xauthority_path = os.path.join(get_home(hostname), ".Xauthority")
     ssh(hostname, "touch", xauthority_path)
-    ssh(hostname, 'xauth', 
-        'add', f"{get_real_hostname(hostname)}/unix:{display_num}", 
+    ssh(hostname, 'xauth',
+        'add', f"{get_real_hostname(hostname)}/unix:{display_num}",
         'MIT-MAGIC-COOKIE-1', cookie,
         _out=logger.debug
     )
 
-def get_next_display_num(hostname):
-    xauth_list = ssh_command(hostname, 'xauth', 'list')
-    if xauth_list == "":
+def get_next_display_num():
+    used_nums = []
+    for host in sshconf.hosts():
+        if not sshconf.is_up(host):
+            continue
+        xauth_list = ssh_command(host, 'xauth', 'list')
+        if xauth_list == "":
+            continue
+        used_nums += [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
+    if len(used_nums) == 0:
         return NXAGENT_FIRST_DISPLAY_NUM
-    used_num = [int(line.split(" ")[0].split(":").pop().strip()) for line in xauth_list.split("\n")]
-    used_num.sort()
-    return used_num.pop() + 1
-   
+    used_nums.sort()
+    return used_nums.pop() + 1
+
 def revoke_cookies(hostname, display_num):
-    return ssh(hostname, 'xauth', 
+    return ssh(hostname, 'xauth',
         'remove', f"{hostname}/unix:{display_num}", _out=logger.debug
     )
 
@@ -105,47 +113,48 @@ def wait_for_output(_out, expected_output):
             raise NxTimeoutException("NX agent or proxy not ready after {NX_TIMEOUT}s")
     logger.debug(process_output)
 
-def start_nx_agent(hostname, display_num, cookie, nxagent_args=dict()):
+def start_nx_agent(hostname, display_num, cookie, nxagent_args=None):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
     display = gen_display_args(
-        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args, 
+        display_num, DEFAULTS_NXAGENT_ARGS, nxagent_args or {},
         {'listen': nxagent_port}
     )
     authorize_cookie(hostname, cookie, display_num)
     buf = StringIO()
-    ssh(hostname, 
+    ssh(hostname,
         '-L', f'{nxagent_port}:127.0.0.1:{nxagent_port}', # ssh tunnel
         f'DISPLAY={display}',
         'LD_LIBRARY_PATH=/usr/lib/nx/X11/',
         'nxagent', '-R', '-nolisten', 'tcp', f':{display_num}',
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    wait_for_output(buf, "Waiting for connection")     
+    wait_for_output(buf, "Waiting for connection")
     logger.info("nxagent is waiting for connection...")
 
-def start_nx_proxy(display_num, cookie, nxproxy_args=dict()):
+def start_nx_proxy(display_num, cookie, nxproxy_args=None):
     nxagent_port = NXAGENT_FIRST_PORT + display_num
     display = gen_display_args(
-        display_num, DEFAULTS_NXPROXY_ARGS, nxproxy_args,
+        display_num, DEFAULTS_NXPROXY_ARGS, nxproxy_args or {},
         {'cookie': cookie, 'port': nxagent_port}
     )
     buf = StringIO()
     nxproxy(
-        '-S', display, 
+        '-S', display,
         _err_to_out=True, _out=buf, _bg=True, _bg_exc=False
     )
-    #wait_for_output(buf, "Established X server connection") 
-    wait_for_output(buf, "Session started")  
+    #wait_for_output(buf, "Established X server connection")
+    wait_for_output(buf, "Session started")
     logger.info("nxproxy connected to nxagent.")
 
 def kill_nx_processes(hostname, display_num):
-    logger.info("closing nxproxy and nxagent..")
-    # TODO: update when switching to Alpine v3.18 fot host: {print $2}
-    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
+    logger.info("closing nxproxy and nxagent (%s)..", f"{hostname}:{display_num}")
+    # for alpine 3.17
+    killcmd_legacy = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
+    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     # nxagent in host
+    ssh(hostname, killcmd_legacy)
     ssh(hostname, killcmd)
     # ssh tunnel and nxproxy in thinclient
-    killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     sh.Command('sh')('-c', killcmd)
 
 def cleanup(hostname, display_num):
@@ -153,17 +162,17 @@ def cleanup(hostname, display_num):
     revoke_cookies(hostname, display_num)
     xsetroot('-cursor_name', 'left_ptr')
 
-def run(hostname, *cmd):
+def run(hostname, nxagent_args, *cmd):
     app_process = None
+    display_num = get_next_display_num()
     try:
         xsetroot('-cursor_name', 'watch')
-        display_num = get_next_display_num(hostname)
         cookie = generate_magic_cookie()
         # start nxagent and nxproxy in background
-        start_nx_agent(hostname, display_num, cookie)
+        start_nx_agent(hostname, display_num, cookie, nxagent_args)
         start_nx_proxy(display_num, cookie)
         # run the command in foreground
-        logger.info(f"run {' '.join(cmd)}")
+        logger.info("run %s", ' '.join(cmd))
         app_process = ssh(
             hostname, f"DISPLAY=:{display_num}", *cmd,
             _out=logger.info, _err_to_out=True, _bg=True
@@ -171,12 +180,14 @@ def run(hostname, *cmd):
         xsetroot('-cursor_name', 'left_ptr')
         app_process.wait()
     except NxTimeoutException:
-        logger.error("Failed to initialize NX, please check the log above.")
+        logger.error("Failed to initialize NX. Please check the log above.")
     finally:
         # kill bakground processes when done
         try:
             if app_process is not None and app_process.is_alive():
                 app_process.terminate()
-        except:
-            pass # we want to cleanup anyway
-        cleanup(hostname, display_num)
+        # pylint: disable=broad-exception-caught
+        except Exception as exc:
+            logger.error(exc)
+        finally:
+            cleanup(hostname, display_num)

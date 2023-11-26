@@ -16,7 +16,7 @@ from rich.console import Console
 #from sh import lsscsi, figlet
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
-with open(LOCALE_FILE, "r") as fp:
+with open(LOCALE_FILE, "r", encoding="UTF-8") as fp:
     LOCALE = json.load(fp)
 
 TIMEZONES = LOCALE["timezones"]
@@ -24,7 +24,7 @@ KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
 
 def run_cmd(cmd, to_json=False):
-    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8").stdout.strip()
+    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8", check=False).stdout.strip()
     if to_json:
         return json.loads(out)
     return out
@@ -84,6 +84,7 @@ def select_value(values, title, ask, clean_values='', no_columns=False):
     choice = values[int(choice_num) - 1]
     return choice
 
+# pylint: disable=too-many-arguments
 def select_sub_value(values, title, ask, sub_values, sub_ask, back_text):
     value1 = select_value(values, title, ask)
     if value1 in sub_values:
@@ -111,47 +112,46 @@ def select_by_letter(title, ask1, ask2, values):
 
 def get_installation_type():
     return select_value(
-        ['Install TowerOS-Thinclient', 'Update TowerOS-Thinclient'],
+        ['Install TowerOS-Thinclient', 'Upgrade TowerOS-Thinclient'],
         "Do you want to install a new system or upgrade an already installed system?",
         "Select the installation type",
         no_columns=True
-    ).split(" ")[0].lower()
+    ).split(" ", maxsplit=1)[0].lower()
 
-def get_target_drive(update=False):
+def get_target_drive(upgrade=False):
     install_title = "Please select the drive where you want to install TowerOS-Thinclient"
-    update_title = "Please select the drive where TowerOS-Thinclient is installed"
+    upgrade_title = "Please select the drive where TowerOS-Thinclient is installed"
     drive = select_value(
         disk_list(),
-        update_title if update else install_title,
+        upgrade_title if upgrade else install_title,
         "Target drive",
         no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
-def get_cryptkey_drive(os_target, update=False):
+def get_cryptkey_drive(os_target, upgrade=False):
     no_selected_drives = disk_list(exclude=os_target)
     please_refresh = '<-- Let me insert a drive and refresh the list!'
     no_selected_drives.append(please_refresh)
     install_title = "Please select the external drive where you want to put the disk encryption keyfile"
-    update_title = "Please select the external boot device containing the disk encryption keyfile"
+    upgrade_title = "Please select the external boot device containing the disk encryption keyfile"
     drive = select_value(
         no_selected_drives,
-        update_title if update else install_title,
+        upgrade_title if upgrade else install_title,
         "Target keyfile drive",
         no_columns=True
     )
     if drive == please_refresh:
         return get_cryptkey_drive(os_target)
-    else:
-        return drive[drive.index('/dev/'):].split(" ")[0].strip()
+    return drive[drive.index('/dev/'):].split(" ")[0].strip()
 
 def check_secure_boot_status():
     sbctl_status = run_cmd(["sbctl", "status", "--json"], to_json=True)
     error = False
-    if sbctl_status['secure_boot'] != False:
+    if sbctl_status['secure_boot'] is not False:
         print_error("Error: Secure boot is enabled, you must disable it to install TowerOS-Thinclient with secure boot.")
         error = True
-    if sbctl_status['setup_mode'] != True:
+    if sbctl_status['setup_mode'] is not True:
         print_error("Error: Secure boot's 'Setup Mode' is disable, you must enbale it to install TowerOS-Thinclient with secure boot.")
         error = True
     if len(sbctl_status['vendors']) > 0:
@@ -162,7 +162,7 @@ def check_secure_boot_status():
         print_error("https://github.com/towercomputers/toweros/blob/master/docs/SecureBoot.md")
         return False
     return True
-    
+
 def get_secure_boot():
     print_title("Secure boot")
     with_secure_boot = Confirm.ask("Do you want to install TowerOS-Thinclient with secure boot ?")
@@ -170,13 +170,12 @@ def get_secure_boot():
         continue_without_secure_boot = Confirm.ask("Do you want to continue without secure boot (y) or reboot (n) ?")
         if continue_without_secure_boot:
             return False
-        else:
-            os.system('reboot')
+        os.system('reboot')
     return with_secure_boot
 
 def get_lang():
     return select_by_letter(
-        "Please select your language:", 
+        "Please select your language:",
         "Enter the first letter of your lang",
         "Enter the number of your lang",
         LANGS
@@ -184,8 +183,8 @@ def get_lang():
 
 def get_timezone():
     return "/".join(select_sub_value(
-        TIMEZONES["regions"], 
-        "Please select the region of your timezone:", 
+        TIMEZONES["regions"],
+        "Please select the region of your timezone:",
         "Enter the number of your region",
         TIMEZONES["zonesByRegions"],
         "Enter the number of your zone",
@@ -205,8 +204,8 @@ def get_keymap():
     return layout, variant
 
 def get_startx_on_login():
-    print_title("Start X on login")
-    return Confirm.ask("Do you want to automatically start X on login ?")
+    print_title("Start Wayland on login")
+    return Confirm.ask("Do you want to automatically start graphical interface on login ?")
 
 def get_user_information():
     print_title("Please enter the first user information")
@@ -240,7 +239,7 @@ def confirm_config(config):
     print_value("Installation type", config['INSTALLATION_TYPE'])
     print_value("Target drive", config['TARGET_DRIVE'])
     print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
-    if config['INSTALLATION_TYPE'] != 'update':
+    if config['INSTALLATION_TYPE'] != 'upgrade':
         print_value("Secure Boot", config['SECURE_BOOT'])
         print_value("Language", config['LANG'])
         print_value("Timezone", config['TIMEZONE'])
@@ -253,7 +252,7 @@ def confirm_config(config):
             print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
             print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
     target_warning = f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased."
-    if config['INSTALLATION_TYPE'] == 'update':
+    if config['INSTALLATION_TYPE'] == 'upgrade':
         target_warning += " Only the /home directory will be kept, if you have data outside this directory please backup them before."
     rprint("\n")
     print_error(target_warning)
@@ -261,22 +260,25 @@ def confirm_config(config):
     print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
-def ask_config():
+def print_header():
     Console().clear()
     title = subprocess.run(
-        ['figlet', '-w', '160', 'TowerOS-ThinClient'], 
-        capture_output=True, encoding="UTF-8"
+        ['figlet', '-w', '160', 'TowerOS-ThinClient'],
+        capture_output=True, encoding="UTF-8", check=False
     ).stdout
     print(title)
     #figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
+
+def ask_config():
+    print_header()
     confirmed = False
     config = {}
     while not confirmed:
         config['INSTALLATION_TYPE'] = get_installation_type()
-        is_update = config['INSTALLATION_TYPE'] == 'update'
-        config['TARGET_DRIVE'] = get_target_drive(is_update)
-        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_update)
-        if not is_update:
+        is_upgrade = config['INSTALLATION_TYPE'] == 'upgrade'
+        config['TARGET_DRIVE'] = get_target_drive(is_upgrade)
+        config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_upgrade)
+        if not is_upgrade:
             config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
             config['LANG'] = get_lang()
             config['TIMEZONE'] = get_timezone()
@@ -287,12 +289,22 @@ def ask_config():
         confirmed = confirm_config(config)
     return config
 
+def congratulations():
+    print_header()
+    print("\n")
+    rprint(Text("Congratulations, toweros is correctly installed!", style="green bold"))
+    print("\n")
+    rprint(Text("Make sure to remove the drive that contains the installation image, then press Enter to reboot.", style="purple bold"))
+    input()
+
 def main():
     config = "\n".join([f"{key}='{value}'" for key, value in ask_config().items()])
-    with open("/root/tower.env", 'w') as fp:
-        fp.write(config)
-        fp.write("\n")
+    with open("/root/tower.env", 'w', encoding="UTF-8") as fptower:
+        fptower.write(config)
+        fptower.write("\n")
     return 0
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == "congratulations":
+        sys.exit(congratulations())
     sys.exit(main())

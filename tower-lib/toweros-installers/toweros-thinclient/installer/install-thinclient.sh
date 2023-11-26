@@ -3,6 +3,8 @@
 set -e
 set -x
 
+ARCH="x86_64"
+
 update_passord() {
     REPLACE="$1:$2:"
     ESCAPED_REPLACE=$(printf '%s\n' "$REPLACE" | sed -e 's/[\/&]/\\&/g')
@@ -165,14 +167,24 @@ prepare_home_directory() {
     addgroup "$USERNAME" video
     addgroup "$USERNAME" audio
     addgroup "$USERNAME" input
+    addgroup "$USERNAME" seat
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
     # create .Xauthority file
     touch /home/$USERNAME/.Xauthority
+    # set XDG_RUNTIME_DIR, XDG_CONFIG_HOME and PS1
+    cat <<EOF >> /home/$USERNAME/.profile
+export PS1='[\\u@\\H \\W]\\$ '
+if [ -z "\$XDG_RUNTIME_DIR" ]; then
+    XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
+	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
+	export XDG_RUNTIME_DIR
+fi
+EOF
     # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
-        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then startx; fi' >> /home/$USERNAME/.profile
+        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /home/$USERNAME/.profile
     fi
 }
 
@@ -181,19 +193,20 @@ install_tower_tools() {
     mkdir -p $TOWER_FOLDER
     # put documentation and install-dev.sh in Tower folder
     cp -r /var/towercomputers/docs $TOWER_FOLDER
-    ln -s /var/towercomputers/docs /home/$USERNAME/docs
     cp $SCRIPT_DIR/install-dev.sh $TOWER_FOLDER
     # put toweros builds in Tower folder
     cp -r /var/towercomputers/builds $TOWER_FOLDER
-
+    # install custom copyq auto start script
+    cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
     # install tower with pip
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
 }
 
+
 update_live_system() {
     # set hostname
-    setup-hostname -n tower
+    setup-hostname -n thinclient
 
     # change root password
     update_passord "root" "$ROOT_PASSWORD_HASH"
@@ -222,20 +235,7 @@ EOF
         echo "eth0 not found"
         exit 1
     fi
-    INSTALL_ETH0_MAC=$(cat /sys/class/net/eth0/address)
-    cat <<EOF > /etc/local.d/01_check_ifnames.start
-INSTALL_ETH0_MAC=$INSTALL_ETH0_MAC
-BOOT_ETH0_MAC=\$(cat /sys/class/net/eth0/address)
-# we assume that if the mac has changed it is because there is an eth1
-if [ ! \$INSTALL_ETH0_MAC == \$BOOT_ETH0_MAC ]; then
-    ip link set eth0 down
-    ip link set eth1 down
-    ip link set eth0 name tmp0
-    ip link set eth1 name eth0
-    ip link set tmp0 name eth1
-    rc-service networking restart
-fi
-EOF
+    cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
     chmod a+x /etc/local.d/01_check_ifnames.start
 
     # set locales
@@ -266,6 +266,7 @@ EOF
     rc-update add networking
     rc-update add dbus
     rc-update add local
+    rc-update add seatd
 
     # enabling udev service
     setup-devd udev
@@ -316,7 +317,7 @@ clone_live_system_to_disk() {
     mount --bind /dev /mnt/dev
 
     # install packages
-    local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
+    local apkflags="--quiet --progress --update-cache --clean-protected"
     local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
     pkgs="$pkgs linux-lts alpine-base syslinux linux-firmware-i915 linux-firmware-intel linux-firmware-mediatek linux-firmware-other linux-firmware-rtl_bt"
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
@@ -324,8 +325,24 @@ clone_live_system_to_disk() {
     for i in $repos; do
         repoflags="$repoflags --repository $i"
     done
-    apk add --root /mnt $apkflags --overlay-from-stdin $repoflags $pkgs <$ovlfiles
-
+    apk add --root /mnt $apkflags --initdb --overlay-from-stdin $repoflags $pkgs <$ovlfiles
+    # install edge packages
+    apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/$ARCH/*.apk
+    # install sfwbar
+    unzip /var/towercomputers/installer/alpine-edge/$ARCH/sfwbar-b29ee39.zip
+    cd sfwbar-main
+    meson setup build
+    ninja -C build
+    DESTDIR=/mnt/ ninja -C build install
+    cd ..
+    # install custom startmenu widget
+    cp /var/towercomputers/installer/sfwbar/startmenu.widget /mnt/usr/local/share/sfwbar/
+    cp /var/towercomputers/installer/sfwbar/startmenu.py /mnt/var/towercomputers/
+    # install custom icons
+    mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
+    cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
+    # update icon cache
+    gtk-update-icon-cache -f -t /mnt/usr/share/icons/hicolor
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
@@ -338,12 +355,15 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
 
-    # remove unistalled packages from xfce menu
-    rm /mnt/usr/share/applications/xfce4-web-browser.desktop
-    rm /mnt/usr/share/applications/xfce4-mail-reader.desktop
-
     # copy user's home to the new system
-    cp -rf "/home/$USERNAME" "/mnt/home/"
+    mkdir -p "/mnt/home/$USERNAME"
+    rsync -a --ignore-existing "/home/$USERNAME" "/mnt/home/$USERNAME"
+    # make a backup and copy new .profile
+    cp "/mnt/home/$USERNAME/.profile" "/mnt/home/$USERNAME/.profile.bak" || true
+    cp /home/$USERNAME/.profile "/mnt/home/$USERNAME/.profile"
+    # create symlink to doc
+    ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
+    # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
@@ -407,7 +427,7 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    read -p "Installation done. Make sure to remove the drive that contains the installation image, then press any key to reboot."
+    python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }
 
@@ -418,9 +438,9 @@ set_configuration() {
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
     # STARTX_ON_LOGIN
-    python $SCRIPT_DIR/ask-configuration.py
+    python $SCRIPT_DIR/askconfiguration.py
     source /root/tower.env
-    if [ "$INSTALLATION_TYPE" == "update" ]; then
+    if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
         check_and_copy_key_from_boot_disk
         activate_root_disk
         set_config_from_root_partition

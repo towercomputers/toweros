@@ -2,21 +2,21 @@ import logging
 import time
 from datetime import timedelta
 
-import sh
-
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 from rich import print as rich_print
+
+from towerlib.utils.sh import sh_sudo
 
 logger = logging.getLogger('tower')
 
 def exec_task(function, sudo, *args, **kwargs):
     if sudo:
-        with sh.contrib.sudo(password="", _with=True):
+        with sh_sudo(password="", _with=True):
             return function(*args, **kwargs)
     else:
         return function(*args, **kwargs)
-    
+
 def get_duration_text(start_time, timer_message, message=""):
     duration = timedelta(seconds=time.time() - start_time)
     if duration.seconds > 0:
@@ -27,8 +27,7 @@ def get_duration_text(start_time, timer_message, message=""):
             str_duration = f"{minutes} minute{'s' if minutes > 1 else ''} {str_duration}"
         if message != "":
             return f"{message} {timer_message.format(str_duration)}"
-        else:
-            return timer_message.format(str_duration)
+        return timer_message.format(str_duration)
     return message
 
 def clitask(message=None, timer=True, timer_message="Done in {0}", sudo=False, task_parent=False):

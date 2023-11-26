@@ -1,0 +1,13 @@
+Function("StartMenu") {
+  PipeRead "python /var/towercomputers/startmenu.py"
+  Menu "MenuGen_Applications"
+}
+
+layout {
+  button {
+    value = "open-menu-symbolic"
+    style = "startmenu"
+    action = Function "StartMenu"
+    tooltip = "Application menu"
+  }
+}

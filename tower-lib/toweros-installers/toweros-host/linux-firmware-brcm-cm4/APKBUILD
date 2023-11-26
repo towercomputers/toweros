@@ -1,0 +1,26 @@
+# Contributor:
+# Maintainer:
+pkgname=linux-firmware-brcm-cm4
+pkgver=1.0
+pkgrel=0
+pkgdesc="missing firmware for the Raspberry Pi CM4"
+url="https://github.com/towercomputers/toweros/"
+arch="noarch"
+license="MIT"
+depends=""
+makedepends=""
+checkdepends=""
+install=""
+source=""
+builddir="$srcdir/"
+
+build() {
+	mkdir -p "$srcdir"/
+	cp  $srcdir/../brcm/* "$srcdir"/
+}
+
+package() {
+	mkdir -p "$pkgdir"/lib/firmware/brcm
+	cp "$srcdir"/* "$pkgdir"/lib/firmware/brcm/
+}
+

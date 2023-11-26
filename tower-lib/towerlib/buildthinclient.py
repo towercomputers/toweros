@@ -7,13 +7,13 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-import sh
-from sh import rm, git, pip, Command, apk, hatch, cp, contrib
+from sh import rm, git, pip, Command, apk, hatch, cp
 
-
-from towerlib.utils import clitask
+from towerlib.utils.decorators import clitask
+from towerlib.utils.sh import sh_sudo
 from towerlib import buildhost
 from towerlib.__about__ import __version__
+from towerlib.utils.exceptions import LockException
 
 logger = logging.getLogger('tower')
 
@@ -30,7 +30,7 @@ def wd(path):
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
-        raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? If not, delete this folder and try again.")
     makedirs(WORKING_DIR)
 
 @clitask("Cleaning up...")
@@ -44,14 +44,14 @@ def find_host_image(builds_dir):
         rpi_image_path = buildhost.build_image(builds_dir)
     else:
         rpi_image_path = host_images.pop()
-        logger.info(f"Using host image {rpi_image_path}")
+        logger.info("Using host image %s", rpi_image_path)
     return rpi_image_path
 
 def check_abuild_key():
     abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
     abuild_conf = join_path(abuild_folder, 'abuild.conf')
     if not os.path.exists(abuild_folder) or not os.path.exists(abuild_conf):
-        logger.error("ERROR: You must have an abuild key to build the image. Please use `abuild-keygen -a -i`.")
+        logger.error("ERROR: You must have an `abuild` key to build the image. Please use `abuild-keygen -a -i`.")
         sys.exit()
 
 @clitask("Downloading pip packages...")
@@ -100,7 +100,7 @@ def prepare_image(builds_dir):
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
-    with sh.contrib.sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True):
         apk('update')
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
@@ -114,13 +114,13 @@ def prepare_image(builds_dir):
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
-        builds_dir, 
+        builds_dir,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
-    with contrib.sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True):
         cp(image_src_path, image_dest_path)
     return image_dest_path
-    
+
 
 @clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
 def build_image(builds_dir):
@@ -133,4 +133,4 @@ def build_image(builds_dir):
     finally:
         cleanup()
     if image_path:
-        logger.info(f"Image ready: {image_path}")
+        logger.info("Image ready: %s", image_path)

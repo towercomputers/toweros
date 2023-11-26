@@ -91,6 +91,8 @@ prepare_home_directory() {
 	chown -R $USERNAME:$USERNAME /home/$USERNAME
 	chmod 700 /home/$USERNAME/.ssh
 	chmod 600 /home/$USERNAME/.ssh/*
+	# set shell prompt color
+	echo "export PS1='\e[${COLOR}m[\\u@\\H \\W]\e[0m\\$ '" >> /home/$USERNAME/.profile
 }
 
 update_live_system() {
@@ -115,7 +117,7 @@ address $STATIC_HOST_IP/24
 EOF
 
 	# disable wireless devices
-    rfkill block all
+    rfkill block all || true
 
 	# enable connection if requested
 	if [ "$HOSTNAME" == "router" ]; then
@@ -143,6 +145,10 @@ net.ipv6.conf.all.forwarding=1
 EOF
 		# Allow tcp forwarding for ssh tunneling (used by `install` and `run` commands)
 		sed -i 's/AllowTcpForwarding no/AllowTcpForwarding yes/' /etc/ssh/sshd_config
+
+		# randomize wlan0 mac address
+		echo "macchanger -r wlan0" >> /etc/local.d/macchanger.start
+		chmod +x /etc/local.d/macchanger.start
 	else
 		if [ "$ONLINE" == "true" ]; then
 			# update network configuration
@@ -172,6 +178,11 @@ EOF
 	sed -i "s/#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/g" /etc/ssh/sshd_config
 	sed -i "s/AllowTcpForwarding no/#AllowTcpForwarding no/g" /etc/ssh/sshd_config
 	echo "rc_need=networking" >> /etc/conf.d/sshd
+
+	# copy sshd host key from boot device
+	mkdir -p /etc/ssh
+	cp $BOOT_MEDIA/ssh_host_* /etc/ssh/
+	chmod 600 /etc/ssh/ssh_host_*
 }
 
 clone_live_system_to_disk() {
@@ -253,6 +264,8 @@ clean_and_reboot() {
 	mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
 	# remove configuration file
 	rm $BOOT_MEDIA/tower.env
+	# remove sshd host keys
+	rm $BOOT_MEDIA/ssh_host_*
 	# remove keyfile
 	rm /mnt/crypto_keyfile.bin
 	# reboot
@@ -263,7 +276,7 @@ init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env

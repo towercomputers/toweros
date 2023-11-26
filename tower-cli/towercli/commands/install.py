@@ -6,16 +6,16 @@ from towerlib import install
 def add_args(argparser):
     install_parser = argparser.add_parser(
         'install',
-        help="""Command used to install an application in a host prepared with the `provision` command."""
+        help="""Install an application on a host with APK"""
     )
 
     install_parser.add_argument(
-        'host_name', 
-        help="""Host name where to install the package (Required).""",
+        'host_name',
+        help="""Host to install the package on (Required)""",
         nargs=1
     )
     install_parser.add_argument(
-        'packages', 
+        'packages',
         help="""Package(s) to install (Required).""",
         nargs='+'
     )
@@ -25,11 +25,8 @@ def check_args(args, parser_error):
     config = sshconf.get(name)
 
     if config is None and name != "thinclient":
-        parser_error("Unkown host name.")
+        parser_error("Unkown host.")
 
-    if (name == "thinclient" or not sshconf.is_online_host(name)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
-        parser_error(message=f"`{name}` is an offline host and `{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
-    
     for pkg_name in args.packages:
         if re.match(r'^[a-z0-9]{1}[a-z0-9\-\+\.]+$', pkg_name) is None:
             parser_error(f"Invalid package name:{pkg_name}")

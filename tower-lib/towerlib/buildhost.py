@@ -6,7 +6,6 @@ import glob
 import getpass
 from io import StringIO
 
-import sh
 from sh import (
     Command, ErrorReturnCode,
     mount, parted, mkdosfs, tee, cat, echo,
@@ -14,13 +13,15 @@ from sh import (
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl,
 )
-mkfs_ext4 = Command('mkfs.ext4')
-fsck_ext4 = Command('fsck.ext4')
 
 from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
-from towerlib.sshconf import TOWER_NETWORK_ONLINE, TOWER_NETWORK_OFFLINE, TOWER_DIR
+from towerlib.config import TOWER_DIR
+from towerlib.utils.exceptions import LockException, BuildException
+
+mkfs_ext4 = Command('mkfs.ext4')
+fsck_ext4 = Command('fsck.ext4')
 
 logger = logging.getLogger('tower')
 
@@ -29,15 +30,17 @@ INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '
 
 ALPINE_BRANCH_FOR_UNVERSIONED = "v3.17"
 ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
+USERNAME = getpass.getuser()
 
-sprint = lambda str: print(str, end='', flush=True)
+def sprint(value):
+    print(value, end='', flush=True)
 
 def wd(path):
     return os.path.join(WORKING_DIR, path)
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
-        raise Exception(f"f{WORKING_DIR} already exists! Is another build in progress? if not, delete this folder and try again.")
+        raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? If not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
 
 def fetch_apk_packages(repo_path, branch, packages):
@@ -58,6 +61,8 @@ def prepare_apk_repos(private_key_path):
     unversioned_apks, versioned_apks = [], []
     for line in cat(world_path, _iter=True):
         package = line.strip()
+        if package == "linux-firmware-brcm-cm4":
+            continue
         if "=" in package:
             versioned_apks.append(package.split("=")[0])
         else:
@@ -65,6 +70,13 @@ def prepare_apk_repos(private_key_path):
     # download packages
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_UNVERSIONED, unversioned_apks)
     fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_VERSIONED, versioned_apks)
+    # build and copy linux-firmware-brcm-cm4
+    Command('sh')(
+        '-c',
+        f'runuser -u {USERNAME} -- abuild -r',
+        _cwd=os.path.join(INSTALLER_DIR, 'linux-firmware-brcm-cm4')
+    )
+    cp("/home/tower/packages/toweros-host/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
     # prepare index
     apks = glob.glob(wd("EXPORT_BOOTFS_DIR/apks/armv7/*.apk"))
     apk_index_path = wd("EXPORT_BOOTFS_DIR/apks/armv7/APKINDEX.tar.gz")
@@ -77,7 +89,7 @@ def prepare_apk_repos(private_key_path):
 def prepare_system_image(alpine_tar_path, private_key_path):
     # prepare disk image
     mkfs_ext4(
-        '-O', '^has_journal,^resize_inode', 
+        '-O', '^has_journal,^resize_inode',
         '-E', 'lazy_itable_init=0,root_owner=0:0',
         '-m', '0',
         '-U', 'clear',
@@ -115,7 +127,7 @@ def prepare_overlay(pub_key_path):
 def create_rpi_boot_partition():
     image_file = wd("toweros-host.img")
     # caluclate sizes
-    boot_size = 256 * 1024 * 1024
+    boot_size = 512 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
     align = 4 * 1024 * 1024
     # Add this much space to the calculated file size. This allows for
@@ -141,7 +153,7 @@ def create_loop_device(image_file):
         loop_dev = losetup('--show', '--find', '--partscan', image_file).strip()
     if loop_dev:
         return loop_dev
-    raise Exception("losetup failed; exiting")
+    raise BuildException("losetup failed; exiting")
 
 @clitask("Copying Alpine Linux system in RPI partitions...")
 def prepare_rpi_partitions(loop_dev):
@@ -155,25 +167,25 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-rtxv', wd("EXPORT_BOOTFS_DIR/"), wd("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
-def compress_image(builds_dir, owner):
+def compress_image(builds_dir):
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
     tmp_image_path = os.path.join("/tmp", image_name)
     image_path = os.path.join(builds_dir, image_name)
     xz(
-        '--compress', '--force', 
+        '--compress', '--force',
         '--threads', 0, '--memlimit-compress=90%', '--best',
 	    '--stdout', wd("toweros-host.img"),
         _out=tmp_image_path
     )
     cp(tmp_image_path, image_path)
-    chown(f"{owner}:{owner}", image_path)
+    chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
 
 @clitask("Copying image...")
-def copy_image(builds_dir, owner):
+def copy_image(builds_dir):
     image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wd("toweros-host.img"), image_path)
-    chown(f"{owner}:{owner}", image_path)
+    chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
 
 def unmount_all():
@@ -197,7 +209,6 @@ def prepare_apk_key():
 @clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
 def build_image(builds_dir, uncompressed=False):
     alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
-    user = getpass.getuser()
     loop_dev = None
     image_path = None
     try:
@@ -210,13 +221,13 @@ def build_image(builds_dir, uncompressed=False):
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         if uncompressed:
-            image_path = copy_image(builds_dir, user)
+            image_path = copy_image(builds_dir)
         else:
-            image_path = compress_image(builds_dir, user)
+            image_path = compress_image(builds_dir)
     finally:
         cleanup()
     if image_path:
-        logger.info(f"Image ready: {image_path}")
+        logger.info("Image ready: %s", image_path)
     return image_path
 
 @clitask("Copying {0} in {1}...")
@@ -226,15 +237,15 @@ def copy_image_in_device(image_file, device):
     try:
         buf = StringIO()
         dd(f'if={image_file}', f'of={device}', 'bs=8M', _out=buf)
-    except ErrorReturnCode:
-        error_message = "Error copying image, please check the boot device integrity or try again with the flag `--zero-device`."
+    except ErrorReturnCode as exc:
+        error_message = "Error copying image. Please check the boot device integrity and try again with the flag `--zero-device`."
         logger.error(buf.getvalue())
         logger.error(error_message)
-        raise Exception(error_message)
+        raise BuildException(error_message) from exc
     # determine partition name
     boot_part = Command('sh')('-c', f'ls {device}*1').strip()
     if not boot_part:
-        raise Exception("Invalid partitions")
+        raise BuildException("Invalid partitions")
     return boot_part
 
 @clitask("Zeroing {0} please be patient...")
@@ -247,19 +258,23 @@ def insert_tower_env(boot_part, config):
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
-    logger.debug(f"Host configuration:\n{str_env}")
+    logger.debug("Host configuration:\n%s", str_env)
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
     keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], "crypto_keyfile.bin")
     cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
+    # insert host ssh keys in boot partition
+    for key_type in ['ecdsa', 'rsa', 'ed25519']:
+        host_keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], f"ssh_host_{key_type}_key")
+        cp(host_keys_path, wd(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
+        cp(f"{host_keys_path}.pub", wd(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
-
-@clitask("Installing TowserOS-Host in {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
+@clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:
-        # make sur the password is not shown in logs
-        del(config['PASSWORD'])
+        # make sure the password is not shown in the logs
+        del config['PASSWORD']
         prepare_working_dir()
         if zero_device:
             zeroing_device(device)

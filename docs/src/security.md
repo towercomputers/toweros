@@ -14,6 +14,12 @@
 ## Operating System
 In general, operating system configuration is outside the scope of TowerOS's responsibilities; TowerOS does attempt to be *secure by default*, however. Of course, the core architecture of TowerOS is designed to mitigate the severity of any compromise of a host. For information on how best to securing your thin client and hosts at the level of the operating system, please see this [Linux Hardening Guide](https://madaidans-insecurities.github.io/guides/linux-hardening.html).
 
+## Thin-Client Security
+The thin client is the root of trust of the system. To avoid accidentally compromising the thin client, avoid installing unnecessary software and never open any untrusted files, except on a host.
+
+## Router Security
+Best practice is never to install any software on the router host, nor open any untrusted files on it either.
+
 
 ## Full-Disk Encryption
 
@@ -41,16 +47,20 @@ Note: The reason that the decryption keys are stored on removable drives---rathe
 | Physical Tampering | Cold-Boot Attack | Optional | Raspberry Pis: [Zymbit](https://www.zymbit.com/) |
 | Microarchitectural | RowHammer; RowPress | Yes | Host-Isolation |
 | Microarchitectural | Speculative Execution | Yes | Host-Isolation |
-| Physical Side-Channel | Power Consumption (e.g. [Hertzbleed](https://www.hertzbleed.com/) | Optional | Disable DVFS |
+| Physical Side-Channel | Power Consumption (e.g. [Hertzbleed](https://www.hertzbleed.com/)) | Optional | Disable DVFS |
 | Physical Side-Channel | Acoustic Emissions | No |  |
 | Physical Side-Channel | Electromagnetic Radiation | No |  |
 
 ## Tor Proxy
 
-Tor is installed by default on the router and a Socks5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.
+Tor is installed by default on the router and a SOCKS5 proxy is available on port 9050 for all online hosts. You can use this proxy by properly configuring your favorite application.
 
 For example if you have an online host called `web`:
 
 ```
 [thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip
 ```
+
+## Common Attack Vectors
+
+![Diagram - Attack Vectors](img/diagram-attackvectors.png)
