@@ -22,7 +22,7 @@ sfwbar >/dev/null 2>&1 &
 # `wlr-randr --output <whatever> --off` because this re-arranges views
 # (since a837fef). Instead use a wlr-output-power-management client such as
 # https://git.sr.ht/~leon_plickat/wlopm
-swayidle -w timeout 300 'swaylock -f -c 000000' >/dev/null 2>&1 &
+# swayidle -w timeout 300 'swaylock -f -c 000000' >/dev/null 2>&1 &
 
 sleep 1 # wait for waybar to be ready
 sh /var/towercomputers/start-copyq.sh  >/dev/null 2>&1 &
