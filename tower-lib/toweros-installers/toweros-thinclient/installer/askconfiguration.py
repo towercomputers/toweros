@@ -84,6 +84,7 @@ def select_value(values, title, ask, clean_values='', no_columns=False):
     choice = values[int(choice_num) - 1]
     return choice
 
+# pylint: disable=too-many-arguments
 def select_sub_value(values, title, ask, sub_values, sub_ask, back_text):
     value1 = select_value(values, title, ask)
     if value1 in sub_values:
@@ -259,7 +260,7 @@ def confirm_config(config):
     print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
-def ask_config():
+def print_header():
     Console().clear()
     title = subprocess.run(
         ['figlet', '-w', '160', 'TowerOS-ThinClient'],
@@ -267,6 +268,9 @@ def ask_config():
     ).stdout
     print(title)
     #figlet('-w', 160, 'TowerOS-ThinClient', _out=sys.stdin)
+
+def ask_config():
+    print_header()
     confirmed = False
     config = {}
     while not confirmed:
@@ -285,6 +289,14 @@ def ask_config():
         confirmed = confirm_config(config)
     return config
 
+def congratulations():
+    print_header()
+    print("\n")
+    rprint(Text("Congratulations, toweros is correctly installed!", style="green bold"))
+    print("\n")
+    rprint(Text("Make sure to remove the drive that contains the installation image, then press Enter to reboot.", style="purple bold"))
+    input()
+
 def main():
     config = "\n".join([f"{key}='{value}'" for key, value in ask_config().items()])
     with open("/root/tower.env", 'w', encoding="UTF-8") as fptower:
@@ -293,4 +305,6 @@ def main():
     return 0
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == "congratulations":
+        sys.exit(congratulations())
     sys.exit(main())

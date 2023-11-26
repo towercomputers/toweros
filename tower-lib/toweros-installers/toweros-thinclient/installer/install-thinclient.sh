@@ -423,7 +423,7 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    python $SCRIPT_DIR/endinstallation.py
+    python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }
 

@@ -4,7 +4,8 @@ from sh import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
 from towerlib.utils.sh import sh_sudo
-from towerlib.sshconf import TOWER_DIR, get_host_color_name
+from towerlib.sshconf import get_host_color_name
+from towerlib.config import TOWER_DIR
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):

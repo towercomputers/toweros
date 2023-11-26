@@ -9,9 +9,9 @@ from sh import ssh, scp, rm, Command, ErrorReturnCode
 
 from towerlib.utils import clitask
 from towerlib.utils.menu import add_installed_package, get_installed_packages
-from towerlib.sshconf import ROUTER_HOSTNAME, is_online_host
+from towerlib.sshconf import is_online_host
 from towerlib.utils.exceptions import LockException, TowerException
-from towerlib import sshconf
+from towerlib import sshconf, config
 
 logger = logging.getLogger('tower')
 
@@ -97,7 +97,7 @@ def open_router_tunnel():
     # run ssh tunnel with router host in background
     ssh(
         '-L', f"{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80", '-N',
-        ROUTER_HOSTNAME,
+        config.ROUTER_HOSTNAME,
         _err_to_out=True, _out=logger.debug, _bg=True, _bg_exc=False
     )
     # wait for ssh tunnel to be ready
@@ -149,8 +149,8 @@ def install_in_thinclient(packages):
 def can_install(host):
     if not sshconf.is_up(host):
         raise TowerException(message=f"`{host}` is down. Please start it first.")
-    if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(sshconf.ROUTER_HOSTNAME):
-        raise TowerException(message=f"`{host}` is an offline host and `{sshconf.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
+    if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(config.ROUTER_HOSTNAME):
+        raise TowerException(message=f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
 
 def install_packages(host, packages):
     can_install(host)

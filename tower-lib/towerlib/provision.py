@@ -8,10 +8,7 @@ from rich.prompt import Confirm
 from rich.text import Text
 from rich import print as rprint
 
-from towerlib import utils
-from towerlib import buildhost
-from towerlib import sshconf
-from towerlib import install
+from towerlib import utils, buildhost, sshconf, config, install
 from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException, DiscoveringException
 
 logger = logging.getLogger('tower')
@@ -21,7 +18,7 @@ def check_environment_value(key, value):
         raise MissingEnvironmentValue(f"Impossible to determine the {key}. Please use the option `--{key}`.")
 
 def generate_key_pair(name):
-    host_dir = os.path.join(sshconf.TOWER_DIR, 'hosts', name)
+    host_dir = os.path.join(config.TOWER_DIR, 'hosts', name)
     os.makedirs(host_dir, exist_ok=True)
     os.chmod(host_dir, 0o700)
     key_path = os.path.join(host_dir, 'id_ed25519')
@@ -32,13 +29,13 @@ def generate_key_pair(name):
     return f'{key_path}.pub', key_path
 
 def generate_luks_key(name):
-    keys_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, "crypto_keyfile.bin")
+    keys_path = os.path.join(config.TOWER_DIR, 'hosts', name, "crypto_keyfile.bin")
     os.makedirs(os.path.dirname(keys_path), exist_ok=True)
     dd('if=/dev/urandom', f'of={keys_path}', 'bs=512', 'count=4')
 
 def generate_ssh_host_keys(name):
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
-        host_keys_path = os.path.join(sshconf.TOWER_DIR, 'hosts', name, f"ssh_host_{key_type}_key")
+        host_keys_path = os.path.join(config.TOWER_DIR, 'hosts', name, f"ssh_host_{key_type}_key")
         if os.path.exists(host_keys_path):
             os.remove(host_keys_path)
             os.remove(f'{host_keys_path}.pub')
@@ -62,29 +59,29 @@ def prepare_host_config(args):
     timezone = args.timezone or utils.get_timezone()
     lang = args.lang or utils.get_lang()
     # determine if online
-    online = 'true' if args.online or name == sshconf.ROUTER_HOSTNAME else 'false'
-    if name == sshconf.ROUTER_HOSTNAME:
+    online = 'true' if args.online or name == config.ROUTER_HOSTNAME else 'false'
+    if name == config.ROUTER_HOSTNAME:
         wlan_ssid = args.wlan_ssid
         wlan_shared_key = utils.derive_wlan_key(args.wlan_ssid, args.wlan_password)
     else:
         wlan_ssid = ""
         wlan_shared_key = ""
     # determine thinclient IP and network
-    if name == sshconf.ROUTER_HOSTNAME or online == "true":
-        tower_network = sshconf.TOWER_NETWORK_ONLINE
-        thin_client_ip = sshconf.THIN_CLIENT_IP_ETH0
+    if name == config.ROUTER_HOSTNAME or online == "true":
+        tower_network = config.TOWER_NETWORK_ONLINE
+        thin_client_ip = config.THIN_CLIENT_IP_ETH0
     else:
-        tower_network = sshconf.TOWER_NETWORK_OFFLINE
-        thin_client_ip = sshconf.THIN_CLIENT_IP_ETH1
-    if name == sshconf.ROUTER_HOSTNAME:
-        host_ip =sshconf.ROUTER_IP
+        tower_network = config.TOWER_NETWORK_OFFLINE
+        thin_client_ip = config.THIN_CLIENT_IP_ETH1
+    if name == config.ROUTER_HOSTNAME:
+        host_ip =config.ROUTER_IP
     else:
         host_ip = sshconf.get_next_host_ip(tower_network)
     host_color = sshconf.color_code(args.color or sshconf.get_next_color_name())
     # return complete configuration
     return {
         'HOSTNAME': name,
-        'USERNAME': sshconf.DEFAULT_SSH_USER,
+        'USERNAME': config.DEFAULT_SSH_USER,
         'PUBLIC_KEY': public_key,
         'PASSWORD': password,
         'PASSWORD_HASH': sha512_crypt.hash(password),
@@ -98,7 +95,7 @@ def prepare_host_config(args):
         'THIN_CLIENT_IP': thin_client_ip,
         'TOWER_NETWORK': tower_network,
         'STATIC_HOST_IP': host_ip,
-        'ROUTER_IP': sshconf.ROUTER_IP,
+        'ROUTER_IP': config.ROUTER_IP,
         'COLOR': host_color,
         'INSTALLATION_TYPE': "install",
     }
@@ -122,7 +119,7 @@ def prepare_host_image(image_arg):
 def prepare_provision(args, upgrade=False):
     if upgrade:
         # use existing key pair
-        private_key_path = os.path.join(sshconf.TOWER_DIR, 'hosts', args.name[0], 'id_ed25519')
+        private_key_path = os.path.join(config.TOWER_DIR, 'hosts', args.name[0], 'id_ed25519')
         # load configuration
         host_config = sshconf.get_host_config(args.name[0])
         host_config['INSTALLATION_TYPE'] = "upgrade"
@@ -154,13 +151,13 @@ def save_config_file(config_path, config_str):
         f.write(config_str)
     os.chmod(config_path, 0o600)
 
-def save_host_config(config):
-    config_path = os.path.join(sshconf.TOWER_DIR, 'hosts', config['HOSTNAME'], 'tower.env')
-    config_str = "\n".join([f"{key}='{value}'" for key, value in config.items()])
+def save_host_config(host_config):
+    config_path = os.path.join(config.TOWER_DIR, 'hosts', host_config['HOSTNAME'], 'tower.env')
+    config_str = "\n".join([f"{key}='{value}'" for key, value in host_config.items()])
     save_config_file(config_path, config_str)
 
 def check_network(online):
-    ip = sshconf.THIN_CLIENT_IP_ETH0 if online else sshconf.THIN_CLIENT_IP_ETH1
+    ip = config.THIN_CLIENT_IP_ETH0 if online else config.THIN_CLIENT_IP_ETH1
     interface = 'eth0' if online else 'eth1'
     if not utils.interface_is_up(interface):
         raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is up.")
@@ -179,7 +176,7 @@ def display_pre_provision_warning(name, boot_device, upgrade):
 def display_pre_discovering_message():
     message = "Boot device ready:\n"
     message += "- make sure that the host and thin client are connected to the same switch and to the correct interface and network "
-    message += f"({sshconf.TOWER_NETWORK_OFFLINE} for offline host and {sshconf.TOWER_NETWORK_ONLINE} for online host)\n"
+    message += f"({config.TOWER_NETWORK_OFFLINE} for offline host and {config.TOWER_NETWORK_ONLINE} for online host)\n"
     message += "- make sure the device for the root system file is plugged into the host computer.\n"
     message += "- remove the boot device from the thin client\n"
     message += "- insert it into the host\n"
@@ -222,7 +219,7 @@ def provision(name, args, upgrade=False):
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, upgrade)
     # check network
     if not args.force:
-        check_network(host_config['ONLINE'] or name == sshconf.ROUTER_HOSTNAME)
+        check_network(host_config['ONLINE'] or name == config.ROUTER_HOSTNAME)
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
@@ -252,5 +249,5 @@ def wlan_connect(ssid, password):
     cmd += f"sudo echo '    ssid=\"{ssid}\"'  | sudo tee -a  {supplicant_path} && "
     cmd += f"sudo echo '    psk={psk}'  | sudo tee -a {supplicant_path} && "
     cmd += f"sudo echo '}}' | sudo tee -a {supplicant_path}"
-    ssh(sshconf.ROUTER_HOSTNAME, cmd)
-    ssh(sshconf.ROUTER_HOSTNAME, "sudo rc-service wpa_supplicant restart")
+    ssh(config.ROUTER_HOSTNAME, cmd)
+    ssh(config.ROUTER_HOSTNAME, "sudo rc-service wpa_supplicant restart")

@@ -1,6 +1,6 @@
 import logging
 
-from towerlib import provision, sshconf
+from towerlib import provision, sshconf, config
 
 logger = logging.getLogger('tower')
 
@@ -23,8 +23,8 @@ def add_args(argparser):
 
 # pylint: disable=unused-argument
 def check_args(args, parser_error):
-    if not sshconf.exists(sshconf.ROUTER_HOSTNAME):
-        parser_error(message=f"`{sshconf.ROUTER_HOSTNAME}` host not found. Please provision it first.")
+    if not sshconf.exists(config.ROUTER_HOSTNAME):
+        parser_error(message=f"`{config.ROUTER_HOSTNAME}` host not found. Please provision it first.")
 
 def execute(args):
     provision.wlan_connect(args.ssid, args.password)

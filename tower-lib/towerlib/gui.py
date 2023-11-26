@@ -187,6 +187,7 @@ def run(hostname, *cmd):
             if app_process is not None and app_process.is_alive():
                 app_process.terminate()
         # pylint: disable=broad-exception-caught
-        except Exception:
-            pass # we want to cleanup anyway
-        cleanup(hostname, display_num)
+        except Exception as exc:
+            logger.error(exc)
+        finally:
+            cleanup(hostname, display_num)

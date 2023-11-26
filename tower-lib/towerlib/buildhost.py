@@ -17,7 +17,7 @@ from sh import (
 from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
-from towerlib.sshconf import TOWER_DIR
+from towerlib.config import TOWER_DIR
 from towerlib.utils.exceptions import LockException, BuildException
 
 mkfs_ext4 = Command('mkfs.ext4')
