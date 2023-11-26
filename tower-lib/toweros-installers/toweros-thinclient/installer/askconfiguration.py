@@ -204,8 +204,8 @@ def get_keymap():
     return layout, variant
 
 def get_startx_on_login():
-    print_title("Start X on login")
-    return Confirm.ask("Do you want to automatically start X on login ?")
+    print_title("Start Wayland on login")
+    return Confirm.ask("Do you want to automatically start graphical interface on login ?")
 
 def get_user_information():
     print_title("Please enter the first user information")
