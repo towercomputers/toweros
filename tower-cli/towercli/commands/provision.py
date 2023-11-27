@@ -209,7 +209,7 @@ def check_provision_args(args, parser_error):
             parser_error(message="You must provide a WiFi password for the router.")
     else:
         if args.online == args.offline:
-            parser_error(message="You cannot specify both `--online` and `--offline` simultaneously.")
+            parser_error(message="You must specify either `--online` or `--offline`, but not both.")
         if args.online:
             if not sshconf.exists(config.ROUTER_HOSTNAME) and not args.force:
                 parser_error(message=f"`{config.ROUTER_HOSTNAME}` host not found. Please provision it first.")

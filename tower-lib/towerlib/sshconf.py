@@ -146,7 +146,7 @@ def wait_for_host_sshd(name, timeout):
     while not is_up(name):
         duration = time.time() - start_time
         if timeout and duration > timeout:
-            raise DiscoveringTimeOut("Host discovering timeout")
+            raise DiscoveringTimeOut("Host discovery timeout")
         time.sleep(3)
 
 def get_host_config(name):

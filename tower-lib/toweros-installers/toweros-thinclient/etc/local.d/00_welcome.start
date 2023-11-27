@@ -1,5 +1,5 @@
 if [ -f /etc/profile.d/install.sh ]; then
-    echo "Welcome to the TowerOS-ThinClient Installer!" > /etc/issue
+    echo "Welcome to the TowerOS Installer for your Thin Client!" > /etc/issue
     echo "" >> /etc/issue
 else
     echo "Welcome to TowerOS!" > /etc/issue

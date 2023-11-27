@@ -174,15 +174,12 @@ def display_pre_provision_warning(name, boot_device, upgrade):
     rprint(warning_text)
 
 def display_pre_discovering_message():
-    message = "Boot device ready:\n"
-    message += "- make sure that the host and thin client are connected to the same switch and to the correct interface and network "
-    message += f"({config.TOWER_NETWORK_OFFLINE} for offline host and {config.TOWER_NETWORK_ONLINE} for online host)\n"
-    message += "- make sure that the host root drive is plugged into the host.\n"
-    message += "- remove the host boot drive from the thin client\n"
-    message += "- insert it into the host\n"
-    message += "- turn on the host computer and wait for it to be discovered on the network by the thin client.\n"
-    message += "This step can take between 2 and 10 minutes, depending mostly on the speed of the root device. "
-    message += "If the host is still not discovered in 10 minutes, you can troubleshoot by connecting a screen and a keyboard to it."
+    message = "Boot device ready.\n"
+    message += "- Make sure that the host and thin client are connected to the same switch and to the correct interface and network "
+    message += f"({config.TOWER_NETWORK_OFFLINE} for offline hosts and {config.TOWER_NETWORK_ONLINE} for online hosts).\n"
+    message += "- Make sure that the host root drive is plugged into the host.\n"
+    message += "- Remove the host boot drive from the thin client and insert it into the host being provisioned.\n"
+    message += "- Turn on the host and wait for it to be discovered on the network... (This step can take up to 10 minutes under normal circumstances, depending mostly on the speed of the root device. If the host has still not discovered in that time period, you can troubleshoot by connecting a screen and a keyboard to it.\n"
     rprint(Text(message, style='green'))
 
 def display_post_discovering_message(name, ip):
@@ -197,7 +194,7 @@ def display_post_discovering_message(name, ip):
     rprint(Text(message))
 
 def wait_for_host(name, timeout):
-    error_message = "Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
+    error_message = "Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or run `bat ~/docs/installation.md`."
     try:
         sshconf.wait_for_host_sshd(name, timeout)
     except KeyboardInterrupt as exc1:

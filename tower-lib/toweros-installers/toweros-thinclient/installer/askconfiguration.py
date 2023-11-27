@@ -158,7 +158,7 @@ def check_secure_boot_status():
         print_error("Error: You must delete all Secure Boot keys in order to install TowerOS-Thinclient with Secure Boot.")
         error = True
     if error:
-        print_error("Please refer to the documentation in order to prepare your laptop firmware for Secure Boot:")
+        print_error("Please refer to the documentation in order to prepare your device firmware for Secure Boot:")
         print_error("https://github.com/towercomputers/toweros/blob/master/docs/SecureBoot.md")
         return False
     return True
@@ -249,7 +249,7 @@ def confirm_config(config):
         print_value("Start X on login", config['STARTX_ON_LOGIN'])
         if config['SECURE_BOOT'] == "true":
             rprint("\n")
-            print_error("Warning: You MUST enable Secure Boot in your laptop firmware.")
+            print_error("Warning: You MUST enable Secure Boot in your device's firmware.")
             print_error("Warning: You MUST backup the Secure Boot keys in `/usr/share/secureboot/keys` as soon as possible.")
     target_warning = f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased."
     if config['INSTALLATION_TYPE'] == 'upgrade':
@@ -257,7 +257,7 @@ def confirm_config(config):
     rprint("\n")
     print_error(target_warning)
     print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
-    print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's BIOS must be configured to boot on it.")
+    print_error("Warning: The device containing the encryption key MUST be plugged in and your device's BIOS must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def print_header():
@@ -292,9 +292,9 @@ def ask_config():
 def congratulations():
     print_header()
     print("\n")
-    rprint(Text("Congratulations, toweros is correctly installed!", style="green bold"))
+    rprint(Text("Congratulations! TowerOS has been successfully installed.", style="green bold"))
     print("\n")
-    rprint(Text("Make sure to remove the drive that contains the installation image, then press Enter to reboot.", style="purple bold"))
+    rprint(Text("Be sure to remove the drive that contains the installation image. Then press \"Enter\" to reboot.", style="purple bold"))
     input()
 
 def main():
