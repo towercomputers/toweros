@@ -220,7 +220,7 @@ def provision(name, args, upgrade=False):
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
-    if not args.no_confirm and not Confirm.ask("Do you want to continue?"):
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
         return
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
