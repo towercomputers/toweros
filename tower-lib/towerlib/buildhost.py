@@ -274,7 +274,8 @@ def insert_tower_env(boot_part, config):
 def burn_image(image_file, device, config, zero_device=False):
     try:
         # make sure the password is not shown in the logs
-        del config['PASSWORD']
+        if 'PASSWORD' in config:
+            del config['PASSWORD']
         prepare_working_dir()
         if zero_device:
             zeroing_device(device)

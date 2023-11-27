@@ -236,7 +236,10 @@ def provision(name, args, upgrade=False):
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
     # re-install packages
     if upgrade:
-        install.reinstall_all_packages(name)
+        if not args.no_wait:
+            install.reinstall_all_packages(name)
+        else:
+            rprint(Text("WARNING: Packages were not re-installed. Please re-install them manually when the host is ready", style='red'))
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

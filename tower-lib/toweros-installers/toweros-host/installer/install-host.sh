@@ -254,7 +254,7 @@ clone_live_system_to_disk() {
 		cat <<EOF > /mnt/etc/apk/repositories 
 http://dl-cdn.alpinelinux.org/alpine/v3.17/main
 http://dl-cdn.alpinelinux.org/alpine/v3.17/community
-#http://dl-cdn.alpinelinux.org/alpine/v3.17/testing
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi
 }

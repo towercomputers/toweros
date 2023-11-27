@@ -17,8 +17,8 @@ logger = logging.getLogger('tower')
 
 APK_REPOS_HOST = "dl-cdn.alpinelinux.org"
 APK_REPOS_URL = [
-    f"http://{APK_REPOS_HOST}/alpine/latest-stable/main",
-    f"http://{APK_REPOS_HOST}/alpine/latest-stable/community",
+    f"http://{APK_REPOS_HOST}/alpine/v3.17/main",
+    f"http://{APK_REPOS_HOST}/alpine/v3.17/community",
 ]
 LOCAL_TUNNELING_PORT = 8666
 
@@ -115,7 +115,7 @@ def install_in_offline_host(host, packages):
             ssh(
                 '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
                 host,
-                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress add {' '.join(packages)}",
+                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress -v add {' '.join(packages)}",
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
             )
