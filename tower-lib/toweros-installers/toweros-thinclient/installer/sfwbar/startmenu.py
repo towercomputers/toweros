@@ -41,6 +41,7 @@ def clean_exec(desktop_file_info):
     if 'Exec' not in desktop_file_info:
         desktop_file_info['Exec'] = ''
         return desktop_file_info
+    desktop_file_info['Icon'] = desktop_file_info.get('Icon', '')   
     exec_line = desktop_file_info['Exec']
     exec_line = exec_line.replace(' %f', '')
     exec_line = exec_line.replace(' %F', '')
