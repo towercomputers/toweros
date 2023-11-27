@@ -35,7 +35,7 @@
   </item>
 </menu>
 
-<menu id="root-menu">
+<!-- <menu id="root-menu">
   <item label="Terminal">
     <action name="Execute" command="foot" />
   </item>
@@ -45,7 +45,6 @@
   <item label="Poweroff">
     <action name="Execute" command="systemctl -i poweroff" />
   </item>
-</menu>
-
+</menu> -->
 
 </openbox_menu>

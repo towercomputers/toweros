@@ -363,7 +363,7 @@
     </context>
 
     <context name="Root">
-      <mousebind button="Left" action="Press">
+      <!-- <mousebind button="Left" action="Press">
         <action name="ShowMenu" menu="root-menu" />
       </mousebind>
       <mousebind button="Right" action="Press">
@@ -371,7 +371,7 @@
       </mousebind>
       <mousebind button="Middle" action="Press">
         <action name="ShowMenu" menu="root-menu" />
-      </mousebind>
+      </mousebind> -->
       <mousebind direction="Up" action="Scroll">
         <action name="GoToDesktop" to="left" wrap="yes" />
       </mousebind>
