@@ -27,5 +27,7 @@ sh /var/towercomputers/start-copyq.sh  >/dev/null 2>&1 &
 # (since a837fef). Instead use a wlr-output-power-management client such as
 # https://git.sr.ht/~leon_plickat/wlopm
 # swayidle -w timeout 300 'swaylock -f -c 000000' >/dev/null 2>&1 &
-swayidle -w timeout 300 physlock >/dev/null 2>&1 &
-
+# hack: move the cursor 1 pixel to avoid a bug in swayidle when no activity
+# after unlocking or on labwc startup
+swayidle -w timeout 300 'physlock && wlrctl pointer move 1 1' >/dev/null 2>&1 &
+wlrctl pointer move 1 1 >/dev/null 2>&1
