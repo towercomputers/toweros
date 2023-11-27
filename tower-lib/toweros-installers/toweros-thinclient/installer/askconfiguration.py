@@ -119,8 +119,8 @@ def get_installation_type():
     ).split(" ", maxsplit=1)[0].lower()
 
 def get_target_drive(upgrade=False):
-    install_title = "Please select the drive where you want to install TowerOS-Thinclient"
-    upgrade_title = "Please select the drive where TowerOS-Thinclient is installed"
+    install_title = "Please select the drive you'd like to use for the boot device of the thin client"
+    upgrade_title = "Please select the boot drive for the thin client"
     drive = select_value(
         disk_list(),
         upgrade_title if upgrade else install_title,
@@ -133,8 +133,8 @@ def get_cryptkey_drive(os_target, upgrade=False):
     no_selected_drives = disk_list(exclude=os_target)
     please_refresh = '<-- Let me insert a drive and refresh the list!'
     no_selected_drives.append(please_refresh)
-    install_title = "Please select the external drive where you want to put the disk encryption keyfile"
-    upgrade_title = "Please select the external boot device containing the disk encryption keyfile"
+    install_title = "Please select the drive you'd like to put the disk encryption keyfile on."
+    upgrade_title = "Please select the drive that holds the disk encryption keyfile."
     drive = select_value(
         no_selected_drives,
         upgrade_title if upgrade else install_title,
@@ -149,23 +149,23 @@ def check_secure_boot_status():
     sbctl_status = run_cmd(["sbctl", "status", "--json"], to_json=True)
     error = False
     if sbctl_status['secure_boot'] is not False:
-        print_error("Error: Secure boot is enabled, you must disable it to install TowerOS-Thinclient with secure boot.")
+        print_error("Error: Secure boot is enabled. You must disable it to install TowerOS-Thinclient with Secure Boot.")
         error = True
     if sbctl_status['setup_mode'] is not True:
-        print_error("Error: Secure boot's 'Setup Mode' is disable, you must enbale it to install TowerOS-Thinclient with secure boot.")
+        print_error("Error: Secure boot's 'Setup Mode' is disabled. You must enable it in order to install TowerOS-Thinclient with Secure Boot.")
         error = True
     if len(sbctl_status['vendors']) > 0:
-        print_error("Error: You must delete all secure boot keys to install TowerOS-Thinclient with secure boot.")
+        print_error("Error: You must delete all Secure Boot keys in order to install TowerOS-Thinclient with Secure Boot.")
         error = True
     if error:
-        print_error("Please refer to the documentation to prepare your laptop firmware for secure boot:")
+        print_error("Please refer to the documentation in order to prepare your laptop firmware for Secure Boot:")
         print_error("https://github.com/towercomputers/toweros/blob/master/docs/SecureBoot.md")
         return False
     return True
 
 def get_secure_boot():
     print_title("Secure boot")
-    with_secure_boot = Confirm.ask("Do you want to install TowerOS-Thinclient with secure boot ?")
+    with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?")
     if with_secure_boot and not check_secure_boot_status():
         continue_without_secure_boot = Confirm.ask("Do you want to continue without secure boot (y) or reboot (n) ?")
         if continue_without_secure_boot:
@@ -205,7 +205,7 @@ def get_keymap():
 
 def get_startx_on_login():
     print_title("Start Wayland on login")
-    return Confirm.ask("Do you want to automatically start graphical interface on login ?")
+    return Confirm.ask("Do you want to automatically start graphical interface on login?")
 
 def get_user_information():
     print_title("Please enter the first user information")
@@ -249,21 +249,21 @@ def confirm_config(config):
         print_value("Start X on login", config['STARTX_ON_LOGIN'])
         if config['SECURE_BOOT'] == "true":
             rprint("\n")
-            print_error("Warning: You MUST enable the secure boot in your laptop firmware.")
-            print_error("Warning: You MUST backup as soon as possible secure boot keys in /usr/share/secureboot/keys.")
+            print_error("Warning: You MUST enable Secure Boot in your laptop firmware.")
+            print_error("Warning: You MUST backup the Secure Boot keys in `/usr/share/secureboot/keys` as soon as possible.")
     target_warning = f"Warning: The content of the device {config['TARGET_DRIVE']} will be permanently erased."
     if config['INSTALLATION_TYPE'] == 'upgrade':
-        target_warning += " Only the /home directory will be kept, if you have data outside this directory please backup them before."
+        target_warning += " Only the `/home` directory will be kept, if you have data outside this directory please backup them before."
     rprint("\n")
     print_error(target_warning)
     print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
-    print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's bios must be configured to boot on it.")
+    print_error("Warning: The device containing the encryption key MUST be plugged in and your laptop's BIOS must be configured to boot on it.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def print_header():
     Console().clear()
     title = subprocess.run(
-        ['figlet', '-w', '160', 'TowerOS-ThinClient'],
+        ['figlet', '-w', '160', 'TowerOS - Thin Client'],
         capture_output=True, encoding="UTF-8", check=False
     ).stdout
     print(title)

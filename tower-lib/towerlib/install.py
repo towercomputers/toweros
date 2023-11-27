@@ -155,11 +155,11 @@ def can_install(host):
 def install_packages(host, packages):
     can_install(host)
     if host == 'thinclient':
-        confirmation = Text("This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
+        confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on hosts. Are you sure you want to install this package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'router':
-        confirmation = Text("This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the router?", style='red')
+        confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on other hosts. Are you sure you want to install this package on the router?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'thinclient':
