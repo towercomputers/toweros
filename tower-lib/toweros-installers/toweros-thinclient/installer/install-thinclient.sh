@@ -171,10 +171,14 @@ prepare_home_directory() {
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+    # create home directory
+    mkdir -p "/mnt/home/$USERNAME"
     # create .Xauthority file
-    touch /home/$USERNAME/.Xauthority
-    # set XDG_RUNTIME_DIR, XDG_CONFIG_HOME and PS1
-    cat <<EOF >> /home/$USERNAME/.profile
+    touch /mnt/home/$USERNAME/.Xauthority
+    # if exists make a backup of .profile
+    cp "/mnt/home/$USERNAME/.profile" "/mnt/home/$USERNAME/.profile.bak" || true
+    # set XDG_RUNTIME_DIR and PS1
+    cat <<EOF > /mnt/home/$USERNAME/.profile
 export PS1='[\\u@\\H \\W]\\$ '
 if [ -z "\$XDG_RUNTIME_DIR" ]; then
     XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
@@ -184,8 +188,12 @@ fi
 EOF
     # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
-        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /home/$USERNAME/.profile
+        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /mnt/home/$USERNAME/.profile
     fi
+    # create symlink to doc
+    ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
+    # set ownership
+    chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
 install_tower_tools() {
@@ -283,8 +291,6 @@ EOF
 
     # disable wireless devices
     rfkill block all
-
-    prepare_home_directory
 }
 
 clone_live_system_to_disk() {
@@ -354,17 +360,6 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/main
 http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
-
-    # copy user's home to the new system
-    mkdir -p "/mnt/home/$USERNAME"
-    rsync -a --ignore-existing "/home/$USERNAME" "/mnt/home/$USERNAME"
-    # make a backup and copy new .profile
-    cp "/mnt/home/$USERNAME/.profile" "/mnt/home/$USERNAME/.profile.bak" || true
-    cp /home/$USERNAME/.profile "/mnt/home/$USERNAME/.profile"
-    # create symlink to doc
-    ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
-    # set ownership
-    chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
 install_bootloader() {
@@ -417,6 +412,7 @@ install_thinclient() {
     prepare_drive
     update_live_system
     install_tower_tools
+    prepare_home_directory
     clone_live_system_to_disk
     install_bootloader
     install_secure_boot
