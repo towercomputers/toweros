@@ -94,3 +94,4 @@ gtk+3.0-dev
 cmake
 meson
 wlrctl
+waypipe

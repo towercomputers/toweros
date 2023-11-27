@@ -19,14 +19,9 @@ dbus
 acct
 linux-rpi4
 raspberrypi-bootloader
-xorg-server
-xf86-input-libinput
 font-dejavu
 adw-gtk3
 mesa-dri-gallium
-gtkmm4
-gtk+3.0-dev
-xinit
 udev
 syslog-ng
 chrony
@@ -36,3 +31,4 @@ cryptsetup
 lvm2
 tor
 macchanger
+waypipe
