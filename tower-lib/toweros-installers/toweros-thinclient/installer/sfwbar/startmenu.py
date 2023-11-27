@@ -22,14 +22,19 @@ XDG_CATEGORIES = {
     'Office': 'Office'
 }
 
-APPLICATIONS_DIR = '/usr/share/applications/'
+APPLICATIONS_DIRS = [
+    '/usr/share/applications/',
+    '/usr/local/share/applications/',
+    os.path.expanduser('~/.local/share/applications/')
+]
 
 def get_desktop_files():
     desktop_files = []
-    for root, _, files in os.walk(APPLICATIONS_DIR):
-        for file in files:
-            if file.endswith(".desktop"):
-                desktop_files.append(os.path.join(root, file))
+    for app_dir in APPLICATIONS_DIRS:
+        for root, _, files in os.walk(app_dir):
+            for file in files:
+                if file.endswith(".desktop"):
+                    desktop_files.append(os.path.join(root, file))
     return desktop_files
 
 def clean_exec(desktop_file_info):

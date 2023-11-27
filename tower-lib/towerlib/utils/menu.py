@@ -5,7 +5,7 @@ from sh import ssh, mkdir, sed, scp, mv, Command
 from towerlib.utils.decorators import clitask
 from towerlib.utils.sh import sh_sudo
 from towerlib.sshconf import get_host_color_name
-from towerlib.config import TOWER_DIR
+from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
@@ -14,7 +14,7 @@ def copy_desktop_files(host, package):
             desktop_file_path = line.split(" ").pop().strip()
             if not desktop_file_path.startswith('/'):
                 desktop_file_path = f"/{desktop_file_path}"
-            desktop_folder, desktop_file_name = os.path.split(desktop_file_path)
+            desktop_file_name = os.path.basename(desktop_file_path)
             # prefix file with the host name
             locale_file_path = os.path.expanduser(f'~/{host}-{desktop_file_name}')
             # copy desktop file with in user directory
@@ -24,10 +24,9 @@ def copy_desktop_files(host, package):
             # update application categories
             sed('-i', f's/Categories=/Categories=X-tower-{host};/g', locale_file_path)
             Command('sh')('-c', f"echo 'Color={get_host_color_name(host)}' >> {locale_file_path}")
-            # with sudo copy .desktop file in the same folder as the host
-            with sh_sudo(password="", _with=True):
-                mkdir('-p', desktop_folder)
-                mv(locale_file_path, desktop_folder)
+            # copy .desktop file in user specific applications folder
+            mkdir('-p', DESKTOP_FILES_DIR)
+            mv(locale_file_path, DESKTOP_FILES_DIR)
 
 def get_installed_packages(host):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')

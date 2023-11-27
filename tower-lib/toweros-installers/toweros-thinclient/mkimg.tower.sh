@@ -3,8 +3,8 @@ set -x
 profile_tower() {
 	profile_base
 	profile_abbrev="tower"
-	title="TowerOS-ThinClient"
-	desc="Towercomputer distribution for Thin Client."
+	title="TowerOS"
+	desc="TowerOS for Thin Clients."
 	image_ext="iso"
 	output_format="iso"
 	arch="x86 x86_64"

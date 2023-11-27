@@ -118,14 +118,16 @@ def is_up(name):
 
 def status(host_name = None):
     if host_name:
-        host_config = get(host_name)
+        host_ssh_config = get(host_name)
+        host_config = get_host_config(host_name)
         host_status = 'up' if is_up(host_name) else 'down'
         online = is_online_host(host_name) if host_status == 'up' else "N/A"
         return {
             'name': host_name,
             'status': host_status,
             'online-host': online,
-            'ip': host_config['hostname']
+            'ip': host_ssh_config['hostname'],
+            'version': host_config.get('TOWEROS_VERSION', 'N/A')
         }
     return [status(host_name) for host_name in hosts()]
 
@@ -146,7 +148,7 @@ def wait_for_host_sshd(name, timeout):
     while not is_up(name):
         duration = time.time() - start_time
         if timeout and duration > timeout:
-            raise DiscoveringTimeOut("Host discovering timeout")
+            raise DiscoveringTimeOut("Host discovery timeout")
         time.sleep(3)
 
 def get_host_config(name):

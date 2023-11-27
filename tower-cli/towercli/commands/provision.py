@@ -71,6 +71,13 @@ def add_args(argparser, upgrade=False):
         required=False,
         default=600
     )
+    parser.add_argument(
+        '--force',
+        help="""Overwrite the configuration for an existing host (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
     if not upgrade:
         parser.add_argument(
@@ -132,13 +139,6 @@ def add_args(argparser, upgrade=False):
             help="""WiFi password (Default: same as that currently currently in use by the thin client)""",
             required=False,
             default=""
-        )
-        parser.add_argument(
-            '--force',
-            help="""Overwrite the configuration for an existing host (Default: False)""",
-            required=False,
-            action='store_true',
-            default=False
         )
         next_color_name = sshconf.get_next_color_name()
         parser.add_argument(
@@ -209,7 +209,7 @@ def check_provision_args(args, parser_error):
             parser_error(message="You must provide a WiFi password for the router.")
     else:
         if args.online == args.offline:
-            parser_error(message="You cannot specify both `--online` and `--offline` simultaneously.")
+            parser_error(message="You must specify either `--online` or `--offline`, but not both.")
         if args.online:
             if not sshconf.exists(config.ROUTER_HOSTNAME) and not args.force:
                 parser_error(message=f"`{config.ROUTER_HOSTNAME}` host not found. Please provision it first.")

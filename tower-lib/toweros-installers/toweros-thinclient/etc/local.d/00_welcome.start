@@ -1,14 +1,14 @@
 if [ -f /etc/profile.d/install.sh ]; then
-    echo "Welcome to TowerOS-ThinClient Installer!" > /etc/issue
+    echo "Welcome to the TowerOS Installer for your Thin Client!" > /etc/issue
     echo "" >> /etc/issue
 else
-    echo "Welcome to TowerOS-ThinClient!" > /etc/issue
+    echo "Welcome to TowerOS!" > /etc/issue
     echo "" >> /etc/issue
 
-    echo "Please see files in ~/docs/ to know how to get started with TowerOS-ThinClient." >> /etc/issue
+    echo "Please see files in ~/docs/ to know how to get started with TowerOS." >> /etc/issue
     echo "You can use the \`bat\` tool to view markdown files; For example \`bat ~/docs/usage.md\`." >> /etc/issue
     echo "" >> /etc/issue
     
-    echo "WARNING: For security reasons, make sure to remove the external device containing the boot partition." >> /etc/issue
+    echo "WARNING: For security reasons, make sure to remove the boot drive." >> /etc/issue
     echo "" >> /etc/issue
 fi

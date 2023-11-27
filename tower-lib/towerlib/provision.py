@@ -169,20 +169,17 @@ def display_pre_provision_warning(name, boot_device, upgrade):
     if not upgrade:
         warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{name}`"
     else:
-        warning_message += f"\nWARNING: This will completely re-install TowerOS into the host `{name}`. Your home directory will be preserved."
+        warning_message += f"\nWARNING: This will completely re-install TowerOS on the host `{name}`. Your home directory will be preserved."
     warning_text = Text(warning_message, style='red')
     rprint(warning_text)
 
 def display_pre_discovering_message():
-    message = "Boot device ready:\n"
-    message += "- make sure that the host and thin client are connected to the same switch and to the correct interface and network "
-    message += f"({config.TOWER_NETWORK_OFFLINE} for offline host and {config.TOWER_NETWORK_ONLINE} for online host)\n"
-    message += "- make sure the device for the root system file is plugged into the host computer.\n"
-    message += "- remove the boot device from the thin client\n"
-    message += "- insert it into the host\n"
-    message += "- turn on the host computer and wait for it to be discovered by the thin client on the network.\n"
-    message += "This step can take between 2 and 10 minutes, depending mostly on the speed of the root device. "
-    message += "If the host is still not discovered in 10 minutes, you can troubleshoot by connecting a screen and a keyboard to it."
+    message = "Boot device ready.\n"
+    message += "- Make sure that the host and thin client are connected to the same switch and to the correct interface and network "
+    message += f"({config.TOWER_NETWORK_OFFLINE} for offline hosts and {config.TOWER_NETWORK_ONLINE} for online hosts).\n"
+    message += "- Make sure that the host root drive is plugged into the host.\n"
+    message += "- Remove the host boot drive from the thin client and insert it into the host being provisioned.\n"
+    message += "- Turn on the host and wait for it to be discovered on the network... (This step can take up to 10 minutes under normal circumstances, depending mostly on the speed of the root device. If the host has still not discovered in that time period, you can troubleshoot by connecting a screen and a keyboard to it.\n"
     rprint(Text(message, style='green'))
 
 def display_post_discovering_message(name, ip):
@@ -193,11 +190,11 @@ def display_post_discovering_message(name, ip):
     message += f"Access the host `{name}` with the command `$ ssh {name}`.\n"
     message += f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`\n"
     message += f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`\n"
-    message += "WARNING: For security reasons, make sure to remove the external device containing the boot partition from the host."
+    message += "WARNING: For security reasons, make sure to remove the host boot device from the host."
     rprint(Text(message))
 
 def wait_for_host(name, timeout):
-    error_message = "Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or `bat ~/docs/installation.md`."
+    error_message = "Unable to confirm that the host is ready. To diagnose the problem, please refer to the troubleshooting documentation at https://toweros.org or run `bat ~/docs/installation.md`."
     try:
         sshconf.wait_for_host_sshd(name, timeout)
     except KeyboardInterrupt as exc1:
@@ -223,7 +220,7 @@ def provision(name, args, upgrade=False):
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
-    if not args.no_confirm and not Confirm.ask("Do you want to continue?"):
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
         return
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
@@ -239,7 +236,10 @@ def provision(name, args, upgrade=False):
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
     # re-install packages
     if upgrade:
-        install.reinstall_all_packages(name)
+        if not args.no_wait:
+            install.reinstall_all_packages(name)
+        else:
+            rprint(Text("WARNING: Packages were not re-installed. Please re-install them manually when the host is ready", style='red'))
 
 @utils.clitask("Updating wlan credentials...")
 def wlan_connect(ssid, password):

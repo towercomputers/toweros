@@ -17,8 +17,8 @@ logger = logging.getLogger('tower')
 
 APK_REPOS_HOST = "dl-cdn.alpinelinux.org"
 APK_REPOS_URL = [
-    f"http://{APK_REPOS_HOST}/alpine/latest-stable/main",
-    f"http://{APK_REPOS_HOST}/alpine/latest-stable/community",
+    f"http://{APK_REPOS_HOST}/alpine/v3.17/main",
+    f"http://{APK_REPOS_HOST}/alpine/v3.17/community",
 ]
 LOCAL_TUNNELING_PORT = 8666
 
@@ -115,7 +115,7 @@ def install_in_offline_host(host, packages):
             ssh(
                 '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
                 host,
-                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress add {' '.join(packages)}",
+                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress -v add {' '.join(packages)}",
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
             )
@@ -147,7 +147,7 @@ def install_in_thinclient(packages):
         cleanup("thinclient")
 
 def can_install(host):
-    if not sshconf.is_up(host):
+    if host != "thinclient" and not sshconf.is_up(host):
         raise TowerException(message=f"`{host}` is down. Please start it first.")
     if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(config.ROUTER_HOSTNAME):
         raise TowerException(message=f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
@@ -155,11 +155,11 @@ def can_install(host):
 def install_packages(host, packages):
     can_install(host)
     if host == 'thinclient':
-        confirmation = Text("This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on hosts. Are you sure you want to install a package directly on the thin client?", style='red')
+        confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on hosts. Are you sure you want to install this package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'router':
-        confirmation = Text("This is a *dangerous operation* and only rarely necessary. Packages should normally be installed only on other hosts. Are you sure you want to install a package directly on the router?", style='red')
+        confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on other hosts. Are you sure you want to install this package on the router?", style='red')
         if not Confirm.ask(confirmation):
             return
     if host == 'thinclient':

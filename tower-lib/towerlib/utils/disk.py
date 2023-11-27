@@ -35,12 +35,12 @@ def get_device_list():
 def select_boot_device():
     k = None
     while k is None:
-        k = input("Please ensure the boot device is *NOT* connected to the Thin Client and press ENTER.")
+        k = input("Please be sure the boot device is *NOT* connected to the thin client and press \"Enter\".")
     devices_before = get_device_list()
 
     k = None
     while k is None:
-        k = input("Please insert now the boot device to the Thin Client and press ENTER.")
+        k = input("Please insert the boot device into the thin client and press \"Enter\".")
 
     time.sleep(2)
     devices_after = get_device_list()

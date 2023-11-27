@@ -254,7 +254,7 @@ clone_live_system_to_disk() {
 		cat <<EOF > /mnt/etc/apk/repositories 
 http://dl-cdn.alpinelinux.org/alpine/v3.17/main
 http://dl-cdn.alpinelinux.org/alpine/v3.17/community
-#http://dl-cdn.alpinelinux.org/alpine/v3.17/testing
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi
 }
@@ -300,7 +300,7 @@ init_configuration() {
 			LVM_DISK=/dev/sda
 		fi
 	else
-		echo "tower.env not found. Please ensure the root drive is not bootable."
+		echo "`tower.env` not found. Please ensure the root drive is not bootable, or try booting with the root drive removed for the first part of the boot sequence."
 		exit 1
 	fi
 
