@@ -257,8 +257,8 @@ clone_live_system_to_disk() {
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		mkdir -p /mnt/etc/apk
 		cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/v3.17/main
-http://dl-cdn.alpinelinux.org/alpine/v3.17/community
+http://dl-cdn.alpinelinux.org/alpine/v3.18/main
+http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi

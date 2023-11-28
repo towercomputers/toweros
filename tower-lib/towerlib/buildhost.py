@@ -28,7 +28,7 @@ logger = logging.getLogger('tower')
 WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-host')
 
-ALPINE_BRANCH_FOR_UNVERSIONED = "v3.17"
+ALPINE_BRANCH_FOR_UNVERSIONED = "v3.18"
 ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
 USERNAME = getpass.getuser()
 

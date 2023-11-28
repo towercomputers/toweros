@@ -17,8 +17,8 @@ logger = logging.getLogger('tower')
 
 APK_REPOS_HOST = "dl-cdn.alpinelinux.org"
 APK_REPOS_URL = [
-    f"http://{APK_REPOS_HOST}/alpine/v3.17/main",
-    f"http://{APK_REPOS_HOST}/alpine/v3.17/community",
+    f"http://{APK_REPOS_HOST}/alpine/v3.18/main",
+    f"http://{APK_REPOS_HOST}/alpine/v3.18/community",
 ]
 LOCAL_TUNNELING_PORT = 8666
 

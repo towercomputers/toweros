@@ -13,9 +13,9 @@ logger = logging.getLogger('tower')
 
 REQUIRED_BUILDS = {
     "alpine-rpi": {
-        "filename": "alpine-rpi-3.17.3-armv7.tar.gz",
-        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz",
-        "checksum": "d623a05183164cc2280e6f934b2153761691ade62f67b03ec0b877d9f4ff6171"
+        "filename": "alpine-rpi-3.18.4-armv7.tar.gz",
+        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/armv7/alpine-rpi-3.18.4-armv7.tar.gz",
+        "checksum": "9ae3f1d96d3238175e40005047b1eb4ea4e80573192743bb0f534611d05eb3f7"
     },
 }
 
