@@ -3,9 +3,15 @@ import json
 from towerlib import sshconf
 
 def add_args(argparser):
-    argparser.add_parser(
+    status_parser = argparser.add_parser(
         'status',
         help="Check the status of all hosts in the Tower system."
+    )
+    status_parser.add_argument(
+        '--host',
+        help="""Host name""",
+        required=False,
+        default=None
     )
 
 # pylint: disable=unused-argument
@@ -14,4 +20,4 @@ def check_args(args, parser_error):
 
 # pylint: disable=unused-argument
 def execute(args):
-    print(json.dumps(sshconf.status(), indent=4))
+    print(json.dumps(sshconf.status(args.host), indent=4))
