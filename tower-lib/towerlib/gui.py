@@ -198,11 +198,14 @@ def run_waypipe(host, waypipe_args, *cmd):
     client_process = None
     try:
         client_process = waypipe('-s', socket_path, '-o', 'client', _bg_exc=False, _bg=True)
+        waypipe_cmd = f"source ~/.profile && waypipe -s {socket_path} {' '.join(waypipe_args)} server --"
+        print(waypipe_cmd)
         ssh(
             host, '-t',
             "-R", f"{socket_path}:{socket_path}",
-            f"source ~/.profile && waypipe -s {socket_path} {' '.join(waypipe_args)} server --",
-            *cmd
+            waypipe_cmd,
+            *cmd,
+            _out=print, _err_to_out=True,
         )
     except ErrorReturnCode as e:
         logger.error(e)

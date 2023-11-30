@@ -77,8 +77,8 @@ def update_config(host, ip, private_key_path):
         return
     # if IP already used, update the name
     for existing_host in existing_hosts:
-        host = config.host(existing_host)
-        if host['hostname'] == ip:
+        existing_host_config = config.host(existing_host)
+        if existing_host_config['hostname'] == ip:
             config.rename(existing_host, host)
             config.set(host, IdentityFile=private_key_path)
             config.write(TOWER_SSH_CONFIG_PATH)

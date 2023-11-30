@@ -70,6 +70,13 @@ def add_args(argparser):
         required=False
     )
     run_parser.add_argument(
+        '--waypipe',
+        help="""Use `waypipe` instead `nx`. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    run_parser.add_argument(
         '--wp-compress',
         help="""Select the compression method applied to data transfers. Options are none (for high-bandwidth networks), lz4 (intermediate), zstd (slow connection). The default compression is none. The compression level can be chosen by appending = followed by a number. For example, if C is zstd=7, waypipe will use level 7 Zstd compression.""",
         required=False,
@@ -85,29 +92,39 @@ def add_args(argparser):
         help="""Compress specific DMABUF formats using a lossy video codec. Opaque, 10-bit, and multiplanar formats, among others, are not supported. V is a comma separated list of options to control the video encoding. Using the --video flag without setting any options is equivalent to using the default setting of: --video=sw,bpf=120000,h264. Later options supersede earlier ones (see `man waypipe` for more options).""",
         required=False
     )
-    run_parser.add_argument(
-        '--waypipe',
-        help="""Use `waypipe` instead `nx`. (Default: False)""",
-        required=False,
-        action='store_true',
-        default=False
-    )
+
 
 def check_nx_args(args, parser_error):
     links = ['modem', 'isdn', 'adsl', 'wan', 'lan', 'local']
     regex = r'^[0-9]+[kmgKMG]{1}$'
-    if not re.match(regex, args.nx_link) and args.nx_link not in links:
+    if args.nx_link and not re.match(regex, args.nx_link) and args.nx_link not in links:
         parser_error("Invalid link name")
-    if not re.match(regex, args.nx_images) and not args.nx_images.isdigit():
+    if args.nx_images and not re.match(regex, args.nx_images) and not args.nx_images.isdigit():
         parser_error("Invalid images size")
-    if not re.match(regex, args.nx_cache) and not args.nx_cache.isdigit():
+    if args.nx_cache and not re.match(regex, args.nx_cache) and not args.nx_cache.isdigit():
         parser_error("Invalid cache size")
+
+def check_waypipe_args(args, parser_error):
+    if args.wp_compress:
+        compressions = ['none', 'lz4', 'zstd']
+        regex = r'^(lz4|zstd)=[0-9]{1}$'
+        if not re.match(regex, args.wp_compress) and args.wp_compress not in compressions:
+            parser_error("Invalid compression method")
+    if args.wp_video:
+        options = args.wp_video.split(',')
+        regex_bpf = r'^bpf=[0-9]{1,6}$'
+        for option in options:
+            if not re.match(regex_bpf, option) and option not in ['sw', 'hw', 'h264', 'vp9']:
+                parser_error("Invalid video option")
 
 def check_args(args, parser_error):
     config = sshconf.get(args.host_name[0])
     if config is None:
         parser_error("Unknown host.")
-    check_nx_args(args, parser_error)
+    if args.waypipe:
+        check_waypipe_args(args, parser_error)
+    else:
+        check_nx_args(args, parser_error)
 
 def execute(args):
     if os.getenv('DISPLAY'):
