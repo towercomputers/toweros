@@ -275,6 +275,9 @@ EOF
     rc-update add dbus
     rc-update add local
     rc-update add seatd
+    rc-update add crond
+
+    echo "*/1     *       *       *       *       runuser -u $USERNAME -- python /var/towercomputers/genstatus.py" >> /etc/crontabs/root
 
     # enabling udev service
     setup-devd udev
@@ -341,9 +344,10 @@ clone_live_system_to_disk() {
     ninja -C build
     DESTDIR=/mnt/ ninja -C build install
     cd ..
-    # install custom startmenu widget
-    cp /var/towercomputers/installer/sfwbar/startmenu.widget /mnt/usr/local/share/sfwbar/
-    cp /var/towercomputers/installer/sfwbar/startmenu.py /mnt/var/towercomputers/
+    # install custom startmenu widget and tower widget
+    cp /var/towercomputers/installer/sfwbar/*.widget /mnt/usr/local/share/sfwbar/
+    cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
+    cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
     # install custom icons
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/

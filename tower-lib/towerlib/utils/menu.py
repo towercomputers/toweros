@@ -4,8 +4,9 @@ from sh import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
 from towerlib.utils.sh import sh_sudo
-from towerlib.sshconf import get_host_color_name
+from towerlib.sshconf import get_host_color_name, hosts
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
+from towerlib.utils.sh import sh_sudo
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
@@ -47,3 +48,57 @@ def add_installed_package(host, package):
         save_installed_packages(host, installed_packages)
     # copy desktop files from host to thinclient
     copy_desktop_files(host, package)
+
+@clitask("Generate sfwbar widget...")
+def generate_tower_widget():
+    hosts_status = []
+    for host in hosts():
+        hosts_status.append(f"{host}_status = RegEx('^{host}=(green|red)$')")
+    hosts_status = "\n".join(hosts_status)
+    status_path = os.path.join(TOWER_DIR, 'status')
+    widget_scanner = f"""
+scanner {{
+  File('{status_path}') {{
+    {hosts_status}
+  }}
+}}
+"""
+    layouts = []
+    for host in hosts():
+        layouts.append(f"""
+layout {{
+  label {{
+    interval = 1000
+    style = 'LabelStyle'
+    value = '{host}'
+  }}
+  image {{
+    style = 'CircleStyle'
+    value = 'circle-' + ${host}_status
+  }}
+}}
+""")
+    layouts = "\n".join(layouts)
+    styles = """
+#CSS
+
+#LabelStyle {
+    padding: 5px;
+    padding-top: 8px;
+    padding-right: 2px;
+}
+
+#CircleStyle {
+    padding: 5px;
+    padding-top: 8px;
+    padding-left:0;
+}
+"""
+    widget = f"{widget_scanner}\n{layouts}\n{styles}"
+    widget_path = "/usr/local/share/sfwbar/tower.widget"
+    with open("/tmp/tower.widget", 'w', encoding="UTF-8") as fp:
+        fp.write(widget)
+    with sh_sudo(password="", _with=True):
+        mv("/tmp/tower.widget", widget_path)
+    Command('sh')('-c', "killall sfwbar || true")
+    Command('sh')('-c', "sfwbar", _bg=True, _bg_exc=False)

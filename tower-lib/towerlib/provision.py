@@ -209,6 +209,8 @@ def prepare_thin_client(name, host_config, private_key_path):
     save_host_config(host_config)
     # prepare ssh config and known hosts
     sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+    # generate sfwbar widget
+    utils.menu.generate_tower_widget()
 
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args, upgrade=False):
