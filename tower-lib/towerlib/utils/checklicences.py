@@ -40,6 +40,15 @@ def generate_sarif(not_allowed_packages):
                     "text": f"Package {package} has license {license} which is not allowed"
                 },
                 "ruleId": "not-allowed-license",
+                "locations": [
+                    {
+                        "physicalLocation": {
+                            "artifactLocation": {
+                                "uri": f"https://pypi.org/project/{package}/"
+                            }
+                        }
+                    }
+                ]
             })
     sarif = {
         "version": "2.1.0",
