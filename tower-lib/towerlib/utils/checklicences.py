@@ -44,7 +44,7 @@ def generate_sarif(not_allowed_packages):
                     {
                         "physicalLocation": {
                             "artifactLocation": {
-                                "uri": f"file://pyproject.toml"
+                                "uri": "tower-lib/pyproject.toml"
                             }
                         }
                     }
