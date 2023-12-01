@@ -6,7 +6,7 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 from rich import print as rich_print
 
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 
 logger = logging.getLogger('tower')
 

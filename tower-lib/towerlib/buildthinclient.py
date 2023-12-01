@@ -10,7 +10,7 @@ import sys
 from sh import rm, git, pip, Command, apk, hatch, cp
 
 from towerlib.utils.decorators import clitask
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 from towerlib import buildhost
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException

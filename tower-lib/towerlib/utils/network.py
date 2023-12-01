@@ -7,7 +7,7 @@ from backports.pbkdf2 import pbkdf2_hmac
 from sh import cp, Command
 
 from towerlib.utils.decorators import clitask
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 
 logger = logging.getLogger('tower')
 
