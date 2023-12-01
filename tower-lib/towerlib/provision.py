@@ -150,7 +150,7 @@ def save_config_file(config_path, config_str):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, 'w', encoding="UTF-8") as f:
         # we want the password in ~/.local/tower/hosts/<host>/tower.env for debugging purposes
-        # codeql[py/clear-text-storage-sensitive-data]
+        #lgtm[py/clear-text-storage-sensitive-data]
         f.write(config_str)
     os.chmod(config_path, 0o600)
 
