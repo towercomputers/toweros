@@ -44,7 +44,7 @@ def generate_sarif(not_allowed_packages):
                     {
                         "physicalLocation": {
                             "artifactLocation": {
-                                "uri": f"https://pypi.org/project/{package}/"
+                                "uri": f"file://pyproject.toml"
                             }
                         }
                     }
