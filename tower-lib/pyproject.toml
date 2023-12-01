@@ -40,6 +40,7 @@ path = "towerlib/__about__.py"
 [tool.license_scanner]
 allowed-licences = [
     'Apache license',
+    'Apache license 2.0',
     'BSD 2-clause license',
     'BSD 3-clause license',
     'BSD license',
