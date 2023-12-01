@@ -259,7 +259,6 @@ def insert_tower_env(boot_part, config):
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
-    logger.debug("Host configuration:\n%s", str_env)
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
@@ -274,13 +273,14 @@ def insert_tower_env(boot_part, config):
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:
-        # make sure the password is not shown in the logs
-        if 'PASSWORD' in config:
-            del config['PASSWORD']
+        # make sure the password is not stored in th sd-card
+        host_config = {**config}
+        if 'PASSWORD' in host_config:
+            del host_config['PASSWORD']
         prepare_working_dir()
         if zero_device:
             zeroing_device(device)
         boot_part = copy_image_in_device(image_file, device)
-        insert_tower_env(boot_part, config)
+        insert_tower_env(boot_part, host_config)
     finally:
         cleanup()
