@@ -213,6 +213,7 @@ def run_waypipe(host, waypipe_args, *cmd):
         try:
             if client_process is not None and client_process.is_alive():
                 client_process.terminate()
+        # pylint: disable=broad-exception-caught
         except Exception as exc:
             logger.error(exc)
         if os.path.exists(socket_path):

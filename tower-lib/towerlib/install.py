@@ -90,8 +90,8 @@ def install_in_online_host(host, packages):
         )
         for package in packages:
             add_installed_package(host, package)
-    except ErrorReturnCode:
-        raise TowerException(f"Error while installing packages in {host}")
+    except ErrorReturnCode as exc:
+        raise TowerException(f"Error while installing packages in {host}") from exc
 
 def open_router_tunnel():
     # run ssh tunnel with router host in background
@@ -131,6 +131,7 @@ def install_in_offline_host(host, packages):
 
 @clitask("Installing {0} in Thin Client...", task_parent=True)
 def install_in_thinclient(packages):
+    error = False
     try:
         prepare_offline_host("thinclient")
         open_router_tunnel()
@@ -148,7 +149,7 @@ def install_in_thinclient(packages):
     finally:
         cleanup("thinclient")
         if error:
-            raise TowerException(f"Error while installing packages in Thin Client")
+            raise TowerException("Error while installing packages in Thin Client")
 
 def can_install(host):
     if host != "thinclient" and not sshconf.is_up(host):
