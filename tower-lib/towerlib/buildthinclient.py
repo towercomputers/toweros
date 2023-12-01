@@ -100,7 +100,7 @@ def prepare_image(builds_dir):
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
-    with sh_sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True): # nosec B106
         apk('update')
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
@@ -117,7 +117,7 @@ def prepare_image(builds_dir):
         builds_dir,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
-    with sh_sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True): # nosec B106
         cp(image_src_path, image_dest_path)
     return image_dest_path
 

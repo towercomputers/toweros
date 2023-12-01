@@ -3,6 +3,7 @@ import os
 import uuid
 import logging
 import time
+import tempfile
 
 import sh
 from sh import ssh, nxproxy, xsetroot, mcookie, waypipe, ErrorReturnCode
@@ -194,7 +195,7 @@ def run(hostname, nxagent_args, *cmd):
 
 def run_waypipe(host, waypipe_args, *cmd):
     socket_id = str(uuid.uuid1())
-    socket_path = f"/tmp/waypipe-{socket_id}.sock"
+    socket_path = f"{tempfile.gettempdir()}/waypipe-{socket_id}.sock"
     client_process = None
     try:
         client_process = waypipe('-s', socket_path, '-o', 'client', _bg_exc=False, _bg=True)

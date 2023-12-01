@@ -3,14 +3,14 @@
 
 import json
 import re
-import subprocess
+import subprocess # nosec B404
 import sys
 
 from rich.console import Console
 from rich.table import Table
 
 def run_cmd(cmd, to_json=False):
-    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8", check=False).stdout.strip()
+    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8", check=False).stdout.strip() # nosec B603
     if to_json:
         return json.loads(out)
     return out

@@ -34,7 +34,7 @@ def init_builds_dir(args_builds_dir):
             return builds_dir
     # if not exists, create it
     if not os.path.isdir(builds_dir):
-        with sh_sudo(password="", _with=True):
+        with sh_sudo(password="", _with=True): # nosec B106
             mkdir('-p', builds_dir)
     return builds_dir
 

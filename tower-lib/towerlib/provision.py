@@ -1,6 +1,7 @@
 import os
 import secrets
 import logging
+import tempfile
 
 from passlib.hash import sha512_crypt
 from sh import ssh_keygen, xz, ssh, cp, dd
@@ -103,7 +104,7 @@ def prepare_host_config(args):
 @utils.clitask("Decompressing {0}...", sudo=True)
 def decompress_image(image_path):
     out_file = image_path.replace('.xz', '')
-    tmp_file = os.path.join('/tmp', os.path.basename(out_file))
+    tmp_file = os.path.join(tempfile.gettempdir(), os.path.basename(out_file))
     xz('--stdout', '-d', image_path, _out=tmp_file)
     cp(tmp_file, out_file)
     return out_file

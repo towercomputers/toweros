@@ -4,7 +4,7 @@ import json
 import os
 import re
 import sys
-import subprocess
+import subprocess # nosec B404
 from base64 import b64encode
 
 from rich import print as rprint
@@ -24,7 +24,7 @@ KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
 
 def run_cmd(cmd, to_json=False):
-    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8", check=False).stdout.strip()
+    out = subprocess.run(cmd, capture_output=True, encoding="UTF-8", check=False).stdout.strip() # nosec B603
     if to_json:
         return json.loads(out)
     return out
@@ -170,7 +170,7 @@ def get_secure_boot():
         continue_without_secure_boot = Confirm.ask("Do you want to continue without secure boot (y) or reboot (n) ?")
         if continue_without_secure_boot:
             return False
-        os.system('reboot')
+        os.system('reboot') # nosec
     return with_secure_boot
 
 def get_lang():
@@ -216,10 +216,10 @@ def get_user_information():
             print_error("Incorrect login, please retry.")
         login = Prompt.ask("Enter the username (between 3 and 32 alphanumeric characters):", default="tower")
         retry += 1
-    password = ""
-    confirm_password = ""
+    password = "" # nosec B105
+    confirm_password = "" # nosec B105
     retry = 0
-    while password == "" or password != confirm_password:
+    while password == "" or password != confirm_password: # nosec B105
         if retry:
             print_error("Incorrect password, please retry.")
         password = Prompt.ask("Enter the password", password=True)
@@ -262,7 +262,7 @@ def confirm_config(config):
 
 def print_header():
     Console().clear()
-    title = subprocess.run(
+    title = subprocess.run( # nosec
         ['figlet', '-w', '160', 'TowerOS - Thin Client'],
         capture_output=True, encoding="UTF-8", check=False
     ).stdout

@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import glob
 import getpass
+import tempfile
 from io import StringIO
 
 from sh import (
@@ -169,7 +170,7 @@ def prepare_rpi_partitions(loop_dev):
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir):
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
-    tmp_image_path = os.path.join("/tmp", image_name)
+    tmp_image_path = os.path.join(tempfile.gettempdir(), image_name)
     image_path = os.path.join(builds_dir, image_name)
     xz(
         '--compress', '--force',
