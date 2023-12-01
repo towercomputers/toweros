@@ -275,9 +275,7 @@ EOF
     rc-update add dbus
     rc-update add local
     rc-update add seatd
-    rc-update add crond
-
-    echo "*/1     *       *       *       *       runuser -u $USERNAME -- python /var/towercomputers/genstatus.py" >> /etc/crontabs/root
+    rc-update add supercronic
 
     # enabling udev service
     setup-devd udev
