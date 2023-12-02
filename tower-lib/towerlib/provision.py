@@ -1,6 +1,7 @@
 import os
 import secrets
 import logging
+import tempfile
 
 from passlib.hash import sha512_crypt
 from sh import ssh_keygen, xz, ssh, cp, dd
@@ -103,7 +104,7 @@ def prepare_host_config(args):
 @utils.clitask("Decompressing {0}...", sudo=True)
 def decompress_image(image_path):
     out_file = image_path.replace('.xz', '')
-    tmp_file = os.path.join('/tmp', os.path.basename(out_file))
+    tmp_file = os.path.join(tempfile.gettempdir(), os.path.basename(out_file))
     xz('--stdout', '-d', image_path, _out=tmp_file)
     cp(tmp_file, out_file)
     return out_file
@@ -148,6 +149,8 @@ def prepare_provision(args, upgrade=False):
 def save_config_file(config_path, config_str):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
     with open(config_path, 'w', encoding="UTF-8") as f:
+        # we want the password in ~/.local/tower/hosts/<host>/tower.env for debugging purposes
+        #lgtm[py/clear-text-storage-sensitive-data]
         f.write(config_str)
     os.chmod(config_path, 0o600)
 
@@ -209,6 +212,8 @@ def prepare_thin_client(name, host_config, private_key_path):
     save_host_config(host_config)
     # prepare ssh config and known hosts
     sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
+    # generate sfwbar widget
+    utils.menu.generate_tower_widget()
 
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(name, args, upgrade=False):

@@ -85,14 +85,24 @@ prepare_home_directory() {
 	# add user to sudoers
 	mkdir -p /etc/sudoers.d
 	echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+	# create home directory
+	mkdir -p "/mnt/home/"
 	# add publick key
-	mkdir -p /home/$USERNAME/.ssh
-	echo "$PUBLIC_KEY" > /home/$USERNAME/.ssh/authorized_keys
-	chown -R $USERNAME:$USERNAME /home/$USERNAME
-	chmod 700 /home/$USERNAME/.ssh
-	chmod 600 /home/$USERNAME/.ssh/*
+	mkdir -p /mnt/home/$USERNAME/.ssh
+	echo "$PUBLIC_KEY" > /mnt/home/$USERNAME/.ssh/authorized_keys
+	chmod 700 /mnt/home/$USERNAME/.ssh
+	chmod 600 /mnt/home/$USERNAME/.ssh/*
 	# set shell prompt color
-	echo "export PS1='\e[${COLOR}m[\\u@\\H \\W]\e[0m\\$ '" >> /home/$USERNAME/.profile
+	echo "export PS1='\e[${COLOR}m[\\u@\\H \\W]\e[0m\\$ '" >> /mnt/home/$USERNAME/.profile
+	# set XDG_RUNTIME_DIR and PS1
+    cat <<EOF >> /mnt/home/$USERNAME/.profile
+if [ -z "\$XDG_RUNTIME_DIR" ]; then
+    XDG_RUNTIME_DIR="/tmp/\$(id -u)-runtime-dir"
+	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
+	export XDG_RUNTIME_DIR
+fi
+EOF
+	chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
 
 update_live_system() {
@@ -242,18 +252,13 @@ clone_live_system_to_disk() {
     cmdline="modules=$modules $kernel_opts"
     echo "$cmdline" > $BOOT_MEDIA/cmdline.txt
 
-	# copy home directory in /mnt
-	mkdir -p "/mnt/home/"
-	cp -r "/home/$USERNAME" "/mnt/home/"
-	chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
-
 	# Get branch from buildhost.py
 	# configure apk repositories if host is online
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		mkdir -p /mnt/etc/apk
 		cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/v3.17/main
-http://dl-cdn.alpinelinux.org/alpine/v3.17/community
+http://dl-cdn.alpinelinux.org/alpine/v3.18/main
+http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi

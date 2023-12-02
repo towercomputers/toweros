@@ -2,6 +2,7 @@
 
 import os
 
+# pylint: disable=import-error
 from PIL import Image, ImageDraw
 
 from towerlib.config import COLORS

@@ -1,13 +1,14 @@
 import binascii
 import socket
 import logging
+import tempfile
 
 import requests
 from backports.pbkdf2 import pbkdf2_hmac
 from sh import cp, Command
 
 from towerlib.utils.decorators import clitask
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 
 logger = logging.getLogger('tower')
 
@@ -25,13 +26,13 @@ def get_interfaces():
 
 @clitask("Downloading {0}...")
 def download_file(url, dest_path):
-    tmp_dest_path = "/tmp/" + dest_path.split("/")[-1]
+    tmp_dest_path = f"{tempfile.gettempdir()}/" + dest_path.split("/")[-1]
     with requests.get(url, stream=True, timeout=60) as resp:
         resp.raise_for_status()
         with open(tmp_dest_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=4096):
                 f.write(chunk)
-    with sh_sudo(password="", _with=True):
+    with sh_sudo(password="", _with=True): # nosec B106
         cp(tmp_dest_path, dest_path)
 
 def interface_is_up(interface):

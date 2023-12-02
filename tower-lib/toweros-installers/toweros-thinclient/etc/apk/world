@@ -58,7 +58,7 @@ labwc
 labwc-doc
 xwayland
 foot
-swaylock
+physlock
 swaybg
 swayidle
 pipewire
@@ -93,3 +93,6 @@ json-c-dev
 gtk+3.0-dev
 cmake
 meson
+wlrctl
+waypipe
+supercronic

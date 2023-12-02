@@ -3,9 +3,10 @@ import os
 import uuid
 import logging
 import time
+import tempfile
 
 import sh
-from sh import ssh, nxproxy, xsetroot, mcookie
+from sh import ssh, nxproxy, xsetroot, mcookie, waypipe, ErrorReturnCode
 
 from towerlib.utils.exceptions import NxTimeoutException
 from towerlib import sshconf
@@ -191,3 +192,31 @@ def run(hostname, nxagent_args, *cmd):
             logger.error(exc)
         finally:
             cleanup(hostname, display_num)
+
+def run_waypipe(host, waypipe_args, *cmd):
+    socket_id = str(uuid.uuid1())
+    socket_path = f"{tempfile.gettempdir()}/waypipe-{socket_id}.sock"
+    client_process = None
+    try:
+        client_process = waypipe('-s', socket_path, '-o', 'client', _bg_exc=False, _bg=True)
+        waypipe_cmd = f"source ~/.profile && waypipe -s {socket_path} {' '.join(waypipe_args)} server --"
+        print(waypipe_cmd)
+        ssh(
+            host, '-t',
+            "-R", f"{socket_path}:{socket_path}",
+            waypipe_cmd,
+            *cmd,
+            _out=print, _err_to_out=True,
+        )
+    except ErrorReturnCode as e:
+        logger.error(e)
+    finally:
+        try:
+            if client_process is not None and client_process.is_alive():
+                client_process.terminate()
+        # pylint: disable=broad-exception-caught
+        except Exception as exc:
+            logger.error(exc)
+        if os.path.exists(socket_path):
+            os.remove(socket_path)
+        ssh(host, "rm", '-f', socket_path)

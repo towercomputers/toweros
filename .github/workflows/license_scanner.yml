@@ -1,0 +1,33 @@
+name: License Scanner
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install license_scanner
+        pip install -e tower-lib
+    - name: Analysing dependencies with licence_scanner
+      run: |
+        python tower-lib/towerlib/utils/checklicences.py
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif/@v2
+      with:
+        sarif_file: license_scanner.sarif

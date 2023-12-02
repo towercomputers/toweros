@@ -5,7 +5,7 @@ import os
 
 from sh import lsblk, umount, ErrorReturnCode
 
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 
 logger = logging.getLogger('tower')
 
@@ -16,7 +16,7 @@ def unmount_all(device):
         return
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoints'][0]:
-            with sh_sudo(password="", _with=True):
+            with sh_sudo(password="", _with=True): # nosec B106
                 umount(partition['mountpoints'][0])
 
 def lazy_umount(path):

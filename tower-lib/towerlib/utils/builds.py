@@ -5,7 +5,7 @@ import glob
 from sh import shasum, mkdir
 
 from towerlib.utils import network
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 from towerlib.utils.decorators import clitask
 from towerlib.utils.exceptions import InvalidChecksum
 
@@ -13,9 +13,9 @@ logger = logging.getLogger('tower')
 
 REQUIRED_BUILDS = {
     "alpine-rpi": {
-        "filename": "alpine-rpi-3.17.3-armv7.tar.gz",
-        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.17/releases/armv7/alpine-rpi-3.17.3-armv7.tar.gz",
-        "checksum": "d623a05183164cc2280e6f934b2153761691ade62f67b03ec0b877d9f4ff6171"
+        "filename": "alpine-rpi-3.18.4-armv7.tar.gz",
+        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/armv7/alpine-rpi-3.18.4-armv7.tar.gz",
+        "checksum": "9ae3f1d96d3238175e40005047b1eb4ea4e80573192743bb0f534611d05eb3f7"
     },
 }
 
@@ -34,7 +34,7 @@ def init_builds_dir(args_builds_dir):
             return builds_dir
     # if not exists, create it
     if not os.path.isdir(builds_dir):
-        with sh_sudo(password="", _with=True):
+        with sh_sudo(password="", _with=True): # nosec B106
             mkdir('-p', builds_dir)
     return builds_dir
 

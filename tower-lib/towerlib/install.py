@@ -17,8 +17,8 @@ logger = logging.getLogger('tower')
 
 APK_REPOS_HOST = "dl-cdn.alpinelinux.org"
 APK_REPOS_URL = [
-    f"http://{APK_REPOS_HOST}/alpine/v3.17/main",
-    f"http://{APK_REPOS_HOST}/alpine/v3.17/community",
+    f"http://{APK_REPOS_HOST}/alpine/v3.18/main",
+    f"http://{APK_REPOS_HOST}/alpine/v3.18/community",
 ]
 LOCAL_TUNNELING_PORT = 8666
 
@@ -90,8 +90,8 @@ def install_in_online_host(host, packages):
         )
         for package in packages:
             add_installed_package(host, package)
-    except ErrorReturnCode:
-        pass # error in remote host is already displayed
+    except ErrorReturnCode as exc:
+        raise TowerException(f"Error while installing packages in {host}") from exc
 
 def open_router_tunnel():
     # run ssh tunnel with router host in background
@@ -126,9 +126,12 @@ def install_in_offline_host(host, packages):
                 add_installed_package(host, package)
     finally:
         cleanup(host)
+        if error:
+            raise TowerException(f"Error while installing packages in {host}")
 
 @clitask("Installing {0} in Thin Client...", task_parent=True)
 def install_in_thinclient(packages):
+    error = False
     try:
         prepare_offline_host("thinclient")
         open_router_tunnel()
@@ -142,9 +145,11 @@ def install_in_thinclient(packages):
                 _out_bufsize=0, _err_bufsize=0,
             )
         except ErrorReturnCode:
-            pass # error in remote host is already displayed
+            error = True # error in remote host is already displayed
     finally:
         cleanup("thinclient")
+        if error:
+            raise TowerException("Error while installing packages in Thin Client")
 
 def can_install(host):
     if host != "thinclient" and not sshconf.is_up(host):

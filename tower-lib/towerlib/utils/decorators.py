@@ -6,13 +6,13 @@ from yaspin import yaspin
 from yaspin.spinners import Spinners
 from rich import print as rich_print
 
-from towerlib.utils.sh import sh_sudo
+from towerlib.utils.shell import sh_sudo
 
 logger = logging.getLogger('tower')
 
 def exec_task(function, sudo, *args, **kwargs):
     if sudo:
-        with sh_sudo(password="", _with=True):
+        with sh_sudo(password="", _with=True): # nosec B106
             return function(*args, **kwargs)
     else:
         return function(*args, **kwargs)

@@ -3,12 +3,16 @@ import os
 from sh import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
-from towerlib.utils.sh import sh_sudo
-from towerlib.sshconf import get_host_color_name
+from towerlib.sshconf import get_host_color_name, hosts
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
+
+def restart_sfwbar():
+    Command('sh')('-c', "killall sfwbar || true")
+    Command('sh')('-c', "sfwbar", _bg=True, _bg_exc=False)
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
+    with_icons = False
     for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
         if line.strip().endswith('.desktop'):
             desktop_file_path = line.split(" ").pop().strip()
@@ -27,6 +31,20 @@ def copy_desktop_files(host, package):
             # copy .desktop file in user specific applications folder
             mkdir('-p', DESKTOP_FILES_DIR)
             mv(locale_file_path, DESKTOP_FILES_DIR)
+        share_icon_folder = 'share/icons/hicolor/'
+        if share_icon_folder in line:
+            # copy icons from hosts to thinclient
+            host_icon_full_path = '/' + line.strip()
+            host_icon_short_path = host_icon_full_path[host_icon_full_path.find(share_icon_folder) + len(share_icon_folder):]
+            host_icon_local_path = os.path.expanduser(f'~/.local/{share_icon_folder}{host_icon_short_path}')
+            mkdir('-p', os.path.dirname(host_icon_local_path))
+            scp('-r', f"{host}:{host_icon_full_path}", host_icon_local_path)
+            with_icons = True
+    if with_icons:
+        # update icon cache
+        Command('sh')('-c', f"gtk-update-icon-cache -f -t ~/.local/{share_icon_folder} || true")
+        Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{share_icon_folder} || true")
+        restart_sfwbar()
 
 def get_installed_packages(host):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
@@ -47,3 +65,54 @@ def add_installed_package(host, package):
         save_installed_packages(host, installed_packages)
     # copy desktop files from host to thinclient
     copy_desktop_files(host, package)
+
+@clitask("Generate sfwbar widget...")
+def generate_tower_widget():
+    hosts_status = []
+    for host in hosts():
+        hosts_status.append(f"{host}_status = RegEx('^{host}=(green|red)$')")
+    hosts_status = "\n".join(hosts_status)
+    status_path = os.path.join(TOWER_DIR, 'status')
+    widget_scanner = f"""
+scanner {{
+  File('{status_path}') {{
+    {hosts_status}
+  }}
+}}
+"""
+    layouts = []
+    for host in hosts():
+        layouts.append(f"""
+layout {{
+  label {{
+    interval = 1000
+    style = 'LabelStyle'
+    value = '{host}'
+  }}
+  image {{
+    style = 'CircleStyle'
+    value = 'circle-' + ${host}_status
+  }}
+}}
+""")
+    layouts = "\n".join(layouts)
+    styles = """
+#CSS
+
+#LabelStyle {
+    padding: 5px;
+    padding-top: 8px;
+    padding-right: 2px;
+}
+
+#CircleStyle {
+    padding: 5px;
+    padding-top: 8px;
+    padding-left:0;
+}
+"""
+    widget = f"{widget_scanner}\n{layouts}\n{styles}"
+    widget_path = f"{TOWER_DIR}/tower.widget"
+    with open(widget_path, 'w', encoding="UTF-8") as fp:
+        fp.write(widget)
+    restart_sfwbar()

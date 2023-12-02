@@ -192,6 +192,9 @@ EOF
     fi
     # create symlink to doc
     ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
+    # create symlink to tower widget
+    mkdir -p /mnt/home/$USERNAME/.local/tower
+    touch /mnt/home/$USERNAME/.local/tower/tower.widget
     # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
@@ -276,6 +279,9 @@ EOF
     rc-update add local
     rc-update add seatd
 
+    chmod a+x /etc/init.d/supercronic
+    rc-update add supercronic
+
     # enabling udev service
     setup-devd udev
 
@@ -341,9 +347,11 @@ clone_live_system_to_disk() {
     ninja -C build
     DESTDIR=/mnt/ ninja -C build install
     cd ..
-    # install custom startmenu widget
-    cp /var/towercomputers/installer/sfwbar/startmenu.widget /mnt/usr/local/share/sfwbar/
-    cp /var/towercomputers/installer/sfwbar/startmenu.py /mnt/var/towercomputers/
+    # install custom startmenu widget and tower widget
+    cp /var/towercomputers/installer/sfwbar/*.widget /mnt/usr/local/share/sfwbar/
+    cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
+    cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
+    ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
     # install custom icons
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
@@ -360,6 +368,9 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/main
 http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
+
+    # copy supercronic init script
+    cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
 }
 
 install_bootloader() {

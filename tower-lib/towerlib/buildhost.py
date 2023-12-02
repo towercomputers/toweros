@@ -4,6 +4,7 @@ from datetime import datetime
 import logging
 import glob
 import getpass
+import tempfile
 from io import StringIO
 
 from sh import (
@@ -28,7 +29,7 @@ logger = logging.getLogger('tower')
 WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-host')
 
-ALPINE_BRANCH_FOR_UNVERSIONED = "v3.17"
+ALPINE_BRANCH_FOR_UNVERSIONED = "v3.18"
 ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
 USERNAME = getpass.getuser()
 
@@ -169,7 +170,7 @@ def prepare_rpi_partitions(loop_dev):
 @clitask("Compressing image with xz...")
 def compress_image(builds_dir):
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
-    tmp_image_path = os.path.join("/tmp", image_name)
+    tmp_image_path = os.path.join(tempfile.gettempdir(), image_name)
     image_path = os.path.join(builds_dir, image_name)
     xz(
         '--compress', '--force',
@@ -258,7 +259,6 @@ def insert_tower_env(boot_part, config):
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
-    logger.debug("Host configuration:\n%s", str_env)
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
@@ -273,13 +273,14 @@ def insert_tower_env(boot_part, config):
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, config, zero_device=False):
     try:
-        # make sure the password is not shown in the logs
-        if 'PASSWORD' in config:
-            del config['PASSWORD']
+        # make sure the password is not stored in th sd-card
+        host_config = {**config}
+        if 'PASSWORD' in host_config:
+            del host_config['PASSWORD']
         prepare_working_dir()
         if zero_device:
             zeroing_device(device)
         boot_part = copy_image_in_device(image_file, device)
-        insert_tower_env(boot_part, config)
+        insert_tower_env(boot_part, host_config)
     finally:
         cleanup()

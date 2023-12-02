@@ -46,45 +46,45 @@ def insert_include_directive():
 def ssh_config():
     return read_ssh_config(TOWER_SSH_CONFIG_PATH) if os.path.exists(TOWER_SSH_CONFIG_PATH) else empty_ssh_config_file()
 
-def get(name):
+def get(host):
     config = ssh_config()
-    if name in config.hosts():
-        return config.host(name)
+    if host in config.hosts():
+        return config.host(host)
     return None
 
-def update_known_hosts(name, ip):
+def update_known_hosts(host, ip):
     if os.path.exists(KNOWN_HOSTS_PATH):
         sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
     else:
         create_ssh_dir()
         touch(KNOWN_HOSTS_PATH)
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
-        host_key_path = os.path.join(TOWER_DIR, 'hosts', name, f"ssh_host_{key_type}_key.pub")
+        host_key_path = os.path.join(TOWER_DIR, 'hosts', host, f"ssh_host_{key_type}_key.pub")
         Command('sh')('-c', f'echo "{ip} $(cat {host_key_path})" >> {KNOWN_HOSTS_PATH}')
 
 @clitask(f"Updating Tower config file {TOWER_SSH_CONFIG_PATH}...")
-def update_config(name, ip, private_key_path):
+def update_config(host, ip, private_key_path):
     insert_include_directive()
-    update_known_hosts(name, ip)
+    update_known_hosts(host, ip)
     # get existing hosts
     config = ssh_config()
     existing_hosts = config.hosts()
     # if name already used, update the IP
-    if name in existing_hosts:
-        config.set(name, Hostname=ip)
-        config.set(name, IdentityFile=private_key_path)
+    if host in existing_hosts:
+        config.set(host, Hostname=ip)
+        config.set(host, IdentityFile=private_key_path)
         config.write(TOWER_SSH_CONFIG_PATH)
         return
     # if IP already used, update the name
-    for host_name in existing_hosts:
-        host = config.host(host_name)
-        if host['hostname'] == ip:
-            config.rename(host_name, name)
-            config.set(name, IdentityFile=private_key_path)
+    for existing_host in existing_hosts:
+        existing_host_config = config.host(existing_host)
+        if existing_host_config['hostname'] == ip:
+            config.rename(existing_host, host)
+            config.set(host, IdentityFile=private_key_path)
             config.write(TOWER_SSH_CONFIG_PATH)
             return
     # if not exists, create a new host
-    config.add(name,
+    config.add(host,
         Hostname=ip,
         User=DEFAULT_SSH_USER,
         IdentityFile=private_key_path,
@@ -97,39 +97,39 @@ def update_config(name, ip, private_key_path):
 def hosts():
     return ssh_config().hosts()
 
-def exists(name):
-    return name in hosts()
+def exists(host):
+    return host in hosts()
 
-def is_online_host(name):
-    if exists(name):
-        ip = get(name)['hostname']
+def is_online_host(host):
+    if exists(host):
+        ip = get(host)['hostname']
         network = ".".join(TOWER_NETWORK_ONLINE.split(".")[0:3]) + "."
         return ip.startswith(network)
-    raise UnkownHost(f"Unknown host: {name}")
+    raise UnkownHost(f"Unknown host: {host}")
 
-def is_up(name):
-    if exists(name):
+def is_up(host):
+    if exists(host):
         try:
-            ssh(name,  '-o', 'ConnectTimeout=2', 'ls') # Running a command over SSH command should tell us if the host is up.
+            ssh(host,  '-o', 'ConnectTimeout=2', 'ls') # Running a command over SSH command should tell us if the host is up.
         except ErrorReturnCode:
             return False
         return True
-    raise UnkownHost(f"Unknown host: {name}")
+    raise UnkownHost(f"Unknown host: {host}")
 
-def status(host_name = None):
-    if host_name:
-        host_ssh_config = get(host_name)
-        host_config = get_host_config(host_name)
-        host_status = 'up' if is_up(host_name) else 'down'
-        online = is_online_host(host_name) if host_status == 'up' else "N/A"
+def status(host = None):
+    if host:
+        host_ssh_config = get(host)
+        host_config = get_host_config(host)
+        host_status = 'up' if is_up(host) else 'down'
+        online = is_online_host(host) if host_status == 'up' else "N/A"
         return {
-            'name': host_name,
+            'name': host,
             'status': host_status,
             'online-host': online,
             'ip': host_ssh_config['hostname'],
             'version': host_config.get('TOWEROS_VERSION', 'N/A')
         }
-    return [status(host_name) for host_name in hosts()]
+    return [status(host) for host in hosts()]
 
 def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     network = ".".join(tower_network.split(".")[0:3]) + "."
@@ -143,16 +143,16 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     return f"{network}{first}"
 
 @clitask("Waiting for host to be ready...")
-def wait_for_host_sshd(name, timeout):
+def wait_for_host_sshd(host, timeout):
     start_time = time.time()
-    while not is_up(name):
+    while not is_up(host):
         duration = time.time() - start_time
         if timeout and duration > timeout:
             raise DiscoveringTimeOut("Host discovery timeout")
         time.sleep(3)
 
-def get_host_config(name):
-    conf_path = os.path.join(TOWER_DIR, 'hosts', name, "tower.env")
+def get_host_config(host):
+    conf_path = os.path.join(TOWER_DIR, 'hosts', host, "tower.env")
     with open(conf_path, 'r', encoding="UTF-8") as f:
         config_str = f.read()
     host_config = {}
@@ -175,11 +175,11 @@ def get_version():
 def color_name_list():
     return [color[1] for color in COLORS]
 
-def color_code(name):
+def color_code(host):
     for color in COLORS:
-        if color[1] == name:
+        if color[1] == host:
             return color[0]
-    raise InvalidColor(f"Invalid color name: {name}")
+    raise InvalidColor(f"Invalid color name: {host}")
 
 def color_hex(code_or_name):
     for color in COLORS:
