@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from sh import ssh, mkdir, sed, scp, mv, Command
+from sh import ssh, mkdir, sed, scp, mv, Command, rm
 
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
@@ -28,6 +28,16 @@ def copy_desktop_files(host, package):
             # copy .desktop file in user specific applications folder
             mkdir('-p', DESKTOP_FILES_DIR)
             mv(locale_file_path, DESKTOP_FILES_DIR)
+        if line.startswith('usr/share/icons/hicolor/'):
+            # copy icons from hosts to thinclient
+            icon_path = '/' + line.strip()
+            icon_folder, icon_name = os.path.split(icon_path)
+            icon_tmp_path = f"{tempfile.gettempdir()}/{icon_name}"
+            scp('-r', f"{host}:{icon_path}", icon_tmp_path, _out=print, _err=print)
+            with sh_sudo(password="", _with=True): # nosec B106
+                rm('-f', '/usr/share/icons/hicolor/icon-theme.cache')
+                mkdir('-p', icon_folder)
+                mv(icon_tmp_path, icon_path)
 
 def get_installed_packages(host):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')

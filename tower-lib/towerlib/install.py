@@ -119,7 +119,7 @@ def install_in_offline_host(host, packages):
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
             )
-        except ErrorReturnCode:
+        except ErrorReturnCode as exc:
             error = True # error in remote host is already displayed
         if not error:
             for package in packages:
