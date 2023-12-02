@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from sh import ssh, mkdir, sed, scp, mv, Command, rm
+from sh import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
@@ -33,19 +33,19 @@ def copy_desktop_files(host, package):
             # copy .desktop file in user specific applications folder
             mkdir('-p', DESKTOP_FILES_DIR)
             mv(locale_file_path, DESKTOP_FILES_DIR)
-        SHARE_ICONS_FOLDER = 'share/icons/hicolor/'
-        if SHARE_ICONS_FOLDER in line:
+        share_icon_folder = 'share/icons/hicolor/'
+        if share_icon_folder in line:
             # copy icons from hosts to thinclient
             host_icon_full_path = '/' + line.strip()
-            host_icon_short_path = host_icon_full_path[host_icon_full_path.find(SHARE_ICONS_FOLDER) + len(SHARE_ICONS_FOLDER):]
-            host_icon_local_path = os.path.expanduser(f'~/.local/{SHARE_ICONS_FOLDER}{host_icon_short_path}')
+            host_icon_short_path = host_icon_full_path[host_icon_full_path.find(share_icon_folder) + len(share_icon_folder):]
+            host_icon_local_path = os.path.expanduser(f'~/.local/{share_icon_folder}{host_icon_short_path}')
             mkdir('-p', os.path.dirname(host_icon_local_path))
             scp('-r', f"{host}:{host_icon_full_path}", host_icon_local_path)
             with_icons = True
     if with_icons:
         # update icon cache
-        Command('sh')('-c', f"gtk-update-icon-cache -f -t ~/.local/{SHARE_ICONS_FOLDER} || true")
-        Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{SHARE_ICONS_FOLDER} || true")
+        Command('sh')('-c', f"gtk-update-icon-cache -f -t ~/.local/{share_icon_folder} || true")
+        Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{share_icon_folder} || true")
         restart_sfwbar()
 
 def get_installed_packages(host):
