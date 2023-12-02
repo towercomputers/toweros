@@ -348,6 +348,7 @@ clone_live_system_to_disk() {
     cp /var/towercomputers/installer/sfwbar/*.widget /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
+    mkdir -p /mnt/home/$USERNAME/.local/tower
     touch /mnt/home/$USERNAME/.local/tower/tower.widget
     ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
     # install custom icons
