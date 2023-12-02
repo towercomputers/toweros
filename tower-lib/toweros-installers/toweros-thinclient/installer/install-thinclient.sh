@@ -275,6 +275,8 @@ EOF
     rc-update add dbus
     rc-update add local
     rc-update add seatd
+
+    chmod a+x /etc/init.d/supercronic
     rc-update add supercronic
 
     # enabling udev service
@@ -362,6 +364,9 @@ http://dl-cdn.alpinelinux.org/alpine/v3.18/main
 http://dl-cdn.alpinelinux.org/alpine/v3.18/community
 #http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
 EOF
+
+    # copy supercronic init script
+    cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
 }
 
 install_bootloader() {
