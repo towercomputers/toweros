@@ -128,7 +128,7 @@ def generate_menu():
     no_in_host_apps = [info for info in desktop_applications if not info["InHost"]]
     menu += generate_menu_group(no_in_host_apps)
     menu += ["Menu('Menugen_Applications') { Separator }"]
-    menu += ["Menu('Menugen_Applications') { Item('Exit',Exec 'labwc --exit') }"]
+    menu += ["Menu('Menugen_Applications') { Item('Exit',Exec 'killall labwc') }"]
     menu += ["Menu('Menugen_Applications') { Item('Poweroff',Exec 'poweroff') }"]
     return "\n".join(menu)
 
