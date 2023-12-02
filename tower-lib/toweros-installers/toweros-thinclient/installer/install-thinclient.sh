@@ -348,6 +348,7 @@ clone_live_system_to_disk() {
     cp /var/towercomputers/installer/sfwbar/*.widget /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
+    ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
     # install custom icons
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/

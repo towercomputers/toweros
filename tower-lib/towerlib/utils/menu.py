@@ -114,10 +114,7 @@ layout {{
 }
 """
     widget = f"{widget_scanner}\n{layouts}\n{styles}"
-    widget_path = "/usr/local/share/sfwbar/tower.widget"
-    tmp_path = f"{tempfile.gettempdir()}/tower.widget"
-    with open(tmp_path, 'w', encoding="UTF-8") as fp:
+    widget_path = f"{TOWER_DIR}/tower.widget"
+    with open(widget_path, 'w', encoding="UTF-8") as fp:
         fp.write(widget)
-    with sh_sudo(password="", _with=True): # nosec B106
-        mv(tmp_path, widget_path)
     restart_sfwbar()
