@@ -8,8 +8,13 @@ from towerlib.utils.shell import sh_sudo
 from towerlib.sshconf import get_host_color_name, hosts
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
+def restart_sfwbar():
+    Command('sh')('-c', "killall sfwbar || true")
+    Command('sh')('-c', "sfwbar", _bg=True, _bg_exc=False)
+
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
+    with_icons = False
     for line in ssh(host, 'sudo', 'apk', 'info', '-qL', package, _iter=True):
         if line.strip().endswith('.desktop'):
             desktop_file_path = line.split(" ").pop().strip()
@@ -28,16 +33,20 @@ def copy_desktop_files(host, package):
             # copy .desktop file in user specific applications folder
             mkdir('-p', DESKTOP_FILES_DIR)
             mv(locale_file_path, DESKTOP_FILES_DIR)
-        if line.startswith('usr/share/icons/hicolor/'):
+        SHARE_ICONS_FOLDER = 'share/icons/hicolor/'
+        if SHARE_ICONS_FOLDER in line:
             # copy icons from hosts to thinclient
-            icon_path = '/' + line.strip()
-            icon_folder, icon_name = os.path.split(icon_path)
-            icon_tmp_path = f"{tempfile.gettempdir()}/{icon_name}"
-            scp('-r', f"{host}:{icon_path}", icon_tmp_path, _out=print, _err=print)
-            with sh_sudo(password="", _with=True): # nosec B106
-                rm('-f', '/usr/share/icons/hicolor/icon-theme.cache')
-                mkdir('-p', icon_folder)
-                mv(icon_tmp_path, icon_path)
+            host_icon_full_path = '/' + line.strip()
+            host_icon_short_path = host_icon_full_path[host_icon_full_path.find(SHARE_ICONS_FOLDER) + len(SHARE_ICONS_FOLDER):]
+            host_icon_local_path = os.path.expanduser(f'~/.local/{SHARE_ICONS_FOLDER}{host_icon_short_path}')
+            mkdir('-p', os.path.dirname(host_icon_local_path))
+            scp('-r', f"{host}:{host_icon_full_path}", host_icon_local_path)
+            with_icons = True
+    if with_icons:
+        # update icon cache
+        Command('sh')('-c', f"gtk-update-icon-cache -f -t ~/.local/{SHARE_ICONS_FOLDER} || true")
+        Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{SHARE_ICONS_FOLDER} || true")
+        restart_sfwbar()
 
 def get_installed_packages(host):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
@@ -111,5 +120,4 @@ layout {{
         fp.write(widget)
     with sh_sudo(password="", _with=True): # nosec B106
         mv(tmp_path, widget_path)
-    Command('sh')('-c', "killall sfwbar || true")
-    Command('sh')('-c', "sfwbar", _bg=True, _bg_exc=False)
+    restart_sfwbar()
