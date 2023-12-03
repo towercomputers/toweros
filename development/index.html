@@ -695,15 +695,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#manually-qa-toweros-for-thin-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Manually QA TowerOS for Thin Client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#build-your-own-custom-thin-client-linux" class="md-nav__link">
     <span class="md-ellipsis">
       Build your own custom Thin Client (Linux)
@@ -744,6 +735,66 @@
   <a href="#install-tower-cli" class="md-nav__link">
     <span class="md-ellipsis">
       Install tower-cli
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manually-qa-toweros" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manually QA TowerOS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manually QA TowerOS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hosts-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hosts provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-and-installation-of-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution and installation of applications
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Upgrade
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      Host Upgrade
     </span>
   </a>
   
@@ -900,15 +951,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#manually-qa-toweros-for-thin-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      Manually QA TowerOS for Thin Client
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#build-your-own-custom-thin-client-linux" class="md-nav__link">
     <span class="md-ellipsis">
       Build your own custom Thin Client (Linux)
@@ -949,6 +991,66 @@
   <a href="#install-tower-cli" class="md-nav__link">
     <span class="md-ellipsis">
       Install tower-cli
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#manually-qa-toweros" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manually QA TowerOS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manually QA TowerOS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hosts-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hosts provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-and-installation-of-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution and installation of applications
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Upgrade
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      Host Upgrade
     </span>
   </a>
   
@@ -1047,54 +1149,6 @@ nameserver 8.8.4.4
 [thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
               build-tower-image thinclient
 </code></pre>
-<h2 id="manually-qa-toweros-for-thin-client">Manually QA TowerOS for Thin Client</h2>
-<p>On first boot:</p>
-<ol>
-<li>
-<p>Basic checking</p>
-<ul>
-<li>The “welcome message” should refer to TowerOS.</li>
-<li>The README, whitepaper and <code>install-dev.sh</code> script should be found in <code>~/</code>.</li>
-<li>The <code>wheel</code> package and host image should be in <code>~/.cache/tower/builds</code>.</li>
-<li><code>$ iptables -L -v</code> should show firewall rules, and <code>/var/logs/iptables.log</code> should contain firewall logs.</li>
-<li><code>lo</code> and <code>eth0</code> should be up (check  with <code>$ ip ad</code>)</li>
-</ul>
-</li>
-<li>
-<p>Provision an online host:</p>
-<pre><code>[thinclient]$ tower provision router --wlan-ssid &lt;ssid&gt; --wlan-password &lt;password&gt;
-[thinclient]$ tower provision web --online
-</code></pre>
-</li>
-<li>
-<p>Provision an offline host:</p>
-<pre><code>[thinclient]$ tower provision office --offline
-</code></pre>
-</li>
-<li>
-<p>Check system status:</p>
-<pre><code>[thinclient]$ tower status
-</code></pre>
-</li>
-<li>
-<p>Install a package in an offline host:</p>
-<pre><code>[thinclient]$ tower install office xcalc
-</code></pre>
-</li>
-<li>
-<p>Install a package in an online host:</p>
-<pre><code>[thinclient]$ tower install web midori
-</code></pre>
-</li>
-<li>
-<p>Test installed packages:</p>
-<pre><code>[thinclient]$ dbus-launch labwc
-[thinclient]$ tower run office xcalc
-[thinclient]$ tower run web midori
-</code></pre>
-<p>Check also if the Xfce Application menu contains shortcuts for installed packages.</p>
-</li>
-</ol>
 <h2 id="build-your-own-custom-thin-client-linux">Build your own custom Thin Client (Linux)</h2>
 <h3 id="install-dependencies">Install Dependencies</h3>
 <pre><code>[thinclient]$ apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
@@ -1133,6 +1187,102 @@ nameserver 8.8.4.4
 <p>Install the <code>tower</code> CLI with <code>pip</code>:</p>
 <pre><code>[thinclient]$ python3 -m pip install &quot;tower-cli @ git+https://github.com/towercomputers/toweros.git#subdirectory=tower-cli&quot;
 </code></pre>
+<h2 id="manually-qa-toweros">Manually QA TowerOS</h2>
+<h3 id="toweros-thinclient-installation">TowerOS-ThinClient Installation</h3>
+<ul>
+<li>The USB key containing the <code>boot</code> partition must be inserted into the thinclient to boot.</li>
+<li>Secure Boot must be active if the option was selected during installation.</li>
+<li>A welcome message should indicate the location of the documentation.</li>
+<li>The username chosen during installation is correctly created with the chosen password.</li>
+<li>The keyboard and timezone are correctly configured.</li>
+<li>
+<p>The <code>swap</code> partition must be 8Gb, the <code>home</code> partition must occupy 20% of the rest, and the <code>root</code> partition the remaining space. All these partitions must be encrypted. To check, <code>lsblk</code> should display something like this:</p>
+<pre><code>NAME           MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINTS
+sda              8:0    0 232.9G  0 disk  
+└─sda1           8:1    0 232.9G  0 part  
+  └─lvmcrypt   253:0    0 232.9G  0 crypt 
+    ├─vg0-swap 253:1    0     8G  0 lvm   
+    ├─vg0-home 253:2    0    45G  0 lvm   /home
+    └─vg0-root 253:3    0 179.9G  0 lvm   /
+</code></pre>
+</li>
+<li>
+<p><code>labwc</code> starts automatically after login if the option was chosen during installation.</p>
+</li>
+<li>The documentation must be present in the ~/docs folder and can be consulted with the <code>bat</code> tool.</li>
+<li>The firewall must be correctly configured and activated (<code>sudo rc-service iptables status</code> and <code>iptables -L -v</code>).</li>
+<li><code>eth0</code> must be configured with IP <code>192.168.2.100</code> and <code>eth0</code> with IP <code>192.168.3.100</code> (check with <code>ip ad</code>).</li>
+<li>On reboot the MAC of <code>eth0</code> and <code>eth1</code> should not change (check with <code>ip ad</code>).</li>
+<li><code>labwc</code> and <code>sfwbar</code> should properly start with <code>dbus-launch labwc</code>.</li>
+<li>The shell prompt must be in the form of <code>[&lt;username&gt;@thinclient &lt;current folder&gt;]$</code>.</li>
+<li><code>XDG_RUNTIME_DIR</code> must be set (check with <code>echo $XDG_RUNTIME_DIR</code>).</li>
+<li><code>supercronic</code> service must be started (check with <code>sudo rc-service supercronic status</code>).</li>
+<li>Wifi and bluetooth must be soft blocked (check with <code>rfkill list</code>).</li>
+<li>Default user should be able to use sudo without password (check with <code>sudo su</code>).</li>
+<li>When <code>labwc</code> is started, the screen locker should activate correctly after 5 minutes of inactivity.</li>
+<li><code>CopyQ</code> must be correctly started (check the presence of the icon in the taskbar).</li>
+<li>The latest version of <code>tower</code> cli must be installed (check with <code>tower version</code>).</li>
+</ul>
+<h3 id="hosts-provisioning">Hosts provisioning</h3>
+<ul>
+<li>The provisioning of the <code>router</code>, an online host and an offline host must work correctly.</li>
+<li>The USB key containing the <code>boot</code> partition must be inserted into the host to boot.</li>
+<li><code>tower status</code> should display all hosts with status <code>up</code>.</li>
+<li>Hosts must be accessible with <code>ssh</code> simply with their name (check with <code>ssh &lt;host&gt;</code>).</li>
+<li>The default user, keyboard and timezone should be the same as for the thinclient.</li>
+<li>Online hosts must be connected and offline hosts must not (check with <code>ssh &lt;host&gt; ping www.google.com</code>).</li>
+<li>The firewall must be correctly configured and activated (<code>ssh &lt;host&gt; sudo rc-service iptables status</code> and <code>ssh &lt;host&gt; iptables -L -v</code>).</li>
+<li><code>eth0</code> must be configured on the network <code>192.168.2.0/24</code> for online hosts and <code>192.168.3.0/24</code> for offline hosts (check with <code>ip ad</code>).</li>
+<li>On the <code>router</code> the MAC of <code>wlan0</code> must be different at each startup.</li>
+<li>
+<p>The <code>home</code> partition must occupy 20% and the <code>root</code> partition the remaining space. All these partitions must be encrypted. To check, <code>ssh &lt;host&gt; lsblk</code> should display something like this:</p>
+<pre><code>NAME         MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
+sda            8:0    1 28.7G  0 disk  
+└─sda1         8:1    1  512M  0 part  
+mmcblk0      179:0    0 29.7G  0 disk  
+└─lvmcrypt   254:0    0 29.7G  0 crypt 
+  ├─vg0-home 254:1    0  5.9G  0 lvm   /home
+  └─vg0-root 254:2    0 23.8G  0 lvm   /
+</code></pre>
+</li>
+<li>
+<p><code>XDG_RUNTIME_DIR</code> must be set (check with <code>ssh &lt;host&gt; echo $XDG_RUNTIME_DIR</code>).</p>
+</li>
+<li>The shell prompt must be in the form of <code>[&lt;username&gt;@&lt;host&gt; &lt;current folder&gt;]$</code> and be of different color for each host.</li>
+<li>Wifi and bluetooth must be soft blocked except wifi in the <code>router</code> (check with <code>ssh &lt;host&gt; rfkill list</code>).</li>
+<li>Host default user should be able to use sudo without password (check with <code>ssh &lt;host&gt; sudo su</code>).</li>
+<li>The hosts should appear in the <code>labwc</code> taskbar with a green icon for the 'up' hosts and a red icon for the 'down' hosts (test by turning off one of the hosts)</li>
+</ul>
+<h3 id="execution-and-installation-of-applications">Execution and installation of applications</h3>
+<p>Once the <code>router</code> is installed:</p>
+<ul>
+<li>APK packages must be correctly installed on the hosts with <code>tower install &lt;host&gt; &lt;package&gt;</code> and on the thinclient with <code>tower install thinclient &lt;package&gt;</code>.</li>
+<li>Once installed, graphical applications should appear in the <code>sfwbar</code> menu with icons.</li>
+<li>In the menu the applications are classified by host and each host is differentiated by a colored circle.</li>
+<li>For each host the color of the circle is the same as that of the shell prompt (check with <code>ssh &lt;host&gt;</code>).</li>
+<li><code>ssh &lt;host&gt;</code> should not display any welcome message.</li>
+<li>Graphical applications can be launched via the <code>sfwbar</code> menu or terminal with <code>tower &lt;host&gt; run &lt;application&gt;</code>.</li>
+<li>Copy/paste must be possible between two graphics applications running on different hosts.</li>
+<li>Online applications must work correctly on online hosts (check for example that it is possible to browse the web with Midori).</li>
+<li>The <code>tor</code> proxy must be accessible from online hosts (check with <code>ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip</code>).</li>
+<li>The time on online hosts must be correct (thanks to <code>chronyd</code>).</li>
+</ul>
+<h3 id="toweros-thinclient-upgrade">TowerOS-ThinClient Upgrade</h3>
+<p>In addition to all the points listed for installing TowerOS-ThinClient:</p>
+<ul>
+<li>The new version of <code>tower</code> cli must be installed (check with <code>tower version</code>).</li>
+<li>All previously installed hosts must be accessible (check with <code>tower status</code>).</li>
+<li>The <code>sfwbar</code> menu must display all applications previously installed on the hosts.</li>
+<li>The <code>sfwbar</code> widget indicating the host status must be active.</li>
+<li>The contents of the home partition must be completely preserved.</li>
+</ul>
+<h3 id="host-upgrade">Host Upgrade</h3>
+<p>In addition to all the points listed for Hosts provisioning:</p>
+<ul>
+<li>The new version of TowerOS-Host must be installed (check with <code>tower status</code>).</li>
+<li>All applications installed with <code>tower install</code> must be reinstalled.</li>
+<li>The contents of the host home partition must be completely preserved.</li>
+</ul>
 
 
 
