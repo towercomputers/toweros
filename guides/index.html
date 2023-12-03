@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.9">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.78cf6014.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
       
       
 
@@ -191,6 +191,7 @@
   
   
   
+  
     
     
     
@@ -232,6 +233,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
         
@@ -252,6 +254,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../hardware/" class="md-nav__link">
         
@@ -269,6 +272,7 @@
             
               
                 
+  
   
   
   
@@ -299,6 +303,7 @@
   
   
     
+  
   
   
     
@@ -340,6 +345,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../usage/" class="md-nav__link">
         
@@ -360,6 +366,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -429,6 +436,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#install-npm-package-in-offline-host-using-online-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install npm package in offline host using online host
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -447,6 +463,7 @@
     
       
       
+  
   
   
   
@@ -491,6 +508,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../security/" class="md-nav__link">
         
@@ -508,6 +526,7 @@
             
               
                 
+  
   
   
   
@@ -535,6 +554,7 @@
     
       
       
+  
   
   
   
@@ -579,6 +599,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../TowerOS%20Whitepaper.pdf" class="md-nav__link">
         
@@ -596,6 +617,7 @@
             
               
                 
+  
   
   
   
@@ -619,6 +641,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../development/" class="md-nav__link">
         
@@ -636,6 +659,7 @@
             
               
                 
+  
   
   
   
@@ -712,6 +736,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#install-npm-package-in-offline-host-using-online-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install npm package in offline host using online host
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -775,19 +808,19 @@ See "<a href="https://restic.readthedocs.io/en/latest/045_working_with_repos.htm
 <ol>
 <li>
 <p>Install <code>pip</code> in online and offline host</p>
-<pre><code>[thinclient]$ tower install router python3 py3-pip
+<pre><code>[thinclient]$ tower install web python3 py3-pip
 [thinclient]$ tower install office python3 py3-pip
 </code></pre>
 </li>
 <li>
 <p>Download package and dependencies in online host</p>
-<pre><code>[thinclient]$ ssh router mkdir mypackages
-[thinclient]$ ssh router pip download &lt;package_name&gt; -d mypackages
+<pre><code>[thinclient]$ ssh web mkdir mypackages
+[thinclient]$ ssh web pip download &lt;package_name&gt; -d mypackages
 </code></pre>
 </li>
 <li>
 <p>Copy package and dependencies to offline host</p>
-<pre><code>[thinclient]$ scp -r router:mypackages office:
+<pre><code>[thinclient]$ scp -r web:mypackages office:
 </code></pre>
 </li>
 <li>
@@ -796,9 +829,41 @@ See "<a href="https://restic.readthedocs.io/en/latest/045_working_with_repos.htm
 </code></pre>
 </li>
 <li>
-<p>Clean cache in online and offline host</p>
+<p>Clean up</p>
 <pre><code>[thinclient]$ ssh office rm -rf mypackages
-[thinclient]$ ssh router rm -rf mypackages
+[thinclient]$ ssh web rm -rf mypackages
+</code></pre>
+</li>
+</ol>
+<h2 id="install-npm-package-in-offline-host-using-online-host">Install <code>npm</code> package in offline host using online host</h2>
+<ol>
+<li>
+<p>Install <code>npm</code> in online and offline host</p>
+<pre><code>[thinclient]$ tower install web npm
+[thinclient]$ tower install office npm
+</code></pre>
+</li>
+<li>
+<p>Download package and dependencies in online host</p>
+<pre><code>[thinclient]$ ssh web 'mkdir mypackages &amp;&amp; cd mypackages &amp;&amp; npm init -y'
+[thinclient]$ ssh web 'cd mypackages &amp;&amp; npm install -B &lt;package_name&gt; &amp;&amp; npm pack'
+</code></pre>
+</li>
+<li>
+<p>Copy package and dependencies to offline host</p>
+<pre><code>[thinclient]$ scp -r web:mypackages/mypackages-1.0.0.tgz office:
+</code></pre>
+</li>
+<li>
+<p>Install <code>npm</code> package in offline host</p>
+<pre><code>[thinclient]$ ssh office tar -xvzf mypackages-1.0.0.tgz
+[thinclient]$ ssh office 'sudo npm install -g package/node_modules/*/'
+</code></pre>
+</li>
+<li>
+<p>Clean up</p>
+<pre><code>[thinclient]$ ssh office rm -rf mypackages-1.0.0.tgz package
+[thinclient]$ ssh web rm -rf mypackages
 </code></pre>
 </li>
 </ol>
@@ -838,7 +903,7 @@ See "<a href="https://restic.readthedocs.io/en/latest/045_working_with_repos.htm
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.instant", "navigation.instant.prefetch"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.6c14ae12.min.js"></script>
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
     
   </body>

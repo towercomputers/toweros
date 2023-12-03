@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.9">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.78cf6014.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
       
       
 
@@ -193,6 +193,7 @@
     
   
   
+  
     
     
     
@@ -232,6 +233,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href=".." class="md-nav__link">
         
@@ -249,6 +251,7 @@
             
               
                 
+  
   
   
   
@@ -272,6 +275,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -417,6 +421,7 @@
   
   
   
+  
     
     
     
@@ -458,6 +463,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../usage/" class="md-nav__link">
         
@@ -475,6 +481,7 @@
             
               
                 
+  
   
   
   
@@ -502,6 +509,7 @@
     
       
       
+  
   
   
   
@@ -546,6 +554,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../security/" class="md-nav__link">
         
@@ -563,6 +572,7 @@
             
               
                 
+  
   
   
   
@@ -590,6 +600,7 @@
     
       
       
+  
   
   
   
@@ -634,6 +645,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../TowerOS%20Whitepaper.pdf" class="md-nav__link">
         
@@ -651,6 +663,7 @@
             
               
                 
+  
   
   
   
@@ -674,6 +687,7 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../development/" class="md-nav__link">
         
@@ -691,6 +705,7 @@
             
               
                 
+  
   
   
   
@@ -855,6 +870,7 @@
 <li>Wait for the provisioning process to complete on the thin client.</li>
 </ol>
 <p><em>NOTE:</em> You must provision a router before you provision any other online hosts.</p>
+<p><em>NOTE:</em> It is a good idea to reserve one (offline) host for managing removable storage (esp. when using the DeskPi Super6C and CM4s, since then only one host has USB ports exposed).</p>
 <h3 id="provision-the-router">Provision the Router</h3>
 <p>The first online host that you must provision is the router, which connect to the Internet <em>via</em> a WiFi network: </p>
 <pre><code>[thinclient]$ tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;
@@ -883,14 +899,14 @@
 </ol>
 <p>If all of these checks are ok and you still cannot access the host, you must connect a screen and keyboard to the host and check for any error messages.</p>
 <h2 id="thin-client-upgrades">Thin Client Upgrades</h2>
-<p>To update the thin client you must proceed in exactly the same way as for the installation and select "Update TowerOS-Thinclient" in the first question.</p>
-<p>During an update the system is completely reinstalled. Only the <code>/home</code> folder with hosts configurations and keys are kept. If you have data outside of <code>/home</code>, make sure to make a backup before starting the update.</p>
+<p>To upgrade the thin client you must proceed in exactly the same way as for the installation and select "Upgrade TowerOS-Thinclient" in the first question.</p>
+<p>During an upgrade the system is completely reinstalled. Only the <code>/home</code> folder with hosts configurations and keys are kept. If you have data outside of <code>/home</code>, make sure to make a backup before starting the upgrade.</p>
 <h2 id="host-upgrades">Host Upgrades</h2>
-<pre><code>[thinclient]$ tower update &lt;host&gt;
+<pre><code>[thinclient]$ tower upgrade &lt;host&gt;
 </code></pre>
-<p>During an update the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the update.</p>
-<p>Once the system is updated, all applications installed with <code>tower install &lt;host&gt;</code> are automatically re-installed.</p>
-<p>Note: Always update the router before other hosts.</p>
+<p>During an upgrade the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the upgrade.</p>
+<p>Once the system is upgrade, all applications installed with <code>tower install &lt;host&gt;</code> are automatically re-installed.</p>
+<p>Note: Always upgrade the router before other hosts.</p>
 
 
 
@@ -927,7 +943,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": ["navigation.sections", "navigation.expand", "navigation.instant", "navigation.instant.prefetch"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.6c14ae12.min.js"></script>
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
     
   </body>
