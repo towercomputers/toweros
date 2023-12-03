@@ -247,7 +247,7 @@ EOF
         exit 1
     fi
     cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
-    chmod a+x /etc/local.d/01_check_ifnames.start
+    chmod a+x /etc/local.d/*.start
 
     # set locales
     # TODO: set LANG
@@ -294,9 +294,6 @@ EOF
 
     # configure firewall
     sh $SCRIPT_DIR/configure-firewall.sh
-
-    # disable wireless devices
-    rfkill block all
 }
 
 clone_live_system_to_disk() {
