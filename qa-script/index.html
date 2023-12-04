@@ -380,6 +380,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../man/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -911,128 +932,133 @@
 </thead>
 <tbody>
 <tr>
-<td>Fulll Disk Encryption</td>
-<td>The USB key containing the <code>boot</code> partition must be inserted into the thinclient to boot.</td>
-<td>The Thin Client does not start without the USB boot key.</td>
+<td>Disk is fully encrypted</td>
+<td>Restart without the USB key containing the <code>boot</code> partition.</td>
+<td>Doesn't Boot.</td>
 </tr>
 <tr>
-<td>Secure Boot</td>
 <td></td>
-<td></td>
+<td>Restart with the USB key containing the <code>boot</code> partition.</td>
+<td>Boots to Welcome Message.</td>
 </tr>
 <tr>
-<td>Welcome Message</td>
+<td>The welcome message is displayed</td>
 <td>A welcome message should indicate the location of the documentation.</td>
-<td></td>
+<td><code>~/docs/</code></td>
 </tr>
 <tr>
-<td>Default User</td>
-<td>You can log in with the chosen username and password.</td>
-<td></td>
+<td>Default user is created</td>
+<td>Enter the chosen username and password.</td>
+<td>You should log in.</td>
 </tr>
 <tr>
-<td>Keyboard</td>
-<td>Keyboard is correctly configured.</td>
-<td></td>
+<td>Keyboard is configured</td>
+<td>Type some characters.</td>
+<td>Check is OK.</td>
 </tr>
 <tr>
-<td>Shell</td>
-<td>The shell prompt must be customized.</td>
-<td><code>[&lt;username&gt;@thinclient &lt;current folder&gt;]$</code></td>
-</tr>
-<tr>
-<td>Partitions</td>
-<td>The <code>swap</code> partition must be 8Gb, the <code>home</code> partition must occupy 20% of the rest, and the <code>root</code> partition the remaining space: <br /><code>[thinclient]$ lsblk</code></td>
-<td><img alt="lsblk thinclient" src="../img/lsblk-thinclient.png" /></td>
-</tr>
-<tr>
-<td>Time Zone</td>
+<td>Time Zone is confirgured</td>
 <td><code>[thinclient]$ date</code></td>
 <td>The date with the correct time zone.</td>
 </tr>
 <tr>
-<td>Cron</td>
-<td><code>supercronic</code> service must be started:<br /><code>[thinclient]$ sudo rc-service supercronic status</code></td>
+<td>Shell is customized</td>
+<td>Check the shell prompt format.</td>
+<td><code>[&lt;username&gt;@thinclient &lt;current folder&gt;]$</code></td>
+</tr>
+<tr>
+<td>The <code>swap</code> partition must be 8Gb, the <code>home</code> partition must occupy 20% of the rest, and the <code>root</code> partition the remaining space.</td>
+<td><code>[thinclient]$ lsblk</code></td>
+<td><img alt="lsblk thinclient" src="../img/lsblk-thinclient.png" /></td>
+</tr>
+<tr>
+<td><code>supercronic</code> service must be started</td>
+<td><code>[thinclient]$ sudo rc-service supercronic status</code></td>
 <td><code>* status: started</code></td>
 </tr>
 <tr>
-<td>Sudo</td>
-<td>Default user is sudoer without password:<br /><code>[thinclient]$ sudo su</code></td>
+<td>Default user is sudoer without password</td>
+<td><code>[thinclient]$ sudo su</code></td>
 <td>Root session without a password being requested.</td>
 </tr>
 <tr>
-<td>Documentation</td>
-<td>The documentation must be present in the ~/docs folder:<br /><code>[thinclient]$ ls ~/docs</code></td>
+<td>The documentation must be present in the ~/docs folder</td>
+<td><code>[thinclient]$ ls ~/docs</code></td>
 <td>List of documents</td>
 </tr>
 <tr>
-<td></td>
-<td>Documentation can be consulted with <code>bat</code>: <br /><code>[thinclient]$ bat ~/docs/usage.md</code></td>
+<td>Documentation can be consulted with <code>bat</code></td>
+<td><code>[thinclient]$ bat ~/docs/usage.md</code></td>
 <td>Markdown viewer</td>
 </tr>
 <tr>
-<td>Network</td>
-<td><code>eth0</code> must be configured with IP <code>192.168.2.100</code>:<br /><code>[thinclient]$ ip ad</code></td>
+<td>Tower CLI man page is installed</td>
+<td><code>[thinclient]$ man tower</code></td>
+<td>Tower CLI manual</td>
+</tr>
+<tr>
+<td><code>eth0</code> must be configured with IP <code>192.168.2.100</code></td>
+<td><code>[thinclient]$ ip ad</code></td>
 <td><img alt="eth0 thinclient" src="../img/eth0-thinclient.png" /></td>
 </tr>
 <tr>
-<td></td>
-<td><code>eth1</code> must be configured with IP <code>192.168.3.100</code>:<br /><code>[thinclient]$ ip ad</code></td>
+<td><code>eth1</code> must be configured with IP <code>192.168.3.100</code></td>
+<td><code>[thinclient]$ ip ad</code></td>
 <td><img alt="eth1 thinclient" src="../img/eth1-thinclient.png" /></td>
 </tr>
 <tr>
-<td></td>
-<td>On reboot the MAC of <code>eth0</code> and <code>eth1</code> should not change:<br /><code>[thinclient]$ ip ad</code></td>
-<td>the value of <code>link/ether</code> for <code>eth0</code> and <code>eth1</code> should not change after a reboot.</td>
+<td><code>eth0</code> MAC must be persistent</td>
+<td><code>[thinclient]$ ip ad</code>, reboot then <code>[thinclient]$ ip ad</code></td>
+<td>the value of <code>link/ether</code> for <code>eth0</code> should not change after a reboot.</td>
 </tr>
 <tr>
-<td>Firewall</td>
-<td><code>iptables</code> service must be started:<br /><code>[thinclient]$ sudo rc-service iptables status</code></td>
+<td><code>iptables</code> service must be started</td>
+<td><code>[thinclient]$ sudo rc-service iptables status</code></td>
 <td><code>* status: iptables</code></td>
 </tr>
 <tr>
-<td></td>
-<td>Firewal must be correctly configured:<br /><code>[thinclient]$ sudo iptables -L -v</code></td>
+<td>Firewal must be correctly configured</td>
+<td><code>[thinclient]$ sudo iptables -L -v</code></td>
 <td><a href="https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh">See configuration</a></td>
 </tr>
 <tr>
-<td>rfkill</td>
-<td>Wifi must be soft blocked:<br /><code>[thinclient]$ rfkill list wifi</code></td>
+<td>Wifi must be soft blocked</td>
+<td><code>[thinclient]$ rfkill list wifi</code></td>
 <td><code>Soft blocked: yes</code></td>
 </tr>
 <tr>
-<td></td>
-<td>Bluetooth must be soft blocked:<br /><code>[thinclient]$ rfkill list bluetooth</code></td>
+<td>Bluetooth must be soft blocked</td>
+<td><code>[thinclient]$ rfkill list bluetooth</code></td>
 <td><code>Soft blocked: yes</code></td>
 </tr>
 <tr>
-<td>Graphical Desktop</td>
-<td><code>labwc</code> starts automatically after login if the option was chosen during installation.</td>
-<td></td>
+<td><code>labwc</code> starts automatically after login if the option was chosen during installation</td>
+<td>Boot</td>
+<td><code>labwc</code> must start after login</td>
 </tr>
 <tr>
-<td></td>
-<td><code>labwc</code> should properly start manually:<br /><code>[thinclient]$ dbus-launch labwc</code></td>
-<td></td>
+<td><code>labwc</code> should properly start manually</td>
+<td><code>[thinclient]$ dbus-launch labwc</code></td>
+<td><code>labwc</code> must start</td>
 </tr>
 <tr>
-<td></td>
 <td>The <code>sfwbar</code> menu bar should appear correctly</td>
-<td></td>
+<td><code>[thinclient]$ dbus-launch labwc</code></td>
+<td>Menu bar must be present on the bottom</td>
 </tr>
 <tr>
-<td></td>
 <td><code>CopyQ</code> must be correctly started</td>
-<td><img alt="copyq" src="../img/copyq.png" /> icon in the taskbar</td>
+<td>Check the presence of the icon in the taskbar</td>
+<td><img alt="copyq" src="../img/copyq.png" /></td>
 </tr>
 <tr>
-<td></td>
 <td>The screen locker should activate correctly after 5 minutes of inactivity</td>
-<td>Black screen with password prompt.</td>
+<td>Stay inactive 5mn</td>
+<td>Black screen with password prompt</td>
 </tr>
 <tr>
-<td>Tower CLI</td>
-<td>The latest version of <code>tower</code> cli must be installed:<br /><code>[thinclient]$ tower version</code></td>
+<td>The latest version of <code>tower</code> cli must be installed</td>
+<td><code>[thinclient]$ tower version</code></td>
 <td>Installed version.</td>
 </tr>
 </tbody>

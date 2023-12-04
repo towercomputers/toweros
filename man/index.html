@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://toweros.org/dev-environment/">
+        <link rel="canonical" href="https://toweros.org/man/">
       
       
-        <link rel="prev" href="../implementation/">
+        <link rel="prev" href="../guides/">
       
       
-        <link rel="next" href="../build-toweros/">
+        <link rel="next" href="../security/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Developer Environment - TowerOS</title>
+        <title>Manual - TowerOS</title>
       
     
     
@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#set-up-development-environment" class="md-skip">
+        <a href="#towerpy1" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Developer Environment
+              Manual
             
           </span>
         </div>
@@ -302,8 +302,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -312,14 +314,12 @@
       
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -333,7 +333,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -386,10 +386,19 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../man/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -398,6 +407,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -617,8 +627,6 @@
       
   
   
-    
-  
   
   
     
@@ -629,12 +637,14 @@
       
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -648,7 +658,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Development
@@ -659,28 +669,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Developer Environment
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../dev-environment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -689,66 +681,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#set-up-development-environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Set Up Development Environment
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Set Up Development Environment">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#connect-to-internet" class="md-nav__link">
-    <span class="md-ellipsis">
-      Connect to internet
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configure-git-and-download-github-repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configure Git and download Github repository
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-tower-cli-with-hatch" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use tower-cli with hatch
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -820,56 +752,8 @@
   
   
   
+    
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#set-up-development-environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Set Up Development Environment
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Set Up Development Environment">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#connect-to-internet" class="md-nav__link">
-    <span class="md-ellipsis">
-      Connect to internet
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#configure-git-and-download-github-repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configure Git and download Github repository
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-tower-cli-with-hatch" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use tower-cli with hatch
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -884,46 +768,304 @@
                   
 
 
-  <h1>Developer Environment</h1>
-
-<h2 id="set-up-development-environment">Set Up Development Environment</h2>
-<h3 id="connect-to-internet">Connect to internet</h3>
-<p>To connect the thin client to the Internet you must:</p>
-<ol>
-<li>Provision a <code>router</code>.</li>
-<li>
-<p>Set the gateway on the thin client to <code>192.168.2.1</code> (the router's IP address):</p>
-<p>The file <code>/etc/network/interfaces</code> must contain the following:</p>
-<pre><code>auto lo
-iface lo inet loopback
-auto eth0
-iface eth0 inet static
-    address 192.168.2.100/24
-    gateway 192.168.2.1
-auto eth1
-iface eth1 inet static
-    address 192.168.3.100/24
+<h1 id="towerpy1">tower.py(1)</h1>
+<p>TowerOS, 2023-12-04</p>
+<p>tower.py</p>
+<p><a name="synopsis"></a></p>
+<h1 id="synopsis">Synopsis</h1>
+<pre><code>tower.py [-h] [--quiet] [--verbose] {provision,upgrade,install,run,status,wlan-connect,version} ...
 </code></pre>
+<p><a name="description"></a></p>
+<h1 id="description">Description</h1>
+<pre><code>    TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with NX protocol.
+</code></pre>
+<p>.SH
+POSITIONAL ARGUMENTS</p>
+<ul>
+<li><strong>tower.py</strong> <em>provision</em><br />
+  Prepare the bootable device needed to provision a host.</li>
+<li><strong>tower.py</strong> <em>upgrade</em><br />
+  Prepare the boot device needed to upgrade a host.</li>
+<li><strong>tower.py</strong> <em>install</em><br />
+  Install an application on a host with APK</li>
+<li><strong>tower.py</strong> <em>run</em><br />
+  Run an application on the specified host, with the GUI on the thin client.</li>
+<li><strong>tower.py</strong> <em>status</em><br />
+  Check the status of all hosts in the Tower system.</li>
+<li><strong>tower.py</strong> <em>wlan-connect</em><br />
+  Command used to update WiFi credentials on the router.</li>
+<li><strong>tower.py</strong> <em>version</em><br />
+  Get the version of TowerOS installed on the thin client and hosts.</li>
+</ul>
+<p><a name="command-fitowerpy-provisionfr"></a></p>
+<h1 id="command-fitowerpy-provisionfr">Command \Fi\,'Tower.Py Provision'\/\Fr</h1>
+<p>usage: tower.py provision [-h] [-bd BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait]
+                          [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH]
+                          [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG]
+                          [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD]
+                          [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}]
+                          name</p>
+<ul>
+<li><strong>name</strong><br />
+  Host's name, used to refer to the host when performing other actions (Required)</li>
+</ul>
+<p><a name="options-fitowerpy-provisionfr"></a></p>
+<h1 id="options-fitowerpy-provisionfr">Options \Fi\,'Tower.Py Provision'\/\Fr</h1>
+<ul>
+<li>
+<p><strong>-bd</strong> <em>BOOT_DEVICE</em>, <strong>--boot-device</strong> <em>BOOT_DEVICE</em><br />
+  Path to virtual device for the SD card or USB drive</p>
 </li>
 <li>
-<p>Set the DNS server on the thin client:</p>
-<p>The file <code>/etc/resolv.conf</code> must contain the following:</p>
-<pre><code>nameserver 8.8.8.8
-nameserver 8.8.4.4
-</code></pre>
+<p><strong>--zero-device</strong><br />
+  Zero the target device before copying the installation image to it. (Default: False)</p>
 </li>
 <li>
-<p>Restart the network with: <code>[thinclient]$ sudo rc-service networking restart</code></p>
+<p><strong>--no-confirm</strong><br />
+  Don't ask for confirmation. (Default: False)</p>
 </li>
-</ol>
-<h3 id="configure-git-and-download-github-repository">Configure Git and download Github repository</h3>
-<p>Configure <code>git</code>, download Github repository in <code>~/towercomputers/toweros</code> and install <code>hatch</code> with:</p>
-<pre><code>[thinclient]$ /var/towercomputers/install-dev.sh &lt;git-name&gt; &lt;git-email&gt; &lt;git-private-key-path&gt;
+<li>
+<p><strong>--image</strong> <em>IMAGE</em><br />
+  Path to installation image</p>
+</li>
+<li>
+<p><strong>--ifname</strong> <em>IFNAME</em><br />
+  Network interface (Default: `eth0` for online host, `eth1` for offline host)</p>
+</li>
+<li>
+<p><strong>--no-wait</strong><br />
+  Do not wait for the host to be ready (Default: False)</p>
+</li>
+<li>
+<p><strong>--timeout</strong> <em>TIMEOUT</em><br />
+  Maximum wait time for the host to be ready, in seconds. Specify `0` for no limit. (Default: 600)</p>
+</li>
+<li>
+<p><strong>--force</strong><br />
+  Overwrite the configuration for an existing host (Default: False)</p>
+</li>
+<li>
+<p><strong>--public-key-path</strong> <em>PUBLIC_KEY_PATH</em><br />
+  Path to public key used to access the host (Default: automatically generated and stored on the boot device and locally in
+  `~/.local/tower/hosts/`)</p>
+</li>
+<li>
+<p><strong>--private-key-path</strong> <em>PRIVATE_KEY_PATH</em><br />
+  Path to private key used to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)</p>
+</li>
+<li>
+<p><strong>--keyboard-layout</strong> <em>KEYBOARD_LAYOUT</em><br />
+  Keyboard layout code (Default: same as that of the thin client)</p>
+</li>
+<li>
+<p><strong>--keyboard-variant</strong> <em>KEYBOARD_VARIANT</em><br />
+  Keyboard variant code (Default: same as that of the thin client)</p>
+</li>
+<li>
+<p><strong>--timezone</strong> <em>TIMEZONE</em><br />
+  Timezone of the host. e.g. `Europe/Paris` (Default: same as that of the thin client)</p>
+</li>
+<li>
+<p><strong>--lang</strong> <em>LANG</em><br />
+  Language of the host. e.g. `en_US` (Default: same as that of the thin client)</p>
+</li>
+<li>
+<p><strong>--online</strong><br />
+  Host <em>WILL</em> be able to access the Internet via the router. (Default: False)</p>
+</li>
+<li>
+<p><strong>--offline</strong><br />
+  Host will <em>NOT</em> be able to access the Internet via the router. (Default: False)</p>
+</li>
+<li>
+<p><strong>--wlan-ssid</strong> <em>WLAN_SSID</em><br />
+  WiFi SSID (Default: same as that currently in use by the thin client)</p>
+</li>
+<li>
+<p><strong>--wlan-password</strong> <em>WLAN_PASSWORD</em><br />
+  WiFi password (Default: same as that currently currently in use by the thin client)</p>
+</li>
+<li>
+<p><strong>--color</strong> <em>{White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}</em><br />
+  Color used for shell prompt and GUI. (Default: sequentially from the list, next: Blue)</p>
+</li>
+</ul>
+<p><a name="command-fitowerpy-upgradefr"></a></p>
+<h1 id="command-fitowerpy-upgradefr">Command \Fi\,'Tower.Py Upgrade'\/\Fr</h1>
+<p>usage: tower.py upgrade [-h] [-bd BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT]
+                        [--force]
+                        name</p>
+<ul>
+<li><strong>name</strong><br />
+  Host's name, used to refer to the host when performing other actions (Required)</li>
+</ul>
+<p><a name="options-fitowerpy-upgradefr"></a></p>
+<h1 id="options-fitowerpy-upgradefr">Options \Fi\,'Tower.Py Upgrade'\/\Fr</h1>
+<ul>
+<li>
+<p><strong>-bd</strong> <em>BOOT_DEVICE</em>, <strong>--boot-device</strong> <em>BOOT_DEVICE</em><br />
+  Path to virtual device for the SD card or USB drive</p>
+</li>
+<li>
+<p><strong>--zero-device</strong><br />
+  Zero the target device before copying the installation image to it. (Default: False)</p>
+</li>
+<li>
+<p><strong>--no-confirm</strong><br />
+  Don't ask for confirmation. (Default: False)</p>
+</li>
+<li>
+<p><strong>--image</strong> <em>IMAGE</em><br />
+  Path to installation image</p>
+</li>
+<li>
+<p><strong>--ifname</strong> <em>IFNAME</em><br />
+  Network interface (Default: `eth0` for online host, `eth1` for offline host)</p>
+</li>
+<li>
+<p><strong>--no-wait</strong><br />
+  Do not wait for the host to be ready (Default: False)</p>
+</li>
+<li>
+<p><strong>--timeout</strong> <em>TIMEOUT</em><br />
+  Maximum wait time for the host to be ready, in seconds. Specify `0` for no limit. (Default: 600)</p>
+</li>
+<li>
+<p><strong>--force</strong><br />
+  Overwrite the configuration for an existing host (Default: False)</p>
+</li>
+</ul>
+<p><a name="command-fitowerpy-installfr"></a></p>
+<h1 id="command-fitowerpy-installfr">Command \Fi\,'Tower.Py Install'\/\Fr</h1>
+<p>usage: tower.py install [-h] host_name packages [packages ...]</p>
+<ul>
+<li>
+<p><strong>host_name</strong><br />
+  Host to install the package on (Required)</p>
+</li>
+<li>
+<p><strong>packages</strong><br />
+  Package(s) to install (Required).</p>
+</li>
+</ul>
+<p><a name="command-fitowerpy-runfr"></a></p>
+<h1 id="command-fitowerpy-runfr">Command \Fi\,'Tower.Py Run'\/\Fr</h1>
+<p>usage: tower.py run [-h] [--nx-link NX_LINK] [--nx-limit NX_LIMIT] [--nx-images NX_IMAGES] [--nx-cache NX_CACHE]
+                    [--nx-stream {0,1,2,3,4,5,6,7,8,9}] [--nx-data {0,1,2,3,4,5,6,7,8,9}] [--nx-delta {0,1}] [--waypipe]
+                    [--wp-compress WP_COMPRESS] [--wp-threads WP_THREADS] [--wp-video WP_VIDEO]
+                    host_name run_command [run_command ...]</p>
+<ul>
+<li>
+<p><strong>host_name</strong><br />
+  Host's name. This name must match the `name` used with the `provision` command. (Required)</p>
+</li>
+<li>
+<p><strong>run_command</strong><br />
+  Command to execute on the host with NX protocol. (Required)</p>
+</li>
+</ul>
+<p><a name="options-fitowerpy-runfr"></a></p>
+<h1 id="options-fitowerpy-runfr">Options \Fi\,'Tower.Py Run'\/\Fr</h1>
+<ul>
+<li>
+<p><strong>--nx-link</strong> <em>NX_LINK</em><br />
+  The value can be either 'modem', 'isdn', 'adsl', 'wan', 'lan', 'local' or a bandwidth specification, like for example '56k', '1m', '100m'</p>
+</li>
+<li>
+<p><strong>--nx-limit</strong> <em>NX_LIMIT</em><br />
+  Specify a bitrate limit allowed for this session. (Default: 0)</p>
+</li>
+<li>
+<p><strong>--nx-images</strong> <em>NX_IMAGES</em><br />
+  Size of the persistent image cache. (Default: 512M)</p>
+</li>
+<li>
+<p><strong>--nx-cache</strong> <em>NX_CACHE</em><br />
+  Size of the in-memory X message cache. Setting the value to 0 will disable the memory cache as well as the NX differential compression.
+  (Default: 1G)</p>
+</li>
+<li>
+<p><strong>--nx-stream</strong> <em>{0,1,2,3,4,5,6,7,8,9}</em><br />
+  Enable or disable the ZLIB stream compression. The value must be between 0 and 9.</p>
+</li>
+<li>
+<p><strong>--nx-data</strong> <em>{0,1,2,3,4,5,6,7,8,9}</em><br />
+  Enable or disable the ZLIB stream compression. The value must be between 0 and 9.</p>
+</li>
+<li>
+<p><strong>--nx-delta</strong> <em>{0,1}</em><br />
+  Enable X differential compression.</p>
+</li>
+<li>
+<p><strong>--waypipe</strong><br />
+  Use `waypipe` instead `nx`. (Default: False)</p>
+</li>
+<li>
+<p><strong>--wp-compress</strong> <em>WP_COMPRESS</em><br />
+  Select the compression method applied to data transfers. Options are none (for high-bandwidth networks), lz4 (intermediate), zstd (slow
+  connection). The default compression is none. The compression level can be chosen by appending = followed by a number. For example, if C is
+  zstd=7, waypipe will use level 7 Zstd compression.</p>
+</li>
+<li>
+<p><strong>--wp-threads</strong> <em>WP_THREADS</em><br />
+  Set the number of total threads (including the main thread) which a waypipe instance will create. These threads will be used to parallelize
+  compression operations. This flag is passed on to waypipe server when given to waypipe ssh. The flag also controls the thread count for waypipe
+  bench. The default behavior (choosable by setting T to 0) is to use half as many threads as the computer has hardware threads available.</p>
+</li>
+<li>
+<p><strong>--wp-video</strong> <em>WP_VIDEO</em><br />
+  Compress specific DMABUF formats using a lossy video codec. Opaque, 10-bit, and multiplanar formats, among others, are not supported. V is a
+  comma separated list of options to control the video encoding. Using the --video flag without setting any options is equivalent to using the
+  default setting of: --video=sw,bpf=120000,h264. Later options supersede earlier ones (see `man waypipe` for more options).</p>
+</li>
+</ul>
+<p><a name="command-fitowerpy-statusfr"></a></p>
+<h1 id="command-fitowerpy-statusfr">Command \Fi\,'Tower.Py Status'\/\Fr</h1>
+<p>usage: tower.py status [-h] [--host HOST]</p>
+<p><a name="options-fitowerpy-statusfr"></a></p>
+<h1 id="options-fitowerpy-statusfr">Options \Fi\,'Tower.Py Status'\/\Fr</h1>
+<ul>
+<li><strong>--host</strong> <em>HOST</em><br />
+  Host name</li>
+</ul>
+<p><a name="command-fitowerpy-wlan-connectfr"></a></p>
+<h1 id="command-fitowerpy-wlan-connectfr">Command \Fi\,'Tower.Py Wlan-Connect'\/\Fr</h1>
+<p>usage: tower.py wlan-connect [-h] --ssid SSID --password PASSWORD</p>
+<p><a name="options-fitowerpy-wlan-connectfr"></a></p>
+<h1 id="options-fitowerpy-wlan-connectfr">Options \Fi\,'Tower.Py Wlan-Connect'\/\Fr</h1>
+<ul>
+<li>
+<p><strong>--ssid</strong> <em>SSID</em><br />
+  WiFi SSID</p>
+</li>
+<li>
+<p><strong>--password</strong> <em>PASSWORD</em><br />
+  WiFi password</p>
+</li>
+</ul>
+<p><a name="command-fitowerpy-versionfr"></a></p>
+<h1 id="command-fitowerpy-versionfr">Command \Fi\,'Tower.Py Version'\/\Fr</h1>
+<p>usage: tower.py version [-h]</p>
+<p><a name="options"></a></p>
+<h1 id="options">Options</h1>
+<ul>
+<li>
+<p><strong>--quiet</strong><br />
+  Set log level to ERROR.</p>
+</li>
+<li>
+<p><strong>--verbose</strong><br />
+  Set log level to DEBUG.</p>
+</li>
+</ul>
+<p><a name="author"></a></p>
+<h1 id="author">Author</h1>
+<pre><code>TowerOS
 </code></pre>
-<h3 id="use-tower-cli-with-hatch">Use <code>tower-cli</code> with <code>hatch</code></h3>
-<pre><code>[thinclient]$ cd ~/towercomputers/toweros/tower-cli
-[thinclient]$ hatch run tower --help
-</code></pre>
+<p><a name="distribution"></a></p>
+<h1 id="distribution">Distribution</h1>
+<p>The latest version of TowerOS may be downloaded from
+<a href="https://toweros.org"></a></p>
 
 
 
