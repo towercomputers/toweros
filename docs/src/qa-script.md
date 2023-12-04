@@ -4,32 +4,32 @@
 
 | Feature | Check | Output |
 | ------- | ----- | ------ |
-| Disk is fully encrypted | Restart without the USB key containing the `boot` partition. | Doesn't Boot. |
+| Disk is fully encrypted? | Restart without the USB key containing the `boot` partition. | Doesn't Boot. |
 | | Restart with the USB key containing the `boot` partition. | Boots to Welcome Message. |
-| The welcome message is displayed | A welcome message should indicate the location of the documentation. | `~/docs/` |
-| Default user is created| Enter the chosen username and password. | You should log in. |
-| Keyboard is configured | Type some characters. | Check is OK. |
-| Time Zone is confirgured | `[thinclient]$ date` | The date with the correct time zone. |
-| Shell is customized | Check the shell prompt format. | `[<username>@thinclient <current folder>]$` |
+| The welcome message is displayed. | Check the message above the login prompt. | A message should indicate the location of the documentation. |
+| Default user is created. | Enter the chosen username and password. | You should log in. |
+| Keyboard is configured. | Type some characters. | Check is OK. |
+| Time Zone is confirgured. | `[thinclient]$ date` | The date with the correct time zone. |
+| Shell is customized. | Check the shell prompt format. | `[<username>@thinclient <current folder>]$` |
 | The `swap` partition must be 8Gb, the `home` partition must occupy 20% of the rest, and the `root` partition the remaining space. | `[thinclient]$ lsblk` | ![lsblk thinclient](img/lsblk-thinclient.png) |
-| `supercronic` service must be started | `[thinclient]$ sudo rc-service supercronic status` | `* status: started` |
-| Default user is sudoer without password | `[thinclient]$ sudo su` | Root session without a password being requested. |
-| The documentation must be present in the ~/docs folder | `[thinclient]$ ls ~/docs` | List of documents |
-| Documentation can be consulted with `bat` | `[thinclient]$ bat ~/docs/usage.md` | Markdown viewer |
-| Tower CLI man page is installed | `[thinclient]$ man tower` | Tower CLI manual |
-| `eth0` must be configured with IP `192.168.2.100` | `[thinclient]$ ip ad` | ![eth0 thinclient](img/eth0-thinclient.png)|
-| `eth1` must be configured with IP `192.168.3.100` | `[thinclient]$ ip ad` | ![eth1 thinclient](img/eth1-thinclient.png)|
-| `eth0` MAC must be persistent| `[thinclient]$ ip ad`, reboot then `[thinclient]$ ip ad` | the value of `link/ether` for `eth0` should not change after a reboot. |
-| `iptables` service must be started | `[thinclient]$ sudo rc-service iptables status` | `* status: iptables` |
-| Firewal must be correctly configured | `[thinclient]$ sudo iptables -L -v` | [See configuration](https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh) |
-| Wifi must be soft blocked | `[thinclient]$ rfkill list wifi` | `Soft blocked: yes` |
-| Bluetooth must be soft blocked | `[thinclient]$ rfkill list bluetooth` | `Soft blocked: yes` |
-| `labwc` starts automatically after login if the option was chosen during installation | Boot | `labwc` must start after login |
-| `labwc` should properly start manually | `[thinclient]$ dbus-launch labwc` | `labwc` must start |
-| The `sfwbar` menu bar should appear correctly | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom |
-| `CopyQ` must be correctly started | Check the presence of the icon in the taskbar | ![copyq](img/copyq.png) |
-| The screen locker should activate correctly after 5 minutes of inactivity | Stay inactive 5mn | Black screen with password prompt |
-| The latest version of `tower` cli must be installed | `[thinclient]$ tower version`| Installed version. |
+| `supercronic` service must be started. | `[thinclient]$ sudo rc-service supercronic status` | `* status: started` |
+| Default user is sudoer without password. | `[thinclient]$ sudo su` | Root session without a password being requested. |
+| The documentation must be present in the ~/docs folder. | `[thinclient]$ ls ~/docs` | List of documents. |
+| Documentation can be consulted with `bat`. | `[thinclient]$ bat ~/docs/usage.md` | Markdown viewer. |
+| Tower CLI man page is installed. | `[thinclient]$ man tower` | Tower CLI manual. |
+| `eth0` must be configured with IP `192.168.2.100`. | `[thinclient]$ ip ad` | ![eth0 thinclient](img/eth0-thinclient.png)|
+| `eth1` must be configured with IP `192.168.3.100`. | `[thinclient]$ ip ad` | ![eth1 thinclient](img/eth1-thinclient.png)|
+| `eth0` MAC must be persistent. | `[thinclient]$ ip ad`, reboot then `[thinclient]$ ip ad`. | The value of `link/ether` for `eth0` should not change after a reboot. |
+| `iptables` service must be started. | `[thinclient]$ sudo rc-service iptables status` | `* status: iptables` |
+| Firewal must be correctly configured. | `[thinclient]$ sudo iptables -L -v` | [See configuration](https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh). |
+| Wifi must be soft blocked. | `[thinclient]$ rfkill list wifi` | `Soft blocked: yes` |
+| Bluetooth must be soft blocked. | `[thinclient]$ rfkill list bluetooth` | `Soft blocked: yes` |
+| `labwc` starts automatically after login if the option was chosen during installation. | Boot. | `labwc` must start after login. |
+| `labwc` should properly start manually. | `[thinclient]$ dbus-launch labwc` | `labwc` must start. |
+| The `sfwbar` menu bar should appear correctly. | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom. |
+| `CopyQ` must be correctly started. | Check the presence of the icon in the taskbar. | ![copyq](img/copyq.png) |
+| The screen locker should activate correctly after 5 minutes of inactivity. | Stay inactive 5mn. | Black screen with password prompt. |
+| The latest version of `tower` cli must be installed. | `[thinclient]$ tower version`| Installed version. |
 
 ### Hosts provisioning
 
