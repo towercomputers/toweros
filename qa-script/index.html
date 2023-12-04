@@ -380,27 +380,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../man/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Manual
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -926,13 +905,13 @@
 <thead>
 <tr>
 <th>Feature</th>
-<th>Check</th>
-<th>Output</th>
+<th>Action</th>
+<th>Result</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Disk is fully encrypted?</td>
+<td>Disk is fully encrypted.</td>
 <td>Restart without the USB key containing the <code>boot</code> partition.</td>
 <td>Doesn't Boot.</td>
 </tr>
@@ -957,12 +936,12 @@
 <td>Check is OK.</td>
 </tr>
 <tr>
-<td>Time Zone is confirgured.</td>
+<td>Time Zone is configured.</td>
 <td><code>[thinclient]$ date</code></td>
 <td>The date with the correct time zone.</td>
 </tr>
 <tr>
-<td>Shell is customized.</td>
+<td>Shell prompt is customized.</td>
 <td>Check the shell prompt format.</td>
 <td><code>[&lt;username&gt;@thinclient &lt;current folder&gt;]$</code></td>
 </tr>
@@ -1064,65 +1043,291 @@
 </tbody>
 </table>
 <h3 id="hosts-provisioning">Hosts provisioning</h3>
-<ul>
-<li>The provisioning of the <code>router</code>, an online host and an offline host must work correctly.</li>
-<li>The USB key containing the <code>boot</code> partition must be inserted into the host to boot.</li>
-<li><code>tower status</code> should display all hosts with status <code>up</code>.</li>
-<li>Hosts must be accessible with <code>ssh</code> simply with their name (check with <code>ssh &lt;host&gt;</code>).</li>
-<li>The default user, keyboard and timezone should be the same as for the thinclient.</li>
-<li>Online hosts must be connected and offline hosts must not (check with <code>ssh &lt;host&gt; ping www.google.com</code>).</li>
-<li>The firewall must be correctly configured and activated (<code>ssh &lt;host&gt; sudo rc-service iptables status</code> and <code>ssh &lt;host&gt; iptables -L -v</code>).</li>
-<li><code>eth0</code> must be configured on the network <code>192.168.2.0/24</code> for online hosts and <code>192.168.3.0/24</code> for offline hosts (check with <code>ip ad</code>).</li>
-<li>On the <code>router</code> the MAC of <code>wlan0</code> must be different at each startup.</li>
-<li>
-<p>The <code>home</code> partition must occupy 20% and the <code>root</code> partition the remaining space. All these partitions must be encrypted. To check, <code>ssh &lt;host&gt; lsblk</code> should display something like this:</p>
-<pre><code>NAME         MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
-sda            8:0    1 28.7G  0 disk  
-└─sda1         8:1    1  512M  0 part  
-mmcblk0      179:0    0 29.7G  0 disk  
-└─lvmcrypt   254:0    0 29.7G  0 crypt 
-  ├─vg0-home 254:1    0  5.9G  0 lvm   /home
-  └─vg0-root 254:2    0 23.8G  0 lvm   /
-</code></pre>
-</li>
-<li>
-<p><code>XDG_RUNTIME_DIR</code> must be set (check with <code>ssh &lt;host&gt; echo $XDG_RUNTIME_DIR</code>).</p>
-</li>
-<li>The shell prompt must be in the form of <code>[&lt;username&gt;@&lt;host&gt; &lt;current folder&gt;]$</code> and be of different color for each host.</li>
-<li>Wifi and bluetooth must be soft blocked except wifi in the <code>router</code> (check with <code>ssh &lt;host&gt; rfkill list</code>).</li>
-<li>Host default user should be able to use sudo without password (check with <code>ssh &lt;host&gt; sudo su</code>).</li>
-<li>The hosts should appear in the <code>labwc</code> taskbar with a green icon for the 'up' hosts and a red icon for the 'down' hosts (test by turning off one of the hosts)</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>router</code> provisioning.</td>
+<td><code>[thinclient]$ tower provision router –wlan-ssid &lt;ssid&gt; –wlan-password &lt;password&gt;</code></td>
+<td><code>router</code> is correctly provisioned</td>
+</tr>
+<tr>
+<td>Online host provisioning.</td>
+<td><code>[thinclient]$ tower provision web --online</code></td>
+<td><code>web</code> is correctly provisioned</td>
+</tr>
+<tr>
+<td>Offline host provisioning.</td>
+<td><code>[thinclient]$ tower provision office --offline</code></td>
+<td><code>office</code> is correctly provisioned</td>
+</tr>
+<tr>
+<td>Disk is fully encrypted.</td>
+<td>Restart hosts without the USB key containing the <code>boot</code> partition.</td>
+<td>Doesn't Boot.</td>
+</tr>
+<tr>
+<td></td>
+<td>Restart with the USB key containing the <code>boot</code> partition.</td>
+<td>Boots correctly.</td>
+</tr>
+<tr>
+<td>All hosts must be <code>up</code></td>
+<td><code>[thinclient]$ tower status</code></td>
+<td>Should display all hosts with status <code>up</code>.</td>
+</tr>
+<tr>
+<td>SSH must be configured</td>
+<td><code>[thinclient]$ ssh &lt;host&gt;</code></td>
+<td>Open a SSH session without requesting password</td>
+</tr>
+<tr>
+<td>Host keyboard is configured.</td>
+<td>Plug a keyboard and a screen into the host and type some characters.</td>
+<td>Check is OK.</td>
+</tr>
+<tr>
+<td>Default user is created.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; 'echo $USER'</code></td>
+<td>Shows the same default user as the thinclient.</td>
+</tr>
+<tr>
+<td>Time Zone is configured.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; date</code></td>
+<td>The date with the same time zone as the thinclient.</td>
+</tr>
+<tr>
+<td>Online hosts must be connected.</td>
+<td><code>[thinclient]$ ssh web ping www.google.com</code></td>
+<td>Ping result.</td>
+</tr>
+<tr>
+<td>Offline hosts must not be connected.</td>
+<td><code>[thinclient]$ ssh office ping www.google.com</code></td>
+<td><code>ping: bad address 'www.google.com'</code></td>
+</tr>
+<tr>
+<td><code>iptables</code> service must be started.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; 'sudo rc-service iptables status'</code></td>
+<td><code>* status: iptables</code></td>
+</tr>
+<tr>
+<td>Firewal must be correctly configured.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; 'sudo iptables -L -v'</code></td>
+<td><a href="https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-host/installer/configure-firewall.sh">See configuration</a>.</td>
+</tr>
+<tr>
+<td><code>eth0</code> must be configured on the network <code>192.168.2.0/24</code> for online hosts</td>
+<td><code>[thinclient]$ ssh web ip ad</code></td>
+<td><img alt="eth0 online host" src="../img/eth0-online-host.png" /></td>
+</tr>
+<tr>
+<td><code>eth0</code> must be configured on the network <code>192.168.3.0/24</code> for offline hosts</td>
+<td><code>[thinclient]$ ssh office ip ad</code></td>
+<td><code>[thinclient]$ ssh web ip ad</code></td>
+</tr>
+<tr>
+<td>On the <code>router</code> the MAC of <code>wlan0</code> must be different at each startup.</td>
+<td><code>[thinclient]$ ssh router ip ad</code>, reboot the <code>router</code>, then <code>[thinclient]$ ssh router ip ad</code>.</td>
+<td>The value of <code>link/ether</code> for <code>wlan0</code> should change after each reboot.</td>
+</tr>
+<tr>
+<td>The <code>home</code> partition must occupy 20% and the <code>root</code> partition the remaining space.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; lsblk</code></td>
+<td><img alt="lsblk host" src="../img/lsblk-host.png" /></td>
+</tr>
+<tr>
+<td>Shell prompt is customized.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt;</code></td>
+<td><code>[&lt;username&gt;@&lt;host&gt; &lt;current folder&gt;]$</code></td>
+</tr>
+<tr>
+<td>Each host has a different shell color.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt;</code> on all hosts.</td>
+<td>The prompt colors are different.</td>
+</tr>
+<tr>
+<td>Wifi must be soft blocked on all hosts except the <code>router</code>.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; rfkill list wifi</code></td>
+<td><code>Soft blocked: yes</code></td>
+</tr>
+<tr>
+<td>Wifi must not be soft blocked on the <code>router</code>.</td>
+<td><code>[thinclient]$ ssh router rfkill list wifi</code></td>
+<td><code>Soft blocked: no</code></td>
+</tr>
+<tr>
+<td>Bluetooth must be soft blocked on all hosts.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; rfkill list bluetooth</code></td>
+<td><code>Soft blocked: yes</code></td>
+</tr>
+<tr>
+<td>Default user is sudoer without password.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; sudo su</code></td>
+<td>Root session without a password being requested.</td>
+</tr>
+<tr>
+<td>Tower widget must be correctly started.</td>
+<td>Check the presence of the widget in the taskbar.</td>
+<td><img alt="Tower widget" src="../img/tower-widget.png" /></td>
+</tr>
+<tr>
+<td>Tower widget should display down hosts in red.</td>
+<td>Turn off one of the hosts and check the taskbar.</td>
+<td><img alt="Tower widget down" src="../img/tower-widget-down.png" /></td>
+</tr>
+</tbody>
+</table>
 <h3 id="execution-and-installation-of-applications">Execution and installation of applications</h3>
 <p>Once the <code>router</code> is installed:</p>
-<ul>
-<li>APK packages must be correctly installed on the hosts with <code>tower install &lt;host&gt; &lt;package&gt;</code> and on the thinclient with <code>tower install thinclient &lt;package&gt;</code>.</li>
-<li>Once installed, graphical applications should appear in the <code>sfwbar</code> menu with icons.</li>
-<li>In the menu the applications are classified by host and each host is differentiated by a colored circle.</li>
-<li>For each host the color of the circle is the same as that of the shell prompt (check with <code>ssh &lt;host&gt;</code>).</li>
-<li><code>ssh &lt;host&gt;</code> should not display any welcome message.</li>
-<li>Graphical applications can be launched via the <code>sfwbar</code> menu or terminal with <code>tower &lt;host&gt; run &lt;application&gt;</code>.</li>
-<li>Copy/paste must be possible between two graphics applications running on different hosts.</li>
-<li>Online applications must work correctly on online hosts (check for example that it is possible to browse the web with Midori).</li>
-<li>The <code>tor</code> proxy must be accessible from online hosts (check with <code>ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip</code>).</li>
-<li>The time on online hosts must be correct (thanks to <code>chronyd</code>).</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>APK packages can be installed on the Thin Client</td>
+<td><code>[thinclient]$ tower install thinclient fortune</code><br /><code>[thinclient]$ fortune</code></td>
+<td>Random message.</td>
+</tr>
+<tr>
+<td>APK packages can be installed on online host</td>
+<td><code>[thinclient]$ tower install web fortune</code><br /><code>[thinclient]$ fortune</code></td>
+<td>Random message.</td>
+</tr>
+<tr>
+<td>APK packages can be installed on offline host</td>
+<td><code>[thinclient]$ tower install office fortune</code><br /><code>[thinclient]$ fortune</code></td>
+<td>Random message.</td>
+</tr>
+<tr>
+<td>Once installed, graphical applications should appear in the <code>sfwbar</code> menu with icons.</td>
+<td><code>[thinclient]$ tower install office galculator</code> then check the taskbar menu.</td>
+<td><img alt="galculator" src="../img/galculator.png" /></td>
+</tr>
+<tr>
+<td>In the taskbar menu each host is differentiated by a colored circle.</td>
+<td>check the taskbar menu.</td>
+<td><img alt="host menu" src="../img/host-menu.png" /></td>
+</tr>
+<tr>
+<td>Host shell prompt color matches with the menu.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt;</code></td>
+<td>Prompt color should be the same as the circle in the menu.</td>
+</tr>
+<tr>
+<td>SSH welcome message is disabled.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt;</code></td>
+<td>No message before the prompt.</td>
+</tr>
+<tr>
+<td>Graphical applications can be launched via the <code>sfwbar</code> menu.</td>
+<td>Click on the desired application.</td>
+<td>Application should be launched.</td>
+</tr>
+<tr>
+<td>Graphical applications can be launched via the terminal.</td>
+<td><code>[thinclient]$ tower &lt;host&gt; run &lt;application&gt;</code></td>
+<td>Application should be launched.</td>
+</tr>
+<tr>
+<td>Copy/past is possible between two hosts.</td>
+<td>Open two graphicals application on two different host and try a copy/past.</td>
+<td>Past must work.</td>
+</tr>
+<tr>
+<td>Online applications must work correctly on online hosts.</td>
+<td><code>[thinclient]$ tower web install midori</code><br /><code>[thinclient]$ tower web run midori</code></td>
+<td>You can browse the web.</td>
+</tr>
+<tr>
+<td><code>tor</code> proxy is enabled for online host.</td>
+<td><code>[thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip</code></td>
+<td><code>{"IsTor":true,"IP":"109.70.100.71"}</code></td>
+</tr>
+<tr>
+<td>The time on online hosts must be correct.</td>
+<td><code>[thinclient]$ ssh web date</code></td>
+<td>The correct date and time.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="toweros-thinclient-upgrade">TowerOS-ThinClient Upgrade</h3>
 <p>In addition to all the points listed for installing TowerOS-ThinClient:</p>
-<ul>
-<li>The new version of <code>tower</code> cli must be installed (check with <code>tower version</code>).</li>
-<li>All previously installed hosts must be accessible (check with <code>tower status</code>).</li>
-<li>The <code>sfwbar</code> menu must display all applications previously installed on the hosts.</li>
-<li>The <code>sfwbar</code> widget indicating the host status must be active.</li>
-<li>The contents of the home partition must be completely preserved.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the new version of <code>tower</code> cli must be installed.</td>
+<td><code>[thinclient]$ tower version</code></td>
+<td>The new version.</td>
+</tr>
+<tr>
+<td>All previously installed hosts must be accessible.</td>
+<td><code>[thinclient]$ tower status</code></td>
+<td>List of previously installed hosts.</td>
+</tr>
+<tr>
+<td>The <code>sfwbar</code> menu must display all applications previously installed on the hosts.</td>
+<td>Check the taskbar menu.</td>
+<td>Previously installed applications must be here.</td>
+</tr>
+<tr>
+<td>The <code>sfwbar</code> widget indicating the host status must include all the hosts.</td>
+<td>Check the taskbar.</td>
+<td><img alt="Tower widget" src="../img/tower-widget.png" /></td>
+</tr>
+<tr>
+<td>The contents of the home partition must be completely preserved.</td>
+<td><code>[thinclient]$ ls ~/</code></td>
+<td>The same content as before the upgrade.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="host-upgrade">Host Upgrade</h3>
 <p>In addition to all the points listed for Hosts provisioning:</p>
-<ul>
-<li>The new version of TowerOS-Host must be installed (check with <code>tower status</code>).</li>
-<li>All applications installed with <code>tower install</code> must be reinstalled.</li>
-<li>The contents of the host home partition must be completely preserved.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Action</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The new version of TowerOS-Host must be installed.</td>
+<td><code>[thinclient]$ tower status &lt;host&gt;</code></td>
+<td>The new version.</td>
+</tr>
+<tr>
+<td>All applications installed with <code>tower install</code> must be reinstalled.</td>
+<td>Check the taskbar menu.</td>
+<td>Previously installed applications must be here.</td>
+</tr>
+<tr>
+<td>The contents of the home partition must be completely preserved.</td>
+<td><code>[thinclient]$ ssh &lt;host&gt; ls ~/</code></td>
+<td>The same content as before the upgrade.</td>
+</tr>
+</tbody>
+</table>
 
 
 

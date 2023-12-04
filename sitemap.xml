@@ -36,11 +36,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://toweros.org/man/</loc>
-         <lastmod>2023-12-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://toweros.org/qa-script/</loc>
          <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
