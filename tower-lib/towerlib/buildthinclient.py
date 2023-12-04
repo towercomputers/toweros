@@ -81,6 +81,7 @@ def prepare_docs():
         '--author', "TowerOS",
         '--project-name', 'TowerOS',
         '--url', 'https://toweros.org',
+        '--prog', 'tower',
         '--output', wd('overlay/var/towercomputers/docs', 'tower.1'),
     )
 
