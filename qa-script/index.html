@@ -8,13 +8,11 @@
       
       
       
-        <link rel="canonical" href="https://toweros.org/guides/">
+        <link rel="canonical" href="https://toweros.org/qa-script/">
       
       
-        <link rel="prev" href="../usage/">
+        <link rel="prev" href="../build-toweros/">
       
-      
-        <link rel="next" href="../security/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +20,7 @@
     
     
       
-        <title>Guides - TowerOS</title>
+        <title>QA Script - TowerOS</title>
       
     
     
@@ -67,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#move-a-file-from-one-host-to-another" class="md-skip">
+        <a href="#manually-qa-toweros" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +101,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Guides
+              QA Script
             
           </span>
         </div>
@@ -302,8 +300,6 @@
       
   
   
-    
-  
   
   
     
@@ -314,12 +310,14 @@
       
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -333,7 +331,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -365,28 +363,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Guides
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../guides/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -395,60 +375,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#move-a-file-from-one-host-to-another" class="md-nav__link">
-    <span class="md-ellipsis">
-      Move a file from one host to another
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backup-hosts-with-restic" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backup hosts with restic
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-pip-package-in-offline-host-using-online-host" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install pip package in offline host using online host
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#install-npm-package-in-offline-host-using-online-host" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install npm package in offline host using online host
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -668,8 +594,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -678,14 +606,12 @@
       
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -699,7 +625,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Development
@@ -752,10 +678,28 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../qa-script/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    QA Script
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -764,6 +708,84 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#manually-qa-toweros" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manually QA TowerOS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manually QA TowerOS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hosts-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hosts provisioning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#execution-and-installation-of-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution and installation of applications
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Upgrade
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      Host Upgrade
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -801,38 +823,62 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#move-a-file-from-one-host-to-another" class="md-nav__link">
+  <a href="#manually-qa-toweros" class="md-nav__link">
     <span class="md-ellipsis">
-      Move a file from one host to another
+      Manually QA TowerOS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manually QA TowerOS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      TowerOS-ThinClient Installation
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#backup-hosts-with-restic" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#hosts-provisioning" class="md-nav__link">
     <span class="md-ellipsis">
-      Backup hosts with restic
+      Hosts provisioning
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#install-pip-package-in-offline-host-using-online-host" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#execution-and-installation-of-applications" class="md-nav__link">
     <span class="md-ellipsis">
-      Install pip package in offline host using online host
+      Execution and installation of applications
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#install-npm-package-in-offline-host-using-online-host" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#toweros-thinclient-upgrade" class="md-nav__link">
     <span class="md-ellipsis">
-      Install npm package in offline host using online host
+      TowerOS-ThinClient Upgrade
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#host-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      Host Upgrade
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -851,113 +897,206 @@
                   
 
 
-  <h1>Guides</h1>
+  <h1>QA Script</h1>
 
-<h2 id="move-a-file-from-one-host-to-another">Move a file from one host to another</h2>
-<pre><code>    [thinclient]$ scp -r router:/home/tower/myfile office:/home/tower
-    [thinclient]$ ssh router rm /home/tower/myfile
-</code></pre>
-<h2 id="backup-hosts-with-restic">Backup hosts with <code>restic</code></h2>
-<p>It is recommended to reserve one of your hosts, for example <code>storage</code>, to store the backups of all the other hosts there. Here's how, using <code>restic</code>, you can store the backup of an <code>office</code> host on a <code>storage</code> host:</p>
-<ol>
+<h2 id="manually-qa-toweros">Manually QA TowerOS</h2>
+<h3 id="toweros-thinclient-installation">TowerOS-ThinClient Installation</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Check</th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fulll Disk Encryption</td>
+<td>The USB key containing the <code>boot</code> partition must be inserted into the thinclient to boot.</td>
+<td>The Thin Client does not start without the USB boot key.</td>
+</tr>
+<tr>
+<td>Secure Boot</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Welcome Message</td>
+<td>A welcome message should indicate the location of the documentation.</td>
+<td></td>
+</tr>
+<tr>
+<td>Default User</td>
+<td>You can log in with the chosen username and password.</td>
+<td></td>
+</tr>
+<tr>
+<td>Keyboard</td>
+<td>Keyboard is correctly configured.</td>
+<td></td>
+</tr>
+<tr>
+<td>Shell</td>
+<td>The shell prompt must be customized.</td>
+<td><code>[&lt;username&gt;@thinclient &lt;current folder&gt;]$</code></td>
+</tr>
+<tr>
+<td>Partitions</td>
+<td>The <code>swap</code> partition must be 8Gb, the <code>home</code> partition must occupy 20% of the rest, and the <code>root</code> partition the remaining space: <br /><code>[thinclient]$ lsblk</code></td>
+<td><img alt="lsblk thinclient" src="../img/lsblk-thinclient.png" /></td>
+</tr>
+<tr>
+<td>Time Zone</td>
+<td><code>[thinclient]$ date</code></td>
+<td>The date with the correct time zone.</td>
+</tr>
+<tr>
+<td>Cron</td>
+<td><code>supercronic</code> service must be started:<br /><code>[thinclient]$ sudo rc-service supercronic status</code></td>
+<td><code>* status: started</code></td>
+</tr>
+<tr>
+<td>Sudo</td>
+<td>Default user is sudoer without password:<br /><code>[thinclient]$ sudo su</code></td>
+<td>Root session without a password being requested.</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>The documentation must be present in the ~/docs folder:<br /><code>[thinclient]$ ls ~/docs</code></td>
+<td>List of documents</td>
+</tr>
+<tr>
+<td></td>
+<td>Documentation can be consulted with <code>bat</code>: <br /><code>[thinclient]$ bat ~/docs/usage.md</code></td>
+<td>Markdown viewer</td>
+</tr>
+<tr>
+<td>Network</td>
+<td><code>eth0</code> must be configured with IP <code>192.168.2.100</code>:<br /><code>[thinclient]$ ip ad</code></td>
+<td><img alt="eth0 thinclient" src="../img/eth0-thinclient.png" /></td>
+</tr>
+<tr>
+<td></td>
+<td><code>eth1</code> must be configured with IP <code>192.168.3.100</code>:<br /><code>[thinclient]$ ip ad</code></td>
+<td><img alt="eth1 thinclient" src="../img/eth1-thinclient.png" /></td>
+</tr>
+<tr>
+<td></td>
+<td>On reboot the MAC of <code>eth0</code> and <code>eth1</code> should not change:<br /><code>[thinclient]$ ip ad</code></td>
+<td>the value of <code>link/ether</code> for <code>eth0</code> and <code>eth1</code> should not change after a reboot.</td>
+</tr>
+<tr>
+<td>Firewall</td>
+<td><code>iptables</code> service must be started:<br /><code>[thinclient]$ sudo rc-service iptables status</code></td>
+<td><code>* status: iptables</code></td>
+</tr>
+<tr>
+<td></td>
+<td>Firewal must be correctly configured:<br /><code>[thinclient]$ sudo iptables -L -v</code></td>
+<td><a href="https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh">See configuration</a></td>
+</tr>
+<tr>
+<td>rfkill</td>
+<td>Wifi must be soft blocked:<br /><code>[thinclient]$ rfkill list wifi</code></td>
+<td><code>Soft blocked: yes</code></td>
+</tr>
+<tr>
+<td></td>
+<td>Bluetooth must be soft blocked:<br /><code>[thinclient]$ rfkill list bluetooth</code></td>
+<td><code>Soft blocked: yes</code></td>
+</tr>
+<tr>
+<td>Graphical Desktop</td>
+<td><code>labwc</code> starts automatically after login if the option was chosen during installation.</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>labwc</code> should properly start manually:<br /><code>[thinclient]$ dbus-launch labwc</code></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>The <code>sfwbar</code> menu bar should appear correctly</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>CopyQ</code> must be correctly started</td>
+<td><img alt="copyq" src="../img/copyq.png" /> icon in the taskbar</td>
+</tr>
+<tr>
+<td></td>
+<td>The screen locker should activate correctly after 5 minutes of inactivity</td>
+<td>Black screen with password prompt.</td>
+</tr>
+<tr>
+<td>Tower CLI</td>
+<td>The latest version of <code>tower</code> cli must be installed:<br /><code>[thinclient]$ tower version</code></td>
+<td>Installed version.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hosts-provisioning">Hosts provisioning</h3>
+<ul>
+<li>The provisioning of the <code>router</code>, an online host and an offline host must work correctly.</li>
+<li>The USB key containing the <code>boot</code> partition must be inserted into the host to boot.</li>
+<li><code>tower status</code> should display all hosts with status <code>up</code>.</li>
+<li>Hosts must be accessible with <code>ssh</code> simply with their name (check with <code>ssh &lt;host&gt;</code>).</li>
+<li>The default user, keyboard and timezone should be the same as for the thinclient.</li>
+<li>Online hosts must be connected and offline hosts must not (check with <code>ssh &lt;host&gt; ping www.google.com</code>).</li>
+<li>The firewall must be correctly configured and activated (<code>ssh &lt;host&gt; sudo rc-service iptables status</code> and <code>ssh &lt;host&gt; iptables -L -v</code>).</li>
+<li><code>eth0</code> must be configured on the network <code>192.168.2.0/24</code> for online hosts and <code>192.168.3.0/24</code> for offline hosts (check with <code>ip ad</code>).</li>
+<li>On the <code>router</code> the MAC of <code>wlan0</code> must be different at each startup.</li>
 <li>
-<p>Install restic</p>
-<pre><code>[thinclient]$ tower install storage restic
-[thinclient]$ tower install office restic
-[thinclient]$ tower install thinclient restic
+<p>The <code>home</code> partition must occupy 20% and the <code>root</code> partition the remaining space. All these partitions must be encrypted. To check, <code>ssh &lt;host&gt; lsblk</code> should display something like this:</p>
+<pre><code>NAME         MAJ:MIN RM  SIZE RO TYPE  MOUNTPOINTS
+sda            8:0    1 28.7G  0 disk  
+└─sda1         8:1    1  512M  0 part  
+mmcblk0      179:0    0 29.7G  0 disk  
+└─lvmcrypt   254:0    0 29.7G  0 crypt 
+  ├─vg0-home 254:1    0  5.9G  0 lvm   /home
+  └─vg0-root 254:2    0 23.8G  0 lvm   /
 </code></pre>
 </li>
 <li>
-<p>Initialize restic repo in each host</p>
-<pre><code>[thinclient]$ restic -r sftp:storage:backup init
-[thinclient]$ restic -r sftp:office:backup init --from-repo sftp:storage:backup --copy-chunker-params
-</code></pre>
-<p>Note: <code>--copy-chunker-params</code> is important to ensure deduplication. 
-See "<a href="https://restic.readthedocs.io/en/latest/045_working_with_repos.html#copying-snapshots-between-repositories">Copying snapshots between repositories</a>" for more options.</p>
+<p><code>XDG_RUNTIME_DIR</code> must be set (check with <code>ssh &lt;host&gt; echo $XDG_RUNTIME_DIR</code>).</p>
 </li>
-<li>
-<p>Backup <code>~/mydata</code> folder in <code>office</code> host</p>
-<pre><code>[thinclient]$ ssh -t office restic -r backup backup mydata
-</code></pre>
-</li>
-<li>
-<p>Copy <code>office</code> snapshot into <code>storage</code> repo</p>
-<pre><code>[thinclient]$ restic -r sftp:storage:backup copy --from-repo sftp:office:backup latest
-</code></pre>
-<p>Note: here <code>restic</code> copies the backup from the <code>office</code> host to the Thin Client, and then copies it to the <code>storage</code> host. You can optionally clear the cache stored on the Thin Client:</p>
-<pre><code>[thinclient]$ rm -rf ~/.cache/restic
-</code></pre>
-</li>
-<li>
-<p>Restore backup into <code>office</code></p>
-<pre><code>[thinclient]$ restic -r sftp:office:backup copy --from-repo sftp:storage:backup latest --host office
-[thinclient]$ ssh -t office restic -r backup restore latest --target ~/
-</code></pre>
-</li>
-</ol>
-<h2 id="install-pip-package-in-offline-host-using-online-host">Install <code>pip</code> package in offline host using online host</h2>
-<ol>
-<li>
-<p>Install <code>pip</code> in online and offline host</p>
-<pre><code>[thinclient]$ tower install web python3 py3-pip
-[thinclient]$ tower install office python3 py3-pip
-</code></pre>
-</li>
-<li>
-<p>Download package and dependencies in online host</p>
-<pre><code>[thinclient]$ ssh web mkdir mypackages
-[thinclient]$ ssh web pip download &lt;package_name&gt; -d mypackages
-</code></pre>
-</li>
-<li>
-<p>Copy package and dependencies to offline host</p>
-<pre><code>[thinclient]$ scp -r web:mypackages office:
-</code></pre>
-</li>
-<li>
-<p>Install <code>pip</code> package in offline host</p>
-<pre><code>[thinclient]$ ssh office pip install --no-index --find-links="~/mypackages" &lt;package_name&gt;
-</code></pre>
-</li>
-<li>
-<p>Clean up</p>
-<pre><code>[thinclient]$ ssh office rm -rf mypackages
-[thinclient]$ ssh web rm -rf mypackages
-</code></pre>
-</li>
-</ol>
-<h2 id="install-npm-package-in-offline-host-using-online-host">Install <code>npm</code> package in offline host using online host</h2>
-<ol>
-<li>
-<p>Install <code>npm</code> in online and offline host</p>
-<pre><code>[thinclient]$ tower install web npm
-[thinclient]$ tower install office npm
-</code></pre>
-</li>
-<li>
-<p>Download package and dependencies in online host</p>
-<pre><code>[thinclient]$ ssh web 'mkdir mypackages &amp;&amp; cd mypackages &amp;&amp; npm init -y'
-[thinclient]$ ssh web 'cd mypackages &amp;&amp; npm install -B &lt;package_name&gt; &amp;&amp; npm pack'
-</code></pre>
-</li>
-<li>
-<p>Copy package and dependencies to offline host</p>
-<pre><code>[thinclient]$ scp -r web:mypackages/mypackages-1.0.0.tgz office:
-</code></pre>
-</li>
-<li>
-<p>Install <code>npm</code> package in offline host</p>
-<pre><code>[thinclient]$ ssh office tar -xvzf mypackages-1.0.0.tgz
-[thinclient]$ ssh office 'sudo npm install -g package/node_modules/*/'
-</code></pre>
-</li>
-<li>
-<p>Clean up</p>
-<pre><code>[thinclient]$ ssh office rm -rf mypackages-1.0.0.tgz package
-[thinclient]$ ssh web rm -rf mypackages
-</code></pre>
-</li>
-</ol>
+<li>The shell prompt must be in the form of <code>[&lt;username&gt;@&lt;host&gt; &lt;current folder&gt;]$</code> and be of different color for each host.</li>
+<li>Wifi and bluetooth must be soft blocked except wifi in the <code>router</code> (check with <code>ssh &lt;host&gt; rfkill list</code>).</li>
+<li>Host default user should be able to use sudo without password (check with <code>ssh &lt;host&gt; sudo su</code>).</li>
+<li>The hosts should appear in the <code>labwc</code> taskbar with a green icon for the 'up' hosts and a red icon for the 'down' hosts (test by turning off one of the hosts)</li>
+</ul>
+<h3 id="execution-and-installation-of-applications">Execution and installation of applications</h3>
+<p>Once the <code>router</code> is installed:</p>
+<ul>
+<li>APK packages must be correctly installed on the hosts with <code>tower install &lt;host&gt; &lt;package&gt;</code> and on the thinclient with <code>tower install thinclient &lt;package&gt;</code>.</li>
+<li>Once installed, graphical applications should appear in the <code>sfwbar</code> menu with icons.</li>
+<li>In the menu the applications are classified by host and each host is differentiated by a colored circle.</li>
+<li>For each host the color of the circle is the same as that of the shell prompt (check with <code>ssh &lt;host&gt;</code>).</li>
+<li><code>ssh &lt;host&gt;</code> should not display any welcome message.</li>
+<li>Graphical applications can be launched via the <code>sfwbar</code> menu or terminal with <code>tower &lt;host&gt; run &lt;application&gt;</code>.</li>
+<li>Copy/paste must be possible between two graphics applications running on different hosts.</li>
+<li>Online applications must work correctly on online hosts (check for example that it is possible to browse the web with Midori).</li>
+<li>The <code>tor</code> proxy must be accessible from online hosts (check with <code>ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip</code>).</li>
+<li>The time on online hosts must be correct (thanks to <code>chronyd</code>).</li>
+</ul>
+<h3 id="toweros-thinclient-upgrade">TowerOS-ThinClient Upgrade</h3>
+<p>In addition to all the points listed for installing TowerOS-ThinClient:</p>
+<ul>
+<li>The new version of <code>tower</code> cli must be installed (check with <code>tower version</code>).</li>
+<li>All previously installed hosts must be accessible (check with <code>tower status</code>).</li>
+<li>The <code>sfwbar</code> menu must display all applications previously installed on the hosts.</li>
+<li>The <code>sfwbar</code> widget indicating the host status must be active.</li>
+<li>The contents of the home partition must be completely preserved.</li>
+</ul>
+<h3 id="host-upgrade">Host Upgrade</h3>
+<p>In addition to all the points listed for Hosts provisioning:</p>
+<ul>
+<li>The new version of TowerOS-Host must be installed (check with <code>tower status</code>).</li>
+<li>All applications installed with <code>tower install</code> must be reinstalled.</li>
+<li>The contents of the host home partition must be completely preserved.</li>
+</ul>
 
 
 

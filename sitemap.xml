@@ -2,47 +2,57 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://toweros.org/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://toweros.org/development/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <loc>https://toweros.org/build-toweros/</loc>
+         <lastmod>2023-12-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://toweros.org/dev-environment/</loc>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/guides/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/hardware/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/implementation/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/installation/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://toweros.org/qa-script/</loc>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/secure-boot/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/security/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://toweros.org/usage/</loc>
-         <lastmod>2023-12-03</lastmod>
+         <lastmod>2023-12-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
