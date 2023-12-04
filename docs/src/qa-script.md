@@ -4,32 +4,32 @@
 
 | Feature | Check | Output |
 | ------- | ----- | ------ |
-| Fulll Disk Encryption | The USB key containing the `boot` partition must be inserted into the thinclient to boot. | The Thin Client does not start without the USB boot key. |
-| Secure Boot | | |
-| Welcome Message | A welcome message should indicate the location of the documentation. | |
-| Default User | You can log in with the chosen username and password. | |
-| Keyboard | Keyboard is correctly configured. | |
-| Shell | The shell prompt must be customized. | `[<username>@thinclient <current folder>]$` |
-| Partitions | The `swap` partition must be 8Gb, the `home` partition must occupy 20% of the rest, and the `root` partition the remaining space: <br />`[thinclient]$ lsblk` | ![lsblk thinclient](img/lsblk-thinclient.png) |
-| Time Zone | `[thinclient]$ date` | The date with the correct time zone. |
-| Cron | `supercronic` service must be started:<br />`[thinclient]$ sudo rc-service supercronic status` | `* status: started` |
-| Sudo | Default user is sudoer without password:<br />`[thinclient]$ sudo su` | Root session without a password being requested. |
-| Documentation | The documentation must be present in the ~/docs folder:<br />`[thinclient]$ ls ~/docs` | List of documents |
-| | Documentation can be consulted with `bat`: <br />`[thinclient]$ bat ~/docs/usage.md` | Markdown viewer |
-| | Tower CLI man page is installed: <br />`[thinclient]$ man tower` | Tower CLI manual |
-| Network | `eth0` must be configured with IP `192.168.2.100`:<br />`[thinclient]$ ip ad` | ![eth0 thinclient](img/eth0-thinclient.png)|
-| | `eth1` must be configured with IP `192.168.3.100`:<br />`[thinclient]$ ip ad` | ![eth1 thinclient](img/eth1-thinclient.png)|
-| | On reboot the MAC of `eth0` and `eth1` should not change:<br />`[thinclient]$ ip ad` | the value of `link/ether` for `eth0` and `eth1` should not change after a reboot. |
-| Firewall | `iptables` service must be started:<br />`[thinclient]$ sudo rc-service iptables status` | `* status: iptables` |
-| | Firewal must be correctly configured:<br />`[thinclient]$ sudo iptables -L -v` | [See configuration](https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh) |
-| rfkill | Wifi must be soft blocked:<br />`[thinclient]$ rfkill list wifi` | `Soft blocked: yes` |
-| | Bluetooth must be soft blocked:<br />`[thinclient]$ rfkill list bluetooth` | `Soft blocked: yes` |
-| Graphical Desktop | `labwc` starts automatically after login if the option was chosen during installation. | |
-| | `labwc` should properly start manually:<br />`[thinclient]$ dbus-launch labwc`| |
-| | The `sfwbar` menu bar should appear correctly | |
-| | `CopyQ` must be correctly started | ![copyq](img/copyq.png) icon in the taskbar |
-| | The screen locker should activate correctly after 5 minutes of inactivity | Black screen with password prompt. |
-| Tower CLI | The latest version of `tower` cli must be installed:<br />`[thinclient]$ tower version`| Installed version. |
+| Disk is fully encrypted | Restart without the USB key containing the `boot` partition. | Doesn't Boot. |
+| | Restart with the USB key containing the `boot` partition. | Boots to Welcome Message. |
+| The welcome message is displayed | A welcome message should indicate the location of the documentation. | `~/docs/` |
+| Default user is created| Enter the chosen username and password. | You should log in. |
+| Keyboard is configured | Type some characters. | Check is OK. |
+| Time Zone is confirgured | `[thinclient]$ date` | The date with the correct time zone. |
+| Shell is customized | Check the shell prompt format. | `[<username>@thinclient <current folder>]$` |
+| The `swap` partition must be 8Gb, the `home` partition must occupy 20% of the rest, and the `root` partition the remaining space. | `[thinclient]$ lsblk` | ![lsblk thinclient](img/lsblk-thinclient.png) |
+| `supercronic` service must be started | `[thinclient]$ sudo rc-service supercronic status` | `* status: started` |
+| Default user is sudoer without password | `[thinclient]$ sudo su` | Root session without a password being requested. |
+| The documentation must be present in the ~/docs folder | `[thinclient]$ ls ~/docs` | List of documents |
+| Documentation can be consulted with `bat` | `[thinclient]$ bat ~/docs/usage.md` | Markdown viewer |
+| Tower CLI man page is installed | `[thinclient]$ man tower` | Tower CLI manual |
+| `eth0` must be configured with IP `192.168.2.100` | `[thinclient]$ ip ad` | ![eth0 thinclient](img/eth0-thinclient.png)|
+| `eth1` must be configured with IP `192.168.3.100` | `[thinclient]$ ip ad` | ![eth1 thinclient](img/eth1-thinclient.png)|
+| `eth0` MAC must be persistent| `[thinclient]$ ip ad`, reboot then `[thinclient]$ ip ad` | the value of `link/ether` for `eth0` should not change after a reboot. |
+| `iptables` service must be started | `[thinclient]$ sudo rc-service iptables status` | `* status: iptables` |
+| Firewal must be correctly configured | `[thinclient]$ sudo iptables -L -v` | [See configuration](https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh) |
+| Wifi must be soft blocked | `[thinclient]$ rfkill list wifi` | `Soft blocked: yes` |
+| Bluetooth must be soft blocked | `[thinclient]$ rfkill list bluetooth` | `Soft blocked: yes` |
+| `labwc` starts automatically after login if the option was chosen during installation | Boot | `labwc` must start after login |
+| `labwc` should properly start manually | `[thinclient]$ dbus-launch labwc` | `labwc` must start |
+| The `sfwbar` menu bar should appear correctly | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom |
+| `CopyQ` must be correctly started | Check the presence of the icon in the taskbar | ![copyq](img/copyq.png) |
+| The screen locker should activate correctly after 5 minutes of inactivity | Stay inactive 5mn | Black screen with password prompt |
+| The latest version of `tower` cli must be installed | `[thinclient]$ tower version`| Installed version. |
 
 ### Hosts provisioning
 
