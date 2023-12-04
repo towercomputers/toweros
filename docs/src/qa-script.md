@@ -16,6 +16,7 @@
 | Sudo | Default user is sudoer without password:<br />`[thinclient]$ sudo su` | Root session without a password being requested. |
 | Documentation | The documentation must be present in the ~/docs folder:<br />`[thinclient]$ ls ~/docs` | List of documents |
 | | Documentation can be consulted with `bat`: <br />`[thinclient]$ bat ~/docs/usage.md` | Markdown viewer |
+| | Tower CLI man page is installed: <br />`[thinclient]$ man tower` | Tower CLI manual |
 | Network | `eth0` must be configured with IP `192.168.2.100`:<br />`[thinclient]$ ip ad` | ![eth0 thinclient](img/eth0-thinclient.png)|
 | | `eth1` must be configured with IP `192.168.3.100`:<br />`[thinclient]$ ip ad` | ![eth1 thinclient](img/eth1-thinclient.png)|
 | | On reboot the MAC of `eth0` and `eth1` should not change:<br />`[thinclient]$ ip ad` | the value of `link/ether` for `eth0` and `eth1` should not change after a reboot. |

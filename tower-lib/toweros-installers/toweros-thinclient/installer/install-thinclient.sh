@@ -212,6 +212,8 @@ install_tower_tools() {
     # install tower with pip
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
+    # install man page
+    cp /var/towercomputers/docs/tower.1 /mnt/usr/local/share/man/man1/
 }
 
 

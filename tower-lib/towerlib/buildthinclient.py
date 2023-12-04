@@ -7,7 +7,7 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-from sh import rm, git, pip, Command, apk, hatch, cp
+from sh import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
 
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
@@ -75,6 +75,14 @@ def prepare_installer():
 def prepare_docs():
     makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
     copytree(join_path(REPO_PATH, 'docs', 'src'), wd('overlay/var/towercomputers/docs'))
+    argparse_manpage(
+        '--pyfile', join_path(REPO_PATH, 'tower-cli', 'towercli', 'tower.py'),
+        '--function', 'towercli_parser',
+        '--author', "TowerOS",
+        '--project-name', 'TowerOS',
+        '--url', 'https://toweros.org',
+        '--output', wd('overlay/var/towercomputers/docs', 'tower.1'),
+    )
 
 def prepare_build(builds_dir):
     makedirs(wd('overlay/var/towercomputers/builds'))

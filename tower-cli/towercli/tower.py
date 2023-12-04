@@ -9,7 +9,7 @@ import towercli
 # pylint: disable=unused-import
 from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version
 
-def parse_arguments():
+def towercli_parser():
     parser = argparse.ArgumentParser(description="""
         TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with NX protocol.
     """)
@@ -35,6 +35,10 @@ def parse_arguments():
     towercli.commands.status.add_args(subparser)
     towercli.commands.wlanconnect.add_args(subparser)
     towercli.commands.version.add_args(subparser)
+    return parser
+
+def parse_arguments():
+    parser = towercli_parser()
     args = parser.parse_args()
     getattr(towercli.commands, args.command.replace("-", "")).check_args(args, parser.error)
     return args
