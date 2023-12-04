@@ -932,7 +932,7 @@
 </thead>
 <tbody>
 <tr>
-<td>Disk is fully encrypted</td>
+<td>Disk is fully encrypted?</td>
 <td>Restart without the USB key containing the <code>boot</code> partition.</td>
 <td>Doesn't Boot.</td>
 </tr>
@@ -942,27 +942,27 @@
 <td>Boots to Welcome Message.</td>
 </tr>
 <tr>
-<td>The welcome message is displayed</td>
-<td>A welcome message should indicate the location of the documentation.</td>
-<td><code>~/docs/</code></td>
+<td>The welcome message is displayed.</td>
+<td>Check the message above the login prompt.</td>
+<td>A message should indicate the location of the documentation.</td>
 </tr>
 <tr>
-<td>Default user is created</td>
+<td>Default user is created.</td>
 <td>Enter the chosen username and password.</td>
 <td>You should log in.</td>
 </tr>
 <tr>
-<td>Keyboard is configured</td>
+<td>Keyboard is configured.</td>
 <td>Type some characters.</td>
 <td>Check is OK.</td>
 </tr>
 <tr>
-<td>Time Zone is confirgured</td>
+<td>Time Zone is confirgured.</td>
 <td><code>[thinclient]$ date</code></td>
 <td>The date with the correct time zone.</td>
 </tr>
 <tr>
-<td>Shell is customized</td>
+<td>Shell is customized.</td>
 <td>Check the shell prompt format.</td>
 <td><code>[&lt;username&gt;@thinclient &lt;current folder&gt;]$</code></td>
 </tr>
@@ -972,92 +972,92 @@
 <td><img alt="lsblk thinclient" src="../img/lsblk-thinclient.png" /></td>
 </tr>
 <tr>
-<td><code>supercronic</code> service must be started</td>
+<td><code>supercronic</code> service must be started.</td>
 <td><code>[thinclient]$ sudo rc-service supercronic status</code></td>
 <td><code>* status: started</code></td>
 </tr>
 <tr>
-<td>Default user is sudoer without password</td>
+<td>Default user is sudoer without password.</td>
 <td><code>[thinclient]$ sudo su</code></td>
 <td>Root session without a password being requested.</td>
 </tr>
 <tr>
-<td>The documentation must be present in the ~/docs folder</td>
+<td>The documentation must be present in the ~/docs folder.</td>
 <td><code>[thinclient]$ ls ~/docs</code></td>
-<td>List of documents</td>
+<td>List of documents.</td>
 </tr>
 <tr>
-<td>Documentation can be consulted with <code>bat</code></td>
+<td>Documentation can be consulted with <code>bat</code>.</td>
 <td><code>[thinclient]$ bat ~/docs/usage.md</code></td>
-<td>Markdown viewer</td>
+<td>Markdown viewer.</td>
 </tr>
 <tr>
-<td>Tower CLI man page is installed</td>
+<td>Tower CLI man page is installed.</td>
 <td><code>[thinclient]$ man tower</code></td>
-<td>Tower CLI manual</td>
+<td>Tower CLI manual.</td>
 </tr>
 <tr>
-<td><code>eth0</code> must be configured with IP <code>192.168.2.100</code></td>
+<td><code>eth0</code> must be configured with IP <code>192.168.2.100</code>.</td>
 <td><code>[thinclient]$ ip ad</code></td>
 <td><img alt="eth0 thinclient" src="../img/eth0-thinclient.png" /></td>
 </tr>
 <tr>
-<td><code>eth1</code> must be configured with IP <code>192.168.3.100</code></td>
+<td><code>eth1</code> must be configured with IP <code>192.168.3.100</code>.</td>
 <td><code>[thinclient]$ ip ad</code></td>
 <td><img alt="eth1 thinclient" src="../img/eth1-thinclient.png" /></td>
 </tr>
 <tr>
-<td><code>eth0</code> MAC must be persistent</td>
-<td><code>[thinclient]$ ip ad</code>, reboot then <code>[thinclient]$ ip ad</code></td>
-<td>the value of <code>link/ether</code> for <code>eth0</code> should not change after a reboot.</td>
+<td><code>eth0</code> MAC must be persistent.</td>
+<td><code>[thinclient]$ ip ad</code>, reboot then <code>[thinclient]$ ip ad</code>.</td>
+<td>The value of <code>link/ether</code> for <code>eth0</code> should not change after a reboot.</td>
 </tr>
 <tr>
-<td><code>iptables</code> service must be started</td>
+<td><code>iptables</code> service must be started.</td>
 <td><code>[thinclient]$ sudo rc-service iptables status</code></td>
 <td><code>* status: iptables</code></td>
 </tr>
 <tr>
-<td>Firewal must be correctly configured</td>
+<td>Firewal must be correctly configured.</td>
 <td><code>[thinclient]$ sudo iptables -L -v</code></td>
-<td><a href="https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh">See configuration</a></td>
+<td><a href="https://github.com/towercomputers/toweros/blob/master/tower-lib/toweros-installers/toweros-thinclient/installer/configure-firewall.sh">See configuration</a>.</td>
 </tr>
 <tr>
-<td>Wifi must be soft blocked</td>
+<td>Wifi must be soft blocked.</td>
 <td><code>[thinclient]$ rfkill list wifi</code></td>
 <td><code>Soft blocked: yes</code></td>
 </tr>
 <tr>
-<td>Bluetooth must be soft blocked</td>
+<td>Bluetooth must be soft blocked.</td>
 <td><code>[thinclient]$ rfkill list bluetooth</code></td>
 <td><code>Soft blocked: yes</code></td>
 </tr>
 <tr>
-<td><code>labwc</code> starts automatically after login if the option was chosen during installation</td>
-<td>Boot</td>
-<td><code>labwc</code> must start after login</td>
+<td><code>labwc</code> starts automatically after login if the option was chosen during installation.</td>
+<td>Boot.</td>
+<td><code>labwc</code> must start after login.</td>
 </tr>
 <tr>
-<td><code>labwc</code> should properly start manually</td>
+<td><code>labwc</code> should properly start manually.</td>
 <td><code>[thinclient]$ dbus-launch labwc</code></td>
-<td><code>labwc</code> must start</td>
+<td><code>labwc</code> must start.</td>
 </tr>
 <tr>
-<td>The <code>sfwbar</code> menu bar should appear correctly</td>
+<td>The <code>sfwbar</code> menu bar should appear correctly.</td>
 <td><code>[thinclient]$ dbus-launch labwc</code></td>
-<td>Menu bar must be present on the bottom</td>
+<td>Menu bar must be present on the bottom.</td>
 </tr>
 <tr>
-<td><code>CopyQ</code> must be correctly started</td>
-<td>Check the presence of the icon in the taskbar</td>
+<td><code>CopyQ</code> must be correctly started.</td>
+<td>Check the presence of the icon in the taskbar.</td>
 <td><img alt="copyq" src="../img/copyq.png" /></td>
 </tr>
 <tr>
-<td>The screen locker should activate correctly after 5 minutes of inactivity</td>
-<td>Stay inactive 5mn</td>
-<td>Black screen with password prompt</td>
+<td>The screen locker should activate correctly after 5 minutes of inactivity.</td>
+<td>Stay inactive 5mn.</td>
+<td>Black screen with password prompt.</td>
 </tr>
 <tr>
-<td>The latest version of <code>tower</code> cli must be installed</td>
+<td>The latest version of <code>tower</code> cli must be installed.</td>
 <td><code>[thinclient]$ tower version</code></td>
 <td>Installed version.</td>
 </tr>
