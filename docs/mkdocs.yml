@@ -25,8 +25,11 @@ nav:
   - Technical:
     - Whitepaper: "TowerOS Whitepaper.pdf"
     - Implementation: implementation.md
-    - Development: development.md
     - GitHub Repository: https://github.com/towercomputers/toweros
+  - Development:
+    - Developer Environment: dev-environment.md
+    - Building TowerOS: build-toweros.md
+    - QA Script: qa-script.md
 
 extra:
   generator: false
