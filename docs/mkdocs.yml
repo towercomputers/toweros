@@ -19,6 +19,7 @@ nav:
   - Usage:
     - Using TowerOS: usage.md
     - Guides: guides.md
+    - Tower CLI Manual: manual.md
   - Security:
     - Security: security.md
     - Secure Boot: secure-boot.md

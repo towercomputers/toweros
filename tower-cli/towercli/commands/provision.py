@@ -8,15 +8,17 @@ from towerlib import provision, utils, sshconf, config
 logger = logging.getLogger('tower')
 
 def provision_parser(argparser):
+    help_message = "Prepare the bootable device needed to provision a host"
     return argparser.add_parser(
         'provision',
-        help="""Prepare the bootable device needed to provision a host."""
+        help=help_message, description=help_message
     )
 
 def upgrade_parser(argparser):
+    help_message = "Prepare the bootable device needed to upgrade a host"
     return argparser.add_parser(
         'upgrade',
-        help="""Prepare the boot device needed to upgrade a host."""
+        help=help_message, description=help_message
     )
 
 def add_args(argparser, upgrade=False):

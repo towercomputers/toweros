@@ -9,11 +9,11 @@ from towerlib.utils.exceptions import TowerException
 logger = logging.getLogger('tower')
 
 def add_args(argparser):
+    help_message = "Run an application on the specified host, with the GUI on the thin client."
     run_parser = argparser.add_parser(
         'run',
-        help="Run an application on the specified host, with the GUI on the thin client."
+        help=help_message, description=help_message
     )
-
     run_parser.add_argument(
         'host_name',
         help="""Host's name. This name must match the `name` used with the `provision` command. (Required)""",

@@ -4,11 +4,11 @@ from towerlib import sshconf
 from towerlib import install
 
 def add_args(argparser):
+    help_message = "Install an application on a host with APK"
     install_parser = argparser.add_parser(
         'install',
-        help="""Install an application on a host with APK"""
+        help=help_message, description=help_message
     )
-
     install_parser.add_argument(
         'host_name',
         help="""Host to install the package on (Required)""",

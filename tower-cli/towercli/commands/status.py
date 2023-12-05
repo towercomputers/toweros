@@ -3,9 +3,10 @@ import json
 from towerlib import sshconf
 
 def add_args(argparser):
+    help_message = "Check the status of all hosts in the Tower system."
     status_parser = argparser.add_parser(
         'status',
-        help="Check the status of all hosts in the Tower system."
+        help=help_message, description=help_message
     )
     status_parser.add_argument(
         '--host',

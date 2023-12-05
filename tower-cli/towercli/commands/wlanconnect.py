@@ -5,9 +5,10 @@ from towerlib import provision, sshconf, config
 logger = logging.getLogger('tower')
 
 def add_args(argparser):
+    help_message = "Update WiFi credentials on the router."
     connect_parser = argparser.add_parser(
         'wlan-connect',
-        help="""Command used to update WiFi credentials on the router."""
+        help=help_message, description=help_message
     )
 
     connect_parser.add_argument(
