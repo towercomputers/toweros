@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://toweros.org/build-toweros/">
+        <link rel="canonical" href="https://toweros.org/manual/">
       
       
-        <link rel="prev" href="../dev-environment/">
+        <link rel="prev" href="../guides/">
       
       
-        <link rel="next" href="../qa-script/">
+        <link rel="next" href="../security/">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -22,7 +22,7 @@
     
     
       
-        <title>Building TowerOS - TowerOS</title>
+        <title>Tower CLI Manual - TowerOS</title>
       
     
     
@@ -67,7 +67,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#build-toweros-images" class="md-skip">
+        <a href="#name" class="md-skip">
           Skip to content
         </a>
       
@@ -103,7 +103,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Building TowerOS
+              Tower CLI Manual
             
           </span>
         </div>
@@ -302,8 +302,10 @@
       
   
   
+    
   
   
+  
     
     
     
@@ -312,14 +314,12 @@
       
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -333,7 +333,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             Usage
@@ -386,10 +386,28 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../manual/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Tower CLI Manual
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -398,6 +416,138 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#name" class="md-nav__link">
+    <span class="md-ellipsis">
+      NAME
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synopsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SYNOPSIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      COMMANDS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="COMMANDS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tower-provision" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower provision
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-upgrade" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower upgrade
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower install
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-wlan-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower wlan-connect
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower version
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      OPTIONS
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -617,8 +767,6 @@
       
   
   
-    
-  
   
   
     
@@ -629,12 +777,14 @@
       
       
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -648,7 +798,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Development
@@ -680,28 +830,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Building TowerOS
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../build-toweros/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -710,117 +842,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#build-toweros-images" class="md-nav__link">
-    <span class="md-ellipsis">
-      Build TowerOS images
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Build TowerOS images">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#toweros-host" class="md-nav__link">
-    <span class="md-ellipsis">
-      TowerOS Host
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#toweros-thin-client" class="md-nav__link">
-    <span class="md-ellipsis">
-      TowerOS Thin Client
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#with-docker" class="md-nav__link">
-    <span class="md-ellipsis">
-      With Docker
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-your-own-custom-thin-client-linux" class="md-nav__link">
-    <span class="md-ellipsis">
-      Build your own custom Thin Client (Linux)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Build your own custom Thin Client (Linux)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#install-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install Dependencies
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enable-basic-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      Enable Basic Services
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-etcsudoers-and-groups" class="md-nav__link">
-    <span class="md-ellipsis">
-      Update /etc/sudoers and groups
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#install-tower-cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install tower-cli
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -879,37 +900,100 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#build-toweros-images" class="md-nav__link">
+  <a href="#name" class="md-nav__link">
     <span class="md-ellipsis">
-      Build TowerOS images
+      NAME
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Build TowerOS images">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synopsis" class="md-nav__link">
+    <span class="md-ellipsis">
+      SYNOPSIS
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      DESCRIPTION
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      COMMANDS
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="COMMANDS">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#toweros-host" class="md-nav__link">
+  <a href="#tower-provision" class="md-nav__link">
     <span class="md-ellipsis">
-      TowerOS Host
+      tower provision
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#toweros-thin-client" class="md-nav__link">
+  <a href="#tower-upgrade" class="md-nav__link">
     <span class="md-ellipsis">
-      TowerOS Thin Client
+      tower upgrade
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#with-docker" class="md-nav__link">
+  <a href="#tower-install" class="md-nav__link">
     <span class="md-ellipsis">
-      With Docker
+      tower install
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower run
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-wlan-connect" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower wlan-connect
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tower-version" class="md-nav__link">
+    <span class="md-ellipsis">
+      tower version
     </span>
   </a>
   
@@ -921,53 +1005,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#build-your-own-custom-thin-client-linux" class="md-nav__link">
+  <a href="#options" class="md-nav__link">
     <span class="md-ellipsis">
-      Build your own custom Thin Client (Linux)
+      OPTIONS
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Build your own custom Thin Client (Linux)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#install-dependencies" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install Dependencies
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enable-basic-services" class="md-nav__link">
-    <span class="md-ellipsis">
-      Enable Basic Services
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#update-etcsudoers-and-groups" class="md-nav__link">
-    <span class="md-ellipsis">
-      Update /etc/sudoers and groups
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#install-tower-cli" class="md-nav__link">
-    <span class="md-ellipsis">
-      Install tower-cli
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -986,79 +1028,116 @@
                   
 
 
-  <h1>Building TowerOS</h1>
+  <h1>Tower CLI Manual</h1>
 
-<h2 id="build-toweros-images">Build TowerOS images</h2>
-<p>Connect to internet and download Github repository as explained in the first paragraph above.</p>
-<h3 id="toweros-host">TowerOS Host</h3>
-<pre><code>[thinclient]$ cd ~/towercomputers/toweros/tower-build-cli
-[thinclient]$ ./tower-build host
-</code></pre>
-<p>This will generate a TowerOS-Host image file compressed with xz in <code>~/.cache/tower/builds/</code>. Images in this folder will be used by default by the <code>provision</code> command (if the <code>--image</code> flag is not provided).</p>
-<h3 id="toweros-thin-client">TowerOS Thin Client</h3>
-<pre><code>[thinclient]$ ./tower-build thinclient
-</code></pre>
-<p>This will generate an ISO image in <code>~/.cache/tower/builds/</code>. A TowerOS Host image is embedded in the TowerOS ThinClient image. If a TowerOS Host image is present in the <code>~/.cache/tower/builds/</code> folder, it is used. Otherwise a new image is automatically generated.</p>
-<h3 id="with-docker">With Docker</h3>
-<p>Build the Docker image with:</p>
-<pre><code>[thinclient]$ git clone git@github.com:towercomputers/toweros.git
-[thinclient]$ cd toweros/tower-build-cli
-[thinclient]$ docker build -t build-tower-image:latest -f ./Dockerfile ../
-</code></pre>
-<p>Then build the TowerOS image inside a Docker container:</p>
-<pre><code>[thinclient]$ docker run --name towerbuilder --user tower --privileged -v /dev:/dev build-tower-image thinclient
-</code></pre>
-<p>Retrieve that image from the container:</p>
-<pre><code>[thinclient]$ docker cp towerbuilder:/home/tower/.cache/tower/builds/toweros-thinclient-0.0.1-20230513171731-x86_64.iso ./
-</code></pre>
-<p>Finally delete the container with:</p>
-<pre><code>[thinclient]$ docker rm towerbuilder
-</code></pre>
-<p><strong>Note: </strong>With the ARM64 architecture, you must use <code>buildx</code> and a cross-platform emulator like <code>tonistiigi/binfmt</code>.</p>
-<pre><code>[thinclient]$ docker buildx create --use
-[thinclient]$ docker buildx build -t build-tower-image:latest --platform=linux/amd64 --output type=docker -f ./Dockerfile ../
-[thinclient]$ docker run --privileged --rm tonistiigi/binfmt --install all
-[thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
-              build-tower-image thinclient
-</code></pre>
-<h2 id="build-your-own-custom-thin-client-linux">Build your own custom Thin Client (Linux)</h2>
-<h3 id="install-dependencies">Install Dependencies</h3>
-<pre><code>[thinclient]$ apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
-      avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
-      musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
-      alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
-      fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
-      agetty runuser nano vim net-tools losetup xorg-server xf86-input-libinput \
-      xinit udev xfce4 xfce4-terminal xfce4-screensaver adw-gtk3 \
-      adwaita-xfce-icon-theme setxkbmap
-</code></pre>
-<h3 id="enable-basic-services">Enable Basic Services</h3>
-<p>If necessary, enable IPv4 with:</p>
-<pre><code>[thinclient]$ sed -i 's/noipv4ll/#noipv4ll/' /etc/dhcpcd.conf
-</code></pre>
-<p>then</p>
-<pre><code>[thinclient]$ rc-update add dhcpcd
-[thinclient]$ rc-update add avahi-daemon
-[thinclient]$ rc-update add iptables
-[thinclient]$ rc-update add networking
-[thinclient]$ rc-update add wpa_supplicant boot
-[thinclient]$ rc-update add dbus
-</code></pre>
-<p><strong>Important:</strong> Make sure you are connected to the switch and check that your first wired interface (starting with the letter <code>e</code>) has an assigned IP.</p>
-<h3 id="update-etcsudoers-and-groups">Update <code>/etc/sudoers</code> and groups</h3>
-<p>The <code>toweros</code> software assumes that the current user has full <code>sudo</code> access with no password. (Please refer to our <a href="../security/">threat model</a>.) Check if <code>/etc/sudoers</code> contains the following line:</p>
-<pre><code>&lt;your_username&gt; ALL=(ALL) NOPASSWD: ALL
-</code></pre>
-<p>To build an image with <code>./tower-build</code>, you first need to add the current user in the <code>abuild</code> group:</p>
-<pre><code>[thinclient]$ addgroup &lt;you_username&gt; abuild
-</code></pre>
-<h3 id="install-tower-cli">Install <code>tower-cli</code></h3>
-<p>Update <code>pip</code> to the latest version:</p>
-<pre><code>[thinclient]$ python3 -m pip install --upgrade pip
-</code></pre>
-<p>Install the <code>tower</code> CLI with <code>pip</code>:</p>
-<pre><code>[thinclient]$ python3 -m pip install &quot;tower-cli @ git+https://github.com/towercomputers/toweros.git#subdirectory=tower-cli&quot;
-</code></pre>
+<!--Do not edit manually. Generated with `[tower-cli]$ hatch run tower mdhelp > ../docs/src/manual.md`.-->
+<h2 id="name">NAME</h2>
+<div style="margin:0 50px">tower</div>
+<h2 id="synopsis">SYNOPSIS</h2>
+<div style="margin:0 50px; font-family:Courier">tower [-h] [--quiet] [--verbose] {provision,upgrade,install,run,status,wlan-connect,version}} ...</div>
+<h2 id="description">DESCRIPTION</h2>
+<div style="margin:0 50px">TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with NX protocol.</div>
+<h2 id="commands">COMMANDS</h2>
+<div style="margin:0 50px">
+<b>tower</b> <u><a href="#tower-provision">provision</a></u><br /><div style="margin:0 50px">Prepare the bootable device needed to provision a host</div><br />
+<b>tower</b> <u><a href="#tower-upgrade">upgrade</a></u><br /><div style="margin:0 50px">Prepare the bootable device needed to upgrade a host</div><br />
+<b>tower</b> <u><a href="#tower-install">install</a></u><br /><div style="margin:0 50px">Install an application on a host with APK</div><br />
+<b>tower</b> <u><a href="#tower-run">run</a></u><br /><div style="margin:0 50px">Run an application on the specified host, with the GUI on the thin client.</div><br />
+<b>tower</b> <u><a href="#tower-status">status</a></u><br /><div style="margin:0 50px">Check the status of all hosts in the Tower system.</div><br />
+<b>tower</b> <u><a href="#tower-wlan-connect">wlan-connect</a></u><br /><div style="margin:0 50px">Update WiFi credentials on the router.</div><br />
+<b>tower</b> <u><a href="#tower-version">version</a></u><br /><div style="margin:0 50px">Get the version of TowerOS installed on the thin client and hosts.</div><br />
+</div>
+<h3 id="tower-provision"><code>tower provision</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower provision [-h] [-bd BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH] [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG] [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD] [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}] name</div>
+<div style="margin:0 50px"><br />
+<b>name</b><br /><div style="margin:0 50px">Host's name, used to refer to the host when performing other actions (Required)</div><br />
+</div>
+<p>Options:</p>
+<div style="margin:0 50px">
+<b>-bd</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
+<b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
+<b>--zero-device</b><br /><div style="margin:0 50px">Zero the target device before copying the installation image to it. (Default: False)</div><br />
+<b>--no-confirm</b><br /><div style="margin:0 50px">Don't ask for confirmation. (Default: False)</div><br />
+<b>--image</b><br /><div style="margin:0 50px">Path to installation image</div><br />
+<b>--ifname</b><br /><div style="margin:0 50px">Network interface (Default: `eth0` for online host, `eth1` for offline host) </div><br />
+<b>--no-wait</b><br /><div style="margin:0 50px">Do not wait for the host to be ready (Default: False)</div><br />
+<b>--timeout</b><br /><div style="margin:0 50px">Maximum wait time for the host to be ready, in seconds. Specify `0` for no limit. (Default: 600)</div><br />
+<b>--force</b><br /><div style="margin:0 50px">Overwrite the configuration for an existing host (Default: False)</div><br />
+<b>--public-key-path</b><br /><div style="margin:0 50px">Path to public key used to access the host (Default: automatically generated and stored on the boot device and locally in `~/.local/tower/hosts/`)</div><br />
+<b>--private-key-path</b><br /><div style="margin:0 50px">Path to private key used to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)</div><br />
+<b>--keyboard-layout</b><br /><div style="margin:0 50px">Keyboard layout code (Default: same as that of the thin client)</div><br />
+<b>--keyboard-variant</b><br /><div style="margin:0 50px">Keyboard variant code (Default: same as that of the thin client)</div><br />
+<b>--timezone</b><br /><div style="margin:0 50px">Timezone of the host. e.g. `Europe/Paris` (Default: same as that of the thin client)</div><br />
+<b>--lang</b><br /><div style="margin:0 50px">Language of the host. e.g. `en_US` (Default: same as that of the thin client)</div><br />
+<b>--online</b><br /><div style="margin:0 50px">Host *WILL* be able to access the Internet via the router. (Default: False)</div><br />
+<b>--offline</b><br /><div style="margin:0 50px">Host will *NOT* be able to access the Internet via the router. (Default: False)</div><br />
+<b>--wlan-ssid</b><br /><div style="margin:0 50px">WiFi SSID (Default: same as that currently in use by the thin client)</div><br />
+<b>--wlan-password</b><br /><div style="margin:0 50px">WiFi password (Default: same as that currently currently in use by the thin client)</div><br />
+<b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Blue)</div><br />
+</div>
+<h3 id="tower-upgrade"><code>tower upgrade</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower upgrade [-h] [-bd BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] name</div>
+<div style="margin:0 50px"><br />
+<b>name</b><br /><div style="margin:0 50px">Host's name, used to refer to the host when performing other actions (Required)</div><br />
+</div>
+<p>Options:</p>
+<div style="margin:0 50px">
+<b>-bd</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
+<b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
+<b>--zero-device</b><br /><div style="margin:0 50px">Zero the target device before copying the installation image to it. (Default: False)</div><br />
+<b>--no-confirm</b><br /><div style="margin:0 50px">Don't ask for confirmation. (Default: False)</div><br />
+<b>--image</b><br /><div style="margin:0 50px">Path to installation image</div><br />
+<b>--ifname</b><br /><div style="margin:0 50px">Network interface (Default: `eth0` for online host, `eth1` for offline host) </div><br />
+<b>--no-wait</b><br /><div style="margin:0 50px">Do not wait for the host to be ready (Default: False)</div><br />
+<b>--timeout</b><br /><div style="margin:0 50px">Maximum wait time for the host to be ready, in seconds. Specify `0` for no limit. (Default: 600)</div><br />
+<b>--force</b><br /><div style="margin:0 50px">Overwrite the configuration for an existing host (Default: False)</div><br />
+</div>
+<h3 id="tower-install"><code>tower install</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower install [-h] host_name packages [packages ...]</div>
+<div style="margin:0 50px"><br />
+<b>host_name</b><br /><div style="margin:0 50px">Host to install the package on (Required)</div><br />
+<b>packages</b><br /><div style="margin:0 50px">Package(s) to install (Required).</div><br />
+</div>
+<h3 id="tower-run"><code>tower run</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower run [-h] [--nx-link NX_LINK] [--nx-limit NX_LIMIT] [--nx-images NX_IMAGES] [--nx-cache NX_CACHE] [--nx-stream {0,1,2,3,4,5,6,7,8,9}] [--nx-data {0,1,2,3,4,5,6,7,8,9}] [--nx-delta {0,1}] [--waypipe] [--wp-compress WP_COMPRESS] [--wp-threads WP_THREADS] [--wp-video WP_VIDEO] host_name run_command [run_command ...]</div>
+<div style="margin:0 50px"><br />
+<b>host_name</b><br /><div style="margin:0 50px">Host's name. This name must match the `name` used with the `provision` command. (Required)</div><br />
+<b>run_command</b><br /><div style="margin:0 50px">Command to execute on the host with NX protocol. (Required)</div><br />
+</div>
+<p>Options:</p>
+<div style="margin:0 50px">
+<b>--nx-link</b><br /><div style="margin:0 50px">The value can be either 'modem', 'isdn', 'adsl', 'wan', 'lan', 'local' or a bandwidth specification, like for example '56k', '1m', '100m'</div><br />
+<b>--nx-limit</b><br /><div style="margin:0 50px">Specify a bitrate limit allowed for this session. (Default: 0)</div><br />
+<b>--nx-images</b><br /><div style="margin:0 50px">Size of the persistent image cache. (Default: 512M)</div><br />
+<b>--nx-cache</b><br /><div style="margin:0 50px">Size of the in-memory X message cache. Setting the value to 0 will disable the memory cache as well as the NX differential compression. (Default: 1G)</div><br />
+<b>--nx-stream</b><br /><div style="margin:0 50px">Enable or disable the ZLIB stream compression. The value must be between 0 and 9.</div><br />
+<b>--nx-data</b><br /><div style="margin:0 50px">Enable or disable the ZLIB stream compression. The value must be between 0 and 9.</div><br />
+<b>--nx-delta</b><br /><div style="margin:0 50px">Enable X differential compression.</div><br />
+<b>--waypipe</b><br /><div style="margin:0 50px">Use `waypipe` instead `nx`. (Default: False)</div><br />
+<b>--wp-compress</b><br /><div style="margin:0 50px">Select the compression method applied to data transfers. Options are none (for high-bandwidth networks), lz4 (intermediate), zstd (slow connection). The default compression is none. The compression level can be chosen by appending = followed by a number. For example, if C is zstd=7, waypipe will use level 7 Zstd compression.</div><br />
+<b>--wp-threads</b><br /><div style="margin:0 50px">Set the number of total threads (including the main thread) which a waypipe instance will create. These threads will be used to parallelize compression operations. This flag is passed on to waypipe server when given to waypipe ssh. The flag also controls the thread count for waypipe bench. The default behavior (choosable by setting T to 0) is to use half as many threads as the computer has hardware threads available.</div><br />
+<b>--wp-video</b><br /><div style="margin:0 50px">Compress specific DMABUF formats using a lossy video codec. Opaque, 10-bit, and multiplanar formats, among others, are not supported. V is a comma separated list of options to control the video encoding. Using the --video flag without setting any options is equivalent to using the default setting of: --video=sw,bpf=120000,h264. Later options supersede earlier ones (see `man waypipe` for more options).</div><br />
+</div>
+<h3 id="tower-status"><code>tower status</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower status [-h] [--host HOST]</div>
+<p>Options:</p>
+<div style="margin:0 50px">
+<b>--host</b><br /><div style="margin:0 50px">Host name</div><br />
+</div>
+<h3 id="tower-wlan-connect"><code>tower wlan-connect</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower wlan-connect [-h] --ssid SSID --password PASSWORD</div>
+<p>Options:</p>
+<div style="margin:0 50px">
+<b>--ssid</b><br /><div style="margin:0 50px">WiFi SSID</div><br />
+<b>--password</b><br /><div style="margin:0 50px">WiFi password</div><br />
+</div>
+<h3 id="tower-version"><code>tower version</code></h3>
+<div style="margin:0 50px; font-family:Courier">usage: tower version [-h]</div>
+<h2 id="options">OPTIONS</h2>
+<div style="margin:0 50px">
+<b>--quiet</b><br /><div style="margin:0 50px">Set log level to ERROR.</div><br />
+<b>--verbose</b><br /><div style="margin:0 50px">Set log level to DEBUG.</div><br />
+</div>
 
 
 
