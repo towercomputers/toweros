@@ -5,8 +5,6 @@ from towerlib import utils
 from towerlib.utils.exceptions import TowerException
 
 import towercli
-# import needed for getattr() in parse_arguments()
-# pylint: disable=unused-import
 from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version, mdhelp
 
 def towercli_parser():
@@ -34,20 +32,24 @@ def towercli_parser():
         help="Use `tower {provision|upgrade|install|run|status|wlan-connect|version} --help` to get the options list for each command.",
         metavar="{provision,upgrade,install,run,status,wlan-connect,version}}"
     )
-    towercli.commands.provision.add_args(subparser)
-    towercli.commands.upgrade.add_args(subparser)
-    towercli.commands.install.add_args(subparser)
-    towercli.commands.run.add_args(subparser)
-    towercli.commands.status.add_args(subparser)
-    towercli.commands.wlanconnect.add_args(subparser)
-    towercli.commands.version.add_args(subparser)
-    towercli.commands.mdhelp.add_args(subparser)
+    provision.add_args(subparser)
+    upgrade.add_args(subparser)
+    install.add_args(subparser)
+    run.add_args(subparser)
+    status.add_args(subparser)
+    wlanconnect.add_args(subparser)
+    version.add_args(subparser)
+    mdhelp.add_args(subparser)
     return parser
+
+def get_module(args):
+    module_name = args.command.replace("-", "")
+    return getattr(towercli.commands, module_name)
 
 def parse_arguments():
     parser = towercli_parser()
     args = parser.parse_args()
-    getattr(towercli.commands, args.command.replace("-", "")).check_args(args, parser.error)
+    get_module(args).check_args(args, parser.error)
     return args
 
 def main():
@@ -55,9 +57,9 @@ def main():
         args = parse_arguments()
         utils.clilogger.initialize(args.verbose, args.quiet)
         if args.command == 'mdhelp':
-            getattr(towercli.commands, args.command.replace("-", "")).execute(towercli_parser())
+            mdhelp.execute(towercli_parser())
         else:
-            getattr(towercli.commands, args.command.replace("-", "")).execute(args)
+            get_module(args).execute(args)
     except TowerException as e:
         utils.clilogger.print_error(str(e))
         sys.exit()
