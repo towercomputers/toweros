@@ -10,7 +10,7 @@ def add_args(argparser):
     )
     status_parser.add_argument(
         '--host',
-        help="""Host name""",
+        help="""Name of the host you want to check the status. If not specified, the status of all hosts will be displayed.""",
         required=False,
         default=None
     )

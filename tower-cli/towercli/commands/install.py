@@ -10,7 +10,7 @@ def add_args(argparser):
         help=help_message, description=help_message
     )
     install_parser.add_argument(
-        'host_name',
+        'host',
         help="""Host to install the package on (Required)""",
         nargs=1
     )
@@ -21,7 +21,7 @@ def add_args(argparser):
     )
 
 def check_args(args, parser_error):
-    name = args.host_name[0]
+    name = args.host[0]
     config = sshconf.get(name)
 
     if config is None and name != "thinclient":
@@ -32,4 +32,4 @@ def check_args(args, parser_error):
             parser_error(f"Invalid package name:{pkg_name}")
 
 def execute(args):
-    install.install_packages(args.host_name[0], args.packages)
+    install.install_packages(args.host[0], args.packages)

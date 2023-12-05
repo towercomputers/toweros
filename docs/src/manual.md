@@ -61,15 +61,15 @@ Options:
 <b>--force</b><br /><div style="margin:0 50px">Overwrite the configuration for an existing host (Default: False)</div><br />
 </div>
 ### `tower install`
-<div style="margin:0 50px; font-family:Courier">usage: tower install [-h] host_name packages [packages ...]</div>
+<div style="margin:0 50px; font-family:Courier">usage: tower install [-h] host packages [packages ...]</div>
 <div style="margin:0 50px"><br />
-<b>host_name</b><br /><div style="margin:0 50px">Host to install the package on (Required)</div><br />
+<b>host</b><br /><div style="margin:0 50px">Host to install the package on (Required)</div><br />
 <b>packages</b><br /><div style="margin:0 50px">Package(s) to install (Required).</div><br />
 </div>
 ### `tower run`
-<div style="margin:0 50px; font-family:Courier">usage: tower run [-h] [--nx-link NX_LINK] [--nx-limit NX_LIMIT] [--nx-images NX_IMAGES] [--nx-cache NX_CACHE] [--nx-stream {0,1,2,3,4,5,6,7,8,9}] [--nx-data {0,1,2,3,4,5,6,7,8,9}] [--nx-delta {0,1}] [--waypipe] [--wp-compress WP_COMPRESS] [--wp-threads WP_THREADS] [--wp-video WP_VIDEO] host_name run_command [run_command ...]</div>
+<div style="margin:0 50px; font-family:Courier">usage: tower run [-h] [--nx-link NX_LINK] [--nx-limit NX_LIMIT] [--nx-images NX_IMAGES] [--nx-cache NX_CACHE] [--nx-stream {0,1,2,3,4,5,6,7,8,9}] [--nx-data {0,1,2,3,4,5,6,7,8,9}] [--nx-delta {0,1}] [--waypipe] [--wp-compress WP_COMPRESS] [--wp-threads WP_THREADS] [--wp-video WP_VIDEO] host run_command [run_command ...]</div>
 <div style="margin:0 50px"><br />
-<b>host_name</b><br /><div style="margin:0 50px">Host's name. This name must match the `name` used with the `provision` command. (Required)</div><br />
+<b>host</b><br /><div style="margin:0 50px">Host's name. This name must match the `name` used with the `provision` command. (Required)</div><br />
 <b>run_command</b><br /><div style="margin:0 50px">Command to execute on the host with NX protocol. (Required)</div><br />
 </div>
 Options:
@@ -90,7 +90,7 @@ Options:
 <div style="margin:0 50px; font-family:Courier">usage: tower status [-h] [--host HOST]</div>
 Options:
 <div style="margin:0 50px">
-<b>--host</b><br /><div style="margin:0 50px">Host name</div><br />
+<b>--host</b><br /><div style="margin:0 50px">Name of the host you want to check the status. If not specified, the status of all hosts will be displayed.</div><br />
 </div>
 ### `tower wlan-connect`
 <div style="margin:0 50px; font-family:Courier">usage: tower wlan-connect [-h] --ssid SSID --password PASSWORD</div>
