@@ -16,13 +16,12 @@
 <b>tower</b> <u><a href="#tower-version">version</a></u><br /><div style="margin:0 50px">Get the version of TowerOS installed on the thin client and hosts.</div><br />
 </div>
 ### `tower provision`
-<div style="margin:0 50px; font-family:Courier">usage: tower provision [-h] [-bd BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH] [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG] [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD] [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}] name</div>
+<div style="margin:0 50px; font-family:Courier">usage: tower provision [-h] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH] [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG] [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD] [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}] name</div>
 <div style="margin:0 50px"><br />
 <b>name</b><br /><div style="margin:0 50px">Host's name, used to refer to the host when performing other actions (Required)</div><br />
 </div>
 Options:
 <div style="margin:0 50px">
-<b>-bd</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
 <b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
 <b>--zero-device</b><br /><div style="margin:0 50px">Zero the target device before copying the installation image to it. (Default: False)</div><br />
 <b>--no-confirm</b><br /><div style="margin:0 50px">Don't ask for confirmation. (Default: False)</div><br />
@@ -44,13 +43,12 @@ Options:
 <b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Blue)</div><br />
 </div>
 ### `tower upgrade`
-<div style="margin:0 50px; font-family:Courier">usage: tower upgrade [-h] [-bd BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] name</div>
+<div style="margin:0 50px; font-family:Courier">usage: tower upgrade [-h] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] name</div>
 <div style="margin:0 50px"><br />
 <b>name</b><br /><div style="margin:0 50px">Host's name, used to refer to the host when performing other actions (Required)</div><br />
 </div>
 Options:
 <div style="margin:0 50px">
-<b>-bd</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
 <b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
 <b>--zero-device</b><br /><div style="margin:0 50px">Zero the target device before copying the installation image to it. (Default: False)</div><br />
 <b>--no-confirm</b><br /><div style="margin:0 50px">Don't ask for confirmation. (Default: False)</div><br />

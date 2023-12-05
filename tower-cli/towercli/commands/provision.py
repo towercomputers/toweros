@@ -30,7 +30,7 @@ def add_args(argparser, upgrade=False):
         help="""Host's name, used to refer to the host when performing other actions (Required)"""
     )
     parser.add_argument(
-        '-bd', '--boot-device',
+        '--boot-device',
         help="""Path to virtual device for the SD card or USB drive""",
         required=False,
         default=""
