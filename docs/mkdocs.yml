@@ -1,5 +1,7 @@
-site_name: TowerOS
+site_name: Documentation
 site_url: https://toweros.org
+repo_url: https://github.com/towercomputers/toweros/
+repo_name: TowerOS
 docs_dir: src
 markdown_extensions:
     - attr_list
@@ -11,6 +13,12 @@ theme:
     - navigation.expand
     - navigation.instant
     - navigation.instant.prefetch
+  logo: img/tower-logo.png
+  favicon: img/favicon.ico
+  icon:
+    repo: fontawesome/brands/github
+extra_css:
+    - css/towerdoc.css
 nav:
   - Getting Started:
     - Introduction: index.md
