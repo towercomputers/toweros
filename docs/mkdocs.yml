@@ -17,6 +17,7 @@ theme:
   favicon: img/favicon.ico
   icon:
     repo: fontawesome/brands/github
+  font: false
 extra_css:
     - css/towerdoc.css
 nav:
