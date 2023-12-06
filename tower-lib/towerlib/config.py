@@ -30,3 +30,5 @@ COLORS = [
     [95, "Light magenta", "ad7fa8"],
     [96, "Light cyan", "34e2e2"],
 ]
+HOST_ALPINE_BRANCH = "v3.18"
+THINCLIENT_ALPINE_BRANCH = "v3.18"

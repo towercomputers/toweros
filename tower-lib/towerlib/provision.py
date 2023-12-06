@@ -50,7 +50,7 @@ def prepare_host_config(args):
     with open(args.public_key_path, encoding="UTF-8") as f:
         public_key = f.read().strip()
     # generate random password
-    password = secrets.token_urlsafe(16)
+    password = args.password or secrets.token_urlsafe(16)
     # gather locale informations
     keyboard_layout, keyboard_variant = utils.get_keymap()
     if args.keyboard_layout:
@@ -99,6 +99,7 @@ def prepare_host_config(args):
         'ROUTER_IP': config.ROUTER_IP,
         'COLOR': host_color,
         'INSTALLATION_TYPE': "install",
+        'ALPINE_BRANCH': config.HOST_ALPINE_BRANCH,
     }
 
 @utils.clitask("Decompressing {0}...", sudo=True)

@@ -18,7 +18,7 @@ from sh import (
 from towerlib import utils
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
-from towerlib.config import TOWER_DIR
+from towerlib.config import TOWER_DIR, HOST_ALPINE_BRANCH
 from towerlib.utils.exceptions import LockException, BuildException
 
 mkfs_ext4 = Command('mkfs.ext4')
@@ -29,9 +29,8 @@ logger = logging.getLogger('tower')
 WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-host')
 
-ALPINE_BRANCH_FOR_UNVERSIONED = "v3.18"
-ALPINE_BRANCH_FOR_VERSIONED = "v3.18"
 USERNAME = getpass.getuser()
+ARCH = "aarch64"
 
 def sprint(value):
     print(value, end='', flush=True)
@@ -46,7 +45,7 @@ def prepare_working_dir():
 
 def fetch_apk_packages(repo_path, branch, packages):
     apk(
-        'fetch', '--arch', 'armv7', '-R', '--url', '--no-cache', '--allow-untrusted',
+        'fetch', '--arch', ARCH, '-R', '--url', '--no-cache', '--allow-untrusted',
         '--root', wd("EXPORT_BOOTFS_DIR"),
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/community',
@@ -54,23 +53,18 @@ def fetch_apk_packages(repo_path, branch, packages):
     )
 
 def prepare_apk_repos(private_key_path):
-    repo_path = wd("EXPORT_BOOTFS_DIR/apks/armv7/")
+    repo_path = wd(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/")
     rm('-rf', repo_path)
     mkdir('-p',repo_path)
     world_path = os.path.join(INSTALLER_DIR, 'etc', 'apk', 'world')
-    # TODO: test and remove this on Alpine v3.19 release
-    unversioned_apks, versioned_apks = [], []
+    apks = []
     for line in cat(world_path, _iter=True):
         package = line.strip()
-        if package == "linux-firmware-brcm-cm4":
+        if package.startswith('linux-firmware-brcm-cm4'):
             continue
-        if "=" in package:
-            versioned_apks.append(package.split("=")[0])
-        else:
-            unversioned_apks.append(package)
+        apks.append(line.strip())
     # download packages
-    fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_UNVERSIONED, unversioned_apks)
-    fetch_apk_packages(repo_path, ALPINE_BRANCH_FOR_VERSIONED, versioned_apks)
+    fetch_apk_packages(repo_path, HOST_ALPINE_BRANCH, apks)
     # build and copy linux-firmware-brcm-cm4
     Command('sh')(
         '-c',
@@ -79,9 +73,9 @@ def prepare_apk_repos(private_key_path):
     )
     cp("/home/tower/packages/toweros-host/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
     # prepare index
-    apks = glob.glob(wd("EXPORT_BOOTFS_DIR/apks/armv7/*.apk"))
-    apk_index_path = wd("EXPORT_BOOTFS_DIR/apks/armv7/APKINDEX.tar.gz")
-    apk_index_opts = ['index', '--arch', 'armv7', '--rewrite-arch', 'armv7', '--allow-untrusted']
+    apks = glob.glob(wd(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/*.apk"))
+    apk_index_path = wd(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/APKINDEX.tar.gz")
+    apk_index_opts = ['index', '--arch', ARCH, '--rewrite-arch', ARCH, '--allow-untrusted']
     apk(*apk_index_opts, '-o', apk_index_path, *apks, _out=logger.debug)
     # sign index
     abuild_sign('-k', private_key_path, apk_index_path, _out=logger.debug)

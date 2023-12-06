@@ -93,6 +93,11 @@ def add_args(argparser, upgrade=False):
             required=False
         )
         parser.add_argument(
+            '--password',
+            help="""Password to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)""",
+            required=False
+        )
+        parser.add_argument(
             '--keyboard-layout',
             help="""Keyboard layout code (Default: same as that of the thin client)""",
             required=False,

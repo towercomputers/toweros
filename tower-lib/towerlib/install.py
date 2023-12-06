@@ -14,11 +14,10 @@ from towerlib.utils.exceptions import LockException, TowerException
 from towerlib import sshconf, config
 
 logger = logging.getLogger('tower')
-
 APK_REPOS_HOST = "dl-cdn.alpinelinux.org"
 APK_REPOS_URL = [
-    f"http://{APK_REPOS_HOST}/alpine/v3.18/main",
-    f"http://{APK_REPOS_HOST}/alpine/v3.18/community",
+    f"http://{APK_REPOS_HOST}/alpine/{config.HOST_ALPINE_BRANCH}/main",
+    f"http://{APK_REPOS_HOST}/alpine/{config.HOST_ALPINE_BRANCH}/community",
 ]
 LOCAL_TUNNELING_PORT = 8666
 

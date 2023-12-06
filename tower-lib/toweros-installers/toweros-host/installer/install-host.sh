@@ -236,7 +236,7 @@ clone_live_system_to_disk() {
 
 	# prepare boot and root partitions and folders
 	mount -o remount,rw $BOOT_MEDIA
-	cp -rf /mnt/boot/*rpi? $BOOT_MEDIA/boot/
+	cp -rf /mnt/boot/*rpi* $BOOT_MEDIA/boot/
 	rm -Rf /mnt/boot
 
 	# update fstab
@@ -257,8 +257,8 @@ clone_live_system_to_disk() {
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		mkdir -p /mnt/etc/apk
 		cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/v3.18/main
-http://dl-cdn.alpinelinux.org/alpine/v3.18/community
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi
@@ -281,7 +281,7 @@ init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR, ALPINE_BRANCH
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env
