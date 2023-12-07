@@ -4,7 +4,8 @@ import os
 import tomllib
 import json
 
-from towerlib.utils.shell import license_scanner
+# pylint: disable=no-name-in-module
+from sh import license_scanner
 
 def scan_licenses():
     cwd = os.path.join(os.getcwd(), 'tower-lib')

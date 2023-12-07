@@ -10,7 +10,6 @@ from sh import (
     git as gitcli, pip, apk, hatch,
     nxproxy, xsetroot, mcookie, waypipe,
     argparse_manpage,
-    license_scanner,
     locale as getlocale,
 )
 # pylint: enable=import-error,unused-import,no-name-in-module
