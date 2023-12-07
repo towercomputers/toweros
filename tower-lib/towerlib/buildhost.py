@@ -30,7 +30,7 @@ WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
 INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-host')
 
 USERNAME = getpass.getuser()
-ARCH = "aarch64"
+ARCH = "armv7"
 
 def sprint(value):
     print(value, end='', flush=True)

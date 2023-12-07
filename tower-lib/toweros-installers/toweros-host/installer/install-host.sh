@@ -30,7 +30,8 @@ create_lvm_partitions() {
 	cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
 	chmod 0400 /crypto_keyfile.bin
 	# create LUKS partition
-	cryptsetup -q luksFormat $LVM_DISK /crypto_keyfile.bin
+	modprobe nhpoly1305
+	cryptsetup -q luksFormat -c xchacha12,aes-adiantum $LVM_DISK /crypto_keyfile.bin
 	cryptsetup luksAddKey $LVM_DISK /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
 	# initialize the LUKS partition
 	cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
