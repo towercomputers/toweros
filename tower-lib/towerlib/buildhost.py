@@ -7,7 +7,7 @@ import getpass
 import tempfile
 from io import StringIO
 
-from sh import (
+from towerlib.utils.shell import (
     Command, ErrorReturnCode,
     mount, parted, mkdosfs, tee, cat, echo,
     cp, rm, sync, rsync, chown, truncate, mkdir,

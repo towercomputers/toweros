@@ -27,8 +27,8 @@ def towercli_parser():
         default=False
     )
     subparser = parser.add_subparsers(
-        dest='command', 
-        required=True, 
+        dest='command',
+        required=True,
         help="Use `tower {provision|upgrade|install|run|status|wlan-connect|version} --help` to get the options list for each command.",
         metavar="{provision,upgrade,install,run,status,wlan-connect,version}}"
     )

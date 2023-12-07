@@ -7,8 +7,7 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-from sh import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
-
+from towerlib.utils.shell import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
 from towerlib import buildhost
@@ -81,7 +80,7 @@ def prepare_docs():
         '--url', 'https://toweros.org',
         '--prog', 'tower',
         '--manual-title', 'Tower CLI Manual',
-        '--output', wd('overlay/var/towercomputers/docs', 'tower.1'),
+        '--output', wd('overlay/var/towercomputers/docs/tower.1'),
     )
 
 def prepare_build(builds_dir):

@@ -13,8 +13,6 @@ from rich.text import Text
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
-#from sh import lsscsi, figlet
-
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
 with open(LOCALE_FILE, "r", encoding="UTF-8") as fp:
     LOCALE = json.load(fp)

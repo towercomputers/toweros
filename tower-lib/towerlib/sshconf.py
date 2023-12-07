@@ -3,8 +3,8 @@ import logging
 import time
 
 from sshconf import read_ssh_config, empty_ssh_config_file
-from sh import ssh, ErrorReturnCode, sed, touch, Command
 
+from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command
 from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost, InvalidColor
 from towerlib.__about__ import __version__

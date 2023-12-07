@@ -425,10 +425,6 @@ disable=line-too-long,
         missing-function-docstring,
         missing-class-docstring,
         missing-module-docstring,
-        no-name-in-module, # for sh import
-        unexpected-keyword-arg, # for sh arguments (_err, _out, etc)
-        too-many-function-args, # false positive for `ssh` function (imported with sh)
-        fixme, # TODO comments
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

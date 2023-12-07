@@ -5,9 +5,7 @@ import logging
 import time
 import tempfile
 
-import sh
-from sh import ssh, nxproxy, xsetroot, mcookie, waypipe, ErrorReturnCode
-
+from towerlib.utils.shell import ssh, nxproxy, xsetroot, mcookie, waypipe, ErrorReturnCode, Command
 from towerlib.utils.exceptions import NxTimeoutException
 from towerlib import sshconf
 
@@ -156,7 +154,7 @@ def kill_nx_processes(hostname, display_num):
     ssh(hostname, killcmd_legacy)
     ssh(hostname, killcmd)
     # ssh tunnel and nxproxy in thinclient
-    sh.Command('sh')('-c', killcmd)
+    Command('sh')('-c', killcmd)
 
 def cleanup(hostname, display_num):
     kill_nx_processes(hostname, display_num)

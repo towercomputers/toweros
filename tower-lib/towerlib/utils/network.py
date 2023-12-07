@@ -5,8 +5,8 @@ import tempfile
 
 import requests
 from backports.pbkdf2 import pbkdf2_hmac
-from sh import cp, Command
 
+from towerlib.utils.shell import cp, Command
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
 

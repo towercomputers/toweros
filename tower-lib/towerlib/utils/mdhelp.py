@@ -5,6 +5,14 @@ def clean_usage(usage):
     cleaned_usage = cleaned_usage.replace('\n', ' ')
     return re.sub(' +', ' ', cleaned_usage)
 
+def option_string_actions(parser):
+    # pylint: disable=protected-access
+    return parser._option_string_actions
+
+def positional_actions(parser):
+    # pylint: disable=protected-access
+    return parser._get_positional_actions()
+
 def get_cli_help(parser):
     cli_help = {
         'name': parser.prog,
@@ -13,7 +21,7 @@ def get_cli_help(parser):
         'commands': [],
         'options': [],
     }
-    commands = parser._get_positional_actions()[0].choices
+    commands = positional_actions(parser)[0].choices
     for command_name in commands:
         action = commands[command_name]
         if not action.description:
@@ -25,22 +33,22 @@ def get_cli_help(parser):
             'positional_arguments': [],
             'optional_arguments': [],
         }
-        for arg in action._get_positional_actions():
+        for arg in positional_actions(action):
             cmd_info['positional_arguments'].append({
                 'name': arg.dest,
                 'help': arg.help,
             })
-        for opt in action._option_string_actions:
-            class_name = str(action._option_string_actions[opt].__class__).split('._')[1].replace("'>", "")
+        for opt in option_string_actions(action):
+            class_name = str(option_string_actions(action)[opt].__class__).split('._')[1].replace("'>", "")
             if class_name == 'HelpAction':
                 continue
             cmd_info['optional_arguments'].append( {
                 'name': opt,
-                'help': action._option_string_actions[opt].help,
-                'class': str(action._option_string_actions[opt].__class__).split('._')[1].replace("'>", ""),
+                'help': option_string_actions(action)[opt].help,
+                'class': str(option_string_actions(action)[opt].__class__).split('._')[1].replace("'>", ""),
             })
         cli_help['commands'].append(cmd_info)
-    options = parser._option_string_actions
+    options = option_string_actions(parser)
     for opt in options:
         class_name = str(options[opt].__class__).split('._')[1].replace("'>", "")
         if class_name == 'HelpAction':
@@ -91,7 +99,7 @@ def gen_md_help(parser):
             md.append(close_div)
         # optional flags
         if len(cmd['optional_arguments']) > 0:
-            md.append(f"Options:")
+            md.append("Options:")
             md.append(open_div)
             for opt in cmd['optional_arguments']:
                 md.append(f"<b>{opt['name']}</b><br />{md_div(opt['help'])}<br />")

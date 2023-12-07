@@ -2,8 +2,7 @@ import os
 import logging
 import glob
 
-from sh import shasum, mkdir
-
+from towerlib.utils.shell import shasum, mkdir
 from towerlib.utils import network
 from towerlib.utils.shell import sh_sudo
 from towerlib.utils.decorators import clitask

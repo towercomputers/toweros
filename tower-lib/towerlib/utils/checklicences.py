@@ -4,7 +4,7 @@ import os
 import tomllib
 import json
 
-from sh import license_scanner
+from towerlib.utils.shell import license_scanner
 
 def scan_licenses():
     cwd = os.path.join(os.getcwd(), 'tower-lib')
