@@ -370,6 +370,11 @@ EOF
 
     # copy supercronic init script
     cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
+    # set crontab
+    cat <<EOF > /mnt/etc/crontabs/supercronic
+*/10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
+*/10 * * * * * * runuser -u $USERNAME -- /var/towercomputers/screenlocker.sh
+EOF
 }
 
 install_bootloader() {
