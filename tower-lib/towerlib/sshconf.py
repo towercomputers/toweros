@@ -131,15 +131,20 @@ def status(host = None, full = True):
             'status': host_status,
             'online-host': online,
             'ip': host_ssh_config['hostname'],
-            'version': host_config.get('TOWEROS_VERSION', 'N/A'),
+            'toweros-version': host_config.get('TOWEROS_VERSION', 'N/A'),
             'color': get_host_color_name(host),
         }
         if full and host_status == 'up':
             if host_status == 'up':
-                inxi_info = ssh('-t', host, 'inxi', '-MI', '-c', '0').strip()
+                inxi_info = ssh('-t', host, 'inxi', '-MIs', '-c', '0').strip()
                 host_info['system'] = inxi_info[inxi_info.index('System: ') + 8:inxi_info.index(' details:')] 
-                host_info['used-memory'] = inxi_info[inxi_info.index('used: ') + 6:inxi_info.index(')') + 1].strip()
-            host_info['installed-packages'] = ', '.join(get_installed_packages(host))
+                memory_available = inxi_info[inxi_info.index('available: ') + 11:inxi_info.index(' used:')].strip()
+                memory_used = inxi_info[inxi_info.index('used: ') + 6:inxi_info.index(' Init:')].strip()
+                host_info['memory-usage'] = memory_used
+                host_info['memory-total'] = memory_available
+                host_info['cpu-usage'] = str(round(100 - float(ssh(host, 'mpstat').strip().split("\n")[-1].split(" ")[-1]), 2)) + "%"
+                host_info['cpu-temperature'] = inxi_info[inxi_info.index('cpu: ') + 5:inxi_info.index(' mobo: ')].strip()
+            host_info['packages-installed'] = ', '.join(get_installed_packages(host))
         return host_info
     return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])
 
@@ -149,7 +154,7 @@ def display_status(host = None):
         all_status = [all_status]
     if not all_status:
         print("No hosts found.")
-    table = Table()
+    table = Table(show_header=len(all_status) > 1)
     headers = all_status[0].keys()
     if len(all_status) > 1:
         for column in headers:
@@ -167,7 +172,9 @@ def display_status(host = None):
         table.add_column("value")
         for key in all_status[0].keys():
             value = str(all_status[0][key])
-            if key == "status":
+            if key == "name":
+                value = Text(value, style="bold")
+            elif key == "status":
                 value = Text(value, style="red" if value == "down" else "green")
             elif key == "online-host":
                 value = Text(value, style="yellow" if value == "True" else ("blue" if value == "False" else "white"))
