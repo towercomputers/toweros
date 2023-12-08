@@ -2,6 +2,9 @@ import os
 import logging
 import time
 
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
 from sshconf import read_ssh_config, empty_ssh_config_file
 
 from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command
@@ -127,9 +130,31 @@ def status(host = None):
             'status': host_status,
             'online-host': online,
             'ip': host_ssh_config['hostname'],
-            'version': host_config.get('TOWEROS_VERSION', 'N/A')
+            'version': host_config.get('TOWEROS_VERSION', 'N/A'),
+            'color': get_host_color_name(host),
         }
-    return [status(host) for host in hosts()]
+    return sorted([status(host) for host in hosts()], key=lambda k: k['name'])
+
+def display_status(host = None):
+    all_status = status(host)
+    if host:
+        all_status = [all_status]
+    if not all_status:
+        print("No hosts found.")
+    table = Table()
+    headers = all_status[0].keys()
+    for column in headers:
+        table.add_column(column)
+    for host_status in all_status:
+        values = [str(value) for value in host_status.values()]
+        values[0] = Text(values[0], style="bold")
+        values[1] = Text(values[1], style="red" if values[1] == "down" else "green")
+        online_color = "yellow" if values[2] == "True" else ("blue" if values[2] == "False" else "white")
+        values[2] = Text(values[2], style=online_color)
+        values[5] = Text(values[5], style=values[5].lower())
+        table.add_row(*values)
+    console = Console()
+    console.print(table)
 
 def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     network = ".".join(tower_network.split(".")[0:3]) + "."

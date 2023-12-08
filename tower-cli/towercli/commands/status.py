@@ -14,11 +14,20 @@ def add_args(argparser):
         required=False,
         default=None
     )
+    status_parser.add_argument(
+        '--json',
+        help="""Json output. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
 # pylint: disable=unused-argument
 def check_args(args, parser_error):
     pass
 
-# pylint: disable=unused-argument
 def execute(args):
-    print(json.dumps(sshconf.status(args.host), indent=4))
+    if args.json:
+        print(json.dumps(sshconf.status(args.host), indent=4))
+    else:
+        sshconf.display_status(args.host)
