@@ -1,8 +1,9 @@
 import os
 
 from towerlib.utils.shell import ssh, mkdir, sed, scp, mv, Command
+
 from towerlib.utils.decorators import clitask
-from towerlib.sshconf import get_host_color_name, hosts
+from towerlib.sshconf import get_host_color_name, hosts, get_installed_packages, save_installed_packages
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
 def restart_sfwbar():
@@ -44,17 +45,6 @@ def copy_desktop_files(host, package):
         Command('sh')('-c', f"gtk-update-icon-cache -f -t ~/.local/{share_icon_folder} || true")
         Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{share_icon_folder} || true")
         restart_sfwbar()
-
-def get_installed_packages(host):
-    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    if os.path.exists(apk_world):
-        return open(apk_world, 'r', encoding="UTF-8").read().strip().split("\n")
-    return []
-
-def save_installed_packages(host, installed_packages):
-    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    with open(apk_world, 'w', encoding="UTF-8") as fp:
-        fp.write("\n".join(installed_packages))
 
 def add_installed_package(host, package):
     # save package in host world
