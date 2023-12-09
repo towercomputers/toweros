@@ -19,7 +19,7 @@ TowerOS provides tools for easily provisioning new hosts with the following step
 *Note:* It is a good idea to reserve one (offline) host for managing removable storage (esp. when using the DeskPi Super6C and CM4s, since then only one host has its USB ports exposed).
 
 
-### Provisioning the Router
+### Router
 The first online host that you must provision is the router, which connects to the Internet _via_ a WiFi network: 
 
 1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the *host device*.
@@ -29,7 +29,7 @@ The first online host that you must provision is the router, which connects to t
 5. Turn on the host device.
 6. Wait for the provisioning process to complete (on the thin client).
 
-### Provisioning Online Hosts
+### Online Hosts
 Once the `router` is correctly provisioned, you may provision other online hosts by following the same steps as above, but using the following command for step 3:
 
 ```
@@ -37,7 +37,7 @@ Once the `router` is correctly provisioned, you may provision other online hosts
 ```
 
 
-### Provision Offline Hosts (Optional)
+### Offline Hosts (Optional)
 An offline host is a host without access to the Internet _via_ the router. Offline hosts are provisioned in the same way as online hosts, except you must pass the `--offline` argument to the `tower provision` command. Offline hosts must be connected to a separate network from the online hosts.
 
 
