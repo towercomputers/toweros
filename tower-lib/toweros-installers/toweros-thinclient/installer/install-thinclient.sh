@@ -222,6 +222,7 @@ install_tower_tools() {
     cp /var/towercomputers/installer/wallpaper.jpg /mnt/var/towercomputers/
     # install terminall screen locker
     cp /var/towercomputers/installer/screenlocker.sh /mnt/var/towercomputers/
+    chmod a+x /mnt/var/towercomputers/screenlocker.sh
 }
 
 
@@ -381,7 +382,7 @@ EOF
     # set crontab
     cat <<EOF > /mnt/etc/crontabs/supercronic
 */10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
-*/10 * * * * * * runuser -u $USERNAME -- /var/towercomputers/screenlocker.sh
+*/10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/screenlocker.sh
 EOF
 }
 
