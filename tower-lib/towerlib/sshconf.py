@@ -151,11 +151,12 @@ def display_status(host = None):
     all_status = status(host)
     if host:
         all_status = [all_status]
-    if not all_status:
-        print("No hosts found.")
+    if len(all_status) == 0:
+        print("No host found.")
+        return
     table = Table(show_header=len(all_status) > 1)
-    headers = all_status[0].keys()
     if len(all_status) > 1:
+        headers = all_status[0].keys()
         for column in headers:
             table.add_column(column)
         for host_status in all_status:
