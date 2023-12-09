@@ -443,10 +443,12 @@ install_thinclient() {
 
 unmount_and_reboot() {
     rm -f /mnt/crypto_keyfile.bin
-    python $SCRIPT_DIR/askconfiguration.py congratulations
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
+    # fix broken package `py3-rich`
+    pip install --break-system-packages --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" rich
+    python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }
 
