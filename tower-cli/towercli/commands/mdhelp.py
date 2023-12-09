@@ -1,4 +1,4 @@
-from towerlib.utils.mdhelp import gen_md_help
+from towerlib import utils
 
 def add_args(argparser):
     argparser.add_parser('mdhelp')
@@ -9,4 +9,4 @@ def check_args(args, parser_error):
 
 # pylint: disable=unused-argument
 def execute(parser):
-    print(gen_md_help(parser))
+    print(utils.gen_md_help(parser))

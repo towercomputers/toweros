@@ -16,7 +16,7 @@
 <b>tower</b> <u><a href="#tower-version">version</a></u><br /><div style="margin:0 50px">Get the version of TowerOS installed on the thin client and hosts.</div><br />
 </div>
 ### `tower provision`
-<div style="margin:0 50px; font-family:Courier">usage: tower provision [-h] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH] [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG] [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD] [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}] name</div>
+<div style="margin:0 50px; font-family:Courier">usage: tower provision [-h] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH] [--password PASSWORD] [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG] [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD] [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}] name</div>
 <div style="margin:0 50px"><br />
 <b>name</b><br /><div style="margin:0 50px">Host's name, used to refer to the host when performing other actions (Required)</div><br />
 </div>
@@ -32,6 +32,7 @@ Options:
 <b>--force</b><br /><div style="margin:0 50px">Overwrite the configuration for an existing host (Default: False)</div><br />
 <b>--public-key-path</b><br /><div style="margin:0 50px">Path to public key used to access the host (Default: automatically generated and stored on the boot device and locally in `~/.local/tower/hosts/`)</div><br />
 <b>--private-key-path</b><br /><div style="margin:0 50px">Path to private key used to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)</div><br />
+<b>--password</b><br /><div style="margin:0 50px">Password to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)</div><br />
 <b>--keyboard-layout</b><br /><div style="margin:0 50px">Keyboard layout code (Default: same as that of the thin client)</div><br />
 <b>--keyboard-variant</b><br /><div style="margin:0 50px">Keyboard variant code (Default: same as that of the thin client)</div><br />
 <b>--timezone</b><br /><div style="margin:0 50px">Timezone of the host. e.g. `Europe/Paris` (Default: same as that of the thin client)</div><br />
@@ -40,7 +41,7 @@ Options:
 <b>--offline</b><br /><div style="margin:0 50px">Host will *NOT* be able to access the Internet via the router. (Default: False)</div><br />
 <b>--wlan-ssid</b><br /><div style="margin:0 50px">WiFi SSID (Default: same as that currently in use by the thin client)</div><br />
 <b>--wlan-password</b><br /><div style="margin:0 50px">WiFi password (Default: same as that currently currently in use by the thin client)</div><br />
-<b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Blue)</div><br />
+<b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Magenta)</div><br />
 </div>
 ### `tower upgrade`
 <div style="margin:0 50px; font-family:Courier">usage: tower upgrade [-h] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] name</div>
@@ -85,10 +86,11 @@ Options:
 <b>--wp-video</b><br /><div style="margin:0 50px">Compress specific DMABUF formats using a lossy video codec. Opaque, 10-bit, and multiplanar formats, among others, are not supported. V is a comma separated list of options to control the video encoding. Using the --video flag without setting any options is equivalent to using the default setting of: --video=sw,bpf=120000,h264. Later options supersede earlier ones (see `man waypipe` for more options).</div><br />
 </div>
 ### `tower status`
-<div style="margin:0 50px; font-family:Courier">usage: tower status [-h] [--host HOST]</div>
+<div style="margin:0 50px; font-family:Courier">usage: tower status [-h] [--host HOST] [--json]</div>
 Options:
 <div style="margin:0 50px">
 <b>--host</b><br /><div style="margin:0 50px">Name of the host you want to check the status. If not specified, the status of all hosts will be displayed.</div><br />
+<b>--json</b><br /><div style="margin:0 50px">Json output. (Default: False)</div><br />
 </div>
 ### `tower wlan-connect`
 <div style="margin:0 50px; font-family:Courier">usage: tower wlan-connect [-h] --ssid SSID --password PASSWORD</div>
