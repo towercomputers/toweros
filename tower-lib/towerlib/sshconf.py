@@ -1,7 +1,6 @@
 import os
 import logging
 import time
-import json
 
 from rich.console import Console
 from rich.table import Table
@@ -137,7 +136,7 @@ def status(host = None, full = True):
         if full and host_status == 'up':
             if host_status == 'up':
                 inxi_info = ssh('-t', host, 'inxi', '-MIs', '-c', '0').strip()
-                host_info['system'] = inxi_info[inxi_info.index('System: ') + 8:inxi_info.index(' details:')] 
+                host_info['system'] = inxi_info[inxi_info.index('System: ') + 8:inxi_info.index(' details:')]
                 memory_available = inxi_info[inxi_info.index('available: ') + 11:inxi_info.index(' used:')].strip()
                 memory_used = inxi_info[inxi_info.index('used: ') + 6:inxi_info.index(' Init:')].strip()
                 host_info['memory-usage'] = memory_used
