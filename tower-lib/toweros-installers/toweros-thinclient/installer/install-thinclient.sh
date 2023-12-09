@@ -371,8 +371,8 @@ clone_live_system_to_disk() {
     # Get branch from buildthinclient.py
     mkdir -p /mnt/etc/apk
     cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/v3.18/main
-http://dl-cdn.alpinelinux.org/alpine/v3.18/community
+http://dl-cdn.alpinelinux.org/alpine/v3.19/main
+http://dl-cdn.alpinelinux.org/alpine/v3.19/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
