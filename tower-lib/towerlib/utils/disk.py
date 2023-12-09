@@ -3,9 +3,7 @@ import logging
 import time
 import os
 
-from sh import lsblk, umount, ErrorReturnCode
-
-from towerlib.utils.shell import sh_sudo
+from towerlib.utils.shell import lsblk, umount, ErrorReturnCode, sh_sudo
 
 logger = logging.getLogger('tower')
 

@@ -1,2 +1,0 @@
-# Run every 10 seconds
-*/10 * * * * * * runuser -u tower -- python /var/towercomputers/genstatus.py

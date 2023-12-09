@@ -30,7 +30,10 @@ create_lvm_partitions() {
 	cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
 	chmod 0400 /crypto_keyfile.bin
 	# create LUKS partition
-	cryptsetup -q luksFormat $LVM_DISK /crypto_keyfile.bin
+	modprobe xchacha20
+	modprobe adiantum
+	modprobe nhpoly1305
+	cryptsetup -q luksFormat -c xchacha12,aes-adiantum-plain64 $LVM_DISK /crypto_keyfile.bin
 	cryptsetup luksAddKey $LVM_DISK /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
 	# initialize the LUKS partition
 	cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
@@ -236,7 +239,7 @@ clone_live_system_to_disk() {
 
 	# prepare boot and root partitions and folders
 	mount -o remount,rw $BOOT_MEDIA
-	cp -rf /mnt/boot/*rpi? $BOOT_MEDIA/boot/
+	cp -rf /mnt/boot/*rpi* $BOOT_MEDIA/boot/
 	rm -Rf /mnt/boot
 
 	# update fstab
@@ -257,8 +260,8 @@ clone_live_system_to_disk() {
 	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
 		mkdir -p /mnt/etc/apk
 		cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/v3.18/main
-http://dl-cdn.alpinelinux.org/alpine/v3.18/community
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi
@@ -281,7 +284,7 @@ init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR, ALPINE_BRANCH
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env

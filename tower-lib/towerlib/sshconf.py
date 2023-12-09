@@ -2,9 +2,12 @@ import os
 import logging
 import time
 
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
 from sshconf import read_ssh_config, empty_ssh_config_file
-from sh import ssh, ErrorReturnCode, sed, touch, Command
 
+from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command
 from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost, InvalidColor
 from towerlib.__about__ import __version__
@@ -116,20 +119,71 @@ def is_up(host):
         return True
     raise UnkownHost(f"Unknown host: {host}")
 
-def status(host = None):
+def status(host = None, full = True):
     if host:
         host_ssh_config = get(host)
         host_config = get_host_config(host)
         host_status = 'up' if is_up(host) else 'down'
         online = is_online_host(host) if host_status == 'up' else "N/A"
-        return {
+        host_info = {
             'name': host,
             'status': host_status,
             'online-host': online,
             'ip': host_ssh_config['hostname'],
-            'version': host_config.get('TOWEROS_VERSION', 'N/A')
+            'toweros-version': host_config.get('TOWEROS_VERSION', 'N/A'),
+            'color': get_host_color_name(host),
         }
-    return [status(host) for host in hosts()]
+        if full and host_status == 'up':
+            if host_status == 'up':
+                inxi_info = ssh('-t', host, 'inxi', '-MIs', '-c', '0').strip()
+                host_info['system'] = inxi_info[inxi_info.index('System: ') + 8:inxi_info.index(' details:')]
+                memory_available = inxi_info[inxi_info.index('available: ') + 11:inxi_info.index(' used:')].strip()
+                memory_used = inxi_info[inxi_info.index('used: ') + 6:inxi_info.index(' Init:')].strip()
+                host_info['memory-usage'] = memory_used
+                host_info['memory-total'] = memory_available
+                host_info['cpu-usage'] = str(round(100 - float(ssh(host, 'mpstat').strip().split("\n")[-1].split(" ")[-1]), 2)) + "%"
+                host_info['cpu-temperature'] = inxi_info[inxi_info.index('cpu: ') + 5:inxi_info.index(' mobo: ')].strip()
+            host_info['packages-installed'] = ', '.join(get_installed_packages(host))
+        return host_info
+    return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])
+
+def display_status(host = None):
+    all_status = status(host)
+    if host:
+        all_status = [all_status]
+    if len(all_status) == 0:
+        print("No host found.")
+        return
+    table = Table(show_header=len(all_status) > 1)
+    if len(all_status) > 1:
+        headers = all_status[0].keys()
+        for column in headers:
+            table.add_column(column)
+        for host_status in all_status:
+            values = [str(value) for value in host_status.values()]
+            values[0] = Text(values[0], style="bold")
+            values[1] = Text(values[1], style="red" if values[1] == "down" else "green")
+            online_color = "yellow" if values[2] == "True" else ("blue" if values[2] == "False" else "white")
+            values[2] = Text(values[2], style=online_color)
+            values[5] = Text(values[5], style=values[5].lower())
+            table.add_row(*values)
+    else:
+        table.add_column("key")
+        table.add_column("value")
+        for key in all_status[0].keys():
+            value = str(all_status[0][key])
+            if key == "name":
+                value = Text(value, style="bold")
+            elif key == "status":
+                value = Text(value, style="red" if value == "down" else "green")
+            elif key == "online-host":
+                value = Text(value, style="yellow" if value == "True" else ("blue" if value == "False" else "white"))
+            elif key == "color":
+                value = Text(value, style=value.lower())
+            table.add_row(key, value)
+
+    console = Console()
+    console.print(table)
 
 def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     network = ".".join(tower_network.split(".")[0:3]) + "."
@@ -206,3 +260,14 @@ def get_hex_host_color(host):
     host_config = get_host_config(host)
     host_color_code= int(host_config.get('COLOR', COLORS[0][0]))
     return color_hex(host_color_code)
+
+def get_installed_packages(host):
+    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    if os.path.exists(apk_world):
+        return open(apk_world, 'r', encoding="UTF-8").read().strip().split("\n")
+    return []
+
+def save_installed_packages(host, installed_packages):
+    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    with open(apk_world, 'w', encoding="UTF-8") as fp:
+        fp.write("\n".join(installed_packages))

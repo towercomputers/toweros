@@ -4,6 +4,7 @@ import os
 import tomllib
 import json
 
+# pylint: disable=no-name-in-module
 from sh import license_scanner
 
 def scan_licenses():

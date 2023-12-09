@@ -1,0 +1,2 @@
+# disable wireless devices
+rfkill block all

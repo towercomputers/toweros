@@ -4,11 +4,11 @@ import logging
 import tempfile
 
 from passlib.hash import sha512_crypt
-from sh import ssh_keygen, xz, ssh, cp, dd
 from rich.prompt import Confirm
 from rich.text import Text
 from rich import print as rprint
 
+from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd
 from towerlib import utils, buildhost, sshconf, config, install
 from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException, DiscoveringException
 
@@ -50,7 +50,7 @@ def prepare_host_config(args):
     with open(args.public_key_path, encoding="UTF-8") as f:
         public_key = f.read().strip()
     # generate random password
-    password = secrets.token_urlsafe(16)
+    password = args.password or secrets.token_urlsafe(16)
     # gather locale informations
     keyboard_layout, keyboard_variant = utils.get_keymap()
     if args.keyboard_layout:
@@ -99,6 +99,7 @@ def prepare_host_config(args):
         'ROUTER_IP': config.ROUTER_IP,
         'COLOR': host_color,
         'INSTALLATION_TYPE': "install",
+        'ALPINE_BRANCH': config.HOST_ALPINE_BRANCH,
     }
 
 @utils.clitask("Decompressing {0}...", sudo=True)
@@ -113,7 +114,7 @@ def prepare_host_image(image_arg):
     image_path = image_arg if image_arg and os.path.isfile(image_arg) else utils.find_host_image()
     if image_path:
         ext = image_path.split(".").pop()
-        if ext == 'xz': # TODO: support more formats
+        if ext == 'xz':
             image_path = decompress_image(image_path)
     return image_path
 

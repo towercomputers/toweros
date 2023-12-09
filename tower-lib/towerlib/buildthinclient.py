@@ -7,18 +7,15 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-from sh import rm, git, pip, Command, apk, hatch, cp
-
+from towerlib.utils.shell import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
 from towerlib import buildhost
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException
+from towerlib.config import THINCLIENT_ALPINE_BRANCH
 
 logger = logging.getLogger('tower')
-
-# TODO: test v3.19 on release
-ALPINE_BRANCH = "3.18"
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
@@ -75,6 +72,16 @@ def prepare_installer():
 def prepare_docs():
     makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
     copytree(join_path(REPO_PATH, 'docs', 'src'), wd('overlay/var/towercomputers/docs'))
+    argparse_manpage(
+        '--pyfile', join_path(REPO_PATH, 'tower-cli', 'towercli', 'tower.py'),
+        '--function', 'towercli_parser',
+        '--author', "TowerOS",
+        '--project-name', 'TowerOS',
+        '--url', 'https://toweros.org',
+        '--prog', 'tower',
+        '--manual-title', 'Tower CLI Manual',
+        '--output', wd('overlay/var/towercomputers/docs/tower.1'),
+    )
 
 def prepare_build(builds_dir):
     makedirs(wd('overlay/var/towercomputers/builds'))
@@ -96,7 +103,7 @@ def prepare_overlay(builds_dir):
 
 @clitask("Building Thin Client image, be patient...")
 def prepare_image(builds_dir):
-    git('clone', '--depth=1', f'--branch={ALPINE_BRANCH}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
+    git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
@@ -105,8 +112,8 @@ def prepare_image(builds_dir):
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
-        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/main',
-        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/v{ALPINE_BRANCH}/community',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/main',
+        '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/community',
         '--profile', 'tower',
         '--tag', __version__,
          _err_to_out=True, _out=logger.debug,

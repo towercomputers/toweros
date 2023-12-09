@@ -44,23 +44,49 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 
 1. Install `pip` in online and offline host
 
-        [thinclient]$ tower install router python3 py3-pip
+        [thinclient]$ tower install web python3 py3-pip
         [thinclient]$ tower install office python3 py3-pip
 
 1. Download package and dependencies in online host
 
-        [thinclient]$ ssh router mkdir mypackages
-        [thinclient]$ ssh router pip download <package_name> -d mypackages 
+        [thinclient]$ ssh web mkdir mypackages
+        [thinclient]$ ssh web pip download <package_name> -d mypackages 
 
 1. Copy package and dependencies to offline host
 
-        [thinclient]$ scp -r router:mypackages office:
+        [thinclient]$ scp -r web:mypackages office:
 
 1. Install `pip` package in offline host
 
         [thinclient]$ ssh office pip install --no-index --find-links="~/mypackages" <package_name>
 
-1. Clean cache in online and offline host
+1. Clean up
 
         [thinclient]$ ssh office rm -rf mypackages
-        [thinclient]$ ssh router rm -rf mypackages
+        [thinclient]$ ssh web rm -rf mypackages
+
+## Install `npm` package in offline host using online host
+
+1. Install `npm` in online and offline host
+
+        [thinclient]$ tower install web npm
+        [thinclient]$ tower install office npm
+
+1. Download package and dependencies in online host
+
+        [thinclient]$ ssh web 'mkdir mypackages && cd mypackages && npm init -y'
+        [thinclient]$ ssh web 'cd mypackages && npm install -B <package_name> && npm pack'
+
+1. Copy package and dependencies to offline host
+
+        [thinclient]$ scp -r web:mypackages/mypackages-1.0.0.tgz office:
+
+1. Install `npm` package in offline host
+
+        [thinclient]$ ssh office tar -xvzf mypackages-1.0.0.tgz
+        [thinclient]$ ssh office 'sudo npm install -g package/node_modules/*/'
+
+1. Clean up
+
+        [thinclient]$ ssh office rm -rf mypackages-1.0.0.tgz package
+        [thinclient]$ ssh web rm -rf mypackages

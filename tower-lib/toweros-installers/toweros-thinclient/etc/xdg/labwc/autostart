@@ -1,7 +1,8 @@
 # Example autostart file
 
 # Set background color.
-swaybg -c '#113344' >/dev/null 2>&1 &
+#swaybg -c '#113344' >/dev/null 2>&1 &
+swaybg -i /var/towercomputers/wallpaper.jpg >/dev/null 2>&1 &
 
 # Configure output directives such as mode, position, scale and transform.
 # Use wlr-randr to get your output names

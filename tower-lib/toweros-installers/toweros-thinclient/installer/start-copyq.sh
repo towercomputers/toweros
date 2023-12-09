@@ -1,4 +1,4 @@
-copyq &
+QT_QPA_PLATFORM=xcb copyq &
 cat <<EOF | copyq eval -
 var cmds = commands()
 var command_added = false

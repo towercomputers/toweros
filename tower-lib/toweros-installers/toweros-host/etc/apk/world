@@ -2,8 +2,8 @@ alpine-base
 openssl
 nx-libs
 dosfstools
-e2fsprogs=1.47.0-r2
-e2fsprogs-extra=1.47.0-r2
+e2fsprogs
+e2fsprogs-extra
 sfdisk
 iptables
 sudo
@@ -33,3 +33,4 @@ tor
 macchanger
 waypipe
 foot
+inxi

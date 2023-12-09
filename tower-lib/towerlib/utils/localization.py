@@ -1,4 +1,4 @@
-from sh import ls, cat, locale as getlocale
+from towerlib.utils.shell import ls, cat, getlocale
 
 def get_timezone():
     zone = ls('--color=no', '/etc/zoneinfo/').strip()

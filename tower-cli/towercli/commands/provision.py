@@ -8,15 +8,17 @@ from towerlib import provision, utils, sshconf, config
 logger = logging.getLogger('tower')
 
 def provision_parser(argparser):
+    help_message = "Prepare the bootable device needed to provision a host"
     return argparser.add_parser(
         'provision',
-        help="""Prepare the bootable device needed to provision a host."""
+        help=help_message, description=help_message
     )
 
 def upgrade_parser(argparser):
+    help_message = "Prepare the bootable device needed to upgrade a host"
     return argparser.add_parser(
         'upgrade',
-        help="""Prepare the boot device needed to upgrade a host."""
+        help=help_message, description=help_message
     )
 
 def add_args(argparser, upgrade=False):
@@ -28,7 +30,7 @@ def add_args(argparser, upgrade=False):
         help="""Host's name, used to refer to the host when performing other actions (Required)"""
     )
     parser.add_argument(
-        '-bd', '--boot-device',
+        '--boot-device',
         help="""Path to virtual device for the SD card or USB drive""",
         required=False,
         default=""
@@ -88,6 +90,11 @@ def add_args(argparser, upgrade=False):
         parser.add_argument(
             '--private-key-path',
             help="""Path to private key used to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)""",
+            required=False
+        )
+        parser.add_argument(
+            '--password',
+            help="""Password to access the host (Default: automatically generated and stored locally in `~/.local/tower/hosts/`)""",
             required=False
         )
         parser.add_argument(

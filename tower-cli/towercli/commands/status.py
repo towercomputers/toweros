@@ -3,21 +3,31 @@ import json
 from towerlib import sshconf
 
 def add_args(argparser):
+    help_message = "Check the status of all hosts in the Tower system."
     status_parser = argparser.add_parser(
         'status',
-        help="Check the status of all hosts in the Tower system."
+        help=help_message, description=help_message
     )
     status_parser.add_argument(
         '--host',
-        help="""Host name""",
+        help="""Name of the host you want to check the status. If not specified, the status of all hosts will be displayed.""",
         required=False,
         default=None
+    )
+    status_parser.add_argument(
+        '--json',
+        help="""Json output. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
     )
 
 # pylint: disable=unused-argument
 def check_args(args, parser_error):
     pass
 
-# pylint: disable=unused-argument
 def execute(args):
-    print(json.dumps(sshconf.status(args.host), indent=4))
+    if args.json:
+        print(json.dumps(sshconf.status(args.host), indent=4))
+    else:
+        sshconf.display_status(args.host)

@@ -37,7 +37,10 @@ prepare_lvm_partition() {
     dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
     chmod 0400 /crypto_keyfile.bin
     # create LUKS partition
-    cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
+    modprobe xchacha20
+    modprobe adiantum
+    modprobe nhpoly1305
+    cryptsetup -q luksFormat -c xchacha12,aes-adiantum-plain64 $LVM_PARTITION /crypto_keyfile.bin
     cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
     # initialize the LUKS partition
     cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
@@ -212,6 +215,14 @@ install_tower_tools() {
     # install tower with pip
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
+    # install man page
+    mkdir -p /mnt/usr/local/share/man/man1/
+    cp /var/towercomputers/docs/tower.1 /mnt/usr/local/share/man/man1/
+    # install wallpaper
+    cp /var/towercomputers/installer/wallpaper.jpg /mnt/var/towercomputers/
+    # install terminall screen locker
+    cp /var/towercomputers/installer/screenlocker.sh /mnt/var/towercomputers/
+    chmod a+x /mnt/var/towercomputers/screenlocker.sh
 }
 
 
@@ -247,7 +258,7 @@ EOF
         exit 1
     fi
     cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
-    chmod a+x /etc/local.d/01_check_ifnames.start
+    chmod a+x /etc/local.d/*.start
 
     # set locales
     # TODO: set LANG
@@ -294,9 +305,6 @@ EOF
 
     # configure firewall
     sh $SCRIPT_DIR/configure-firewall.sh
-
-    # disable wireless devices
-    rfkill block all
 }
 
 clone_live_system_to_disk() {
@@ -364,13 +372,18 @@ clone_live_system_to_disk() {
     # Get branch from buildthinclient.py
     mkdir -p /mnt/etc/apk
     cat <<EOF > /mnt/etc/apk/repositories 
-http://dl-cdn.alpinelinux.org/alpine/v3.18/main
-http://dl-cdn.alpinelinux.org/alpine/v3.18/community
-#http://dl-cdn.alpinelinux.org/alpine/v3.18/testing
+http://dl-cdn.alpinelinux.org/alpine/v3.19/main
+http://dl-cdn.alpinelinux.org/alpine/v3.19/community
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
     # copy supercronic init script
     cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
+    # set crontab
+    cat <<EOF > /mnt/etc/crontabs/supercronic
+*/10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
+*/10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/screenlocker.sh
+EOF
 }
 
 install_bootloader() {
@@ -434,6 +447,8 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
+    # fix broken package `py3-rich`
+    pip install --break-system-packages --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" rich
     python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }

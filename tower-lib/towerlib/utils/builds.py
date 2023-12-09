@@ -2,8 +2,7 @@ import os
 import logging
 import glob
 
-from sh import shasum, mkdir
-
+from towerlib.utils.shell import shasum, mkdir
 from towerlib.utils import network
 from towerlib.utils.shell import sh_sudo
 from towerlib.utils.decorators import clitask
@@ -13,9 +12,9 @@ logger = logging.getLogger('tower')
 
 REQUIRED_BUILDS = {
     "alpine-rpi": {
-        "filename": "alpine-rpi-3.18.4-armv7.tar.gz",
-        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.18/releases/armv7/alpine-rpi-3.18.4-armv7.tar.gz",
-        "checksum": "9ae3f1d96d3238175e40005047b1eb4ea4e80573192743bb0f534611d05eb3f7"
+        "filename": "alpine-rpi-3.19.0-aarch64.tar.gz",
+        "url": "https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/alpine-rpi-3.19.0-aarch64.tar.gz",
+        "checksum": "5621e7e597c3242605cd403a0a9109ec562892a6c8a185852b6b02ff88f5503c",
     },
 }
 

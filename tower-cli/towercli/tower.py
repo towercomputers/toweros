@@ -5,14 +5,13 @@ from towerlib import utils
 from towerlib.utils.exceptions import TowerException
 
 import towercli
-# import needed for getattr() in parse_arguments()
-# pylint: disable=unused-import
-from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version
+from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version, mdhelp
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="""
-        TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with NX protocol.
-    """)
+def towercli_parser():
+    parser = argparse.ArgumentParser(
+        description="TowerOS command-line interface for provisioning hosts, install APK packages on it and run applications with NX protocol.",
+        prog="tower"
+    )
     parser.add_argument(
         '--quiet',
         help="""Set log level to ERROR.""",
@@ -27,23 +26,40 @@ def parse_arguments():
         action='store_true',
         default=False
     )
-    subparser = parser.add_subparsers(dest='command', required=True, help="Use `tower {provision|install|run|status|wlan-connect} --help` to get the options list for each command.")
-    towercli.commands.provision.add_args(subparser)
-    towercli.commands.upgrade.add_args(subparser)
-    towercli.commands.install.add_args(subparser)
-    towercli.commands.run.add_args(subparser)
-    towercli.commands.status.add_args(subparser)
-    towercli.commands.wlanconnect.add_args(subparser)
-    towercli.commands.version.add_args(subparser)
+    subparser = parser.add_subparsers(
+        dest='command',
+        required=True,
+        help="Use `tower {provision|upgrade|install|run|status|wlan-connect|version} --help` to get the options list for each command.",
+        metavar="{provision,upgrade,install,run,status,wlan-connect,version}}"
+    )
+    provision.add_args(subparser)
+    upgrade.add_args(subparser)
+    install.add_args(subparser)
+    run.add_args(subparser)
+    status.add_args(subparser)
+    wlanconnect.add_args(subparser)
+    version.add_args(subparser)
+    mdhelp.add_args(subparser)
+    return parser
+
+def get_module(args):
+    module_name = args.command.replace("-", "")
+    return getattr(towercli.commands, module_name)
+
+def parse_arguments():
+    parser = towercli_parser()
     args = parser.parse_args()
-    getattr(towercli.commands, args.command.replace("-", "")).check_args(args, parser.error)
+    get_module(args).check_args(args, parser.error)
     return args
 
 def main():
     try:
         args = parse_arguments()
         utils.clilogger.initialize(args.verbose, args.quiet)
-        getattr(towercli.commands, args.command.replace("-", "")).execute(args)
+        if args.command == 'mdhelp':
+            mdhelp.execute(towercli_parser())
+        else:
+            get_module(args).execute(args)
     except TowerException as e:
         utils.clilogger.print_error(str(e))
         sys.exit()

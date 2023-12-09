@@ -1,48 +1,3 @@
-## Set Up Development Environment
-
-### Connect to internet
-
-To connect the thin client to the Internet you must:
-
-1. Provision a `router`.
-1. Set the gateway on the thin client to `192.168.2.1` (the router's IP address):
-
-    The file `/etc/network/interfaces` must contain the following:
-
-        auto lo
-        iface lo inet loopback
-        auto eth0
-        iface eth0 inet static
-            address 192.168.2.100/24
-            gateway 192.168.2.1
-        auto eth1
-        iface eth1 inet static
-            address 192.168.3.100/24
-
-1. Set the DNS server on the thin client:
-
-    The file `/etc/resolv.conf` must contain the following:
-
-        nameserver 8.8.8.8
-        nameserver 8.8.4.4
-
-1. Restart the network with: `[thinclient]$ sudo rc-service networking restart`
-
-### Configure Git and download Github repository
-
-Configure `git`, download Github repository in `~/towercomputers/toweros` and install `hatch` with:
-
-```
-[thinclient]$ /var/towercomputers/install-dev.sh <git-name> <git-email> <git-private-key-path>
-```
-
-### Use `tower-cli` with `hatch`
-
-```
-[thinclient]$ cd ~/towercomputers/toweros/tower-cli
-[thinclient]$ hatch run tower --help
-```
-
 ## Build TowerOS images
 
 Connect to internet and download Github repository as explained in the first paragraph above.
@@ -101,47 +56,6 @@ Finally delete the container with:
 [thinclient]$ docker run --platform=linux/amd64 --name towerbuilder --user tower --privileged -v /dev:/dev \
               build-tower-image thinclient
 ```
-
-## Manually QA TowerOS for Thin Client
-
-On first boot:
-
-1. Basic checking
-
-    - The “welcome message” should refer to TowerOS.
-    - The README, whitepaper and `install-dev.sh` script should be found in `~/`.
-    - The `wheel` package and host image should be in `~/.cache/tower/builds`.
-    - `$ iptables -L -v` should show firewall rules, and `/var/logs/iptables.log` should contain firewall logs.
-    - `lo` and `eth0` should be up (check  with `$ ip ad`)
-
-1. Provision an online host:
-
-        [thinclient]$ tower provision router --wlan-ssid <ssid> --wlan-password <password>
-        [thinclient]$ tower provision web --online
-
-1. Provision an offline host:
-
-        [thinclient]$ tower provision office --offline
-
-1. Check system status:
-
-        [thinclient]$ tower status
-
-1. Install a package in an offline host:
-
-        [thinclient]$ tower install office xcalc
-
-1. Install a package in an online host:
-
-        [thinclient]$ tower install web midori
-
-1. Test installed packages:
-
-        [thinclient]$ dbus-launch labwc
-        [thinclient]$ tower run office xcalc
-        [thinclient]$ tower run web midori
-
-    Check also if the Xfce Application menu contains shortcuts for installed packages.
 
 ## Build your own custom Thin Client (Linux)
 
@@ -206,4 +120,3 @@ Install the `tower` CLI with `pip`:
 ```
 [thinclient]$ python3 -m pip install "tower-cli @ git+https://github.com/towercomputers/toweros.git#subdirectory=tower-cli"
 ```
-

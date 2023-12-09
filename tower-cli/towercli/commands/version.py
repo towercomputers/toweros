@@ -3,9 +3,10 @@ import json
 from towerlib import sshconf
 
 def add_args(argparser):
+    help_message = "Get the version of TowerOS installed on the thin client and hosts."
     argparser.add_parser(
         'version',
-        help="Get the version of TowerOS installed on the thin client and hosts."
+        help=help_message, description=help_message
     )
 
 # pylint: disable=unused-argument

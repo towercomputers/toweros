@@ -9,13 +9,13 @@ from towerlib.utils.exceptions import TowerException
 logger = logging.getLogger('tower')
 
 def add_args(argparser):
+    help_message = "Run an application on the specified host, with the GUI on the thin client."
     run_parser = argparser.add_parser(
         'run',
-        help="Run an application on the specified host, with the GUI on the thin client."
+        help=help_message, description=help_message
     )
-
     run_parser.add_argument(
-        'host_name',
+        'host',
         help="""Host's name. This name must match the `name` used with the `provision` command. (Required)""",
         nargs=1
     )
@@ -118,7 +118,7 @@ def check_waypipe_args(args, parser_error):
                 parser_error("Invalid video option")
 
 def check_args(args, parser_error):
-    config = sshconf.get(args.host_name[0])
+    config = sshconf.get(args.host[0])
     if config is None:
         parser_error("Unknown host.")
     if args.waypipe:
@@ -136,7 +136,7 @@ def execute(args):
                 waypipe_args += ["--threads", args.wp_threads]
             if args.wp_video:
                 waypipe_args += ["--video", args.wp_video]
-            gui.run_waypipe(args.host_name[0], waypipe_args, *args.run_command)
+            gui.run_waypipe(args.host[0], waypipe_args, *args.run_command)
         else:
             nxagent_args = {
                 "link": args.nx_link,
@@ -150,6 +150,6 @@ def execute(args):
                 nxagent_args["data"] = args.nx_data
             if args.nx_delta:
                 nxagent_args["delta"] = args.nx_delta
-            gui.run(args.host_name[0], nxagent_args, *args.run_command)
+            gui.run(args.host[0], nxagent_args, *args.run_command)
     else:
         raise TowerException("`tower run` requires a running desktop environment. Use `startx` to start X.Org.")
