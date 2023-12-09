@@ -38,8 +38,8 @@ prepare_lvm_partition() {
     chmod 0400 /crypto_keyfile.bin
     # create LUKS partition
     modprobe xchacha20
-	modprobe adiantum
-	modprobe nhpoly1305
+    modprobe adiantum
+    modprobe nhpoly1305
     cryptsetup -q luksFormat -c xchacha12,aes-adiantum-plain64 $LVM_PARTITION /crypto_keyfile.bin
     cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
     # initialize the LUKS partition
