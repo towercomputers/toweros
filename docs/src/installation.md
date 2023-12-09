@@ -4,82 +4,73 @@
 
 To use TowerOS, you must first install the image for the thin client on the device you wish to use (normally a laptop):
 
-1. Download the latest image here: [https://github.com/towercomputers/toweros/releases/latest](https://github.com/towercomputers/toweros/releases/latest).
+1. Download the latest installation image from the [TowerOS GitHub releases page](https://github.com/towercomputers/toweros/releases/latest).
 2. Prepare a bootable USB medium using the above image.
-3. Boot the thin client with the USB drive and follow the instructions.
+3. Boot the thin client with the USB drive and follow the on-screen instructions.
 
 ## Provisioning Hosts
-Hosts are divided into two types: *online* and *offline*. Online hosts live on a separate LAN from offline hosts, and the thin client is connected to both networks. One online host is deemed the “router”, and the router is responsible for providing Internet access to the thin client and all other hosts. If you do not wish to maintain two separate networks, you can simply not provision any offline hosts.
+Hosts are divided into two types: *online* and *offline*. Online hosts live on a separate LAN from offline hosts, and the thin client is connected to both networks. One online host is identified as the “router”, and the router is responsible for providing Internet access to the thin client and all other hosts. If you do not wish to maintain two separate networks, you can simply not provision any offline hosts.
 
 TowerOS provides tools for easily provisioning new hosts with the following steps, with the user guided through them by the `tower` CLI tool:
 
-1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the **host hardware**.
-2. Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the **thin client**.
-3. Call the `[thinclient]$ tower provision` command to prepare the boot device.
-4. Remove the boot device from the thin client and insert it into the target host hardware.
-5. Turn on the host hardware.
-6. Wait for the provisioning process to complete on the thin client.
 
-*NOTE:* You must provision a router before you provision any other online hosts.
+*Note:* You must provision a router before you provision any other online hosts.
 
-*NOTE:* It is a good idea to reserve one (offline) host for managing removable storage (esp. when using the DeskPi Super6C and CM4s, since then only one host has USB ports exposed).
+*Note:* It is a good idea to reserve one (offline) host for managing removable storage (esp. when using the DeskPi Super6C and CM4s, since then only one host has its USB ports exposed).
 
 
-### Provision the Router
-The first online host that you must provision is the router, which connect to the Internet _via_ a WiFi network: 
+### Provisioning the Router
+The first online host that you must provision is the router, which connects to the Internet _via_ a WiFi network: 
 
-```
-[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>
-```
+1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the *host device*.
+2. Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the *thin client*.
+3. Run `[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>` to prepare the host boot drive.
+4. Remove the boot device from the thin client and insert it into the target host device.
+5. Turn on the host device.
+6. Wait for the provisioning process to complete (on the thin client).
 
-### Provision an Online Host
-Once the `router` is correctly provisioned, you may provision other online hosts:
+### Provisioning Online Hosts
+Once the `router` is correctly provisioned, you may provision other online hosts by following the same steps as above, but using the following command for step 3:
 
 ```
-[thinclient]$ tower provision <host> --online
+[thinclient]$ tower provision <host> --online`
 ```
 
-### Provision an Offline Host
-An offline host is a host without access to the Internet _via_ the router.
 
-```
-[thinclient]$ tower provision <host> --offline
-```
+### Provision Offline Hosts (Optional)
+An offline host is a host without access to the Internet _via_ the router. Offline hosts are provisioned in the same way as online hosts, except you must pass the `--offline` argument to the `tower provision` command. Offline hosts must be connected to a separate network from the online hosts.
+
 
 ### Troubleshooting
 
-In case a host is not accessible:
+Sometimes a host fails to come up during the provisioning process, and you are left waiting on the thin client for the provisioning process to finish. If the host is not accessible _via_ `[thinclient]$ ssh <host>`, the most likely problem is in the networking. The following is a list of checks to perform in this case:
 
-- either by the provisioning script
-- either with `ssh <host>`
-- either appears as "down" with `tower status`
+1. With `[thinclient]$ ip ad`, check that the interface `eth0` is UP, with the IP `192.168.2.100`, and that the interface `eth1` is UP with the IP `192.168.3.100`.
+1. Check that the thin client is connected to the online switch with `eth0` and to the offline switch with `eth1`.
+1. Check that the host is connected to the correct switch.
+1. Check that the host is visible with `[thinclient]$ nmap -sn 192.168.2.0/24` for an online host and `nmap -sn 192.168.3.0/24` for an offline host.
 
-The most likely cause is a network problem. Here is the list of checks to carry out:
-
-1. With `ip ad` check that the interface `eth0` is UP and with the ip `192.168.2.100` and that the interface `eth1` is UP with the ip `192.168.3.100`.
-1. check that the Thin Client is connected to the online switch with `eth0` and to the offline switch with `eth1`.
-1. check that the host is connected to the correct switch
-1. check that the host is visible with `nmap -sn 192.168.2.0/24` for an online host and `nmap -sn 192.168.3.0/24` for an offline host.
-
-If all of these checks are ok and you still cannot access the host, you must connect a screen and keyboard to the host and check for any error messages.
+If all of these checks are OK and you still cannot access the host, you must connect a screen and keyboard to the host and look for error messages that appear during the boot process.
 
 
 ## Thin Client Upgrades
 
-To upgrade the thin client you must proceed in exactly the same way as for the installation and select "Upgrade TowerOS-Thinclient" in the first question.
+To upgrade the thin client, you must proceed in exactly the same way as for the installation and select "Upgrade TowerOS-Thinclient" in the first CLI prompt.
 
-During an upgrade the system is completely reinstalled. Only the `/home` folder with hosts configurations and keys are kept. If you have data outside of `/home`, make sure to make a backup before starting the upgrade.
+During an upgrade the system is completely reinstalled. Only the `/home` folder, which contains the TowerOS configuration and keys is kept. If you have data outside of `/home`, make sure to make a backup before starting the upgrade.
 
 
 ## Host Upgrades
+
+To upgrade a host, run the following command:
 
 ```
 [thinclient]$ tower upgrade <host>
 ```
 
-During an upgrade the system is completely reinstalled. Only the /home folder is kept. If you have data outside of /home, make sure to make a backup before starting the upgrade.
+During an upgrade the system is completely reinstalled; only the `/home` folder is kept. If you have data stored on the host outside of `/home`, make sure to make a backup before starting the upgrade.
   
-Once the system is upgrade, all applications installed with `tower install <host>` are automatically re-installed.
+Once the system has been upgraded, all applications installed with `tower install <host>` are automatically re-installed.
 
-Note: Always upgrade the router before other hosts.
+*Note:* Always upgrade the router before other hosts.
 

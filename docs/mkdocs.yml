@@ -23,7 +23,7 @@ extra_css:
 nav:
   - Getting Started:
     - Introduction: index.md
-    - Hardware: hardware.md
+    - Hardware Requirements: hardware.md
     - Installation and Upgrades: installation.md
   - Usage:
     - Using TowerOS: usage.md
