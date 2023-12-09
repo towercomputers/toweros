@@ -37,7 +37,10 @@ prepare_lvm_partition() {
     dd if=/dev/urandom of=/crypto_keyfile.bin bs=1024 count=2
     chmod 0400 /crypto_keyfile.bin
     # create LUKS partition
-    cryptsetup -q luksFormat $LVM_PARTITION /crypto_keyfile.bin
+    modprobe xchacha20
+	modprobe adiantum
+	modprobe nhpoly1305
+    cryptsetup -q luksFormat -c xchacha12,aes-adiantum-plain64 $LVM_PARTITION /crypto_keyfile.bin
     cryptsetup luksAddKey $LVM_PARTITION /crypto_keyfile.bin --key-file=/crypto_keyfile.bin
     # initialize the LUKS partition
     cryptsetup luksOpen $LVM_PARTITION lvmcrypt --key-file=/crypto_keyfile.bin
@@ -213,7 +216,12 @@ install_tower_tools() {
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
     pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
     # install man page
+    mkdir -p /mnt/usr/local/share/man/man1/
     cp /var/towercomputers/docs/tower.1 /mnt/usr/local/share/man/man1/
+    # install wallpaper
+    cp /var/towercomputers/installer/wallpaper.jpg /mnt/var/towercomputers/
+    # install terminall screen locker
+    cp /var/towercomputers/installer/screenlocker.sh /mnt/var/towercomputers/
 }
 
 

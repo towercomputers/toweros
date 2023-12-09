@@ -27,8 +27,6 @@ GIT_KEY_PATH="$3"
 # set this variable if you need to connect with ssh from another host
 AUTHORIZED_KEY="$4"
 
-pip install hatch
-
 # update Git configuration
 if [ ! -z "$GIT_NAME" ]; then
     git config --global user.name "$GIT_NAME"
