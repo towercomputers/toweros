@@ -26,6 +26,7 @@ dependencies = [
     "rich==13.3.5",
     "yaspin==2.3.0",
     "hatch==1.7.0",
+    "argparse-manpage==4.5",
 ]
 
 [tool.hatch.build.targets.wheel]

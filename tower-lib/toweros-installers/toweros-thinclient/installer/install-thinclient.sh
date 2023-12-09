@@ -443,10 +443,10 @@ install_thinclient() {
 
 unmount_and_reboot() {
     rm -f /mnt/crypto_keyfile.bin
+    python $SCRIPT_DIR/askconfiguration.py congratulations
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }
 
