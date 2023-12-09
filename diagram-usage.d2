@@ -1,0 +1,42 @@
+internet: Internet {
+  style.stroke: transparent
+  style.fill: transparent
+  icon: https://icons.terrastruct.com/essentials%2F140-internet.svg
+}
+
+deskpi: DeskPi Super6C {
+  style.fill: transparent
+
+  cm4-router: router {
+    icon: https://icons.terrastruct.com/infra%2F021-hardware.svg
+  }
+  cm4-web: web {
+    icon: https://icons.terrastruct.com/infra%2F021-hardware.svg
+  }
+  cm4-email: email {
+    icon: https://icons.terrastruct.com/infra%2F021-hardware.svg
+  }
+}
+
+thinclient: Thin Client {
+  style.fill: transparent
+  window-web: Firefox {
+    icon: https://icons.terrastruct.com/essentials%2F006-window.svg
+  }
+  window-email: Thunderbird {
+    icon: https://icons.terrastruct.com/essentials%2F006-window.svg
+  }
+}
+
+
+deskpi.*.style.fill: transparent
+deskpi.*.style.stroke: transparent
+
+thinclient.*.style.fill: transparent
+thinclient.*.style.stroke: transparent
+
+
+
+deskpi.cm4-router <-> internet
+deskpi.cm4-web -> thinclient.window-web: NX over SSH
+deskpi.cm4-email -> thinclient.window-email: NX over SSH
