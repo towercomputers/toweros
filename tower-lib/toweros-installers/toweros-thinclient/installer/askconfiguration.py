@@ -110,8 +110,8 @@ def select_by_letter(title, ask1, ask2, values):
 
 def get_installation_type():
     return select_value(
-        ['Install TowerOS-Thinclient', 'Upgrade TowerOS-Thinclient'],
-        "Do you want to install a new system or upgrade an already installed system?",
+        ['Install TowerOS-ThinClient', 'Upgrade TowerOS-ThinClient'],
+        "Do you want to reinstall TowerOS or upgrade an existing installation?",
         "Select the installation type",
         no_columns=True
     ).split(" ", maxsplit=1)[0].lower()
@@ -147,13 +147,13 @@ def check_secure_boot_status():
     sbctl_status = run_cmd(["sbctl", "status", "--json"], to_json=True)
     error = False
     if sbctl_status['secure_boot'] is not False:
-        print_error("Error: Secure boot is enabled. You must disable it to install TowerOS-Thinclient with Secure Boot.")
+        print_error("Error: Secure Boot is enabled. You must disable it to install TowerOS-ThinClient with Secure Boot.")
         error = True
     if sbctl_status['setup_mode'] is not True:
-        print_error("Error: Secure boot's 'Setup Mode' is disabled. You must enable it in order to install TowerOS-Thinclient with Secure Boot.")
+        print_error("Error: Secure Boot's 'Setup Mode' is disabled. You must enable it in order to install TowerOS-ThinClient with Secure Boot.")
         error = True
     if len(sbctl_status['vendors']) > 0:
-        print_error("Error: You must delete all Secure Boot keys in order to install TowerOS-Thinclient with Secure Boot.")
+        print_error("Error: You must delete all Secure Boot keys in order to install TowerOS-ThinClient with Secure Boot.")
         error = True
     if error:
         print_error("Please refer to the documentation in order to prepare your device firmware for Secure Boot:")
@@ -165,7 +165,7 @@ def get_secure_boot():
     print_title("Secure boot")
     with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?")
     if with_secure_boot and not check_secure_boot_status():
-        continue_without_secure_boot = Confirm.ask("Do you want to continue without secure boot (y) or reboot (n) ?")
+        continue_without_secure_boot = Confirm.ask("Do you want to continue without Secure Boot (y), or do you want to reboot (n) ?")
         if continue_without_secure_boot:
             return False
         os.system('reboot') # nosec
@@ -255,7 +255,7 @@ def confirm_config(config):
     rprint("\n")
     print_error(target_warning)
     print_error(f"Warning: The content of the device {config['CRYPTKEY_DRIVE']} will be permanently erased.")
-    print_error("Warning: The device containing the encryption key MUST be plugged in and your device's BIOS must be configured to boot on it.")
+    print_error("Warning: The device containing the encryption key MUST be plugged in, and your device's BIOS must be configured to boot from it.")
     return Confirm.ask("\nIs the configuration correct?")
 
 def print_header():
@@ -290,7 +290,7 @@ def ask_config():
 def congratulations():
     print_header()
     print("\n")
-    rprint(Text("Congratulations! TowerOS has been successfully installed.", style="green bold"))
+    rprint(Text("Congratulations! TowerOS-ThinClient has been successfully installed.", style="green bold"))
     print("\n")
     rprint(Text("Be sure to remove the drive that contains the installation image. Then press \"Enter\" to reboot.", style="purple bold"))
     input()
