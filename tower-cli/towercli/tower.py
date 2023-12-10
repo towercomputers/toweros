@@ -40,6 +40,7 @@ def towercli_parser():
     wlanconnect.add_args(subparser)
     version.add_args(subparser)
     mdhelp.add_args(subparser)
+    utils.mdhelp.insert_autocompletion_command(parser)
     return parser
 
 def get_module(args):

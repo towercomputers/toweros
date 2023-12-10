@@ -379,6 +379,8 @@ EOF
 */10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
 */10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/screenlocker.sh
 EOF
+    # install tower autocompletion
+    cp /var/towercomputers/installer/tower-bash-autocompletion /mnt/usr/share/bash-completion/completions/tower
 }
 
 install_bootloader() {

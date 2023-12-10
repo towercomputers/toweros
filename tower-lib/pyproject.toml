@@ -27,6 +27,7 @@ dependencies = [
     "yaspin==2.3.0",
     "hatch==1.7.0",
     "argparse-manpage==4.5",
+    "shtab==1.6.5",
 ]
 
 [tool.hatch.build.targets.wheel]

@@ -1,4 +1,7 @@
 import re
+import argparse
+
+import shtab
 
 def clean_usage(usage):
     cleaned_usage = usage.replace('usage: ', '')
@@ -111,3 +114,6 @@ def gen_md_help(parser):
         md.append(f"<b>{opt['name']}</b><br />{md_div(opt['help'])}<br />")
     md.append(close_div)
     return "\n".join(md)
+
+def insert_autocompletion_command(parser):
+    shtab.add_argument_to(parser, '--print-completion', help=argparse.SUPPRESS)

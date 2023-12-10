@@ -11,7 +11,6 @@
 | Keyboard is configured. | Type some characters. | Check is OK. |
 | Time Zone is configured. | `[thinclient]$ date` | The date with the correct time zone. |
 | Shell prompt is customized. | Check the shell prompt format. | `[<username>@thinclient <current folder>]$` |
-| Shell must be `bash` | `[thinclient]$ echo $SHELL` | `/bin/bash` |
 | The `swap` partition must be 8Gb, the `home` partition must occupy 20% of the rest, and the `root` partition the remaining space. | `[thinclient]$ lsblk` | ![lsblk thinclient](img/lsblk-thinclient.png) |
 | `supercronic` service must be started. | `[thinclient]$ sudo rc-service supercronic status` | `* status: started` |
 | Default user is sudoer without password. | `[thinclient]$ sudo su` | Root session without a password being requested. |
@@ -33,6 +32,7 @@
 | When `labwc` is open, the screen locker should activate correctly after 5 minutes of inactivity. | Stay inactive 5mn. | Black screen with password prompt. |
 | In the terminal, the screen locker should activate correctly after 5 minutes of inactivity. | Exit `labwc` and stay inactive 5mn. | Black screen with password prompt. |
 | The latest version of `tower` cli must be installed. | `[thinclient]$ tower version`| Installed version. |
+| Tower CLI autocompletion should work correctly. | `[thinclient]$ tower p` then `[tab]` | `[thinclient]$ tower provision` |
 
 ### Hosts provisioning
 
