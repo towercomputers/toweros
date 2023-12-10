@@ -11,6 +11,7 @@
 | Keyboard is configured. | Type some characters. | Check is OK. |
 | Time Zone is configured. | `[thinclient]$ date` | The date with the correct time zone. |
 | Shell prompt is customized. | Check the shell prompt format. | `[<username>@thinclient <current folder>]$` |
+| Shell must be `bash` | `[thinclient]$ echo $SHELL` | `/bin/bash` |
 | The `swap` partition must be 8Gb, the `home` partition must occupy 20% of the rest, and the `root` partition the remaining space. | `[thinclient]$ lsblk` | ![lsblk thinclient](img/lsblk-thinclient.png) |
 | `supercronic` service must be started. | `[thinclient]$ sudo rc-service supercronic status` | `* status: started` |
 | Default user is sudoer without password. | `[thinclient]$ sudo su` | Root session without a password being requested. |

@@ -96,3 +96,6 @@ meson
 wlrctl
 waypipe
 supercronic
+bash-completion
+bash-completion-doc
+shadow

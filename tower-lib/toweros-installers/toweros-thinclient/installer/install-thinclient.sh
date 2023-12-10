@@ -171,6 +171,7 @@ prepare_home_directory() {
     addgroup "$USERNAME" audio
     addgroup "$USERNAME" input
     addgroup "$USERNAME" seat
+    chsh "$USERNAME" -s /bin/bash
     # add user to sudoers
     mkdir -p /etc/sudoers.d
     echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
@@ -188,6 +189,7 @@ if [ -z "\$XDG_RUNTIME_DIR" ]; then
 	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
 	export XDG_RUNTIME_DIR
 fi
+source /etc/bash/bash_completion.sh
 EOF
     # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
