@@ -7,6 +7,7 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
+from towerlib import utils, config
 from towerlib.utils.shell import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
@@ -34,15 +35,14 @@ def prepare_working_dir():
 def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
-def find_host_image(builds_dir):
-    host_images = glob.glob(join_path(builds_dir, 'toweros-host-*.xz'))
-    if not host_images:
+def prepare_host_image():
+    host_image = utils.builds.find_host_image()
+    if not host_image:
         logger.info("Host image not found in builds directory. Building a new image.")
-        rpi_image_path = buildhost.build_image(builds_dir)
+        host_image = buildhost.build_image()
     else:
-        rpi_image_path = host_images.pop()
-        logger.info("Using host image %s", rpi_image_path)
-    return rpi_image_path
+        logger.info("Using host image %s", host_image)
+    return host_image
 
 def check_abuild_key():
     abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
@@ -83,9 +83,9 @@ def prepare_docs():
         '--output', wd('overlay/var/towercomputers/docs/tower.1'),
     )
 
-def prepare_build(builds_dir):
+def prepare_build():
     makedirs(wd('overlay/var/towercomputers/builds'))
-    host_image_path = find_host_image(builds_dir)
+    host_image_path = prepare_host_image()
     copyfile(host_image_path, wd('overlay/var/towercomputers/builds'))
     for package in ['tower_lib', 'tower_cli']:
         wheels = glob.glob(join_path(wd('overlay/var/cache/pip-packages'), f'{package}-*.whl'))
@@ -94,15 +94,15 @@ def prepare_build(builds_dir):
 def prepare_etc_folder():
     copytree(join_path(INSTALLER_DIR, 'etc'), wd('overlay/etc'))
 
-def prepare_overlay(builds_dir):
+def prepare_overlay():
     prepare_pip_packages()
     prepare_installer()
     prepare_docs()
     prepare_etc_folder()
-    prepare_build(builds_dir)
+    prepare_build()
 
 @clitask("Building Thin Client image, be patient...")
-def prepare_image(builds_dir):
+def prepare_image():
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
@@ -121,7 +121,7 @@ def prepare_image(builds_dir):
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
-        builds_dir,
+        config.TOWER_BUILDS_DIR,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
     with sh_sudo(password="", _with=True): # nosec B106
@@ -130,13 +130,13 @@ def prepare_image(builds_dir):
 
 
 @clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
-def build_image(builds_dir):
+def build_image():
     image_path = None
     try:
         check_abuild_key()
         prepare_working_dir()
-        prepare_overlay(builds_dir)
-        image_path = prepare_image(builds_dir)
+        prepare_overlay()
+        image_path = prepare_image()
     finally:
         cleanup()
     if image_path:

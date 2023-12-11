@@ -15,7 +15,7 @@ from towerlib.utils.shell import (
     losetup, abuild_sign, openssl,
 )
 
-from towerlib import utils
+from towerlib import utils, config
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
 from towerlib.config import TOWER_DIR, HOST_ALPINE_BRANCH
@@ -162,10 +162,10 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-rtxv', wd("EXPORT_BOOTFS_DIR/"), wd("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
-def compress_image(builds_dir):
+def compress_image():
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
     tmp_image_path = os.path.join(tempfile.gettempdir(), image_name)
-    image_path = os.path.join(builds_dir, image_name)
+    image_path = os.path.join(config.TOWER_BUILDS_DIR, image_name)
     xz(
         '--compress', '--force',
         '--threads', 0, '--memlimit-compress=90%', '--best',
@@ -177,8 +177,8 @@ def compress_image(builds_dir):
     return image_path
 
 @clitask("Copying image...")
-def copy_image(builds_dir):
-    image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
+def copy_image():
+    image_path = os.path.join(config.TOWER_BUILDS_DIR, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wd("toweros-host.img"), image_path)
     chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
@@ -202,8 +202,8 @@ def prepare_apk_key():
     return private_key_path, public_key_path
 
 @clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
-def build_image(builds_dir, uncompressed=False):
-    alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
+def build_image(uncompressed=False):
+    alpine_tar_path = utils.download_alpine_rpi()
     loop_dev = None
     image_path = None
     try:
@@ -216,9 +216,9 @@ def build_image(builds_dir, uncompressed=False):
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         if uncompressed:
-            image_path = copy_image(builds_dir)
+            image_path = copy_image()
         else:
-            image_path = compress_image(builds_dir)
+            image_path = compress_image()
     finally:
         cleanup()
     if image_path:
