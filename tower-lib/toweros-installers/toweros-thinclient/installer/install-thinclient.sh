@@ -378,6 +378,7 @@ EOF
     cat <<EOF > /mnt/etc/crontabs/supercronic
 */10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
 */10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/screenlocker.sh
+*/5 * * * * runuser -u $USERNAME -- tower synctime
 EOF
     # install tower autocompletion
     cp /var/towercomputers/installer/tower-bash-autocompletion /mnt/usr/share/bash-completion/completions/tower

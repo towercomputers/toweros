@@ -22,9 +22,10 @@ def add_args(argparser):
         default=False
     )
 
-# pylint: disable=unused-argument
 def check_args(args, parser_error):
-    pass
+    config = sshconf.get(args.host[0])
+    if config is None:
+        parser_error("Unknown host.")
 
 def execute(args):
     if args.json:

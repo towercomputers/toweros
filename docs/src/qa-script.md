@@ -64,7 +64,7 @@
 | Default user is sudoer without password. | `[thinclient]$ ssh <host> sudo su` | Root session without a password being requested. |
 | Tower widget must be correctly started. | Check the presence of the widget in the taskbar. | ![Tower widget](img/tower-widget.png) |
 | Tower widget should display down hosts in red. | Turn off one of the hosts and check the taskbar.| ![Tower widget down](img/tower-widget-down.png) |
-
+| Offline host time should be synchronized with `router` time | `[thinclient]$ ssh router date && ssh office date` | The same date and time. |
 
 ### Execution and installation of applications
 

@@ -5,7 +5,7 @@ from towerlib import utils
 from towerlib.utils.exceptions import TowerException
 
 import towercli
-from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version, mdhelp
+from towercli.commands import provision, install, run, status, wlanconnect, upgrade, version, mdhelp, synctime
 
 def towercli_parser():
     parser = argparse.ArgumentParser(
@@ -39,8 +39,9 @@ def towercli_parser():
     status.add_args(subparser)
     wlanconnect.add_args(subparser)
     version.add_args(subparser)
-    mdhelp.add_args(subparser)
-    utils.mdhelp.insert_autocompletion_command(parser)
+    mdhelp.add_args(subparser) # hidden command
+    synctime.add_args(subparser) # hidden command
+    utils.mdhelp.insert_autocompletion_command(parser) # hidden command
     return parser
 
 def get_module(args):

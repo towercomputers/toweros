@@ -1,0 +1,2 @@
+# synchronize offline hosts and Thin Client time with `router`
+tower synctime
