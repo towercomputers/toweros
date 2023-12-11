@@ -117,8 +117,8 @@ def get_installation_type():
     ).split(" ", maxsplit=1)[0].lower()
 
 def get_target_drive(upgrade=False):
-    install_title = "Please select the drive you'd like to use for the boot device of the thin client"
-    upgrade_title = "Please select the boot drive for the thin client"
+    install_title = "Please select the drive you'd like to use for the root device of the thin client"
+    upgrade_title = "Please select the root drive for the thin client"
     drive = select_value(
         disk_list(),
         upgrade_title if upgrade else install_title,
