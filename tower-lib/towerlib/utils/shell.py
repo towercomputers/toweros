@@ -6,7 +6,7 @@ from sh import (
     cp, rm, mv, ls, cat, tee, echo, mkdir, chown, truncate, sed, touch,
     lsblk, mount, umount, parted, mkdosfs, dd, losetup,
     sync, rsync, tar, xz,
-    ssh as sshcli, scp, ssh_keygen, openssl, abuild_sign, shasum,
+    ssh as sshcli, scp, ssh_keygen, openssl, abuild, abuild_sign, shasum,
     git as gitcli, pip, apk, hatch,
     nxproxy, xsetroot, mcookie, waypipe,
     argparse_manpage,

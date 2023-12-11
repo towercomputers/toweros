@@ -7,14 +7,14 @@ import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-from towerlib import utils, config
-from towerlib.utils.shell import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
+from towerlib import utils
+from towerlib.utils.shell import rm, git, Command, apk, cp, argparse_manpage, abuild
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import sh_sudo
 from towerlib import buildhost
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException
-from towerlib.config import THINCLIENT_ALPINE_BRANCH
+from towerlib.config import THINCLIENT_ALPINE_BRANCH, APK_LOCAL_REPOSITORY, TOWER_BUILDS_DIR
 
 logger = logging.getLogger('tower')
 
@@ -51,19 +51,10 @@ def check_abuild_key():
         logger.error("ERROR: You must have an `abuild` key to build the image. Please use `abuild-keygen -a -i`.")
         sys.exit()
 
-@clitask("Downloading pip packages...")
+@clitask("Prepare Tower CLI APK package...")
 def prepare_pip_packages():
-    makedirs(wd('overlay/var/cache/pip-packages'))
-    for package in ['tower-lib', 'tower-cli']:
-        hatch('build', '-t', 'wheel', _cwd=join_path(REPO_PATH, package))
-        wheel_name = f"{package.replace('-', '_')}-{__version__}-py3-none-any.whl"
-        wheel_path = os.path.abspath(join_path(REPO_PATH, package, 'dist', wheel_name))
-        copyfile(wheel_path, wd('overlay/var/cache/pip-packages'))
-        pip(
-            "download", f"{package} @ file://{wheel_path}",
-            '-d', wd('overlay/var/cache/pip-packages'),
-            _err_to_out=True, _out=logger.debug
-        )
+    rm('-rf', APK_LOCAL_REPOSITORY)
+    abuild('-r', _cwd=REPO_PATH)
 
 def prepare_installer():
     makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
@@ -87,9 +78,6 @@ def prepare_build():
     makedirs(wd('overlay/var/towercomputers/builds'))
     host_image_path = prepare_host_image()
     copyfile(host_image_path, wd('overlay/var/towercomputers/builds'))
-    for package in ['tower_lib', 'tower_cli']:
-        wheels = glob.glob(join_path(wd('overlay/var/cache/pip-packages'), f'{package}-*.whl'))
-        copyfile(wheels[0], wd('overlay/var/towercomputers/builds'))
 
 def prepare_etc_folder():
     copytree(join_path(INSTALLER_DIR, 'etc'), wd('overlay/etc'))
@@ -112,6 +100,7 @@ def prepare_image():
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
+        '--repository', APK_LOCAL_REPOSITORY,
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/community',
         '--profile', 'tower',
@@ -121,7 +110,7 @@ def prepare_image():
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
-        config.TOWER_BUILDS_DIR,
+        TOWER_BUILDS_DIR,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
     with sh_sudo(password="", _with=True): # nosec B106

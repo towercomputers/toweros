@@ -214,9 +214,6 @@ install_tower_tools() {
     cp -r /var/towercomputers/builds $TOWER_FOLDER
     # install custom copyq auto start script
     cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
-    # install tower with pip
-    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
-    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
     # install man page
     mkdir -p /mnt/usr/local/share/man/man1/
     cp /var/towercomputers/docs/tower.1 /mnt/usr/local/share/man/man1/
@@ -445,8 +442,6 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    # fix broken package `py3-rich`
-    pip install --break-system-packages --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" rich
     python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }

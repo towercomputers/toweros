@@ -16,6 +16,7 @@ TOWER_SSH_CONFIG_PATH = os.path.join(TOWER_DIR, 'config')
 SSH_CONFIG_PATH = os.path.expanduser('~/.ssh/config')
 KNOWN_HOSTS_PATH = os.path.expanduser('~/.ssh/known_hosts')
 DESKTOP_FILES_DIR = os.path.expanduser('~/.local/share/applications')
+APK_LOCAL_REPOSITORY = os.path.expanduser('~/packages/towercomputers')
 COLORS = [
     [39, "White", "ffffff"],
     [31, "Red", "cc0000"],
