@@ -1,5 +1,5 @@
 pkgname=tower-cli
-pkgver=0.4.0
+pkgver=$(cat tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
 pkgrel=0
 pkgdesc="Tower CLI"
 url="https://toweros.org/"
@@ -33,7 +33,7 @@ package() {
     # old packages
     pip3 install --target="$pkgdir/usr/lib/python3.11/site-packages/" --find-links="$srcdir" \
                 --use-pep517 --no-warn-script-location --no-deps --ignore-requires-python --no-cache-dir \
-                --use-deprecated=legacy-resolver --upgrade \
+                --use-deprecated=legacy-resolver --upgrade --root-user-action=ignore \
                 argparse-manpage==4.5 backports.pbkdf2==0.1
-    mv $pkgdir/usr/lib/python3.11/site-packages/bin/* $pkgdir/usr/bin/ 
+    mv $pkgdir/usr/lib/python3.11/site-packages/bin/* $pkgdir/usr/bin/
 }
