@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "Tower library"
 readme = "../README.md"
 licence = "Apache-2.0"
-license-files = { paths = ["../LICENSE"] }
+#license-files = { paths = ["../LICENSE"] }
 requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -16,18 +16,20 @@ classifiers = [
 ]
 dependencies = [
     "setuptools==67.6.1",
+    "hatchling==1.14.0",
+    #"hatch==1.7.0",
+    "wheel==0.40.0",
     "requests==2.31.0",
-    "sh==1.14.3",
     "passlib==1.7.4",
+    "rich==13.3.5",
+    # apks in edge for now
+    "sh==1.14.3",
+    "shtab==1.6.5",
+    # no apks for these
     "backports.pbkdf2==0.1",
     "sshconf==0.2.5",
-    "hatchling==1.14.0",
-    "wheel==0.40.0",
-    "rich==13.3.5",
     "yaspin==2.3.0",
-    "hatch==1.7.0",
     "argparse-manpage==4.5",
-    "shtab==1.6.5",
 ]
 
 [tool.hatch.build.targets.wheel]
