@@ -42,6 +42,8 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 
 ## Install `pip` package in offline host using online host
 
+Before installing a package with `pip`, check that there is no `apk` package installable with `tower install`.
+
 1. Install `pip` in online and offline host
 
         [thinclient]$ tower install web python3 py3-pip
@@ -58,7 +60,14 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 
 1. Install `pip` package in offline host
 
-        [thinclient]$ ssh office pip install --no-index --find-links="~/mypackages" <package_name>
+To install a package with `pip` you must create a virtual environment. Please refer to [the official documentation](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
+
+        [thinclient]$ ssh office
+        [office]$ mkdir myproject
+        [office]$ cd myproject
+        [office]$ python3 -m venv .venv
+        [office]$ source .venv/bin/activate
+        (.venv)[office]$ pip install --no-index --find-links="~/mypackages" <package_name>
 
 1. Clean up
 
