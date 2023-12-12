@@ -23,7 +23,9 @@ def add_args(argparser):
     )
 
 def check_args(args, parser_error):
-    config = sshconf.get(args.host[0])
+    if not args.host:
+        return
+    config = sshconf.get(args.host)
     if config is None:
         parser_error("Unknown host.")
 
