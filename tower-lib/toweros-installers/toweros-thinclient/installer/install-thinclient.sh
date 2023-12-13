@@ -288,6 +288,7 @@ EOF
     rc-update add dbus
     rc-update add local
     rc-update add seatd
+    rc-update add acpid
 
     chmod a+x /etc/init.d/supercronic
     rc-update add supercronic
