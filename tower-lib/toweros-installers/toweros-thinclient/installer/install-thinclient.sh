@@ -373,7 +373,7 @@ EOF
     cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
     # set crontab
     cat <<EOF > /mnt/etc/crontabs/supercronic
-*/10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
+*/10 * * * * * * runuser -u $USERNAME -- python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
 */10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/screenlocker.sh
 */5 * * * * runuser -u $USERNAME -- tower synctime
 EOF

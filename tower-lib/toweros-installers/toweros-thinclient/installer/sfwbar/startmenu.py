@@ -120,7 +120,7 @@ def generate_menu_group(desktop_applications):
 
 def generate_menu():
     desktop_applications = get_desktop_applications()
-    menu = ["MenuClear('Menugen_Applications')"]
+    menu = []
     in_host_apps = [info for info in desktop_applications if info["InHost"]]
     if len(in_host_apps) > 0:
         menu += generate_menu_group(in_host_apps)

@@ -131,7 +131,7 @@ def status(host = None, full = True):
             'toweros-version': host_config.get('TOWEROS_VERSION', 'N/A'),
             'color': get_host_color_name(host),
         }
-        if full and host_status == 'up':
+        if full:
             if host_status == 'up':
                 inxi_info = ssh('-t', host, 'inxi', '-MIs', '-c', '0').strip()
                 host_info['system'] = inxi_info[inxi_info.index('System: ') + 8:inxi_info.index(' details:')]
@@ -141,6 +141,12 @@ def status(host = None, full = True):
                 host_info['memory-total'] = memory_available
                 host_info['cpu-usage'] = str(round(100 - float(ssh(host, 'mpstat').strip().split("\n")[-1].split(" ")[-1]), 2)) + "%"
                 host_info['cpu-temperature'] = inxi_info[inxi_info.index('cpu: ') + 5:inxi_info.index(' mobo: ')].strip()
+            else:
+                host_info['system'] = 'N/A'
+                host_info['memory-usage'] = 'N/A'
+                host_info['memory-total'] = 'N/A'
+                host_info['cpu-usage'] = 'N/A'
+                host_info['cpu-temperature'] = 'N/A'
             host_info['packages-installed'] = ', '.join(get_installed_packages(host))
         return host_info
     return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])
@@ -179,7 +185,6 @@ def display_status(host = None):
             elif key == "color":
                 value = Text(value, style=value.lower())
             table.add_row(key, value)
-
     console = Console()
     console.print(table)
 
