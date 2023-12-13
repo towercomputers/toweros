@@ -85,9 +85,8 @@ prepare_home_directory() {
 	# create first user
 	adduser -D "$USERNAME" "$USERNAME"
 	update_passord "$USERNAME" "$PASSWORD_HASH"
-	# add user to sudoers
-	mkdir -p /etc/sudoers.d
-	echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+	# add user to doas config
+	echo "permit nopass $USERNAME as root" > /etc/doas.conf
 	# create home directory
 	mkdir -p "/mnt/home/"
 	# add publick key
@@ -265,6 +264,9 @@ http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi
+
+	# migrate from sudo to doas
+	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
 }
 
 clean_and_reboot() {

@@ -3,7 +3,7 @@ coreutils
 python3
 py3-pip
 py3-rich
-sudo
+doas
 openssh
 rsync
 git

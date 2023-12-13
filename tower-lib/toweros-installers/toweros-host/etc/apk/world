@@ -6,7 +6,7 @@ e2fsprogs
 e2fsprogs-extra
 sfdisk
 iptables
-sudo
+doas
 openssh
 xauth
 nano

@@ -79,7 +79,7 @@ set_config_from_root_partition() {
     mkdir -p /ROOT
     mount -t ext4 "$ROOT_PARTITION" /ROOT
     # set username
-    USERNAME=$(cat /ROOT/etc/sudoers.d/01_tower_nopasswd | awk '{print $1}')
+    USERNAME=$(cat /ROOT/etc/doas.conf | awk '{print $3}')
     # set user password hash
     PASSWORD_HASH=$(cat /ROOT/etc/shadow | grep $USERNAME | cut -d ':' -f 2)
     # set root password hash
@@ -172,9 +172,8 @@ prepare_home_directory() {
     addgroup "$USERNAME" input
     addgroup "$USERNAME" seat
     chsh "$USERNAME" -s /bin/bash
-    # add user to sudoers
-    mkdir -p /etc/sudoers.d
-    echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+    # add user to doas config
+    echo "permit nopass $USERNAME as root" > /etc/doas.conf
     # create home directory
     mkdir -p "/mnt/home/$USERNAME"
     # create .Xauthority file
@@ -380,6 +379,9 @@ EOF
 EOF
     # install tower autocompletion
     cp /var/towercomputers/installer/tower-bash-autocompletion /mnt/usr/share/bash-completion/completions/tower
+
+    # migrate from sudo to doas
+    ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
 }
 
 install_bootloader() {
