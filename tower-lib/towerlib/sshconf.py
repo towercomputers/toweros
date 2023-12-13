@@ -141,15 +141,12 @@ def status(host = None, full = True):
                 host_info['memory-total'] = memory_available
                 host_info['cpu-usage'] = str(round(100 - float(ssh(host, 'mpstat').strip().split("\n")[-1].split(" ")[-1]), 2)) + "%"
                 host_info['cpu-temperature'] = inxi_info[inxi_info.index('cpu: ') + 5:inxi_info.index(' mobo: ')].strip()
-                bandwith_usage = ssh(host, "netstat -e -n -i | grep eth0 -A 5 | grep 'RX packets' |  tail -1").strip()
-                host_info['bandwith-usage'] = bandwith_usage[bandwith_usage.index('(') + 1:-1]
             else:
                 host_info['system'] = 'N/A'
                 host_info['memory-usage'] = 'N/A'
                 host_info['memory-total'] = 'N/A'
                 host_info['cpu-usage'] = 'N/A'
                 host_info['cpu-temperature'] = 'N/A'
-                host_info['bandwith-usage'] = 'N/A'
             host_info['packages-installed'] = ', '.join(get_installed_packages(host))
         return host_info
     return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])

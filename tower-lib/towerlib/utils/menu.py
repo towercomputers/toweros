@@ -68,7 +68,6 @@ STATUS_KEYS = {
     "memory-total": "Memory Total",
     "cpu-usage": "CPU Usage",
     "cpu-temperature": "CPU Temperature",
-    "bandwith-usage": "Bandwith Usage",
 }
 
 def host_scanner_expressions(host):
