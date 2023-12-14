@@ -4,7 +4,7 @@ if [ -f /home/$USER/.local/tower/osconfig ]; then
     source /home/$USER/.local/tower/osconfig
 fi
 LOCK_SCREEN_AFTER=${LOCK_SCREEN_AFTER:-"300"}
-WALLPAPER_IMAGE=${WALLPAPER_IMAGE:-"/var/towercomputers/wallpaper.jpg"}
+WALLPAPER_IMAGE=${WALLPAPER_IMAGE:-"/var/towercomputers/wallpapers/wallpaper1.jpg"}
 
 # Set background color.
 #swaybg -c '#113344' >/dev/null 2>&1 &

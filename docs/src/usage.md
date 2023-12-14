@@ -46,6 +46,6 @@ Edit the file `~/.local/tower/osconfig` with the following variables:
 
 ```
 LOCK_SCREEN_AFTER=300 # 5 minutes
-WALLPAPER_IMAGE=/var/towercomputers/wallpaper.jpg
+WALLPAPER_IMAGE=/var/towercomputers/wallpapers/wallpaper1.jpg
 STARTW_ON_LOGIN='false'
 ```

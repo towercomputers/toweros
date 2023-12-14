@@ -224,8 +224,8 @@ install_tower_tools() {
     # install man page
     mkdir -p /mnt/usr/local/share/man/man1/
     cp /var/towercomputers/docs/tower.1 /mnt/usr/local/share/man/man1/
-    # install wallpaper
-    cp /var/towercomputers/installer/wallpaper.jpg /mnt/var/towercomputers/
+    # install wallpapers
+    cp -r /var/towercomputers/installer/wallpapers /mnt/var/towercomputers/
     # install terminall screen locker
     cp /var/towercomputers/installer/screenlocker.sh /mnt/var/towercomputers/
     chmod a+x /mnt/var/towercomputers/screenlocker.sh
