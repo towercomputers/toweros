@@ -29,8 +29,10 @@
 | The wallpaper should be correctyly displayed | Check the wallpaper. | Tower's logo. |
 | The `sfwbar` menu bar should appear correctly. | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom. |
 | `CopyQ` must be correctly started. | Check the presence of the icon in the taskbar. | ![copyq](img/copyq.png) |
+| Wallpaper should be configurable. | Edit the `WALLPAPER_IMAGE` value in `~/.local/tower/osconfig` and restart `labwc`. | Wallpaper must change. |
 | When `labwc` is open, the screen locker should activate correctly after 5 minutes of inactivity. | Stay inactive 5mn. | Black screen with password prompt. |
 | In the terminal, the screen locker should activate correctly after 5 minutes of inactivity. | Exit `labwc` and stay inactive 5mn. | Black screen with password prompt. |
+| Screen locker timeout should be configurable. | Edit the `LOCK_SCREEN_AFTER` value in `~/.local/tower/osconfig` and make the two previous tests. | Black screen with password prompt. |
 | The latest version of `tower` cli must be installed. | `[thinclient]$ tower version`| Installed version. |
 | Tower CLI autocompletion should work correctly. | `[thinclient]$ tower p` then `[tab]` | `[thinclient]$ tower provision` |
 

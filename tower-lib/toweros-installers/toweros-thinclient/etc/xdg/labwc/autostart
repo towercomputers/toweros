@@ -1,8 +1,14 @@
 # Example autostart file
 
+if [ -f /home/$USER/.local/tower/osconfig ]; then
+    source /home/$USER/.local/tower/osconfig
+fi
+LOCK_SCREEN_AFTER=${LOCK_SCREEN_AFTER:-"300"}
+WALLPAPER_IMAGE=${WALLPAPER_IMAGE:-"/var/towercomputers/wallpaper.jpg"}
+
 # Set background color.
 #swaybg -c '#113344' >/dev/null 2>&1 &
-swaybg -i /var/towercomputers/wallpaper.jpg >/dev/null 2>&1 &
+swaybg -i $WALLPAPER_IMAGE >/dev/null 2>&1 &
 
 # Configure output directives such as mode, position, scale and transform.
 # Use wlr-randr to get your output names
@@ -30,5 +36,5 @@ sh /var/towercomputers/start-copyq.sh  >/dev/null 2>&1 &
 # swayidle -w timeout 300 'swaylock -f -c 000000' >/dev/null 2>&1 &
 # hack: move the cursor 1 pixel to avoid a bug in swayidle when no activity
 # after unlocking or on labwc startup
-swayidle -w timeout 300 'physlock && wlrctl pointer move 1 1' >/dev/null 2>&1 &
+swayidle -w timeout $LOCK_SCREEN_AFTER 'physlock && wlrctl pointer move 1 1' >/dev/null 2>&1 &
 wlrctl pointer move 1 1 >/dev/null 2>&1
