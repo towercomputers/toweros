@@ -32,6 +32,3 @@ sh /var/towercomputers/start-copyq.sh  >/dev/null 2>&1 &
 # after unlocking or on labwc startup
 swayidle -w timeout 300 'physlock && wlrctl pointer move 1 1' >/dev/null 2>&1 &
 wlrctl pointer move 1 1 >/dev/null 2>&1
-
-# start sound server
-/usr/libexec/pipewire-launcher >/dev/null 2>&1 &

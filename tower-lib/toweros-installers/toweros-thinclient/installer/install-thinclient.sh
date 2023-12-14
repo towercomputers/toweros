@@ -221,6 +221,8 @@ install_tower_tools() {
     # install terminall screen locker
     cp /var/towercomputers/installer/screenlocker.sh /mnt/var/towercomputers/
     chmod a+x /mnt/var/towercomputers/screenlocker.sh
+    # install sound sample file
+    cp /var/towercomputers/installer/sample.flac /mnt/var/towercomputers/
 }
 
 

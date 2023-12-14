@@ -1,0 +1,2 @@
+# start sound server
+dbus-launch /usr/libexec/pipewire-launcher >/dev/null 2>&1 &
