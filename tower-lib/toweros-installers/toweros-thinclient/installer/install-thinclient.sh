@@ -189,6 +189,7 @@ if [ -z "\$XDG_RUNTIME_DIR" ]; then
 	export XDG_RUNTIME_DIR
 fi
 source /etc/bash/bash_completion.sh
+alias startw='dbus-launch labwc'
 EOF
     # start X on login if necessary
     if [ "$STARTX_ON_LOGIN" == "true" ]; then
