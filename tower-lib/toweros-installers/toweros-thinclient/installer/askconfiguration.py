@@ -218,7 +218,7 @@ def get_keymap():
     return layout, variant
 
 
-def get_startx_on_login():
+def get_startw_on_login():
     print_title("Start Wayland on login")
     return Confirm.ask("Do you want to automatically start the graphical interface on login?")
 
@@ -264,7 +264,7 @@ def confirm_config(config):
         print_value("Keyboard layout", config['KEYBOARD_LAYOUT'])
         print_value("Keyboard variant", config['KEYBOARD_VARIANT'])
         print_value("Username", config['USERNAME'])
-        print_value("Start X on login", config['STARTX_ON_LOGIN'])
+        print_value("Start X on login", config['STARTW_ON_LOGIN'])
         if config['SECURE_BOOT'] == "true":
             rprint("\n")
             print_error("Warning: You must enable Secure Boot in your device's firmware.")
@@ -303,7 +303,7 @@ def ask_config():
             config['LANG'] = get_lang()
             config['TIMEZONE'] = get_timezone()
             config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
-            config['STARTX_ON_LOGIN'] = "true" if get_startx_on_login() else "false"
+            config['STARTW_ON_LOGIN'] = "true" if get_startw_on_login() else "false"
             config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
             config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']
         confirmed = confirm_config(config)

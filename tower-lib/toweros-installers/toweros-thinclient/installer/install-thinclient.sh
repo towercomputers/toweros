@@ -98,7 +98,7 @@ set_config_from_root_partition() {
         SECURE_BOOT="false"
     fi
     # set startx on login
-    STARTX_ON_LOGIN="false" # in any case, already present in /home if needed
+    STARTW_ON_LOGIN="false" # in any case, already present in /home if needed
     umount /ROOT
 }
 
@@ -190,16 +190,23 @@ if [ -z "\$XDG_RUNTIME_DIR" ]; then
 fi
 source /etc/bash/bash_completion.sh
 alias startw='dbus-launch labwc'
+if [ -f /home/$USERNAME/.local/tower/osconfig ]; then
+    source /home/$USERNAME/.local/tower/osconfig
+fi
+STARTW_ON_LOGIN=\${STARTW_ON_LOGIN:-"false"}
+if [ -z "\$DISPLAY" ] && [ "\$(tty)" == "/dev/tty1" ] && [ "\$STARTW_ON_LOGIN" == "true" ]; then
+    dbus-launch labwc; 
+fi
 EOF
-    # start X on login if necessary
-    if [ "$STARTX_ON_LOGIN" == "true" ]; then
-        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /mnt/home/$USERNAME/.profile
-    fi
     # create symlink to doc
     ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
     # create symlink to tower widget
     mkdir -p /mnt/home/$USERNAME/.local/tower
     touch /mnt/home/$USERNAME/.local/tower/tower.widget
+    # initialize osconfig file
+    if [ "$STARTW_ON_LOGIN" == "true" ]; then
+        echo "STARTW_ON_LOGIN='true'" > /mnt/home/$USERNAME/.local/tower/osconfig
+    fi
     # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
@@ -458,7 +465,7 @@ set_configuration() {
     # INSTALLATION_TYPE, ROOT_PASSWORD_HASH, USERNAME, PASSWORD_HASH,
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
-    # STARTX_ON_LOGIN
+    # STARTW_ON_LOGIN
     python $SCRIPT_DIR/askconfiguration.py
     source /root/tower.env
     if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
