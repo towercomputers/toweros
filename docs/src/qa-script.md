@@ -26,6 +26,8 @@
 | Bluetooth must be soft blocked. | `[thinclient]$ rfkill list bluetooth` | `Soft blocked: yes` |
 | `labwc` starts automatically after login if the option was chosen during installation. | Boot. | `labwc` must start after login. |
 | `labwc` should properly start manually with `startw` alias. | `[thinclient]$ startw` | `labwc` must start. |
+| `labwc` auto start should be configurable. | Edit the `STARTW_ON_LOGIN` value in `~/.local/tower/osconfig` to "true" and reboot. | `labwc` should start after login. |
+| `labwc` auto start should be configurable. | Edit the `STARTW_ON_LOGIN` value in `~/.local/tower/osconfig` to "false" and reboot. | `labwc` should not start after login. |
 | The wallpaper should be correctyly displayed | Check the wallpaper. | Tower's logo. |
 | The `sfwbar` menu bar should appear correctly. | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom. |
 | `CopyQ` must be correctly started. | Check the presence of the icon in the taskbar. | ![copyq](img/copyq.png) |
