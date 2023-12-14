@@ -25,7 +25,7 @@
 | Wifi must be soft blocked. | `[thinclient]$ rfkill list wifi` | `Soft blocked: yes` |
 | Bluetooth must be soft blocked. | `[thinclient]$ rfkill list bluetooth` | `Soft blocked: yes` |
 | `labwc` starts automatically after login if the option was chosen during installation. | Boot. | `labwc` must start after login. |
-| `labwc` should properly start manually. | `[thinclient]$ dbus-launch labwc` | `labwc` must start. |
+| `labwc` should properly start manually with `startw` alias. | `[thinclient]$ startw` | `labwc` must start. |
 | The wallpaper should be correctyly displayed | Check the wallpaper. | Tower's logo. |
 | The `sfwbar` menu bar should appear correctly. | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom. |
 | `CopyQ` must be correctly started. | Check the presence of the icon in the taskbar. | ![copyq](img/copyq.png) |
@@ -63,8 +63,12 @@
 | Bluetooth must be soft blocked on all hosts. | `[thinclient]$ ssh <host> rfkill list bluetooth` | `Soft blocked: yes` |
 | Default user is sudoer without password. | `[thinclient]$ ssh <host> sudo su` | Root session without a password being requested. |
 | Tower widget must be correctly started. | Check the presence of the widget in the taskbar. | ![Tower widget](img/tower-widget.png) |
+| Clicking on the name of a host in the taskbar displays the host information. | Click on the name of one of the hosts | ![Tower status widget](img/host-status-widget.jpg) |
 | Tower widget should display down hosts in red. | Turn off one of the hosts and check the taskbar.| ![Tower widget down](img/tower-widget-down.png) |
-| Offline host time should be synchronized with `router` time | `[thinclient]$ ssh router date && ssh office date` | The same date and time. |
+| Offline host time should be synchronized with `router` time. | `[thinclient]$ ssh router date && ssh office date` | The same date and time. |
+| Laptop should suspend on lid close | Close and re-open the lid | The laptop should be suspended and `physlock` activated on resume. |
+| Power-off button should work. | Press the power-off button. | TowerOS should shutdown. |
+| Sound must work. | `[thinclient]$ spw-cat -p /var/towercomputers/sample.flac ` | You must hear something. |
 
 ### Execution and installation of applications
 
