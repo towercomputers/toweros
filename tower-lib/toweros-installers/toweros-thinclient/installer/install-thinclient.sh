@@ -266,6 +266,9 @@ EOF
         exit 1
     fi
     cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
+    if [  -f /sys/class/net/eth1/address ]; then
+        cp /sys/class/net/eth1/address /etc/local.d/eth1_mac
+    fi
     chmod a+x /etc/local.d/*.start
 
     # set locales
