@@ -34,3 +34,9 @@ macchanger
 waypipe
 foot
 inxi
+pipewire
+wireplumber
+pipewire-pulse
+pipewire-jack
+pipewire-alsa
+pipewire-tools
