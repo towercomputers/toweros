@@ -1,6 +1,4 @@
 # pylint: disable=import-error,unused-import,no-name-in-module
-from sh.contrib import sudo as sh_sudo
-
 from sh import (
     Command, ErrorReturnCode,
     cp, rm, mv, ls, cat, tee, echo, mkdir, chown, truncate, sed, touch,
@@ -11,6 +9,7 @@ from sh import (
     nxproxy, xsetroot, mcookie, waypipe,
     argparse_manpage,
     locale as getlocale,
+    doas,
 )
 # pylint: enable=import-error,unused-import,no-name-in-module
 

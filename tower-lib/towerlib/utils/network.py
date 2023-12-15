@@ -9,7 +9,7 @@ from backports.pbkdf2 import pbkdf2_hmac
 
 from towerlib.utils.shell import cp, Command
 from towerlib.utils.decorators import clitask
-from towerlib.utils.shell import sh_sudo, mkdir
+from towerlib.utils.shell import doas, mkdir
 
 logger = logging.getLogger('tower')
 
@@ -34,7 +34,7 @@ def download_file(url, dest_path):
             for chunk in resp.iter_content(chunk_size=4096):
                 f.write(chunk)
     dest_dir = os.path.dirname(dest_path)
-    with sh_sudo(password="", _with=True): # nosec B106
+    with doas:
         mkdir('-p', dest_dir)
         cp(tmp_dest_path, dest_path)
 
