@@ -37,6 +37,9 @@
 | Screen locker timeout should be configurable. | Edit the `LOCK_SCREEN_AFTER` value in `~/.local/tower/osconfig` and make the two previous tests. | Black screen with password prompt. |
 | The latest version of `tower` cli must be installed. | `[thinclient]$ tower version`| Installed version. |
 | Tower CLI autocompletion should work correctly. | `[thinclient]$ tower p` then `[tab]` | `[thinclient]$ tower provision` |
+| Laptop should suspend on lid close | Close and re-open the lid | The laptop should be suspended and `physlock` activated on resume. |
+| Power-off button should work. | Press the power-off button. | TowerOS should shutdown. |
+| Sound must work. | `[thinclient]$ pw-cat -p /var/towercomputers/sample.flac ` | You must hear something. |
 
 ### Hosts provisioning
 
@@ -70,9 +73,6 @@
 | Clicking on the name of a host in the taskbar displays the host information. | Click on the name of one of the hosts | ![Tower status widget](img/host-status-widget.jpg) |
 | Tower widget should display down hosts in red. | Turn off one of the hosts and check the taskbar.| ![Tower widget down](img/tower-widget-down.png) |
 | Offline host time should be synchronized with `router` time. | `[thinclient]$ ssh router date && ssh office date` | The same date and time. |
-| Laptop should suspend on lid close | Close and re-open the lid | The laptop should be suspended and `physlock` activated on resume. |
-| Power-off button should work. | Press the power-off button. | TowerOS should shutdown. |
-| Sound must work. | `[thinclient]$ spw-cat -p /var/towercomputers/sample.flac ` | You must hear something. |
 
 ### Execution and installation of applications
 
