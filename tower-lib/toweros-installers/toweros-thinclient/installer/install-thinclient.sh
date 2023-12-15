@@ -271,6 +271,8 @@ Section "InputClass"
 EndSection
 EOF
 
+    chmod a+x /etc/init.d/*
+
     # start services
     rc-update add lvm
     rc-update add dmcrypt
@@ -279,8 +281,6 @@ EOF
     rc-update add local
     rc-update add seatd
     rc-update add acpid
-
-    chmod a+x /etc/init.d/supercronic
     rc-update add supercronic
 
     # enabling udev service
