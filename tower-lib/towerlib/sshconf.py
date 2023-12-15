@@ -289,6 +289,7 @@ def sync_time(offline_host = None):
         return
     # update offline host time
     for host in offline_hosts:
+        # pylint: disable=anomalous-backslash-in-string
         now = ssh(ROUTER_HOSTNAME, 'date +\%s').strip()
         ssh(host, f"sudo date -s @{now}")
     # update thinclient time

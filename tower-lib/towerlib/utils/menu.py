@@ -72,7 +72,7 @@ STATUS_KEYS = {
 
 def host_scanner_expressions(host):
     hosts_status_scanner = []
-    for key, title in STATUS_KEYS.items():
+    for key, _ in STATUS_KEYS.items():
         hosts_status_scanner.append(f"{host}_{key.replace('-', '_')} = Json('.{key.replace('-', '')}')")
     return "\n".join(hosts_status_scanner)
 

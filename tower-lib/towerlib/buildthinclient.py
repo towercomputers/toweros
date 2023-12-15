@@ -3,7 +3,6 @@ import logging
 import os
 from os import makedirs
 from os.path import join as join_path
-import glob
 from shutil import copytree, copy as copyfile
 import sys
 

@@ -248,27 +248,27 @@ def zeroing_device(device):
     dd('if=/dev/zero', f'of={device}', 'bs=8M', _out=logger.debug)
 
 @clitask("Configuring image...")
-def insert_tower_env(boot_part, config):
+def insert_tower_env(boot_part, host_config):
     # mount boot partition
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
-    str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
+    str_env = "\n".join([f"{key}='{value}'" for key, value in host_config.items()])
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
-    keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], "crypto_keyfile.bin")
+    keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], "crypto_keyfile.bin")
     cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
     # insert host ssh keys in boot partition
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
-        host_keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], f"ssh_host_{key_type}_key")
+        host_keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], f"ssh_host_{key_type}_key")
         cp(host_keys_path, wd(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
         cp(f"{host_keys_path}.pub", wd(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
-def burn_image(image_file, device, config, zero_device=False):
+def burn_image(image_file, device, new_config, zero_device=False):
     try:
         # make sure the password is not stored in th sd-card
-        host_config = {**config}
+        host_config = {**new_config}
         if 'PASSWORD' in host_config:
             del host_config['PASSWORD']
         prepare_working_dir()
