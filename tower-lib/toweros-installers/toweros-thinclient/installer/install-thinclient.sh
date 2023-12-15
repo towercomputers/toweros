@@ -233,49 +233,28 @@ install_tower_tools() {
     cp /var/towercomputers/installer/sample.flac /mnt/var/towercomputers/
 }
 
-
 update_live_system() {
     # set hostname
     setup-hostname -n thinclient
-
     # change root password
     update_passord "root" "$ROOT_PASSWORD_HASH"
-
-    # configure default network
-    mkdir -p /etc/network
-    cat <<EOF > /etc/network/interfaces
-auto lo
-iface lo inet loopback
-auto eth0
-iface eth0 inet static
-    address 192.168.2.100/24
-    #gateway 192.168.2.1
-auto eth1
-iface eth1 inet static
-    address 192.168.3.100/24
-EOF
-    # For devs convenience
-    cat <<EOF > /etc/resolv.conf
-#nameserver 8.8.8.8
-#nameserver 8.8.4.4
-EOF
-
-    # ensure eth0 exists and that it's always eth0
+    # ensure eth0 exists and store its MAC address
     if [  ! -f /sys/class/net/eth0/address ]; then
         echo "eth0 not found"
         exit 1
     fi
     cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
-    if [  -f /sys/class/net/eth1/address ]; then
-        cp /sys/class/net/eth1/address /etc/local.d/eth1_mac
-    fi
+    # For devs convenience
+    cat <<EOF > /etc/resolv.conf
+#nameserver 8.8.8.8
+#nameserver 8.8.4.4
+EOF
+    # ensure boot script are executable
     chmod a+x /etc/local.d/*.start
-
     # set locales
     # TODO: set LANG
     setup-timezone "$TIMEZONE"
     setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
-
     # configure keyboard
     echo "KEYMAP=$KEYBOARD_LAYOUT" > /etc/vconsole.conf
     echo "XKBLAYOUT=$KEYBOARD_LAYOUT"  >> /etc/vconsole.conf
@@ -296,7 +275,6 @@ EOF
     rc-update add lvm
     rc-update add dmcrypt
     rc-update add iptables
-    rc-update add networking
     rc-update add dbus
     rc-update add local
     rc-update add seatd

@@ -6,10 +6,19 @@ The architecture of TowerOS requires a significant amount of computer hardware t
 ## Thin Client
 - The thin client is typically a laptop like a Lenovo X270, but any x86 device will work if it has a screen and keyboard.
 - If you are using any Compute Modules for the hosts, then the thin client should have an SD card reader for provisioning SD cards that the hosts will boot from. (Raspberry Pi 4B/5s may be booted from USB keys, however.)
-- The thin client should also have one or two RJ-45 ports, depending on the number of networks in use (online-only, or one for online hosts and one for offline hosts).
+- The thin client should also have one or two RJ-45 ports.
 - A USB-Ethernet adapter, if the thin client doesn't have a built-in Ethernet port. (Recommended: [Olimex USB Ethernet Adapter](https://www.olimex.com/Products/USB-Modules/USB-GIGABIT/open-source-hardware)
 - Finally, you will need a dedicated USB key to serve as the boot device for the thin client.
 
+**Note about the network**
+
+The TowerOS network can work in three different ways:
+
+- The Thin Client is connected to two switches with two cables.
+- The Thin Client is connected to a switch with two cables.
+- The Thin Client is connected to a switch with a cable.
+
+We strongly recommend using the first way and connecting the offline and online hosts to different switches. This guarantees physical isolation of each network.
 
 ## Hosts
 TowerOS currently supports two kinds of host hardware: **Raspberry Pi 4B** or **Raspberry Pi 5** and **Raspberry Pi Compute Module 4 Lite** (“**CM4**” for short). Whereas Raspberry Pi 4B/5s must be connected with standalone switch hardware, CM4 modules may be connected with a board like the DeskPi Super6C, which provides for a much more compact form factor for a complete TowerOS system. CM4 modules may use M.2 SSDs as their persistent storage with a DeskPi Super6C, and they should therefore perform much better than Raspberry Pi 4Bs, which are limited to USB transfer speeds. (Raspberry Pi 5s have an external PCIe port, however, and so may also use SSDs for their storage without being bottlenecked by the USB interface.)
