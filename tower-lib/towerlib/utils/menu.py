@@ -8,8 +8,7 @@ from towerlib.sshconf import get_host_color_name, hosts, get_installed_packages,
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
 def restart_sfwbar():
-    Command('sh')('-c', "killall sfwbar || true")
-    Command('sh')('-c', "sfwbar", _bg=True, _bg_exc=False)
+    Command('sh')('-c', "killall sfwbar && sfwbar &", _bg=True, _bg_exc=False)
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
