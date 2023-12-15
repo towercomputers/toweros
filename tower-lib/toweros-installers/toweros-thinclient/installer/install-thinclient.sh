@@ -339,6 +339,7 @@ clone_live_system_to_disk() {
     # install edge packages
     apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/$ARCH/*.apk
     # install custom startmenu widget and tower widget
+    mkdir -p /mnt/usr/local/share/sfwbar
     cp /var/towercomputers/installer/sfwbar/*.widget /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
