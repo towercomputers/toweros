@@ -52,6 +52,8 @@ def check_abuild_key():
 
 @clitask("Prepare Tower CLI APK package...")
 def prepare_pip_packages():
+    with doas:
+        apk('update')
     rm('-rf', APK_LOCAL_REPOSITORY)
     abuild('-r', _cwd=REPO_PATH)
 
