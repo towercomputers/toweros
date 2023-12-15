@@ -193,6 +193,9 @@ alias startw='dbus-launch labwc'
 if [ -f /home/$USERNAME/.local/tower/osconfig ]; then
     source /home/$USERNAME/.local/tower/osconfig
 fi
+if [ "\$(tty)" == "/dev/tty1" ]; then
+    dbus-launch /usr/libexec/pipewire-launcher >/dev/null 2>&1 &
+fi
 STARTW_ON_LOGIN=\${STARTW_ON_LOGIN:-"false"}
 if [ -z "\$DISPLAY" ] && [ "\$(tty)" == "/dev/tty1" ] && [ "\$STARTW_ON_LOGIN" == "true" ]; then
     dbus-launch labwc; 
