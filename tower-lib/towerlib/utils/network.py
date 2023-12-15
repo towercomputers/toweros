@@ -34,9 +34,8 @@ def download_file(url, dest_path):
             for chunk in resp.iter_content(chunk_size=4096):
                 f.write(chunk)
     dest_dir = os.path.dirname(dest_path)
-    with doas:
-        mkdir('-p', dest_dir)
-        cp(tmp_dest_path, dest_path)
+    mkdir('-p', dest_dir)
+    cp(tmp_dest_path, dest_path)
 
 def interface_is_up(interface):
     is_up = Command('sh')('-c', f'ip link show {interface} | grep -q "state UP" && echo "OK" || echo "NOK"').strip()
