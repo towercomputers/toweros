@@ -9,7 +9,7 @@ from backports.pbkdf2 import pbkdf2_hmac
 
 from towerlib.utils.shell import cp, Command
 from towerlib.utils.decorators import clitask
-from towerlib.utils.shell import doas, mkdir
+from towerlib.utils.shell import mkdir
 
 logger = logging.getLogger('tower')
 
