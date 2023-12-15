@@ -17,13 +17,12 @@ classifiers = [
 dependencies = [
     "setuptools==67.6.1",
     "hatchling==1.14.0",
-    #"hatch==1.7.0",
-    "wheel==0.40.0",
+    "wheel==0.42.0",
     "requests==2.31.0",
     "passlib==1.7.4",
-    "rich==13.3.5",
+    "rich==13.7.0",
     # apks in edge for now
-    "sh==1.14.3",
+    "sh==2.0.6",
     "shtab==1.6.5",
     # no apks for these
     "backports.pbkdf2==0.1",

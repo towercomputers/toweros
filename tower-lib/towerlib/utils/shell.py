@@ -5,7 +5,7 @@ from sh import (
     lsblk, mount, umount, parted, mkdosfs, dd, losetup,
     sync, rsync, tar, xz,
     ssh as sshcli, scp, ssh_keygen, openssl, abuild, abuild_sign, shasum,
-    git as gitcli, pip, apk, hatch,
+    git as gitcli, pip, apk,
     nxproxy, xsetroot, mcookie, waypipe,
     argparse_manpage,
     locale as getlocale,

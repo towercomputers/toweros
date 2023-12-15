@@ -5,16 +5,17 @@ pkgdesc="Tower CLI"
 url="https://toweros.org/"
 arch="x86_64"
 license="Apache-2.0"
-depends="python3 py3-pip py3-hatchling py3-wheel py3-requests py3-passlib py3-rich"
-makedepends="py3-gpep517 py3-hatchling py3-wheel python3-dev"
+depends="python3 py3-pip py3-hatchling py3-wheel py3-rich py3-requests py3-passlib"
+makedepends="py3-gpep517 python3-dev py3-hatchling  py3-wheel"
 # no apk for these
-pipdepends="sh==1.14.3 shtab==1.6.5 sshconf==0.2.5 yaspin==2.3.0 argparse-manpage==4.5 backports.pbkdf2==0.1"
+pipdepends="sh==2.0.6 shtab==1.6.5 sshconf==0.2.5 yaspin==3.0.1 \
+            argparse-manpage==4.5 backports.pbkdf2==0.1"
 
 build() {
 	cd tower-lib
-    hatch build -t wheel
+    hatchling build -t wheel
     cd ../tower-cli
-    hatch build -t wheel
+    hatchling build -t wheel
     cd ..
     cp tower-lib/dist/tower_lib-$pkgver-py3-none-any.whl $srcdir
     cp tower-cli/dist/tower_cli-$pkgver-py3-none-any.whl $srcdir
