@@ -349,8 +349,8 @@ clone_live_system_to_disk() {
     ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
     # install custom icons
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
+    cp -r /mnt/usr/share/icons/oxygen/base/48x48/* /mnt/usr/share/icons/hicolor/48x48/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
-    cp -r /mnt/usr/share/icons/oxygen/base/48x48/categories /mnt/usr/share/icons/hicolor/48x48/
     # update icon cache
     gtk-update-icon-cache -f -t /mnt/usr/share/icons/hicolor
     # clean chroot

@@ -128,8 +128,8 @@ def generate_menu():
     no_in_host_apps = [info for info in desktop_applications if not info["InHost"]]
     menu += generate_menu_group(no_in_host_apps)
     menu += ["Menu('Menugen_Applications') { Separator }"]
-    menu += ["Menu('Menugen_Applications') { Item('Exit',Exec 'killall labwc') }"]
-    menu += ["Menu('Menugen_Applications') { Item('Poweroff',Exec 'poweroff') }"]
+    menu += ["Menu('Menugen_Applications') { Item('Exit%system-log-out',Exec 'killall labwc') }"]
+    menu += ["Menu('Menugen_Applications') { Item('Poweroff%system-shutdown',Exec 'poweroff') }"]
     return "\n".join(menu)
 
 if __name__ == '__main__':
