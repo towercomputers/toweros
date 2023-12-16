@@ -34,8 +34,8 @@ dependencies = [
 [tool.hatch.build.targets.wheel]
 include = ["towerlib", "toweros-installers"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"README.md" = "../README.md"
+#[tool.hatch.build.targets.wheel.force-include]
+#"README.md" = "../README.md"
 
 [tool.hatch.version]
 path = "towerlib/__about__.py"

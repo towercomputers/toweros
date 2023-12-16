@@ -25,8 +25,8 @@ post-install-commands = [
 [tool.hatch.build.targets.wheel]
 include = ["towercli"]
 
-[tool.hatch.build.targets.wheel.force-include]
-"README.md" = "../README.md"
+#[tool.hatch.build.targets.wheel.force-include]
+#"README.md" = "../README.md"
 
 [project.scripts]
 tower = "towercli.tower:main"
