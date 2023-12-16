@@ -103,6 +103,7 @@ scanner {{
   }}
 }}
 PopUp '{host}_satus_popup' {{
+  AutoClose = true
   css = '* {{border-bottom: 1px solid #000000;}}'
   grid {{
     style = 'GridStyle'
