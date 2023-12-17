@@ -53,6 +53,8 @@ def get_cli_help(parser):
         cli_help['commands'].append(cmd_info)
     options = option_string_actions(parser)
     for opt in options:
+        if 'argparse._' not in str(options[opt].__class__):
+            continue
         class_name = str(options[opt].__class__).split('._')[1].replace("'>", "")
         if class_name == 'HelpAction':
             continue
