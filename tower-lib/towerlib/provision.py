@@ -222,7 +222,7 @@ def provision(name, args, upgrade=False):
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, upgrade)
     # check network
     if not args.force:
-        check_network(host_config['ONLINE'] or name == config.ROUTER_HOSTNAME)
+        check_network(host_config['ONLINE'] == 'true')
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
     # ask confirmation
@@ -238,6 +238,9 @@ def provision(name, args, upgrade=False):
     # wait for host to be ready
     if not args.no_wait:
         wait_for_host(name, args.timeout)
+         # sync time
+        if host_config['ONLINE'] == 'false':
+            sshconf.sync_time(name)
     # display post discovering message
     display_post_discovering_message(name, host_config['STATIC_HOST_IP'])
     # re-install packages

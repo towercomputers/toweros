@@ -15,11 +15,11 @@ from towerlib.config import (
     SSH_CONFIG_PATH,
     TOWER_SSH_CONFIG_PATH,
     TOWER_DIR,
-    TOWER_NETWORK_ONLINE,
     DEFAULT_SSH_USER,
     FIRST_HOST_IP,
     KNOWN_HOSTS_PATH,
-    COLORS
+    COLORS,
+    ROUTER_HOSTNAME,
 )
 
 logger = logging.getLogger('tower')
@@ -105,9 +105,7 @@ def exists(host):
 
 def is_online_host(host):
     if exists(host):
-        ip = get(host)['hostname']
-        network = ".".join(TOWER_NETWORK_ONLINE.split(".")[0:3]) + "."
-        return ip.startswith(network)
+        return get_host_config_value(host, 'ONLINE') == 'true'
     raise UnkownHost(f"Unknown host: {host}")
 
 def is_up(host):
@@ -124,7 +122,7 @@ def status(host = None, full = True):
         host_ssh_config = get(host)
         host_config = get_host_config(host)
         host_status = 'up' if is_up(host) else 'down'
-        online = is_online_host(host) if host_status == 'up' else "N/A"
+        online = is_online_host(host)
         host_info = {
             'name': host,
             'status': host_status,
@@ -133,7 +131,7 @@ def status(host = None, full = True):
             'toweros-version': host_config.get('TOWEROS_VERSION', 'N/A'),
             'color': get_host_color_name(host),
         }
-        if full and host_status == 'up':
+        if full:
             if host_status == 'up':
                 inxi_info = ssh('-t', host, 'inxi', '-MIs', '-c', '0').strip()
                 host_info['system'] = inxi_info[inxi_info.index('System: ') + 8:inxi_info.index(' details:')]
@@ -143,6 +141,12 @@ def status(host = None, full = True):
                 host_info['memory-total'] = memory_available
                 host_info['cpu-usage'] = str(round(100 - float(ssh(host, 'mpstat').strip().split("\n")[-1].split(" ")[-1]), 2)) + "%"
                 host_info['cpu-temperature'] = inxi_info[inxi_info.index('cpu: ') + 5:inxi_info.index(' mobo: ')].strip()
+            else:
+                host_info['system'] = 'N/A'
+                host_info['memory-usage'] = 'N/A'
+                host_info['memory-total'] = 'N/A'
+                host_info['cpu-usage'] = 'N/A'
+                host_info['cpu-temperature'] = 'N/A'
             host_info['packages-installed'] = ', '.join(get_installed_packages(host))
         return host_info
     return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])
@@ -181,7 +185,6 @@ def display_status(host = None):
             elif key == "color":
                 value = Text(value, style=value.lower())
             table.add_row(key, value)
-
     console = Console()
     console.print(table)
 
@@ -215,6 +218,10 @@ def get_host_config(host):
         value = line[line.index('=') + 2:-1]
         host_config[key] = value
     return host_config
+
+def get_host_config_value(host, key):
+    host_config = get_host_config(host)
+    return host_config.get(key, None)
 
 def get_version():
     versions = {
@@ -271,3 +278,20 @@ def save_installed_packages(host, installed_packages):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
     with open(apk_world, 'w', encoding="UTF-8") as fp:
         fp.write("\n".join(installed_packages))
+
+@clitask("Syncing offline host time with `router`...")
+def sync_time(offline_host = None):
+    if not exists(ROUTER_HOSTNAME):
+        return
+    all_hosts = hosts() if not offline_host else [offline_host]
+    offline_hosts =  [host for host in all_hosts if not is_online_host(host) and is_up(host)]
+    if len(offline_hosts) == 0:
+        return
+    # update offline host time
+    for host in offline_hosts:
+        # pylint: disable=anomalous-backslash-in-string
+        now = ssh(ROUTER_HOSTNAME, 'date +\%s').strip()
+        ssh(host, f"sudo date -s @{now}")
+    # update thinclient time
+    now = ssh(ROUTER_HOSTNAME, 'date').strip()
+    Command('sh')('-c', f"sudo date -s '{now}'")

@@ -39,3 +39,13 @@ TowerOS makes it easy to install new packages on any host by tunneling a connect
 ```
 [thinclient]$ tower wlan-connect --ssid <ssid> --password <password>
 ```
+
+## Configure wallpaper, screen lock timeout and desktop auto start
+
+Edit the file `~/.local/tower/osconfig` with the following variables:
+
+```
+LOCK_SCREEN_AFTER=300 # 5 minutes
+WALLPAPER_IMAGE=/var/towercomputers/wallpapers/wallpaper1.jpg
+STARTW_ON_LOGIN='false'
+```

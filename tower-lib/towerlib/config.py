@@ -10,10 +10,13 @@ ROUTER_IP = "192.168.2.1"
 ROUTER_HOSTNAME = "router"
 FIRST_HOST_IP = 200 # 192.168.2.200 or 192.168.3.200
 TOWER_DIR = os.path.expanduser('~/.local/tower')
+TOWER_VAR_DIR = "/var/towercomputers"
+TOWER_BUILDS_DIR = "/var/towercomputers/builds"
 TOWER_SSH_CONFIG_PATH = os.path.join(TOWER_DIR, 'config')
 SSH_CONFIG_PATH = os.path.expanduser('~/.ssh/config')
 KNOWN_HOSTS_PATH = os.path.expanduser('~/.ssh/known_hosts')
 DESKTOP_FILES_DIR = os.path.expanduser('~/.local/share/applications')
+APK_LOCAL_REPOSITORY = os.path.expanduser('~/packages/towercomputers')
 COLORS = [
     [39, "White", "ffffff"],
     [31, "Red", "cc0000"],
@@ -32,3 +35,5 @@ COLORS = [
 ]
 HOST_ALPINE_BRANCH = "v3.19"
 THINCLIENT_ALPINE_BRANCH = "v3.19"
+ALPINE_RPI_URL = "https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/alpine-rpi-3.19.0-aarch64.tar.gz"
+ALPINE_RPI_CHECKSUM = "5621e7e597c3242605cd403a0a9109ec562892a6c8a185852b6b02ff88f5503c"

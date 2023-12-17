@@ -3,7 +3,7 @@ import logging
 import time
 import os
 
-from towerlib.utils.shell import lsblk, umount, ErrorReturnCode, sh_sudo
+from towerlib.utils.shell import lsblk, umount, ErrorReturnCode, doas
 
 logger = logging.getLogger('tower')
 
@@ -14,7 +14,7 @@ def unmount_all(device):
         return
     for partition in result['blockdevices'][0]['children']:
         if partition['mountpoints'][0]:
-            with sh_sudo(password="", _with=True): # nosec B106
+            with doas:
                 umount(partition['mountpoints'][0])
 
 def lazy_umount(path):

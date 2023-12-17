@@ -15,7 +15,7 @@ from towerlib.utils.shell import (
     losetup, abuild_sign, openssl,
 )
 
-from towerlib import utils
+from towerlib import utils, config
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
 from towerlib.config import TOWER_DIR, HOST_ALPINE_BRANCH
@@ -162,10 +162,10 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-rtxv', wd("EXPORT_BOOTFS_DIR/"), wd("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
-def compress_image(builds_dir):
+def compress_image():
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
     tmp_image_path = os.path.join(tempfile.gettempdir(), image_name)
-    image_path = os.path.join(builds_dir, image_name)
+    image_path = os.path.join(config.TOWER_BUILDS_DIR, image_name)
     xz(
         '--compress', '--force',
         '--threads', 0, '--memlimit-compress=90%', '--best',
@@ -177,8 +177,8 @@ def compress_image(builds_dir):
     return image_path
 
 @clitask("Copying image...")
-def copy_image(builds_dir):
-    image_path = os.path.join(builds_dir, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
+def copy_image():
+    image_path = os.path.join(config.TOWER_BUILDS_DIR, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wd("toweros-host.img"), image_path)
     chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
@@ -202,8 +202,8 @@ def prepare_apk_key():
     return private_key_path, public_key_path
 
 @clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
-def build_image(builds_dir, uncompressed=False):
-    alpine_tar_path = utils.prepare_required_build("alpine-rpi", builds_dir)
+def build_image(uncompressed=False):
+    alpine_tar_path = utils.download_alpine_rpi()
     loop_dev = None
     image_path = None
     try:
@@ -216,9 +216,9 @@ def build_image(builds_dir, uncompressed=False):
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         if uncompressed:
-            image_path = copy_image(builds_dir)
+            image_path = copy_image()
         else:
-            image_path = compress_image(builds_dir)
+            image_path = compress_image()
     finally:
         cleanup()
     if image_path:
@@ -248,27 +248,27 @@ def zeroing_device(device):
     dd('if=/dev/zero', f'of={device}', 'bs=8M', _out=logger.debug)
 
 @clitask("Configuring image...")
-def insert_tower_env(boot_part, config):
+def insert_tower_env(boot_part, host_config):
     # mount boot partition
     mkdir('-p', wd("BOOTFS_DIR/"))
     mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
-    str_env = "\n".join([f"{key}='{value}'" for key, value in config.items()])
+    str_env = "\n".join([f"{key}='{value}'" for key, value in host_config.items()])
     # insert tower.env file in boot partition
     tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
-    keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], "crypto_keyfile.bin")
+    keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], "crypto_keyfile.bin")
     cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
     # insert host ssh keys in boot partition
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
-        host_keys_path = os.path.join(TOWER_DIR, 'hosts', config['HOSTNAME'], f"ssh_host_{key_type}_key")
+        host_keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], f"ssh_host_{key_type}_key")
         cp(host_keys_path, wd(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
         cp(f"{host_keys_path}.pub", wd(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
-def burn_image(image_file, device, config, zero_device=False):
+def burn_image(image_file, device, new_config, zero_device=False):
     try:
         # make sure the password is not stored in th sd-card
-        host_config = {**config}
+        host_config = {**new_config}
         if 'PASSWORD' in host_config:
             del host_config['PASSWORD']
         prepare_working_dir()

@@ -3,17 +3,17 @@ import logging
 import os
 from os import makedirs
 from os.path import join as join_path
-import glob
 from shutil import copytree, copy as copyfile
 import sys
 
-from towerlib.utils.shell import rm, git, pip, Command, apk, hatch, cp, argparse_manpage
+from towerlib import utils
+from towerlib.utils.shell import rm, git, Command, apk, cp, argparse_manpage, abuild
 from towerlib.utils.decorators import clitask
-from towerlib.utils.shell import sh_sudo
+from towerlib.utils.shell import doas
 from towerlib import buildhost
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException
-from towerlib.config import THINCLIENT_ALPINE_BRANCH
+from towerlib.config import THINCLIENT_ALPINE_BRANCH, APK_LOCAL_REPOSITORY, TOWER_BUILDS_DIR
 
 logger = logging.getLogger('tower')
 
@@ -34,15 +34,14 @@ def prepare_working_dir():
 def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
-def find_host_image(builds_dir):
-    host_images = glob.glob(join_path(builds_dir, 'toweros-host-*.xz'))
-    if not host_images:
+def prepare_host_image():
+    host_image = utils.builds.find_host_image()
+    if not host_image:
         logger.info("Host image not found in builds directory. Building a new image.")
-        rpi_image_path = buildhost.build_image(builds_dir)
+        host_image = buildhost.build_image()
     else:
-        rpi_image_path = host_images.pop()
-        logger.info("Using host image %s", rpi_image_path)
-    return rpi_image_path
+        logger.info("Using host image %s", host_image)
+    return host_image
 
 def check_abuild_key():
     abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
@@ -51,19 +50,12 @@ def check_abuild_key():
         logger.error("ERROR: You must have an `abuild` key to build the image. Please use `abuild-keygen -a -i`.")
         sys.exit()
 
-@clitask("Downloading pip packages...")
+@clitask("Prepare Tower CLI APK package...")
 def prepare_pip_packages():
-    makedirs(wd('overlay/var/cache/pip-packages'))
-    for package in ['tower-lib', 'tower-cli']:
-        hatch('build', '-t', 'wheel', _cwd=join_path(REPO_PATH, package))
-        wheel_name = f"{package.replace('-', '_')}-{__version__}-py3-none-any.whl"
-        wheel_path = os.path.abspath(join_path(REPO_PATH, package, 'dist', wheel_name))
-        copyfile(wheel_path, wd('overlay/var/cache/pip-packages'))
-        pip(
-            "download", f"{package} @ file://{wheel_path}",
-            '-d', wd('overlay/var/cache/pip-packages'),
-            _err_to_out=True, _out=logger.debug
-        )
+    with doas:
+        apk('update')
+    rm('-rf', APK_LOCAL_REPOSITORY)
+    abuild('-r', _cwd=REPO_PATH)
 
 def prepare_installer():
     makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
@@ -83,35 +75,33 @@ def prepare_docs():
         '--output', wd('overlay/var/towercomputers/docs/tower.1'),
     )
 
-def prepare_build(builds_dir):
+def prepare_build():
     makedirs(wd('overlay/var/towercomputers/builds'))
-    host_image_path = find_host_image(builds_dir)
+    host_image_path = prepare_host_image()
     copyfile(host_image_path, wd('overlay/var/towercomputers/builds'))
-    for package in ['tower_lib', 'tower_cli']:
-        wheels = glob.glob(join_path(wd('overlay/var/cache/pip-packages'), f'{package}-*.whl'))
-        copyfile(wheels[0], wd('overlay/var/towercomputers/builds'))
 
 def prepare_etc_folder():
     copytree(join_path(INSTALLER_DIR, 'etc'), wd('overlay/etc'))
 
-def prepare_overlay(builds_dir):
+def prepare_overlay():
     prepare_pip_packages()
     prepare_installer()
     prepare_docs()
     prepare_etc_folder()
-    prepare_build(builds_dir)
+    prepare_build()
 
 @clitask("Building Thin Client image, be patient...")
-def prepare_image(builds_dir):
+def prepare_image():
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
-    with sh_sudo(password="", _with=True): # nosec B106
+    with doas:
         apk('update')
     Command('sh')(
         wd('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
+        '--repository', APK_LOCAL_REPOSITORY,
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/community',
         '--profile', 'tower',
@@ -121,22 +111,22 @@ def prepare_image(builds_dir):
     )
     image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
-        builds_dir,
+        TOWER_BUILDS_DIR,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
     )
-    with sh_sudo(password="", _with=True): # nosec B106
+    with doas:
         cp(image_src_path, image_dest_path)
     return image_dest_path
 
 
 @clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
-def build_image(builds_dir):
+def build_image():
     image_path = None
     try:
         check_abuild_key()
         prepare_working_dir()
-        prepare_overlay(builds_dir)
-        image_path = prepare_image(builds_dir)
+        prepare_overlay()
+        image_path = prepare_image()
     finally:
         cleanup()
     if image_path:

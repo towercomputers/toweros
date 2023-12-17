@@ -1,0 +1,6 @@
+"EV_KEY"	0x01	"KEY_POWER"		116 1	"button/power PWRF 00000080"
+"EV_KEY"	0x01	"KEY_POWER"		116 1	"button/power PWRB 00000080"
+"EV_KEY"	0x01	"KEY_SLEEP"		142 1	"button/sleep SBTN 00000080"
+"EV_KEY"	0x01	"KEY_SUSPEND"		205 1	"button/suspend SUSP 00000080"
+"EV_SW"		0x05	"SW_LID"		0   0	"button/lid LID/open 00000080 00000000"
+"EV_SW"		0x05	"SW_LID"		0   1	"button/lid LID/close 00000080 00000001"

@@ -79,7 +79,7 @@ set_config_from_root_partition() {
     mkdir -p /ROOT
     mount -t ext4 "$ROOT_PARTITION" /ROOT
     # set username
-    USERNAME=$(cat /ROOT/etc/sudoers.d/01_tower_nopasswd | awk '{print $1}')
+    USERNAME=$(cat /ROOT/etc/doas.conf | awk '{print $3}')
     # set user password hash
     PASSWORD_HASH=$(cat /ROOT/etc/shadow | grep $USERNAME | cut -d ':' -f 2)
     # set root password hash
@@ -98,7 +98,7 @@ set_config_from_root_partition() {
         SECURE_BOOT="false"
     fi
     # set startx on login
-    STARTX_ON_LOGIN="false" # in any case, already present in /home if needed
+    STARTW_ON_LOGIN="false" # in any case, already present in /home if needed
     umount /ROOT
 }
 
@@ -171,9 +171,9 @@ prepare_home_directory() {
     addgroup "$USERNAME" audio
     addgroup "$USERNAME" input
     addgroup "$USERNAME" seat
-    # add user to sudoers
-    mkdir -p /etc/sudoers.d
-    echo "$USERNAME ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/01_tower_nopasswd
+    chsh "$USERNAME" -s /bin/bash
+    # add user to doas config
+    echo "permit nopass $USERNAME as root" > /etc/doas.conf
     # create home directory
     mkdir -p "/mnt/home/$USERNAME"
     # create .Xauthority file
@@ -188,16 +188,28 @@ if [ -z "\$XDG_RUNTIME_DIR" ]; then
 	mkdir -pm 0700 "\$XDG_RUNTIME_DIR"
 	export XDG_RUNTIME_DIR
 fi
+source /etc/bash/bash_completion.sh
+alias startw='dbus-launch labwc'
+if [ -f /home/$USERNAME/.local/tower/osconfig ]; then
+    source /home/$USERNAME/.local/tower/osconfig
+fi
+if [ "\$(tty)" == "/dev/tty1" ]; then
+    dbus-launch /usr/libexec/pipewire-launcher >/dev/null 2>&1 &
+fi
+STARTW_ON_LOGIN=\${STARTW_ON_LOGIN:-"false"}
+if [ -z "\$DISPLAY" ] && [ "\$(tty)" == "/dev/tty1" ] && [ "\$STARTW_ON_LOGIN" == "true" ]; then
+    dbus-launch labwc; 
+fi
 EOF
-    # start X on login if necessary
-    if [ "$STARTX_ON_LOGIN" == "true" ]; then
-        echo 'if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ]; then dbus-launch labwc; fi' >> /mnt/home/$USERNAME/.profile
-    fi
     # create symlink to doc
     ln -s /var/towercomputers/docs /mnt/home/$USERNAME/docs || true
     # create symlink to tower widget
     mkdir -p /mnt/home/$USERNAME/.local/tower
     touch /mnt/home/$USERNAME/.local/tower/tower.widget
+    # initialize osconfig file
+    if [ "$STARTW_ON_LOGIN" == "true" ]; then
+        echo "STARTW_ON_LOGIN='true'" > /mnt/home/$USERNAME/.local/tower/osconfig
+    fi
     # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
@@ -212,59 +224,40 @@ install_tower_tools() {
     cp -r /var/towercomputers/builds $TOWER_FOLDER
     # install custom copyq auto start script
     cp $SCRIPT_DIR/start-copyq.sh $TOWER_FOLDER
-    # install tower with pip
-    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" tower-lib
-    pip install --root="/mnt" --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" --no-deps tower-cli
     # install man page
     mkdir -p /mnt/usr/local/share/man/man1/
     cp /var/towercomputers/docs/tower.1 /mnt/usr/local/share/man/man1/
-    # install wallpaper
-    cp /var/towercomputers/installer/wallpaper.jpg /mnt/var/towercomputers/
+    # install wallpapers
+    cp -r /var/towercomputers/installer/wallpapers /mnt/var/towercomputers/
     # install terminall screen locker
     cp /var/towercomputers/installer/screenlocker.sh /mnt/var/towercomputers/
     chmod a+x /mnt/var/towercomputers/screenlocker.sh
+    # install sound sample file
+    cp /var/towercomputers/installer/sample.flac /mnt/var/towercomputers/
 }
-
 
 update_live_system() {
     # set hostname
     setup-hostname -n thinclient
-
     # change root password
     update_passord "root" "$ROOT_PASSWORD_HASH"
-
-    # configure default network
-    mkdir -p /etc/network
-    cat <<EOF > /etc/network/interfaces
-auto lo
-iface lo inet loopback
-auto eth0
-iface eth0 inet static
-    address 192.168.2.100/24
-    #gateway 192.168.2.1
-auto eth1
-iface eth1 inet static
-    address 192.168.3.100/24
-EOF
-    # For devs convenience
-    cat <<EOF > /etc/resolv.conf
-#nameserver 8.8.8.8
-#nameserver 8.8.4.4
-EOF
-
-    # ensure eth0 exists and that it's always eth0
+    # ensure eth0 exists and store its MAC address
     if [  ! -f /sys/class/net/eth0/address ]; then
         echo "eth0 not found"
         exit 1
     fi
     cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
+    # For devs convenience
+    cat <<EOF > /etc/resolv.conf
+#nameserver 8.8.8.8
+#nameserver 8.8.4.4
+EOF
+    # ensure boot script are executable
     chmod a+x /etc/local.d/*.start
-
     # set locales
     # TODO: set LANG
     setup-timezone "$TIMEZONE"
     setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
-
     # configure keyboard
     echo "KEYMAP=$KEYBOARD_LAYOUT" > /etc/vconsole.conf
     echo "XKBLAYOUT=$KEYBOARD_LAYOUT"  >> /etc/vconsole.conf
@@ -281,16 +274,16 @@ Section "InputClass"
 EndSection
 EOF
 
+    chmod a+x /etc/init.d/*
+
     # start services
     rc-update add lvm
     rc-update add dmcrypt
     rc-update add iptables
-    rc-update add networking
     rc-update add dbus
     rc-update add local
     rc-update add seatd
-
-    chmod a+x /etc/init.d/supercronic
+    rc-update add acpid
     rc-update add supercronic
 
     # enabling udev service
@@ -348,20 +341,15 @@ clone_live_system_to_disk() {
     apk add --root /mnt $apkflags --initdb --overlay-from-stdin $repoflags $pkgs <$ovlfiles
     # install edge packages
     apk add --root /mnt $apkflags --allow-untrusted /var/towercomputers/installer/alpine-edge/$ARCH/*.apk
-    # install sfwbar
-    unzip /var/towercomputers/installer/alpine-edge/$ARCH/sfwbar-b29ee39.zip
-    cd sfwbar-main
-    meson setup build
-    ninja -C build
-    DESTDIR=/mnt/ ninja -C build install
-    cd ..
     # install custom startmenu widget and tower widget
+    mkdir -p /mnt/usr/local/share/sfwbar
     cp /var/towercomputers/installer/sfwbar/*.widget /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
     ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
     # install custom icons
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
+    cp -r /mnt/usr/share/icons/oxygen/base/48x48/* /mnt/usr/share/icons/hicolor/48x48/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
     # update icon cache
     gtk-update-icon-cache -f -t /mnt/usr/share/icons/hicolor
@@ -381,9 +369,15 @@ EOF
     cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
     # set crontab
     cat <<EOF > /mnt/etc/crontabs/supercronic
-*/10 * * * * * * runuser -u $USERNAME -- python /var/towercomputers/genstatus.py
+*/10 * * * * * * runuser -u $USERNAME -- python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
 */10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/screenlocker.sh
+*/5 * * * * runuser -u $USERNAME -- tower synctime
 EOF
+    # install tower autocompletion
+    cp /var/towercomputers/installer/tower-bash-autocompletion /mnt/usr/share/bash-completion/completions/tower
+
+    # migrate from sudo to doas
+    ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
 }
 
 install_bootloader() {
@@ -447,8 +441,6 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    # fix broken package `py3-rich`
-    pip install --break-system-packages --no-index --no-warn-script-location --find-links="/var/cache/pip-packages" rich
     python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }
@@ -459,7 +451,7 @@ set_configuration() {
     # INSTALLATION_TYPE, ROOT_PASSWORD_HASH, USERNAME, PASSWORD_HASH,
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
-    # STARTX_ON_LOGIN
+    # STARTW_ON_LOGIN
     python $SCRIPT_DIR/askconfiguration.py
     source /root/tower.env
     if [ "$INSTALLATION_TYPE" == "upgrade" ]; then

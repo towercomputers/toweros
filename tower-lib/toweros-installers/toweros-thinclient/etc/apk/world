@@ -3,7 +3,7 @@ coreutils
 python3
 py3-pip
 py3-rich
-sudo
+doas
 openssh
 rsync
 git
@@ -56,12 +56,19 @@ font-awesome
 seatd
 labwc
 labwc-doc
+adwaita-icon-theme
+oxygen-icons5
 xwayland
 foot
 physlock
 swaybg
 swayidle
 pipewire
+wireplumber
+pipewire-pulse
+pipewire-jack
+pipewire-alsa
+pipewire-tools
 setxkbmap
 syslog-ng
 cryptsetup
@@ -96,3 +103,8 @@ meson
 wlrctl
 waypipe
 supercronic
+bash-completion
+bash-completion-doc
+shadow
+tower-cli
+zzz

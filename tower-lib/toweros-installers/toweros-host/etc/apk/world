@@ -6,7 +6,7 @@ e2fsprogs
 e2fsprogs-extra
 sfdisk
 iptables
-sudo
+doas
 openssh
 xauth
 nano
@@ -34,3 +34,9 @@ macchanger
 waypipe
 foot
 inxi
+pipewire
+wireplumber
+pipewire-pulse
+pipewire-jack
+pipewire-alsa
+pipewire-tools

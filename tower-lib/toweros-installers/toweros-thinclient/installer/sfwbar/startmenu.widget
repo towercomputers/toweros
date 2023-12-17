@@ -1,4 +1,5 @@
 Function("StartMenu") {
+  MenuClear "Menugen_Applications"
   PipeRead "python /var/towercomputers/startmenu.py"
   Menu "MenuGen_Applications"
 }

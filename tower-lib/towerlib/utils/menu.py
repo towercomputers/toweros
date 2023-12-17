@@ -1,14 +1,14 @@
 import os
+import json
 
 from towerlib.utils.shell import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
-from towerlib.sshconf import get_host_color_name, hosts, get_installed_packages, save_installed_packages
+from towerlib.sshconf import get_host_color_name, hosts, get_installed_packages, save_installed_packages, status as get_status
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
 def restart_sfwbar():
-    Command('sh')('-c', "killall sfwbar || true")
-    Command('sh')('-c', "sfwbar", _bg=True, _bg_exc=False)
+    Command('sh')('-c', "killall sfwbar && sfwbar &", _bg=True, _bg_exc=False)
 
 @clitask("Copying desktop files from host to thinclient...")
 def copy_desktop_files(host, package):
@@ -55,38 +55,99 @@ def add_installed_package(host, package):
     # copy desktop files from host to thinclient
     copy_desktop_files(host, package)
 
+STATUS_KEYS = {
+    "name": "Name",
+    "status": "Status",
+    "online-host": "Online Host",
+    "ip": "IP",
+    "toweros-version": "TowerOS Version",
+    "color": "Color",
+    "system": "System",
+    "memory-usage": "Memory Usage",
+    "memory-total": "Memory Total",
+    "cpu-usage": "CPU Usage",
+    "cpu-temperature": "CPU Temperature",
+}
+
+def host_scanner_expressions(host):
+    hosts_status_scanner = []
+    for key, _ in STATUS_KEYS.items():
+        hosts_status_scanner.append(f"{host}_{key.replace('-', '_')} = Json('.{key.replace('-', '')}')")
+    return "\n".join(hosts_status_scanner)
+
+def host_fields(host):
+    fields = []
+    for key, title in STATUS_KEYS.items():
+        fields.append(f"""
+            grid {{
+                label {{
+                    value = '{title}'
+                    style = 'LabelKeyStyle'
+                }}
+                label {{
+                    value = ${host}_{key.replace('-', '_')}
+                    style = 'LabelValueStyle'
+                }}
+            }}
+        """)
+    return "\n".join(fields)
+
 @clitask("Generate sfwbar widget...")
 def generate_tower_widget():
-    hosts_status = []
-    for host in hosts():
-        hosts_status.append(f"{host}_status = RegEx('^{host}=(green|red)$')")
-    hosts_status = "\n".join(hosts_status)
-    status_path = os.path.join(TOWER_DIR, 'status')
-    widget_scanner = f"""
-scanner {{
-  File('{status_path}') {{
-    {hosts_status}
-  }}
-}}
-"""
     layouts = []
     for host in hosts():
         layouts.append(f"""
+scanner {{
+  File('{TOWER_DIR}/{host}_status') {{
+    {host_scanner_expressions(host)}
+  }}
+}}
+PopUp '{host}_satus_popup' {{
+  AutoClose = true
+  css = '* {{border-bottom: 1px solid #000000;}}'
+  grid {{
+    style = 'GridStyle'
+    {host_fields(host)}
+  }}
+}}
 layout {{
   label {{
     interval = 1000
+    action = PopUp '{host}_satus_popup'
     style = 'LabelStyle'
     value = '{host}'
   }}
   image {{
     style = 'CircleStyle'
-    value = 'circle-' + ${host}_status
+    value = If(${host}_status = 'up', 'circle-green', 'circle-red')
   }}
 }}
 """)
     layouts = "\n".join(layouts)
     styles = """
 #CSS
+
+#GridStyle {
+    min-width: 400px;
+    -GtkWidget-direction: bottom;
+}
+
+#LabelKeyStyle {
+    padding: 5px;
+    padding-top: 8px;
+    padding-right: 2px;
+    font-weight: bold;
+    -GtkWidget-align: 0;
+    min-width: 150px;
+}
+
+#LabelValueStyle {
+    padding: 5px;
+    padding-top: 8px;
+    padding-right: 2px;
+    -GtkWidget-align: 0;
+    -GtkWidget-hexpand: true;
+}
 
 #LabelStyle {
     padding: 5px;
@@ -100,8 +161,16 @@ layout {{
     padding-left:0;
 }
 """
-    widget = f"{widget_scanner}\n{layouts}\n{styles}"
+    widget = f"{layouts}\n{styles}"
     widget_path = f"{TOWER_DIR}/tower.widget"
     with open(widget_path, 'w', encoding="UTF-8") as fp:
         fp.write(widget)
     restart_sfwbar()
+
+def generate_hosts_status():
+    for host in hosts():
+        host_status = get_status(host, full=True)
+        for key in list(host_status.keys()):
+            host_status[key.replace('-', '')] = host_status.pop(key)
+        with open(os.path.join(TOWER_DIR, f'{host}_status'), 'w', encoding="UTF-8") as fp:
+            json.dump(host_status, fp, indent=4)
