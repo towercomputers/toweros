@@ -60,7 +60,7 @@ STATUS_KEYS = {
     "status": "Status",
     "online-host": "Online Host",
     "ip": "IP",
-    "toweros-version": "Tower Version",
+    "toweros-version": "TowerOS Version",
     "color": "Color",
     "system": "System",
     "memory-usage": "Memory Usage",
