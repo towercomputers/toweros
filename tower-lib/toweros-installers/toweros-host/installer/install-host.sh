@@ -171,6 +171,8 @@ EOF
 		fi
 	fi
 
+	chmod a+x /etc/init.d/*
+	
 	# setup services
 	rc-update add iptables default
 	rc-update add dbus default
