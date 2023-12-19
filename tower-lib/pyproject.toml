@@ -21,6 +21,7 @@ dependencies = [
     "requests==2.31.0",
     "passlib==1.7.4",
     "rich==13.7.0",
+    #"PyGObject==3.46.0",
     # apks in edge for now
     "sh==2.0.6",
     "shtab==1.6.5",

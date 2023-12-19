@@ -42,3 +42,5 @@ pipewire-alsa
 pipewire-tools
 procps
 x11vnc
+xvfb
+xdotool

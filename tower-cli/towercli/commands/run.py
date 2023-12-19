@@ -6,6 +6,12 @@ from towerlib import sshconf
 from towerlib import gui
 from towerlib.utils.exceptions import TowerException
 
+# for hatch
+try:
+    from towerlib import vnc
+except:
+    pass
+
 logger = logging.getLogger('tower')
 
 def add_args(argparser):
@@ -92,6 +98,13 @@ def add_args(argparser):
         help="""Compress specific DMABUF formats using a lossy video codec. Opaque, 10-bit, and multiplanar formats, among others, are not supported. V is a comma separated list of options to control the video encoding. Using the --video flag without setting any options is equivalent to using the default setting of: --video=sw,bpf=120000,h264. Later options supersede earlier ones (see `man waypipe` for more options).""",
         required=False
     )
+    run_parser.add_argument(
+        '--vnc',
+        help="""Use `vnc` instead `nx`. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
 
 def check_nx_args(args, parser_error):
@@ -128,7 +141,9 @@ def check_args(args, parser_error):
 
 def execute(args):
     if os.getenv('DISPLAY'):
-        if args.waypipe:
+        if args.vnc:
+            vnc.run(args.host[0], ' '.join(args.run_command))
+        elif args.waypipe:
             waypipe_args = []
             if args.wp_compress:
                 waypipe_args += ["--compress", args.wp_compress]
@@ -152,4 +167,4 @@ def execute(args):
                 nxagent_args["delta"] = args.nx_delta
             gui.run(args.host[0], nxagent_args, *args.run_command)
     else:
-        raise TowerException("`tower run` requires a running desktop environment. Use `startx` to start X.Org.")
+        raise TowerException("`tower run` requires a running desktop environment. Use `startw` to Labwc.")
