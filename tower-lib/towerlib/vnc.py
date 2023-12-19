@@ -110,7 +110,7 @@ class VNCViewer(Gtk.Window):
     
     def _start_x11vnc_server(self):
         self.x11vnc_output = StringIO()
-        vnc_cmd = f"x11vnc -create -nowf -nowcr -cursor arrow -ncache 10 -ncache_cr -env FD_PROG='{self.run_cmd}' -nopw -listen 127.0.0.1 -rfbport {self.port}"
+        vnc_cmd = f"x11vnc -create -nowf -nowcr -cursor arrow -ncache 20 -ncache_cr -env FD_PROG='{self.run_cmd}' -nopw -listen 127.0.0.1 -rfbport {self.port}"
         self.ssh_process = ssh(
             self.host, 
             "-L", f"{self.port}:localhost:{self.port}", 
