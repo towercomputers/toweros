@@ -147,7 +147,7 @@ class VNCViewer(Gtk.Window):
     def _get_app_size(self):
         try:
             width, height = ssh(self.host, f'DISPLAY={self.display} xdotool getwindowgeometry {self.window_id}').split(' ')[-1].split('x')
-            return int(width), int(height)
+            return int(width) - 50, int(height) - 100
         except Exception as e:
             if self._refresh_window_id():
                 return self._get_app_size()
@@ -202,7 +202,8 @@ class VNCViewer(Gtk.Window):
             return
         self.init_size_timer = None
         width, height = self._get_app_size()
-        self.resize(width, height)
+        ssh(self.host, f'DISPLAY={self.display} xdotool windowmove {self.window_id} 0 0')
+        self.resize(width + 50, height + 100)
         self.set_resizable(True)
         self._update_window_pid()
         # "resize" event
@@ -238,7 +239,7 @@ class VNCViewer(Gtk.Window):
         # NO changes anymore
         if self._remembered_size.equal(curr):  # == doesn't work here
             print("Window size changed to %dx%d" % (curr.width, curr.height))
-            self._set_app_size(curr.width, curr.height)
+            self._set_app_size(curr.width - 50, curr.height - 90)
             # reconnect the 'size-allocate' event
             self._connect_resize_event()
             # stop the timer
