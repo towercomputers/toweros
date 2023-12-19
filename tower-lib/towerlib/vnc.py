@@ -110,14 +110,14 @@ class VNCViewer(Gtk.Window):
     
     def _start_x11vnc_server(self):
         self.x11vnc_output = StringIO()
+        thinclient_resolution = Command('sh')('-c', "xrandr | grep '*' | awk '{print $1}'").strip()
         vnc_params = ' '.join([
             '-create',
             '-nopw', '-listen 127.0.0.1',
             #'-nowf', '-nowcr',
             '-cursor arrow', 
             '-ncache 20', '-ncache_cr',
-            '-env FD_GEOM=1366x768x16',
-            #'-env X11VNC_CREATE_GEOM=1366x768x16',
+            f'-env FD_GEOM={thinclient_resolution}x16',
             f"-env FD_PROG='{self.run_cmd}'",
             f"-rfbport {self.port}",
         ])
