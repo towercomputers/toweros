@@ -40,3 +40,5 @@ pipewire-pulse
 pipewire-jack
 pipewire-alsa
 pipewire-tools
+procps
+x11vnc

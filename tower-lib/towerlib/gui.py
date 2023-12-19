@@ -147,11 +147,8 @@ def start_nx_proxy(display_num, cookie, nxproxy_args=None):
 
 def kill_nx_processes(hostname, display_num):
     logger.info("closing nxproxy and nxagent (%s)..", f"{hostname}:{display_num}")
-    # for alpine 3.17
-    killcmd_legacy = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
     killcmd = f"ps -ef | grep 'nx..... .*:{display_num}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     # nxagent in host
-    ssh(hostname, killcmd_legacy)
     ssh(hostname, killcmd)
     # ssh tunnel and nxproxy in thinclient
     Command('sh')('-c', killcmd)

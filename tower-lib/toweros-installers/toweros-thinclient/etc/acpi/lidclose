@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ $(ps -a | grep 'physlock' | grep -v 'swayidle' | grep -vc 'grep') -gt 0 ]; then
+if [ $(ps -ax | grep 'physlock' | grep -v 'swayidle' | grep -vc 'grep') -gt 0 ]; then
     echo "physlock already running"
 else
     physlock &
