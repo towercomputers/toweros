@@ -110,7 +110,18 @@ class VNCViewer(Gtk.Window):
     
     def _start_x11vnc_server(self):
         self.x11vnc_output = StringIO()
-        vnc_cmd = f"x11vnc -create -nowf -nowcr -cursor arrow -ncache 20 -ncache_cr -env FD_PROG='{self.run_cmd}' -nopw -listen 127.0.0.1 -rfbport {self.port}"
+        vnc_params = ' '.join([
+            '-create',
+            '-nopw', '-listen 127.0.0.1',
+            #'-nowf', '-nowcr',
+            '-cursor arrow', 
+            '-ncache 20', '-ncache_cr',
+            '-env FD_GEOM=1366x768x16',
+            #'-env X11VNC_CREATE_GEOM=1366x768x16',
+            f"-env FD_PROG='{self.run_cmd}'",
+            f"-rfbport {self.port}",
+        ])
+        vnc_cmd = f"x11vnc {vnc_params}"
         self.ssh_process = ssh(
             self.host, 
             "-L", f"{self.port}:localhost:{self.port}", 
@@ -226,6 +237,7 @@ class VNCViewer(Gtk.Window):
         # was the size changed in the last 500ms?
         # NO changes anymore
         if self._remembered_size.equal(curr):  # == doesn't work here
+            print("Window size changed to %dx%d" % (curr.width, curr.height))
             self._set_app_size(curr.width, curr.height)
             # reconnect the 'size-allocate' event
             self._connect_resize_event()
