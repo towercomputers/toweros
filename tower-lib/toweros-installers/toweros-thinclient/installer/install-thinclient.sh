@@ -347,10 +347,11 @@ clone_live_system_to_disk() {
     cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
     ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
-    # install custom icons
+    # install custom icons and backgrounds
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
     cp -r /mnt/usr/share/icons/oxygen/base/48x48/* /mnt/usr/share/icons/hicolor/48x48/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
+    cp -r /var/towercomputers/installer/backgrounds /mnt/var/towercomputers/
     # update icon cache
     gtk-update-icon-cache -f -t /mnt/usr/share/icons/hicolor
     # clean chroot
