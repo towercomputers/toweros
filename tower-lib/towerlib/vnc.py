@@ -106,13 +106,24 @@ class VNCViewer(Gtk.Window):
             padding-bottom: 0;
             min-height: 0;
         }
+
+        #loading_label {
+            min-height: 80px;
+            min-width: 200px;
+            padding: 120px 0;
+            background-image: url("/var/towercomputers/wallpapers/tower-logo-200x200.jpg");
+            background-size: 200px 200px;
+            color: white;
+        }
         """.replace('BACKGROUND_FILENAME', bg_filename)
         provider.load_from_data(css)
 
         self.set_title(host)
         self.layout = Gtk.Layout()
+        self.layout.set_name('main_layout')
         self.add(self.layout)
-        self.loading_label = Gtk.Label(label=f"Connecting to {host}")
+        self.loading_label = Gtk.Label(label=f"Connecting to {host}...")
+        self.loading_label.set_name('loading_label')
         self.layout.add(self.loading_label)
         self.show_all()
         self._start_x11vnc_server()
@@ -355,8 +366,3 @@ def run(host, run_cmd):
         Gtk.main()
     finally:
         cleanup(host, port, session_id)
-
-# for testing because py3-gobject doesn't work with hatch :(
-if __name__ == "__main__":
-    import sys
-    run(sys.argv[1], ' '.join(sys.argv[2:]))
