@@ -3,14 +3,8 @@ import logging
 import re
 
 from towerlib import sshconf
-from towerlib import gui
+from towerlib import gui, vnc
 from towerlib.utils.exceptions import TowerException
-
-# for hatch
-try:
-    from towerlib import vnc
-except:
-    pass
 
 logger = logging.getLogger('tower')
 
