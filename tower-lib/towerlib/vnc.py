@@ -15,7 +15,7 @@ from gi.repository import Gdk
 from gi.repository import GtkVnc
 from gi.repository import GLib
 
-from sh import ssh, Command
+from sh import ssh, Command, ErrorReturnCode_1
 
 logger = logging.getLogger('tower')
 
@@ -318,12 +318,19 @@ def find_free_port():
         s.bind(('', 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
-    
+
+def find_cmd_path(host, run_cmd):
+    try:
+        return ssh(host, f'which {run_cmd}').strip()
+    except ErrorReturnCode_1:
+        raise Exception(f'Command {run_cmd} not found on host {host}')
+
 def run(host, run_cmd):
     port = str(find_free_port())
     session_id = uuid.uuid1()
+    cmd = find_cmd_path(host, run_cmd)
     try:
-        VNCViewer(host, port, run_cmd, session_id)
+        VNCViewer(host, port, cmd, session_id)
         Gtk.main()
     finally:
         cleanup(host, port, session_id)
