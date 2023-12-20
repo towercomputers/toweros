@@ -163,8 +163,8 @@ layout {{
 """
     widget = f"{layouts}\n{styles}"
     widget_path = f"{TOWER_DIR}/tower.widget"
-    with open(widget_path, 'w', encoding="UTF-8") as fp:
-        fp.write(widget)
+    with open(widget_path, 'w', encoding="UTF-8") as file_pointer:
+        file_pointer.write(widget)
     restart_sfwbar()
 
 def generate_hosts_status():
@@ -172,5 +172,5 @@ def generate_hosts_status():
         host_status = get_status(host, full=True)
         for key in list(host_status.keys()):
             host_status[key.replace('-', '')] = host_status.pop(key)
-        with open(os.path.join(TOWER_DIR, f'{host}_status'), 'w', encoding="UTF-8") as fp:
-            json.dump(host_status, fp, indent=4)
+        with open(os.path.join(TOWER_DIR, f'{host}_status'), 'w', encoding="UTF-8") as file_pointer:
+            json.dump(host_status, file_pointer, indent=4)

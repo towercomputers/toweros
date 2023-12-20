@@ -73,8 +73,8 @@ def get_desktop_file_info(desktop_file):
     desktop_file_info = {
         "Filename": desktop_file,
     }
-    with open(desktop_file, 'r', encoding="UTF-8") as fp:
-        for line in fp.readlines():
+    with open(desktop_file, 'r', encoding="UTF-8") as file_pointer:
+        for line in file_pointer.readlines():
             if '=' in line:
                 key, value = line.split('=', 1)
                 if key in fields and key not in desktop_file_info:

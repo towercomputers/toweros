@@ -47,8 +47,8 @@ def prepare_host_config(args):
     name = args.name[0]
     # public key for ssh
     check_environment_value('public-key-path', args.public_key_path)
-    with open(args.public_key_path, encoding="UTF-8") as f:
-        public_key = f.read().strip()
+    with open(args.public_key_path, encoding="UTF-8") as file_pointer:
+        public_key = file_pointer.read().strip()
     # generate random password
     password = args.password or secrets.token_urlsafe(16)
     # gather locale informations
@@ -149,10 +149,10 @@ def prepare_provision(args, upgrade=False):
 @utils.clitask("Saving host configuration in {0}...")
 def save_config_file(config_path, config_str):
     os.makedirs(os.path.dirname(config_path), exist_ok=True)
-    with open(config_path, 'w', encoding="UTF-8") as f:
+    with open(config_path, 'w', encoding="UTF-8") as file_pointer:
         # we want the password in ~/.local/tower/hosts/<host>/tower.env for debugging purposes
         #lgtm[py/clear-text-storage-sensitive-data]
-        f.write(config_str)
+        file_pointer.write(config_str)
     os.chmod(config_path, 0o600)
 
 def save_host_config(host_config):
@@ -161,12 +161,12 @@ def save_host_config(host_config):
     save_config_file(config_path, config_str)
 
 def check_network(online):
-    ip = config.THIN_CLIENT_IP_ETH0 if online else config.THIN_CLIENT_IP_ETH1
+    host_ip = config.THIN_CLIENT_IP_ETH0 if online else config.THIN_CLIENT_IP_ETH1
     interface = 'eth0' if online else 'eth1'
     if not utils.interface_is_up(interface):
         raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is up.")
-    if not utils.is_ip_attached(interface, ip):
-        raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is attached to the IP `{ip}`.")
+    if not utils.is_ip_attached(interface, host_ip):
+        raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is attached to the IP `{host_ip}`.")
 
 def display_pre_provision_warning(name, boot_device, upgrade):
     warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the thin client."
@@ -186,11 +186,11 @@ def display_pre_discovering_message():
     message += "- Turn on the host and wait for it to be discovered on the network... (This step can take up to 10 minutes under normal circumstances, depending mostly on the speed of the root device. If the host has still not discovered in that time period, you can troubleshoot by connecting a screen and a keyboard to it.\n"
     rprint(Text(message, style='green'))
 
-def display_post_discovering_message(name, ip):
+def display_post_discovering_message(name, host_ip):
     if sshconf.is_up(name):
-        message = f"Host ready with IP: {ip}\n"
+        message = f"Host ready with IP: {host_ip}\n"
     else:
-        message = f"Host IP: {ip}\n"
+        message = f"Host IP: {host_ip}\n"
     message += f"Access the host `{name}` with the command `$ ssh {name}`.\n"
     message += f"Install a package on `{name}` with the command `$ tower install {name} <package-name>`\n"
     message += f"Run a GUI application on `{name}` with the command `$ tower run {name} <package-name>`\n"

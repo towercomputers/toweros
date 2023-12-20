@@ -35,7 +35,7 @@ ARCH = "aarch64"
 def sprint(value):
     print(value, end='', flush=True)
 
-def wd(path):
+def wdir(path):
     return os.path.join(WORKING_DIR, path)
 
 def prepare_working_dir():
@@ -46,14 +46,14 @@ def prepare_working_dir():
 def fetch_apk_packages(repo_path, branch, packages):
     apk(
         'fetch', '--arch', ARCH, '-R', '--url', '--no-cache', '--allow-untrusted',
-        '--root', wd("EXPORT_BOOTFS_DIR"),
+        '--root', wdir("EXPORT_BOOTFS_DIR"),
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{branch}/community',
         '-o', repo_path, *packages, _out=logger.debug
     )
 
 def prepare_apk_repos(private_key_path):
-    repo_path = wd(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/")
+    repo_path = wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/")
     rm('-rf', repo_path)
     mkdir('-p',repo_path)
     world_path = os.path.join(INSTALLER_DIR, 'etc', 'apk', 'world')
@@ -73,8 +73,8 @@ def prepare_apk_repos(private_key_path):
     )
     cp("/home/tower/packages/toweros-host/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
     # prepare index
-    apks = glob.glob(wd(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/*.apk"))
-    apk_index_path = wd(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/APKINDEX.tar.gz")
+    apks = glob.glob(wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/*.apk"))
+    apk_index_path = wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/APKINDEX.tar.gz")
     apk_index_opts = ['index', '--arch', ARCH, '--rewrite-arch', ARCH, '--allow-untrusted']
     apk(*apk_index_opts, '-o', apk_index_path, *apks, _out=logger.debug)
     # sign index
@@ -88,39 +88,39 @@ def prepare_system_image(alpine_tar_path, private_key_path):
         '-E', 'lazy_itable_init=0,root_owner=0:0',
         '-m', '0',
         '-U', 'clear',
-        '--', wd("root.img"), '4G',
+        '--', wdir("root.img"), '4G',
         _out=logger.debug
     )
     # mount image in temporary folder
-    mkdir('-p', wd("EXPORT_BOOTFS_DIR"))
-    mount(wd("root.img"), wd("EXPORT_BOOTFS_DIR"))
+    mkdir('-p', wdir("EXPORT_BOOTFS_DIR"))
+    mount(wdir("root.img"), wdir("EXPORT_BOOTFS_DIR"))
     # put alpine linux files
-    tar('-xpf', alpine_tar_path, '-C', wd("EXPORT_BOOTFS_DIR"))
+    tar('-xpf', alpine_tar_path, '-C', wdir("EXPORT_BOOTFS_DIR"))
     prepare_apk_repos(private_key_path)
     # synchronize folder
-    sync(wd("EXPORT_BOOTFS_DIR"))
+    sync(wdir("EXPORT_BOOTFS_DIR"))
 
 def prepare_overlay(pub_key_path):
     # put installer in local.d
-    mkdir('-p', wd("overlay/etc/local.d/"))
-    cp('-r', os.path.join(INSTALLER_DIR, 'etc'), wd("overlay/"))
-    cp(os.path.join(INSTALLER_DIR, 'installer', 'install-host.sh'), wd("overlay/etc/local.d/install-host.start"))
-    cp(os.path.join(INSTALLER_DIR, 'installer', 'configure-firewall.sh'), wd("overlay/etc/local.d/configure-firewall.sh"))
+    mkdir('-p', wdir("overlay/etc/local.d/"))
+    cp('-r', os.path.join(INSTALLER_DIR, 'etc'), wdir("overlay/"))
+    cp(os.path.join(INSTALLER_DIR, 'installer', 'install-host.sh'), wdir("overlay/etc/local.d/install-host.start"))
+    cp(os.path.join(INSTALLER_DIR, 'installer', 'configure-firewall.sh'), wdir("overlay/etc/local.d/configure-firewall.sh"))
     # put public key used to signe apk index
-    mkdir('-p', wd("overlay/etc/apk/keys/"))
-    cp(pub_key_path, wd(f"overlay/etc/apk/keys/{os.path.basename(pub_key_path)}"))
+    mkdir('-p', wdir("overlay/etc/apk/keys/"))
+    cp(pub_key_path, wdir(f"overlay/etc/apk/keys/{os.path.basename(pub_key_path)}"))
     # generate the overlay in the boot folder
     Command('sh')(
         os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'),
-        wd("overlay"),
-        _cwd=wd("EXPORT_BOOTFS_DIR/"),
+        wdir("overlay"),
+        _cwd=wdir("EXPORT_BOOTFS_DIR/"),
         _out=print
     )
-    tee(wd("EXPORT_BOOTFS_DIR/usercfg.txt"), _in=echo("dtoverlay=dwc2,dr_mode=host"))
+    tee(wdir("EXPORT_BOOTFS_DIR/usercfg.txt"), _in=echo("dtoverlay=dwc2,dr_mode=host"))
 
 @clitask("Creating RPI partitions...")
 def create_rpi_boot_partition():
-    image_file = wd("toweros-host.img")
+    image_file = wdir("toweros-host.img")
     # caluclate sizes
     boot_size = 512 * 1024 * 1024
     # All partition sizes and starts will be aligned to this size
@@ -156,10 +156,10 @@ def prepare_rpi_partitions(loop_dev):
     # format partitions
     mkdosfs('-n', 'bootfs', '-F', 32, '-s', 4, '-v', boot_dev, _out=logger.debug)
     # mount partitions
-    mkdir('-p', wd("BOOTFS_DIR"), _out=logger.debug)
-    mount('-v', boot_dev, wd("BOOTFS_DIR"), '-t', 'vfat')
+    mkdir('-p', wdir("BOOTFS_DIR"), _out=logger.debug)
+    mount('-v', boot_dev, wdir("BOOTFS_DIR"), '-t', 'vfat')
     # copy system in partitions
-    rsync('-rtxv', wd("EXPORT_BOOTFS_DIR/"), wd("BOOTFS_DIR/"), _out=logger.debug)
+    rsync('-rtxv', wdir("EXPORT_BOOTFS_DIR/"), wdir("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
 def compress_image():
@@ -169,7 +169,7 @@ def compress_image():
     xz(
         '--compress', '--force',
         '--threads', 0, '--memlimit-compress=90%', '--best',
-	    '--stdout', wd("toweros-host.img"),
+	    '--stdout', wdir("toweros-host.img"),
         _out=tmp_image_path
     )
     cp(tmp_image_path, image_path)
@@ -179,13 +179,13 @@ def compress_image():
 @clitask("Copying image...")
 def copy_image():
     image_path = os.path.join(config.TOWER_BUILDS_DIR, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
-    cp(wd("toweros-host.img"), image_path)
+    cp(wdir("toweros-host.img"), image_path)
     chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
 
 def unmount_all():
-    utils.lazy_umount(wd("BOOTFS_DIR"))
-    utils.lazy_umount(wd("EXPORT_BOOTFS_DIR"))
+    utils.lazy_umount(wdir("BOOTFS_DIR"))
+    utils.lazy_umount(wdir("EXPORT_BOOTFS_DIR"))
     losetup('-D')
 
 @clitask("Cleaning up...")
@@ -194,9 +194,9 @@ def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
 
 def prepare_apk_key():
-    mkdir('-p', wd("apk-keys"))
-    private_key_path = wd("apk-keys/tower.rsa")
-    public_key_path = wd("apk-keys/tower.rsa.pub")
+    mkdir('-p', wdir("apk-keys"))
+    private_key_path = wdir("apk-keys/tower.rsa")
+    public_key_path = wdir("apk-keys/tower.rsa.pub")
     openssl('genrsa', '-out', private_key_path, '2048')
     openssl('rsa', '-in', private_key_path, '-pubout', '-out', public_key_path)
     return private_key_path, public_key_path
@@ -212,7 +212,7 @@ def build_image(uncompressed=False):
         prepare_system_image(alpine_tar_path, private_key_path)
         prepare_overlay(public_key_path)
         create_rpi_boot_partition()
-        loop_dev = create_loop_device(wd("toweros-host.img"))
+        loop_dev = create_loop_device(wdir("toweros-host.img"))
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         if uncompressed:
@@ -250,19 +250,19 @@ def zeroing_device(device):
 @clitask("Configuring image...")
 def insert_tower_env(boot_part, host_config):
     # mount boot partition
-    mkdir('-p', wd("BOOTFS_DIR/"))
-    mount(boot_part, wd("BOOTFS_DIR/"), '-t', 'vfat')
+    mkdir('-p', wdir("BOOTFS_DIR/"))
+    mount(boot_part, wdir("BOOTFS_DIR/"), '-t', 'vfat')
     str_env = "\n".join([f"{key}='{value}'" for key, value in host_config.items()])
     # insert tower.env file in boot partition
-    tee(wd("BOOTFS_DIR/tower.env"), _in=echo(str_env))
+    tee(wdir("BOOTFS_DIR/tower.env"), _in=echo(str_env))
     # insert luks key in boot partition
     keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], "crypto_keyfile.bin")
-    cp(keys_path, wd("BOOTFS_DIR/crypto_keyfile.bin"))
+    cp(keys_path, wdir("BOOTFS_DIR/crypto_keyfile.bin"))
     # insert host ssh keys in boot partition
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
         host_keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], f"ssh_host_{key_type}_key")
-        cp(host_keys_path, wd(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
-        cp(f"{host_keys_path}.pub", wd(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
+        cp(host_keys_path, wdir(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
+        cp(f"{host_keys_path}.pub", wdir(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, new_config, zero_device=False):

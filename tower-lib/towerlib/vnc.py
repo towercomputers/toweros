@@ -7,6 +7,7 @@ import os
 import socket
 from contextlib import closing
 
+# pylint: disable=wrong-import-position
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkVnc', '2.0')
@@ -14,9 +15,11 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GtkVnc
 from gi.repository import GLib
+# pylint: enable=wrong-import-position
 
-from towerlib.utils.shell import sshcli, Command, ErrorReturnCode_1
+from towerlib.utils.shell import ssh, Command, ErrorReturnCode_1, ErrorReturnCode
 from towerlib.sshconf import get_host_color_name
+from towerlib.utils.exceptions import ServerTimeoutException, CommandNotFound
 
 logger = logging.getLogger('tower')
 
@@ -30,10 +33,11 @@ def wait_for_output(_out, expected_output):
         process_output = _out.getvalue()
         elapsed_time = time.time() - start_time
         if elapsed_time > X11VNC_TIMEOUT:
-            print(process_output)
-            raise Exception(f"x11vnc not ready after {X11VNC_TIMEOUT}s")
+            logger.info(process_output)
+            raise ServerTimeoutException(f"x11vnc not ready after {X11VNC_TIMEOUT}s")
     logger.debug(process_output)
 
+# pylint: disable=too-many-instance-attributes
 class VNCViewer(Gtk.Window):
     def __init__(self, host, port, run_cmd, session_id):
         Gtk.Window.__init__(self)
@@ -45,6 +49,10 @@ class VNCViewer(Gtk.Window):
         self.window_id = None
         self.window_pid = None
         self.ssh_process = None
+        self._timer_id = None
+        self._event_id_size_allocate = None
+        self._remembered_size = None
+        self.display = None
         self.set_resizable(False)
         # close event
         self.connect('delete-event', self._vnc_close)
@@ -52,9 +60,9 @@ class VNCViewer(Gtk.Window):
         # headerbar
         host_color_name = get_host_color_name(self.host)
         bg_filename = f"/var/towercomputers/backgrounds/square-{host_color_name.replace(' ', '-').lower()}.png"
-        self.hb = Gtk.HeaderBar()
-        self.hb.set_show_close_button(True)
-        self.set_titlebar(self.hb)
+        self.headerbar = Gtk.HeaderBar()
+        self.headerbar.set_show_close_button(True)
+        self.set_titlebar(self.headerbar)
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
         style_context = Gtk.StyleContext()
@@ -102,13 +110,13 @@ class VNCViewer(Gtk.Window):
         self.set_title(host)
         self.layout = Gtk.Layout()
         self.add(self.layout)
-        self.loading_label = Gtk.Label(label="Connecting to %s:%s" % (host, port))
+        self.loading_label = Gtk.Label(label=f"Connecting to {host}")
         self.layout.add(self.loading_label)
         self.show_all()
         self._start_x11vnc_server()
         # initialize vnc display
         self._initialize_vnc_display()
-    
+
     def _start_x11vnc_server(self):
         self.x11vnc_output = StringIO()
         thinclient_resolution = Command('sh')('-c', "xrandr | grep '*' | awk '{print $1}'").strip()
@@ -123,8 +131,8 @@ class VNCViewer(Gtk.Window):
             f"-rfbport {self.port}",
         ])
         vnc_cmd = f"x11vnc {vnc_params}"
-        self.ssh_process = sshcli(
-            self.host, 
+        self.ssh_process = ssh(
+            self.host,
             "-L", f"{self.port}:localhost:{self.port}", 
             vnc_cmd,
             _err_to_out=True, _out=self.x11vnc_output, _bg=True, _bg_exc=False
@@ -137,38 +145,38 @@ class VNCViewer(Gtk.Window):
             self.window_id = new_window_id
             return True
         return False
-    
+
     def _set_app_size(self, width, height):
         try:
-            sshcli(self.host, f'DISPLAY={self.display} xdotool windowsize --sync {self.window_id} {width} {height}')
-        except Exception as e:
+            ssh(self.host, f'DISPLAY={self.display} xdotool windowsize --sync {self.window_id} {width} {height}')
+        except ErrorReturnCode:
             if self._refresh_window_id():
                 self._set_app_size(width, height)
 
     def _get_app_size(self):
         try:
-            width, height = sshcli(self.host, f'DISPLAY={self.display} xdotool getwindowgeometry {self.window_id}').split(' ')[-1].split('x')
+            width, height = ssh(self.host, f'DISPLAY={self.display} xdotool getwindowgeometry {self.window_id}').split(' ')[-1].split('x')
             return int(width) - 50, int(height) - 100
-        except Exception as e:
+        except ErrorReturnCode:
             if self._refresh_window_id():
                 return self._get_app_size()
             return 200, 200
-    
+
     def _update_window_pid(self):
         try:
-            self.window_pid = sshcli(self.host, f'DISPLAY={self.display} xdotool getwindowpid {self.window_id}').strip()
-            with open(f'/tmp/{self.session_id}.pid', 'w') as f:
-                f.write(self.window_pid)
-        except Exception as e:
+            self.window_pid = ssh(self.host, f'DISPLAY={self.display} xdotool getwindowpid {self.window_id}').strip()
+            with open(f'/tmp/{self.session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
+                file_pointer.write(self.window_pid)
+        except ErrorReturnCode:
             if self._refresh_window_id():
-                return self._update_window_pid()
-            
+                self._update_window_pid()
+
     def _update_session_display(self):
         self.display = self.x11vnc_output.getvalue().split(" Using X display")[1].split("\n")[0].strip()
-        print("DISPLAY=%s" % self.display)
-        with open(f'/tmp/{self.session_id}.display', 'w') as f:
-            f.write(self.display)
-        
+        logger.debug("DISPLAY %s", self.display)
+        with open(f'/tmp/{self.session_id}.display', 'w', encoding="UTF-8") as file_pointer:
+            file_pointer.write(self.display)
+
     def _window_name(self):
         name = self.run_cmd.split(' ')[0]
         return name.split('/')[-1]
@@ -176,8 +184,8 @@ class VNCViewer(Gtk.Window):
     def _search_window_id(self):
         try:
             cmd = f'DISPLAY={self.display} xdotool search --onlyvisible --name "{self._window_name()}"'
-            return sshcli(self.host, cmd).strip()
-        except Exception as e:
+            return ssh(self.host, cmd).strip()
+        except ErrorReturnCode:
             return None
 
     def _initialize_vnc_display(self):
@@ -203,7 +211,7 @@ class VNCViewer(Gtk.Window):
             return
         self.init_size_timer = None
         width, height = self._get_app_size()
-        sshcli(self.host, f'DISPLAY={self.display} xdotool windowmove {self.window_id} 0 0')
+        ssh(self.host, f'DISPLAY={self.display} xdotool windowmove {self.window_id} 0 0')
         self.resize(width + 50, height + 100)
         self.set_resizable(True)
         self._update_window_pid()
@@ -215,10 +223,10 @@ class VNCViewer(Gtk.Window):
         eid = self.connect('size-allocate', self._on_size_allocated)
         self._event_id_size_allocate = eid
 
-    def _on_delete_event(self, a, b):
+    def _on_delete_event(self, _, __):
         Gtk.main_quit()
 
-    def _on_size_allocated(self, widget, alloc):
+    def _on_size_allocated(self, _, alloc):
         if self.init_size_timer:
             return
         # don't install a second timer
@@ -239,7 +247,7 @@ class VNCViewer(Gtk.Window):
         # was the size changed in the last 500ms?
         # NO changes anymore
         if self._remembered_size.equal(curr):  # == doesn't work here
-            print("Window size changed to %dx%d" % (curr.width, curr.height))
+            logger.debug("Window size changed to %sx%s", curr.width, curr.height)
             self._set_app_size(curr.width - 50, curr.height - 90)
             # reconnect the 'size-allocate' event
             self._connect_resize_event()
@@ -262,69 +270,79 @@ class VNCViewer(Gtk.Window):
             else:
                 keystr = keystr + "+" + Gdk.keyval_name(k)
         if grabbed:
-            subtitle = "(Press %s to release pointer) " % keystr
+            subtitle = f"(Press {keystr} to release pointer)"
         else:
             subtitle = ""
         self.set_title(f"[{self.host}] {self._window_name()} {subtitle}")
-    
-    def _vnc_close(self, src, data=None):
-        print("Window closed by user")
+
+    def _vnc_close(self, _, __=None):
+        logger.debug("Window closed by user")
         self.vnc.send_keys([Gdk.KEY_Control_L, Gdk.KEY_q])
         return True
         #Gtk.main_quit()
 
-    def _vnc_grab(self, src):
+    def _vnc_grab(self, _):
         self._set_title(True)
 
-    def _vnc_ungrab(self, src):
+    def _vnc_ungrab(self, _):
         self._set_title(False)
 
-    def _vnc_connected(self, src):
-        print("Connected to server")
+    def _vnc_connected(self, _):
+        logger.info("Connected to server")
 
-    def _vnc_initialized(self, src):
-        print("Connection initialized")
-        print(self.x11vnc_output.getvalue())
+    def _vnc_initialized(self, _):
+        logger.info("Connection initialized")
+        logger.debug(self.x11vnc_output.getvalue())
         self.layout.remove(self.loading_label)
         self._set_title(False)
         self._update_session_display()
         self._init_size()
-        
         self.show_all()
 
-    def _vnc_disconnected(self, src):
-        print("Disconnected from server")
+    def _vnc_disconnected(self, _):
+        logger.info("Disconnected from server")
         Gtk.main_quit()
 
 def cleanup(host, port, session_id):
     # killing application
     if os.path.exists(f'/tmp/{session_id}.pid'):
-        with open(f'/tmp/{session_id}.pid', 'r') as f:
-            window_pid = f.read().strip()
-            sshcli(host, f'kill -9 {window_pid} || true', _bg=True, _bg_exc=False)
+        with open(f'/tmp/{session_id}.pid', 'r', encoding="UTF-8") as file_pointer:
+            window_pid = file_pointer.read().strip()
+            ssh(
+                host,
+                f'kill -9 {window_pid} || true',
+                _bg=True, _bg_exc=False
+            )
             os.remove(f'/tmp/{session_id}.pid')
     # killing xvfb and x11vnc
     if os.path.exists(f'/tmp/{session_id}.display'):
-        with open(f'/tmp/{session_id}.display', 'r') as f:
-            display = f.read().strip()
+        with open(f'/tmp/{session_id}.display', 'r', encoding="UTF-8") as file_pointer:
+            display = file_pointer.read().strip()
             kill_cmd = f"ps -ef | grep -e 'Xvfb {display}' -e '-rfbport {port}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
-            sshcli(host, kill_cmd, _bg=True, _bg_exc=False)
+            ssh(
+                host,
+                kill_cmd,
+                _bg=True, _bg_exc=False
+            )
             os.remove(f'/tmp/{session_id}.display')
     # killing ssh tunnel
     ssh_killcmd = f"ps -ef | grep '{port}:localhost:{port} x11vnc' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
-    Command('sh')('-c', ssh_killcmd, _bg=True, _bg_exc=False)
+    Command('sh')('-c',
+        ssh_killcmd,
+        _bg=True, _bg_exc=False
+    )
 
 def find_free_port():
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
-        s.bind(('', 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        return s.getsockname()[1]
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+        sock.bind(('', 0))
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        return sock.getsockname()[1]
 
 def find_cmd_path(host, run_cmd):
     try:
-        return sshcli(host, f'which {run_cmd}').strip()
-    except ErrorReturnCode_1:
-        raise Exception(f'Command {run_cmd} not found on host {host}')
+        return ssh(host, f'which {run_cmd}').strip()
+    except ErrorReturnCode_1 as exc:
+        raise CommandNotFound(f'Command {run_cmd} not found on host {host}') from exc
 
 def run(host, run_cmd):
     port = str(find_free_port())

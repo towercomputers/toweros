@@ -203,8 +203,8 @@ def run_waypipe(host, waypipe_args, *cmd):
             *cmd,
             _out=print, _err_to_out=True,
         )
-    except ErrorReturnCode as e:
-        logger.error(e)
+    except ErrorReturnCode as exc:
+        logger.error(exc)
     finally:
         try:
             if client_process is not None and client_process.is_alive():

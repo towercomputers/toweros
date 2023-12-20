@@ -62,6 +62,6 @@ def main():
             mdhelp.execute(towercli_parser())
         else:
             get_module(args).execute(args)
-    except TowerException as e:
-        utils.clilogger.print_error(str(e))
+    except TowerException as exc:
+        utils.clilogger.print_error(str(exc))
         sys.exit()

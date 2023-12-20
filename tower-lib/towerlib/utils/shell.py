@@ -10,7 +10,6 @@ from sh import (
     argparse_manpage,
     locale as getlocale,
     doas,
-    
 )
 # pylint: enable=import-error,unused-import,no-name-in-module
 
