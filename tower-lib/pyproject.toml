@@ -59,4 +59,5 @@ allowed-licences = [
 ]
 allowed-packages = [
     'tower-cli', 'tower-lib',
+    'pycairo',
 ]

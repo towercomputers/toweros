@@ -6,8 +6,9 @@ import uuid
 import os
 import socket
 from contextlib import closing
+import tempfile
 
-# pylint: disable=wrong-import-position
+# pylint: disable=wrong-import-position,no-name-in-module
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('GtkVnc', '2.0')
@@ -15,7 +16,7 @@ from gi.repository import Gtk
 from gi.repository import Gdk
 from gi.repository import GtkVnc
 from gi.repository import GLib
-# pylint: enable=wrong-import-position
+# pylint: enable=wrong-import-position,no-name-in-module
 
 from towerlib.utils.shell import ssh, Command, ErrorReturnCode_1, ErrorReturnCode
 from towerlib.sshconf import get_host_color_name
@@ -24,6 +25,7 @@ from towerlib.utils.exceptions import ServerTimeoutException, CommandNotFound
 logger = logging.getLogger('tower')
 
 X11VNC_TIMEOUT = 5
+TMP_DIR = tempfile.gettempdir()
 
 def wait_for_output(_out, expected_output):
     start_time = time.time()
@@ -37,7 +39,7 @@ def wait_for_output(_out, expected_output):
             raise ServerTimeoutException(f"x11vnc not ready after {X11VNC_TIMEOUT}s")
     logger.debug(process_output)
 
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes,too-few-public-methods
 class VNCViewer(Gtk.Window):
     def __init__(self, host, port, run_cmd, session_id):
         Gtk.Window.__init__(self)
@@ -165,7 +167,7 @@ class VNCViewer(Gtk.Window):
     def _update_window_pid(self):
         try:
             self.window_pid = ssh(self.host, f'DISPLAY={self.display} xdotool getwindowpid {self.window_id}').strip()
-            with open(f'/tmp/{self.session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
+            with open(f'/{TMP_DIR}/{self.session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
                 file_pointer.write(self.window_pid)
         except ErrorReturnCode:
             if self._refresh_window_id():
@@ -174,7 +176,7 @@ class VNCViewer(Gtk.Window):
     def _update_session_display(self):
         self.display = self.x11vnc_output.getvalue().split(" Using X display")[1].split("\n")[0].strip()
         logger.debug("DISPLAY %s", self.display)
-        with open(f'/tmp/{self.session_id}.display', 'w', encoding="UTF-8") as file_pointer:
+        with open(f'/{TMP_DIR}/{self.session_id}.display', 'w', encoding="UTF-8") as file_pointer:
             file_pointer.write(self.display)
 
     def _window_name(self):
@@ -305,18 +307,18 @@ class VNCViewer(Gtk.Window):
 
 def cleanup(host, port, session_id):
     # killing application
-    if os.path.exists(f'/tmp/{session_id}.pid'):
-        with open(f'/tmp/{session_id}.pid', 'r', encoding="UTF-8") as file_pointer:
+    if os.path.exists(f'/{TMP_DIR}/{session_id}.pid'):
+        with open(f'/{TMP_DIR}/{session_id}.pid', 'r', encoding="UTF-8") as file_pointer:
             window_pid = file_pointer.read().strip()
             ssh(
                 host,
                 f'kill -9 {window_pid} || true',
                 _bg=True, _bg_exc=False
             )
-            os.remove(f'/tmp/{session_id}.pid')
+            os.remove(f'/{TMP_DIR}/{session_id}.pid')
     # killing xvfb and x11vnc
-    if os.path.exists(f'/tmp/{session_id}.display'):
-        with open(f'/tmp/{session_id}.display', 'r', encoding="UTF-8") as file_pointer:
+    if os.path.exists(f'/{TMP_DIR}/{session_id}.display'):
+        with open(f'/{TMP_DIR}/{session_id}.display', 'r', encoding="UTF-8") as file_pointer:
             display = file_pointer.read().strip()
             kill_cmd = f"ps -ef | grep -e 'Xvfb {display}' -e '-rfbport {port}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
             ssh(
@@ -324,7 +326,7 @@ def cleanup(host, port, session_id):
                 kill_cmd,
                 _bg=True, _bg_exc=False
             )
-            os.remove(f'/tmp/{session_id}.display')
+            os.remove(f'/{TMP_DIR}/{session_id}.display')
     # killing ssh tunnel
     ssh_killcmd = f"ps -ef | grep '{port}:localhost:{port} x11vnc' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
     Command('sh')('-c',
