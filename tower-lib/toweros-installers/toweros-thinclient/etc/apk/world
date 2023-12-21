@@ -64,7 +64,6 @@ physlock
 swaybg
 swayidle
 pulseaudio
-pulseaudio-utils
 setxkbmap
 syslog-ng
 cryptsetup

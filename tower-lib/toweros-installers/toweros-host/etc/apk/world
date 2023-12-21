@@ -34,8 +34,7 @@ macchanger
 waypipe
 foot
 inxi
-pulseaudio
-pulseaudio-utils
+libpulse
 procps
 x11vnc
 xvfb
