@@ -141,12 +141,14 @@ class VNCViewer(Gtk.Window):
             '-ncache 20', '-ncache_cr',
             f'-env FD_GEOM={thinclient_resolution}x16',
             f"-env FD_PROG='{self.run_cmd}'",
+            "-env PULSE_SERVER=tcp:localhost:4713",
             f"-rfbport {self.port}",
         ])
         vnc_cmd = f"x11vnc {vnc_params}"
         self.ssh_process = ssh(
             self.host,
             "-L", f"{self.port}:localhost:{self.port}", 
+            "-R", f"4713:localhost:4713",
             vnc_cmd,
             _err_to_out=True, _out=self.x11vnc_output, _bg=True, _bg_exc=False
         )

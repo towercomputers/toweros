@@ -63,12 +63,8 @@ foot
 physlock
 swaybg
 swayidle
-pipewire
-wireplumber
-pipewire-pulse
-pipewire-jack
-pipewire-alsa
-pipewire-tools
+pulseaudio
+pulseaudio-utils
 setxkbmap
 syslog-ng
 cryptsetup

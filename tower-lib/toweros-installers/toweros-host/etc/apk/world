@@ -34,12 +34,8 @@ macchanger
 waypipe
 foot
 inxi
-pipewire
-wireplumber
-pipewire-pulse
-pipewire-jack
-pipewire-alsa
-pipewire-tools
+pulseaudio
+pulseaudio-utils
 procps
 x11vnc
 xvfb
