@@ -25,6 +25,13 @@ def add_args(argparser):
         nargs='+'
     )
     run_parser.add_argument(
+        '--nx',
+        help="""Use `nx` instead `vnc`. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    run_parser.add_argument(
         '--nx-link',
         help="""The value can be either 'modem', 'isdn', 'adsl', 'wan', 'lan', 'local' or a bandwidth specification, like for example '56k', '1m', '100m'""",
         required=False,
@@ -71,7 +78,7 @@ def add_args(argparser):
     )
     run_parser.add_argument(
         '--waypipe',
-        help="""Use `waypipe` instead `nx`. (Default: False)""",
+        help="""Use `waypipe` instead `vnc`. (Default: False)""",
         required=False,
         action='store_true',
         default=False
@@ -91,13 +98,6 @@ def add_args(argparser):
         '--wp-video',
         help="""Compress specific DMABUF formats using a lossy video codec. Opaque, 10-bit, and multiplanar formats, among others, are not supported. V is a comma separated list of options to control the video encoding. Using the --video flag without setting any options is equivalent to using the default setting of: --video=sw,bpf=120000,h264. Later options supersede earlier ones (see `man waypipe` for more options).""",
         required=False
-    )
-    run_parser.add_argument(
-        '--vnc',
-        help="""Use `vnc` instead `nx`. (Default: False)""",
-        required=False,
-        action='store_true',
-        default=False
     )
 
 
@@ -135,18 +135,7 @@ def check_args(args, parser_error):
 
 def execute(args):
     if os.getenv('DISPLAY'):
-        if args.vnc:
-            vnc.run(args.host[0], ' '.join(args.run_command))
-        elif args.waypipe:
-            waypipe_args = []
-            if args.wp_compress:
-                waypipe_args += ["--compress", args.wp_compress]
-            if args.wp_threads:
-                waypipe_args += ["--threads", args.wp_threads]
-            if args.wp_video:
-                waypipe_args += ["--video", args.wp_video]
-            gui.run_waypipe(args.host[0], waypipe_args, *args.run_command)
-        else:
+        if args.nx:
             nxagent_args = {
                 "link": args.nx_link,
                 "limit": args.nx_limit,
@@ -160,5 +149,16 @@ def execute(args):
             if args.nx_delta:
                 nxagent_args["delta"] = args.nx_delta
             gui.run(args.host[0], nxagent_args, *args.run_command)
+        elif args.waypipe:
+            waypipe_args = []
+            if args.wp_compress:
+                waypipe_args += ["--compress", args.wp_compress]
+            if args.wp_threads:
+                waypipe_args += ["--threads", args.wp_threads]
+            if args.wp_video:
+                waypipe_args += ["--video", args.wp_video]
+            gui.run_waypipe(args.host[0], waypipe_args, *args.run_command)
+        else:
+            vnc.run(args.host[0], ' '.join(args.run_command))
     else:
         raise TowerException("`tower run` requires a running desktop environment. Use `startw` to Labwc.")
