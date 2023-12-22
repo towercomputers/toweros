@@ -108,3 +108,4 @@ procps
 xrandr
 brightnessctl
 gtk-vnc
+py3-evdev

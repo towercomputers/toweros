@@ -193,6 +193,9 @@ alias startw='dbus-launch labwc'
 if [ -f /home/$USERNAME/.local/tower/osconfig ]; then
     source /home/$USERNAME/.local/tower/osconfig
 fi
+if [ "\$(tty)" == "/dev/tty1" ]; then
+    actkbd.py &
+fi
 STARTW_ON_LOGIN=\${STARTW_ON_LOGIN:-"false"}
 if [ -z "\$DISPLAY" ] && [ "\$(tty)" == "/dev/tty1" ] && [ "\$STARTW_ON_LOGIN" == "true" ]; then
     dbus-launch labwc; 
@@ -270,6 +273,10 @@ Section "InputClass"
         Option "XkbVariant" "$KEYBOARD_VARIANT"
 EndSection
 EOF
+
+    # install actkbd.py
+    cp /var/towercomputers/installer/actkbd.py /usr/bin/
+    chmod a+x /usr/bin/actkbd.py
 
     chmod a+x /etc/init.d/*
 
