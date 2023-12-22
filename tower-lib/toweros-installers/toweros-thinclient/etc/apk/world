@@ -64,6 +64,7 @@ physlock
 swaybg
 swayidle
 pulseaudio
+pulseaudio-utils
 setxkbmap
 syslog-ng
 cryptsetup
@@ -105,3 +106,4 @@ tower-cli
 zzz
 procps
 xrandr
+brightnessctl
