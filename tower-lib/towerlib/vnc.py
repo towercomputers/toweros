@@ -41,12 +41,13 @@ def wait_for_output(_out, expected_output):
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class VNCViewer(Gtk.Window):
-    def __init__(self, host, port, run_cmd, session_id):
+    def __init__(self, host, port, run_cmd, session_id, uncolored=False):
         Gtk.Window.__init__(self)
         self.host = host
         self.port = port
         self.run_cmd = run_cmd
         self.session_id = session_id
+        self.uncolored = uncolored
         self.init_size_timer = None
         self.window_id = None
         self.window_pid = None
@@ -61,62 +62,64 @@ class VNCViewer(Gtk.Window):
         self.connect('delete-event', self._vnc_close)
         self.connect("destroy", Gtk.main_quit)
         # headerbar
-        host_color_name = get_host_color_name(self.host)
-        bg_filename = f"/var/towercomputers/backgrounds/square-{host_color_name.replace(' ', '-').lower()}.png"
-        self.headerbar = Gtk.HeaderBar()
-        self.headerbar.set_show_close_button(True)
-        self.set_titlebar(self.headerbar)
-        screen = Gdk.Screen.get_default()
-        provider = Gtk.CssProvider()
-        style_context = Gtk.StyleContext()
-        style_context.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        css = """
-        headerbar {
-            padding: 0px;
-            margin: 0px;
-            min-height: 0px;
-            padding-left: 2px; /* same as childrens vertical margins for nicer proportions */
-            padding-right: 2px;
-            background-image: url("BACKGROUND_FILENAME");
-            background-size: cover;
-        }
+        bg_filename = ""
+        if not self.uncolored:
+            host_color_name = get_host_color_name(self.host)
+            bg_filename = f"/var/towercomputers/backgrounds/square-{host_color_name.replace(' ', '-').lower()}.png"
+            self.headerbar = Gtk.HeaderBar()
+            self.headerbar.set_show_close_button(True)
+            self.set_titlebar(self.headerbar)
+            screen = Gdk.Screen.get_default()
+            provider = Gtk.CssProvider()
+            style_context = Gtk.StyleContext()
+            style_context.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            css = """
+            headerbar {
+                padding: 0px;
+                margin: 0px;
+                min-height: 0px;
+                padding-left: 2px; /* same as childrens vertical margins for nicer proportions */
+                padding-right: 2px;
+                background-image: url("BACKGROUND_FILENAME");
+                background-size: cover;
+            }
 
-        headerbar entry,
-        headerbar spinbutton,
-        headerbar button,
-        headerbar separator {
-            margin-top: 0px; /* same as headerbar side padding for nicer proportions */
-            margin-bottom: 0px;
-            padding: 1px;
-        }
+            headerbar entry,
+            headerbar spinbutton,
+            headerbar button,
+            headerbar separator {
+                margin-top: 0px; /* same as headerbar side padding for nicer proportions */
+                margin-bottom: 0px;
+                padding: 1px;
+            }
 
-        /* shrink ssd titlebars */
-        .default-decoration {
-            min-height: 0; /* let the entry and button drive the titlebar size */
-            padding: 0px;
-            background-color: #FF0000;
-        }
+            /* shrink ssd titlebars */
+            .default-decoration {
+                min-height: 0; /* let the entry and button drive the titlebar size */
+                padding: 0px;
+                background-color: #FF0000;
+            }
 
-        .default-decoration .titlebutton {
-            min-height: 0px; /* tweak these two props to reduce button size */
-            min-width: 0px;
-        }
+            .default-decoration .titlebutton {
+                min-height: 0px; /* tweak these two props to reduce button size */
+                min-width: 0px;
+            }
 
-        window.ssd headerbar.titlebar {
-            padding-top: 0;
-            padding-bottom: 0;
-            min-height: 0;
-        }
-        #loading_label {
-            min-height: 80px;
-            min-width: 200px;
-            padding: 120px 0;
-            background-image: url("/var/towercomputers/wallpapers/tower-logo-200x200.jpg");
-            background-size: 200px 200px;
-            color: white;
-        }
-        """.replace('BACKGROUND_FILENAME', bg_filename)
-        provider.load_from_data(css)
+            window.ssd headerbar.titlebar {
+                padding-top: 0;
+                padding-bottom: 0;
+                min-height: 0;
+            }
+            #loading_label {
+                min-height: 80px;
+                min-width: 200px;
+                padding: 120px 0;
+                background-image: url("/var/towercomputers/wallpapers/tower-logo-200x200.jpg");
+                background-size: 200px 200px;
+                color: white;
+            }
+            """.replace('BACKGROUND_FILENAME', bg_filename)
+            provider.load_from_data(css)
         self.set_title(host)
         self.layout = Gtk.Layout()
         self.layout.set_name('main_layout')
@@ -225,7 +228,7 @@ class VNCViewer(Gtk.Window):
         width, height = self._get_app_size()
         ssh(self.host, f'DISPLAY={self.display} xdotool windowmove {self.window_id} 0 0')
         thinclient_width, _ = self.thinclient_resolution.split('x')
-        if width == int(thinclient_width):
+        if self.uncolored or width == int(thinclient_width):
             self.resize(width, height)
         else:
             self.resize(width + 50, height + 100)
@@ -265,7 +268,7 @@ class VNCViewer(Gtk.Window):
         if self._remembered_size.equal(curr):  # == doesn't work here
             logger.debug("Window size changed to %sx%s", curr.width, curr.height)
             thinclient_width, _ = self.thinclient_resolution.split('x')
-            if curr.width == int(thinclient_width):
+            if self.uncolored or curr.width == int(thinclient_width):
                 self._set_app_size(curr.width, curr.height)
             else:
                 self._set_app_size(curr.width - 50, curr.height - 90)
@@ -364,12 +367,12 @@ def find_cmd_path(host, run_cmd):
     except ErrorReturnCode_1 as exc:
         raise CommandNotFound(f'Command {run_cmd} not found on host {host}') from exc
 
-def run(host, run_cmd):
+def run(host, run_cmd, uncolored=False):
     port = str(find_free_port())
     session_id = uuid.uuid1()
     cmd = find_cmd_path(host, run_cmd)
     try:
-        VNCViewer(host, port, cmd, session_id)
+        VNCViewer(host, port, cmd, session_id, uncolored)
         Gtk.main()
     finally:
         cleanup(host, port, session_id)

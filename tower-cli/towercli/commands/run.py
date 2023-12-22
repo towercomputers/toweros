@@ -25,6 +25,13 @@ def add_args(argparser):
         nargs='+'
     )
     run_parser.add_argument(
+        '--uncolored',
+        help="""Don't use host color for window headerbar. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    run_parser.add_argument(
         '--nx',
         help="""Use `nx` instead `vnc`. (Default: False)""",
         required=False,
@@ -159,6 +166,6 @@ def execute(args):
                 waypipe_args += ["--video", args.wp_video]
             gui.run_waypipe(args.host[0], waypipe_args, *args.run_command)
         else:
-            vnc.run(args.host[0], ' '.join(args.run_command))
+            vnc.run(args.host[0], ' '.join(args.run_command), args.uncolored)
     else:
         raise TowerException("`tower run` requires a running desktop environment. Use `startw` to Labwc.")
