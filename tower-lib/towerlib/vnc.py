@@ -56,6 +56,7 @@ class VNCViewer(Gtk.Window):
         self._remembered_size = None
         self.display = None
         self.set_resizable(False)
+        self.thinclient_resolution = Command('sh')('-c', "xrandr | grep '*' | awk '{print $1}'").strip()
         # close event
         self.connect('delete-event', self._vnc_close)
         self.connect("destroy", Gtk.main_quit)
@@ -106,7 +107,6 @@ class VNCViewer(Gtk.Window):
             padding-bottom: 0;
             min-height: 0;
         }
-
         #loading_label {
             min-height: 80px;
             min-width: 200px;
@@ -117,7 +117,6 @@ class VNCViewer(Gtk.Window):
         }
         """.replace('BACKGROUND_FILENAME', bg_filename)
         provider.load_from_data(css)
-
         self.set_title(host)
         self.layout = Gtk.Layout()
         self.layout.set_name('main_layout')
@@ -125,21 +124,19 @@ class VNCViewer(Gtk.Window):
         self.loading_label = Gtk.Label(label=f"Connecting to {host}...")
         self.loading_label.set_name('loading_label')
         self.layout.add(self.loading_label)
-        self.show_all()
         self._start_x11vnc_server()
         # initialize vnc display
         self._initialize_vnc_display()
 
     def _start_x11vnc_server(self):
         self.x11vnc_output = StringIO()
-        thinclient_resolution = Command('sh')('-c', "xrandr | grep '*' | awk '{print $1}'").strip()
         vnc_params = ' '.join([
             '-create',
             '-nopw', '-listen 127.0.0.1',
             #'-nowf', '-nowcr',
             '-cursor arrow', 
             '-ncache 20', '-ncache_cr',
-            f'-env FD_GEOM={thinclient_resolution}x16',
+            f'-env FD_GEOM={self.thinclient_resolution}x16',
             f"-env FD_PROG='{self.run_cmd}'",
             "-env PULSE_SERVER=tcp:localhost:4713",
             f"-rfbport {self.port}",
@@ -227,7 +224,11 @@ class VNCViewer(Gtk.Window):
         self.init_size_timer = None
         width, height = self._get_app_size()
         ssh(self.host, f'DISPLAY={self.display} xdotool windowmove {self.window_id} 0 0')
-        self.resize(width + 50, height + 100)
+        thinclient_width, _ = self.thinclient_resolution.split('x')
+        if width == int(thinclient_width):
+            self.resize(width, height)
+        else:
+            self.resize(width + 50, height + 100)
         self.set_resizable(True)
         self._update_window_pid()
         # "resize" event
@@ -263,7 +264,11 @@ class VNCViewer(Gtk.Window):
         # NO changes anymore
         if self._remembered_size.equal(curr):  # == doesn't work here
             logger.debug("Window size changed to %sx%s", curr.width, curr.height)
-            self._set_app_size(curr.width - 50, curr.height - 90)
+            thinclient_width, _ = self.thinclient_resolution.split('x')
+            if curr.width == int(thinclient_width):
+                self._set_app_size(curr.width, curr.height)
+            else:
+                self._set_app_size(curr.width - 50, curr.height - 90)
             # reconnect the 'size-allocate' event
             self._connect_resize_event()
             # stop the timer
