@@ -194,7 +194,7 @@ if [ -f /home/$USERNAME/.local/tower/osconfig ]; then
     source /home/$USERNAME/.local/tower/osconfig
 fi
 if [ "\$(tty)" == "/dev/tty1" ]; then
-    actkbd.py &
+    actkbd.py >/dev/null 2>&1 &
 fi
 STARTW_ON_LOGIN=\${STARTW_ON_LOGIN:-"false"}
 if [ -z "\$DISPLAY" ] && [ "\$(tty)" == "/dev/tty1" ] && [ "\$STARTW_ON_LOGIN" == "true" ]; then
@@ -275,8 +275,8 @@ EndSection
 EOF
 
     # install actkbd.py
-    cp /var/towercomputers/installer/actkbd.py /usr/bin/
-    chmod a+x /usr/bin/actkbd.py
+    cp /var/towercomputers/installer/actkbd.py /mnt/usr/bin/
+    chmod a+x /mnt/usr/bin/actkbd.py
 
     chmod a+x /etc/init.d/*
 
