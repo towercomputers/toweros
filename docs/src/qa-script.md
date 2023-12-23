@@ -41,6 +41,7 @@
 | Power-off button should work. | Press the power-off button. | TowerOS should shutdown. |
 | Sound must work. | `[thinclient]$ paplay /var/towercomputers/sample.flac` | You must hear something. |
 | Volume keys must work. | `[thinclient]$ paplay /var/towercomputers/sample.flac` then press volume keys. | Volume must change. |
+| Brightness keys must work in `labwc`. | `[thinclient]$ startw` then press brightness keys. | Screen brightness must change. |
 
 ### Hosts provisioning
 
