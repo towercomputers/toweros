@@ -274,10 +274,6 @@ Section "InputClass"
 EndSection
 EOF
 
-    # install actkbd.py
-    cp /var/towercomputers/installer/actkbd.py /mnt/usr/bin/
-    chmod a+x /mnt/usr/bin/actkbd.py
-
     chmod a+x /etc/init.d/*
 
     # start services
@@ -370,8 +366,9 @@ http://dl-cdn.alpinelinux.org/alpine/v3.19/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
-    # copy supercronic init script
-    cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
+    # copy init scripts
+    cp /etc/init.d/* /mnt/etc/init.d/
+    chmod a+x /mnt/etc/init.d/*
     # set crontab
     cat <<EOF > /mnt/etc/crontabs/supercronic
 */10 * * * * * * runuser -u $USERNAME -- python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
@@ -383,6 +380,10 @@ EOF
 
     # migrate from sudo to doas
     ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
+
+    # install actkbd.py
+    cp /var/towercomputers/installer/actkbd.py /mnt/usr/bin/
+    chmod a+x /mnt/usr/bin/actkbd.py
 }
 
 install_bootloader() {

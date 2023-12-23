@@ -267,6 +267,10 @@ http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 EOF
 	fi
 
+	# copy init scripts
+    cp /etc/init.d/* /mnt/etc/init.d/
+    chmod a+x /mnt/etc/init.d/*
+
 	# migrate from sudo to doas
 	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
 }
