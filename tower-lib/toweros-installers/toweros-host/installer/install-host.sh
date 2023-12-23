@@ -268,8 +268,8 @@ EOF
 	fi
 
 	# copy init scripts
-    cp /etc/init.d/* /mnt/etc/init.d/
-    chmod a+x /mnt/etc/init.d/*
+    cp /etc/init.d/iptables /mnt/etc/init.d/
+    chmod a+x /mnt/etc/init.d/iptables
 
 	# migrate from sudo to doas
 	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true

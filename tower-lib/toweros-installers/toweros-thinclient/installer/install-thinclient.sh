@@ -367,8 +367,10 @@ http://dl-cdn.alpinelinux.org/alpine/v3.19/community
 EOF
 
     # copy init scripts
-    cp /etc/init.d/* /mnt/etc/init.d/
-    chmod a+x /mnt/etc/init.d/*
+    cp /etc/init.d/iptables /mnt/etc/init.d/
+    cp /etc/init.d/supercronic /mnt/etc/init.d/
+    chmod a+x /mnt/etc/init.d/iptables
+    chmod a+x /mnt/etc/init.d/supercronic
     # set crontab
     cat <<EOF > /mnt/etc/crontabs/supercronic
 */10 * * * * * * runuser -u $USERNAME -- python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
