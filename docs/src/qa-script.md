@@ -39,7 +39,8 @@
 | Tower CLI autocompletion should work correctly. | `[thinclient]$ tower p` then `[tab]` | `[thinclient]$ tower provision` |
 | Laptop should suspend on lid close | Close and re-open the lid | The laptop should be suspended and `physlock` activated on resume. |
 | Power-off button should work. | Press the power-off button. | TowerOS should shutdown. |
-| Sound must work. | `[thinclient]$ pw-cat -p /var/towercomputers/sample.flac ` | You must hear something. |
+| Sound must work. | `[thinclient]$ paplay /var/towercomputers/sample.flac` | You must hear something. |
+| Volume keys must work. | `[thinclient]$ paplay /var/towercomputers/sample.flac` then press volume keys. | Volume must change. |
 
 ### Hosts provisioning
 
@@ -93,6 +94,9 @@ Once the `router` is installed:
 | Online applications must work correctly on online hosts. | `[thinclient]$ tower web install midori`<br />`[thinclient]$ tower web run midori` | You can browse the web. |
 | `tor` proxy is enabled for online host. | `[thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip` | `{"IsTor":true,"IP":"109.70.100.71"}` |
 | The time on online hosts must be correct. | `[thinclient]$ ssh web date` | The correct date and time. |
+| Sound must work in browser. | `[thinclient]$ tower install web firefox` then `[thinclient]$ tower run web firefox`. Browse to soundclound and play a sound. | You must hear the song. |
+| Window header bar must be colored. | `[thinclient]$ tower <host> run <application>` | Window header bar color must match with the host color. |
+| Window header bar must be uncolored when using the flag `--uncolored`. | `[thinclient]$ tower <host> run <application> --uncolored` | Window header bar color must be uncolored. |
 
 ### TowerOS-ThinClient Upgrade
 
