@@ -26,6 +26,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install license_scanner
         pip install -e tower-lib
+        pip install evdev
     - name: Analysing dependencies with licence_scanner
       run: |
         python tower-lib/towerlib/utils/checklicences.py

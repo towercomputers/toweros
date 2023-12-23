@@ -27,6 +27,7 @@ jobs:
         pip install pylint
         pip install pylint-sarif-unofficial
         pip install -e tower-lib
+        pip install evdev
     - name: Analysing the code with pylint
       run: |
         pylint2sarif $(git ls-files '*.py') || true

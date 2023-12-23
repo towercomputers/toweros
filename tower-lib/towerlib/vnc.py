@@ -41,6 +41,7 @@ def wait_for_output(_out, expected_output):
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class VNCViewer(Gtk.Window):
+    # pylint: disable=too-many-arguments
     def __init__(self, host, port, run_cmd, session_id, uncolored=False):
         Gtk.Window.__init__(self)
         self.host = host
@@ -148,7 +149,7 @@ class VNCViewer(Gtk.Window):
         self.ssh_process = ssh(
             self.host,
             "-L", f"{self.port}:localhost:{self.port}", 
-            "-R", f"4713:localhost:4713",
+            "-R", "4713:localhost:4713", # tunnel for pulseaudio
             vnc_cmd,
             _err_to_out=True, _out=self.x11vnc_output, _bg=True, _bg_exc=False
         )
