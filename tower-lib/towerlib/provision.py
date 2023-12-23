@@ -211,6 +211,8 @@ def wait_for_host(name, timeout):
 def prepare_thin_client(name, host_config, private_key_path):
     # save host configuration in Thin Client
     save_host_config(host_config)
+    if host_config['INSTALLATION_TYPE'] == "upgrade":
+        return
     # prepare ssh config and known hosts
     sshconf.update_config(name, host_config['STATIC_HOST_IP'], private_key_path)
     # generate sfwbar widget
@@ -231,8 +233,7 @@ def provision(name, args, upgrade=False):
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
     # save necessary files in Thin Client
-    if not upgrade:
-        prepare_thin_client(name, host_config, private_key_path)
+    prepare_thin_client(name, host_config, private_key_path)
     # display pre discovering message
     display_pre_discovering_message()
     # wait for host to be ready
