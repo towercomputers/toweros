@@ -42,6 +42,7 @@ EVENTS = {
 KEY_STATE = ["UP", "DOWN", "HOLD"]
 
 for event in evdev.InputDevice(DEFAULT_DEVICE).read_loop():
+    # pylint: disable=no-member
     if event.type == evdev.ecodes.EV_KEY:
         categorized_event = evdev.categorize(event)
         event_name = f"{categorized_event.scancode}_{KEY_STATE[categorized_event.keystate]}"
