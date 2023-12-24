@@ -168,4 +168,4 @@ def execute(args):
         else:
             vnc.run(args.host[0], ' '.join(args.run_command), args.uncolored)
     else:
-        raise TowerException("`tower run` requires a running desktop environment. Use `startw` to Labwc.")
+        raise TowerException("`tower run` requires a running desktop environment. Use `startw` to start Labwc.")
