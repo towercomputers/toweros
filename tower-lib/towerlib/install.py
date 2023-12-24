@@ -30,9 +30,9 @@ def prepare_repositories_file(host):
     if os.path.exists(file_name):
         raise LockException(f"f{file_name} already exists! Is another install in progress? If not, delete this file and try again.")
     # generate temporary apk repositories
-    with open(file_name, 'w', encoding="UTF-8") as fp:
+    with open(file_name, 'w', encoding="UTF-8") as file_pointer:
         for repo in APK_REPOS_URL:
-            fp.write(f"{repo}\n")
+            file_pointer.write(f"{repo}\n")
     # copy apk repositories in offline host
     if host != 'thinclient':
         scp(file_name, f"{host}:~/")

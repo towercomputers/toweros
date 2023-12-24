@@ -187,20 +187,20 @@
     <keybind key="A-Space">
       <action name="ShowMenu" menu="client-menu" />
     </keybind>
-    <keybind key="XF86_AudioLowerVolume">
-      <action name="Execute" command="amixer sset Master 5%-" />
+    <!-- <keybind key="XF86_AudioLowerVolume">
+      <action name="Execute" command="pactl set-sink-volume @DEFAULT_SINK@ -5%" />
     </keybind>
     <keybind key="XF86_AudioRaiseVolume">
-      <action name="Execute" command="amixer sset Master 5%+" />
+      <action name="Execute" command="pactl set-sink-volume @DEFAULT_SINK@ +5%" />
     </keybind>
     <keybind key="XF86_AudioMute">
-      <action name="Execute" command="amixer sset Master toggle" />
-    </keybind>
+      <action name="Execute" command="pactl set-sink-volume @DEFAULT_SINK@ -100%" />
+    </keybind> -->
     <keybind key="XF86_MonBrightnessUp">
-      <action name="Execute" command="brightnessctl set +10%" />
+      <action name="Execute" command="sudo brightnessctl set +10%" />
     </keybind>
     <keybind key="XF86_MonBrightnessDown">
-      <action name="Execute" command="brightnessctl set 10%-" />
+      <action name="Execute" command="sudo brightnessctl set 10%-" />
     </keybind>
   <!-- SnapToRegion via W-Numpad -->
     <!--

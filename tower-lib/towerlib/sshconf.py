@@ -33,17 +33,17 @@ def create_ssh_dir():
 def insert_include_directive():
     directive = f"Include {TOWER_SSH_CONFIG_PATH}"
     if os.path.exists(SSH_CONFIG_PATH):
-        with open(SSH_CONFIG_PATH, 'r', encoding="UTF-8") as f:
-            current_config = f.read()
+        with open(SSH_CONFIG_PATH, 'r', encoding="UTF-8") as file_pointer:
+            current_config = file_pointer.read()
         if directive not in current_config:
-            with open(SSH_CONFIG_PATH, 'r+', encoding="UTF-8") as f:
-                content = f.read()
-                f.seek(0, 0)
-                f.write(directive + '\n\n' + content)
+            with open(SSH_CONFIG_PATH, 'r+', encoding="UTF-8") as file_pointer:
+                content = file_pointer.read()
+                file_pointer.seek(0, 0)
+                file_pointer.write(directive + '\n\n' + content)
     else:
         create_ssh_dir()
-        with open(SSH_CONFIG_PATH, 'w', encoding="UTF-8") as f:
-            f.write(directive + '\n\n')
+        with open(SSH_CONFIG_PATH, 'w', encoding="UTF-8") as file_pointer:
+            file_pointer.write(directive + '\n\n')
         os.chmod(SSH_CONFIG_PATH, 0o600)
 
 def ssh_config():
@@ -55,40 +55,40 @@ def get(host):
         return config.host(host)
     return None
 
-def update_known_hosts(host, ip):
+def update_known_hosts(host, host_ip):
     if os.path.exists(KNOWN_HOSTS_PATH):
-        sed('-i', f'/{ip}/d', KNOWN_HOSTS_PATH)
+        sed('-i', f'/{host_ip}/d', KNOWN_HOSTS_PATH)
     else:
         create_ssh_dir()
         touch(KNOWN_HOSTS_PATH)
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
         host_key_path = os.path.join(TOWER_DIR, 'hosts', host, f"ssh_host_{key_type}_key.pub")
-        Command('sh')('-c', f'echo "{ip} $(cat {host_key_path})" >> {KNOWN_HOSTS_PATH}')
+        Command('sh')('-c', f'echo "{host_ip} $(cat {host_key_path})" >> {KNOWN_HOSTS_PATH}')
 
 @clitask(f"Updating Tower config file {TOWER_SSH_CONFIG_PATH}...")
-def update_config(host, ip, private_key_path):
+def update_config(host, host_ip, private_key_path):
     insert_include_directive()
-    update_known_hosts(host, ip)
+    update_known_hosts(host, host_ip)
     # get existing hosts
     config = ssh_config()
     existing_hosts = config.hosts()
     # if name already used, update the IP
     if host in existing_hosts:
-        config.set(host, Hostname=ip)
+        config.set(host, Hostname=host_ip)
         config.set(host, IdentityFile=private_key_path)
         config.write(TOWER_SSH_CONFIG_PATH)
         return
     # if IP already used, update the name
     for existing_host in existing_hosts:
         existing_host_config = config.host(existing_host)
-        if existing_host_config['hostname'] == ip:
+        if existing_host_config['hostname'] == host_ip:
             config.rename(existing_host, host)
             config.set(host, IdentityFile=private_key_path)
             config.write(TOWER_SSH_CONFIG_PATH)
             return
     # if not exists, create a new host
     config.add(host,
-        Hostname=ip,
+        Hostname=host_ip,
         User=DEFAULT_SSH_USER,
         IdentityFile=private_key_path,
         LogLevel="FATAL"
@@ -191,9 +191,9 @@ def display_status(host = None):
 def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     network = ".".join(tower_network.split(".")[0:3]) + "."
     for host_name in hosts():
-        ip = get(host_name)['hostname']
-        if ip.startswith(network):
-            num = int(ip.split(".").pop())
+        host_ip = get(host_name)['hostname']
+        if host_ip.startswith(network):
+            num = int(host_ip.split(".").pop())
             if num == first:
                 first += 1
                 return get_next_host_ip(tower_network, first=first + 1)
@@ -210,8 +210,8 @@ def wait_for_host_sshd(host, timeout):
 
 def get_host_config(host):
     conf_path = os.path.join(TOWER_DIR, 'hosts', host, "tower.env")
-    with open(conf_path, 'r', encoding="UTF-8") as f:
-        config_str = f.read()
+    with open(conf_path, 'r', encoding="UTF-8") as file_pointer:
+        config_str = file_pointer.read()
     host_config = {}
     for line in config_str.strip().split("\n"):
         key = line[0:line.index('=')]
@@ -276,8 +276,8 @@ def get_installed_packages(host):
 
 def save_installed_packages(host, installed_packages):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    with open(apk_world, 'w', encoding="UTF-8") as fp:
-        fp.write("\n".join(installed_packages))
+    with open(apk_world, 'w', encoding="UTF-8") as file_pointer:
+        file_pointer.write("\n".join(installed_packages))
 
 @clitask("Syncing offline host time with `router`...")
 def sync_time(offline_host = None):

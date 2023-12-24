@@ -5,7 +5,7 @@ pkgdesc="Tower CLI"
 url="https://toweros.org/"
 arch="x86_64"
 license="Apache-2.0"
-depends="python3 py3-pip py3-hatchling py3-wheel py3-rich py3-requests py3-passlib"
+depends="python3 py3-pip py3-hatchling py3-wheel py3-rich py3-requests py3-passlib py3-gobject3 gobject-introspection-dev"
 makedepends="py3-gpep517 python3-dev py3-hatchling py3-wheel"
 # no apk for these
 pipdepends="sh==2.0.6 shtab==1.6.5 sshconf==0.2.5 yaspin==3.0.1 \

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if [ $(ps -a | grep 'physlock' | grep -vc 'grep') -gt 0 ]; then
+if [ $(ps -ax | grep 'physlock' | grep -vc 'grep') -gt 0 ]; then
     echo "physlock already running"
     exit 0
 fi
-if [ $(ps -a | grep 'labwc' | grep -vc 'grep') -gt 0 ]; then
+if [ $(ps -ax | grep 'labwc' | grep -vc 'grep') -gt 0 ]; then
     echo "Labwc already running"
     exit 0
 fi

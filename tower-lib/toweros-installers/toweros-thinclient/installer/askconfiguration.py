@@ -14,8 +14,8 @@ from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
-with open(LOCALE_FILE, "r", encoding="UTF-8") as fp:
-    LOCALE = json.load(fp)
+with open(LOCALE_FILE, "r", encoding="UTF-8") as file_pointer:
+    LOCALE = json.load(file_pointer)
 
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]

@@ -73,49 +73,49 @@ def md_div_courrier(text):
 
 def gen_md_help(parser):
     cli_help = get_cli_help(parser)
-    md = []
+    md_doc = []
     open_div = '<div style="margin:0 50px">'
     close_div = '</div>'
-    md.append('<!--Do not edit manually. Generated with `[tower-cli]$ hatch run tower mdhelp > ../docs/src/manual.md`.-->')
+    md_doc.append('<!--Do not edit manually. Generated with `[tower-cli]$ hatch run tower mdhelp > ../docs/src/manual.md`.-->')
     # global information
-    md.append('## NAME')
-    md.append(md_div(cli_help['name']))
-    md.append('## SYNOPSIS')
-    md.append(md_div_courrier(cli_help['synopsis']))
-    md.append('## DESCRIPTION')
-    md.append(md_div(cli_help['description']))
+    md_doc.append('## NAME')
+    md_doc.append(md_div(cli_help['name']))
+    md_doc.append('## SYNOPSIS')
+    md_doc.append(md_div_courrier(cli_help['synopsis']))
+    md_doc.append('## DESCRIPTION')
+    md_doc.append(md_div(cli_help['description']))
     # commands list
-    md.append('## COMMANDS')
-    md.append(open_div)
+    md_doc.append('## COMMANDS')
+    md_doc.append(open_div)
     for cmd in cli_help['commands']:
-        md.append(f'<b>tower</b> <u><a href="#tower-{cmd["name"]}">{cmd["name"]}</a></u><br />{md_div(cmd["help"])}<br />')
-    md.append(close_div)
+        md_doc.append(f'<b>tower</b> <u><a href="#tower-{cmd["name"]}">{cmd["name"]}</a></u><br />{md_div(cmd["help"])}<br />')
+    md_doc.append(close_div)
     # commands details
     for cmd in cli_help['commands']:
         # command name
-        md.append(f"### `tower {cmd['name']}`")
+        md_doc.append(f"### `tower {cmd['name']}`")
         # usage
-        md.append(md_div_courrier(f"usage: {cmd['usage']}"))
+        md_doc.append(md_div_courrier(f"usage: {cmd['usage']}"))
         # required arguments
         if len(cmd['positional_arguments']) > 0:
-            md.append(f'{open_div}<br />')
+            md_doc.append(f'{open_div}<br />')
             for pos_arg in cmd['positional_arguments']:
-                md.append(f'<b>{pos_arg["name"]}</b><br />{md_div(pos_arg["help"])}<br />')
-            md.append(close_div)
+                md_doc.append(f'<b>{pos_arg["name"]}</b><br />{md_div(pos_arg["help"])}<br />')
+            md_doc.append(close_div)
         # optional flags
         if len(cmd['optional_arguments']) > 0:
-            md.append("Options:")
-            md.append(open_div)
+            md_doc.append("Options:")
+            md_doc.append(open_div)
             for opt in cmd['optional_arguments']:
-                md.append(f"<b>{opt['name']}</b><br />{md_div(opt['help'])}<br />")
-            md.append(close_div)
+                md_doc.append(f"<b>{opt['name']}</b><br />{md_div(opt['help'])}<br />")
+            md_doc.append(close_div)
     # global options
-    md.append('## OPTIONS')
-    md.append(open_div)
+    md_doc.append('## OPTIONS')
+    md_doc.append(open_div)
     for opt in cli_help['options']:
-        md.append(f"<b>{opt['name']}</b><br />{md_div(opt['help'])}<br />")
-    md.append(close_div)
-    return "\n".join(md)
+        md_doc.append(f"<b>{opt['name']}</b><br />{md_div(opt['help'])}<br />")
+    md_doc.append(close_div)
+    return "\n".join(md_doc)
 
 def insert_autocompletion_command(parser):
     shtab.add_argument_to(parser, '--print-completion', help=argparse.SUPPRESS)

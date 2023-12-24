@@ -21,9 +21,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libgirepository1.0-dev
         python -m pip install --upgrade pip
         pip install license_scanner
         pip install -e tower-lib
+        pip install evdev
     - name: Analysing dependencies with licence_scanner
       run: |
         python tower-lib/towerlib/utils/checklicences.py

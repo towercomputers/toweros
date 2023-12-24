@@ -30,3 +30,9 @@ class BuildException(TowerException):
 
 class InvalidColor(TowerException):
     pass
+
+class ServerTimeoutException(TowerException):
+    pass
+
+class CommandNotFound(TowerException):
+    pass

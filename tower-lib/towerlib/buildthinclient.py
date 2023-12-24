@@ -22,7 +22,7 @@ WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
 INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-thinclient')
 REPO_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 
-def wd(path):
+def wdir(path):
     return join_path(WORKING_DIR, path)
 
 def prepare_working_dir():
@@ -58,12 +58,12 @@ def prepare_pip_packages():
     abuild('-r', _cwd=REPO_PATH)
 
 def prepare_installer():
-    makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
-    copytree(join_path(INSTALLER_DIR, 'installer'), wd('overlay/var/towercomputers/installer'))
+    makedirs(wdir('overlay/var/towercomputers/'), exist_ok=True)
+    copytree(join_path(INSTALLER_DIR, 'installer'), wdir('overlay/var/towercomputers/installer'))
 
 def prepare_docs():
-    makedirs(wd('overlay/var/towercomputers/'), exist_ok=True)
-    copytree(join_path(REPO_PATH, 'docs', 'src'), wd('overlay/var/towercomputers/docs'))
+    makedirs(wdir('overlay/var/towercomputers/'), exist_ok=True)
+    copytree(join_path(REPO_PATH, 'docs', 'src'), wdir('overlay/var/towercomputers/docs'))
     argparse_manpage(
         '--pyfile', join_path(REPO_PATH, 'tower-cli', 'towercli', 'tower.py'),
         '--function', 'towercli_parser',
@@ -72,16 +72,16 @@ def prepare_docs():
         '--url', 'https://toweros.org',
         '--prog', 'tower',
         '--manual-title', 'Tower CLI Manual',
-        '--output', wd('overlay/var/towercomputers/docs/tower.1'),
+        '--output', wdir('overlay/var/towercomputers/docs/tower.1'),
     )
 
 def prepare_build():
-    makedirs(wd('overlay/var/towercomputers/builds'))
+    makedirs(wdir('overlay/var/towercomputers/builds'))
     host_image_path = prepare_host_image()
-    copyfile(host_image_path, wd('overlay/var/towercomputers/builds'))
+    copyfile(host_image_path, wdir('overlay/var/towercomputers/builds'))
 
 def prepare_etc_folder():
-    copytree(join_path(INSTALLER_DIR, 'etc'), wd('overlay/etc'))
+    copytree(join_path(INSTALLER_DIR, 'etc'), wdir('overlay/etc'))
 
 def prepare_overlay():
     prepare_pip_packages()
@@ -93,13 +93,13 @@ def prepare_overlay():
 @clitask("Building Thin Client image, be patient...")
 def prepare_image():
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
-    copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wd('aports/scripts'))
-    copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wd('aports/scripts'))
-    copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wd('aports/scripts'))
+    copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
+    copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))
+    copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wdir('aports/scripts'))
     with doas:
         apk('update')
     Command('sh')(
-        wd('aports/scripts/mkimage.sh'),
+        wdir('aports/scripts/mkimage.sh'),
         '--outdir', WORKING_DIR,
         '--repository', APK_LOCAL_REPOSITORY,
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/main',
@@ -109,7 +109,7 @@ def prepare_image():
          _err_to_out=True, _out=logger.debug,
          _cwd=WORKING_DIR
     )
-    image_src_path = wd(f"alpine-tower-{__version__}-x86_64.iso")
+    image_src_path = wdir(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
         TOWER_BUILDS_DIR,
         datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')

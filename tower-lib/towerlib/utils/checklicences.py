@@ -24,8 +24,8 @@ def scan_licenses():
 
 def get_allowed():
     pyproject_path = os.path.join(os.getcwd(), 'tower-lib', "pyproject.toml")
-    with open(pyproject_path, "rb") as f:
-        data = tomllib.load(f)
+    with open(pyproject_path, "rb") as file_pointer:
+        data = tomllib.load(file_pointer)
     allowed_licenses = data['tool']['license_scanner']['allowed-licences']
     allowed_packages = data['tool']['license_scanner']['allowed-packages']
     return allowed_licenses, allowed_packages

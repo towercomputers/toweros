@@ -63,12 +63,8 @@ foot
 physlock
 swaybg
 swayidle
-pipewire
-wireplumber
-pipewire-pulse
-pipewire-jack
-pipewire-alsa
-pipewire-tools
+pulseaudio
+pulseaudio-utils
 setxkbmap
 syslog-ng
 cryptsetup
@@ -108,3 +104,8 @@ bash-completion-doc
 shadow
 tower-cli
 zzz
+procps
+xrandr
+brightnessctl
+gtk-vnc
+py3-evdev

@@ -194,7 +194,7 @@ if [ -f /home/$USERNAME/.local/tower/osconfig ]; then
     source /home/$USERNAME/.local/tower/osconfig
 fi
 if [ "\$(tty)" == "/dev/tty1" ]; then
-    dbus-launch /usr/libexec/pipewire-launcher >/dev/null 2>&1 &
+    actkbd.py >/dev/null 2>&1 &
 fi
 STARTW_ON_LOGIN=\${STARTW_ON_LOGIN:-"false"}
 if [ -z "\$DISPLAY" ] && [ "\$(tty)" == "/dev/tty1" ] && [ "\$STARTW_ON_LOGIN" == "true" ]; then
@@ -347,10 +347,11 @@ clone_live_system_to_disk() {
     cp /var/towercomputers/installer/sfwbar/sfwbar.config /mnt/usr/local/share/sfwbar/
     cp /var/towercomputers/installer/sfwbar/*.py /mnt/var/towercomputers/
     ln -s /home/$USERNAME/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
-    # install custom icons
+    # install custom icons and backgrounds
     mkdir -p /mnt/usr/share/icons/hicolor/48x48/apps/
     cp -r /mnt/usr/share/icons/oxygen/base/48x48/* /mnt/usr/share/icons/hicolor/48x48/
     cp /var/towercomputers/installer/icons/* /mnt/usr/share/icons/hicolor/48x48/apps/
+    cp -r /var/towercomputers/installer/backgrounds /mnt/var/towercomputers/
     # update icon cache
     gtk-update-icon-cache -f -t /mnt/usr/share/icons/hicolor
     # clean chroot
@@ -365,8 +366,11 @@ http://dl-cdn.alpinelinux.org/alpine/v3.19/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
-    # copy supercronic init script
-    cp /etc/init.d/supercronic /mnt/etc/init.d/supercronic
+    # copy init scripts
+    cp /etc/init.d/iptables /mnt/etc/init.d/
+    cp /etc/init.d/supercronic /mnt/etc/init.d/
+    chmod a+x /mnt/etc/init.d/iptables
+    chmod a+x /mnt/etc/init.d/supercronic
     # set crontab
     cat <<EOF > /mnt/etc/crontabs/supercronic
 */10 * * * * * * runuser -u $USERNAME -- python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
@@ -378,6 +382,10 @@ EOF
 
     # migrate from sudo to doas
     ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
+
+    # install actkbd.py
+    cp /var/towercomputers/installer/actkbd.py /mnt/usr/bin/
+    chmod a+x /mnt/usr/bin/actkbd.py
 }
 
 install_bootloader() {

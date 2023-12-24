@@ -171,6 +171,8 @@ EOF
 		fi
 	fi
 
+	chmod a+x /etc/init.d/*
+	
 	# setup services
 	rc-update add iptables default
 	rc-update add dbus default
@@ -264,6 +266,10 @@ http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 	fi
+
+	# copy init scripts
+    cp /etc/init.d/iptables /mnt/etc/init.d/
+    chmod a+x /mnt/etc/init.d/iptables
 
 	# migrate from sudo to doas
 	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true

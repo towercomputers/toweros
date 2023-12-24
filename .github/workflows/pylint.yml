@@ -21,10 +21,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libgirepository1.0-dev
         python -m pip install --upgrade pip
         pip install pylint
         pip install pylint-sarif-unofficial
         pip install -e tower-lib
+        pip install evdev
     - name: Analysing the code with pylint
       run: |
         pylint2sarif $(git ls-files '*.py') || true
