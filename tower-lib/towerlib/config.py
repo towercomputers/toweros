@@ -37,3 +37,42 @@ HOST_ALPINE_BRANCH = "v3.19"
 THINCLIENT_ALPINE_BRANCH = "v3.19"
 ALPINE_RPI_URL = "https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/alpine-rpi-3.19.0-aarch64.tar.gz"
 ALPINE_RPI_CHECKSUM = "5621e7e597c3242605cd403a0a9109ec562892a6c8a185852b6b02ff88f5503c"
+
+VNC_VIEWER_CSS = """
+headerbar {
+    padding: 0px;
+    margin: 0px;
+    min-height: 0px;
+    padding-left: 2px; /* same as childrens vertical margins for nicer proportions */
+    padding-right: 2px;
+    background-image: url("BACKGROUND_FILENAME");
+    background-size: cover;
+}
+
+headerbar entry,
+headerbar spinbutton,
+headerbar button,
+headerbar separator {
+    margin-top: 0px; /* same as headerbar side padding for nicer proportions */
+    margin-bottom: 0px;
+    padding: 1px;
+}
+
+/* shrink ssd titlebars */
+.default-decoration {
+    min-height: 0; /* let the entry and button drive the titlebar size */
+    padding: 0px;
+    background-color: #FF0000;
+}
+
+.default-decoration .titlebutton {
+    min-height: 0px; /* tweak these two props to reduce button size */
+    min-width: 0px;
+}
+
+window.ssd headerbar.titlebar {
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 0;
+}
+"""
