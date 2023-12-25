@@ -1,6 +1,7 @@
 alpine-base
 coreutils
 python3
+python3-dev
 py3-pip
 py3-rich
 doas
