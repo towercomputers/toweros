@@ -40,8 +40,8 @@ def wait_for_output(_out, expected_output):
             raise ServerTimeoutException(f"x11vnc not ready after {X11VNC_TIMEOUT}s")
     logger.debug(process_output)
 
-
-def start_vnc_server(host, port, run_cmd, resolution):
+def start_vnc_server(host, port, run_cmd):
+    resolution = get_thinclient_resolution()
     x11vnc_output = StringIO()
     vnc_params = ' '.join([
         '-create',
@@ -79,7 +79,14 @@ def on_vnc_close(vnc):
     vnc.send_keys([Gdk.KEY_Control_L, Gdk.KEY_q])
     return True
 
-def initialize_vnc_display(parent_window, port):
+def on_vnc_initialized(x11vnc_output, callback):
+    logger.info("Connection initialized")
+    display = x11vnc_output.getvalue().split(" Using X display")[1].split("\n")[0].strip()
+    logger.debug("DISPLAY %s", display)
+    callback(display)
+
+def initialize_vnc_display(host, port, run_cmd, parent_window):
+    x11vnc_output = start_vnc_server(host, port, run_cmd)
     vnc = GtkVnc.Display()
     vnc.realize()
     vnc.set_pointer_grab(True)
@@ -87,15 +94,64 @@ def initialize_vnc_display(parent_window, port):
     # Example to change grab key combination to Ctrl+Alt+g
     grab_keys = GtkVnc.GrabSequence.new([ Gdk.KEY_Control_L, Gdk.KEY_Alt_L, Gdk.KEY_g ])
     vnc.set_grab_keys(grab_keys)
+    # connect
     vnc.open_host("localhost", port)
+    # initialize events listeners
     vnc.connect("vnc-pointer-grab", lambda _: logger.debug("Grabbed pointer"))
     vnc.connect("vnc-pointer-ungrab", lambda _: logger.debug("Ungrabbed pointer"))
     vnc.connect("vnc-connected", lambda _: logger.info("Connected to server"))
-    vnc.connect("vnc-initialized", parent_window._vnc_initialized)
+    vnc.connect("vnc-initialized", lambda _: on_vnc_initialized(x11vnc_output, parent_window._vnc_initialized))
     vnc.connect("vnc-disconnected", on_vnc_disconnected)
     parent_window.connect('delete-event', lambda _, __: on_vnc_close(vnc))
-    return vnc
+    # add vnc to window
+    vnc_layout = Gtk.Layout()
+    parent_window.add(vnc_layout)
+    vnc_layout.add(vnc)
 
+
+def gen_window_name(run_cmd):
+    return run_cmd.split(' ')[0].split('/')[-1]
+
+
+def xdo_get_window_id_cmd(display, run_cmd):
+    window_name = gen_window_name(run_cmd)
+    return f'DISPLAY={display} xdotool search --onlyvisible --name "{window_name}"'
+
+def xdo_get_window_id(host, display, run_cmd):
+    try:
+        cmd = xdo_get_window_id_cmd(display, run_cmd)
+        return ssh(host, cmd).strip()
+    except ErrorReturnCode:
+        return None
+
+def xdo_get_window_pid(host, display, run_cmd):
+    cmd = f'DISPLAY={display} xdotool getwindowpid $({xdo_get_window_id_cmd(display, run_cmd)})'
+    try:
+        return ssh(host, cmd).strip()
+    except ErrorReturnCode:
+        return None
+
+def xdo_get_window_size(host, display, run_cmd):
+    cmd = f'DISPLAY={display} xdotool getwindowgeometry $({xdo_get_window_id_cmd(display, run_cmd)})'
+    try:
+        geom = ssh(host, cmd).strip()
+        return [int(value) for value in geom.split(' ')[-1].split('x')]
+    except ErrorReturnCode:
+        return None, None
+
+def xdo_set_window_size(host, display, run_cmd, width, height):
+    cmd = f'DISPLAY={display} xdotool windowsize --sync $({xdo_get_window_id_cmd(display, run_cmd)}) {width} {height}'
+    try:
+        ssh(host, cmd)
+    except ErrorReturnCode:
+        pass
+
+def xdo_move_window_to_top_left(host, display, run_cmd):
+    cmd = f'DISPLAY={display} xdotool windowmove $({xdo_get_window_id_cmd(display, run_cmd)}) 0 0'
+    try:
+        ssh(host, cmd)
+    except ErrorReturnCode:
+        pass
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class VNCViewer(ColorableWindow):
@@ -107,131 +163,117 @@ class VNCViewer(ColorableWindow):
         self.run_cmd = run_cmd
         self.session_id = session_id
         self.uncolored = uncolored
-        self.init_size_timer = None
-        self.window_id = None
-        self.window_pid = None
         self.display = None
-        self.set_resizable(False)
-        self.thinclient_resolution = get_thinclient_resolution()
+        self.thinclient_resolution = None
         # close event
         self.connect("destroy", Gtk.main_quit)
         # headerbar
         if not self.uncolored:
             host_color_name = get_host_color_name(self.host)
             self.set_headerbar_color(host_color_name)
-        self.set_title(f"[{self.host}] {self._window_name()}")
-        self.layout = Gtk.Layout()
-        self.add(self.layout)
-        self.x11vnc_output = start_vnc_server(host, port, run_cmd, self.thinclient_resolution)
+        self.set_title(f"[{self.host}] {gen_window_name(run_cmd)}")
         # initialize vnc display
-        self.vnc = initialize_vnc_display(self, port)
-        self.layout.add(self.vnc)
+        initialize_vnc_display(host, port, run_cmd, self)
 
-    def _window_name(self):
-        name = self.run_cmd.split(' ')[0]
-        return name.split('/')[-1]
+    def _wait_for_window_id(self, callback):
+        logger.debug("Waiting for window id...")
+        window_id = xdo_get_window_id(self.host, self.display, self.run_cmd)
+        if window_id is None:
+            GLib.timeout_add(interval=100, function=lambda: self._wait_for_window_id(callback))
+        else:
+            callback()
 
-    def _vnc_initialized(self, _):
-        logger.info("Connection initialized")
-        logger.debug(self.x11vnc_output.getvalue())
-        self._update_session_display()
+    def _vnc_initialized(self, display):
+        self.display = display
+        # wait for window application to be ready
+        self._wait_for_window_id(self._window_host_ready)
+
+    def _window_host_ready(self):
+        # save session tmp files
+        save_session_tmp_file(self.host, self.session_id, self.display, self.run_cmd)
+        # set initial size
         self._init_size()
+        # initialize resize listener
+        self.connect_resize_event(self._on_resize)
         self.show_all()
 
     def _init_size(self):
-        self._refresh_window_id()
-        if self.window_id is None:
-            self.init_size_timer = GLib.timeout_add(interval=1000, function=self._init_size)
-            return
-        self.init_size_timer = None
-        width, height = self._get_app_size()
-        ssh(self.host, f'DISPLAY={self.display} xdotool windowmove {self.window_id} 0 0')
-        self.resize(width, height)
-        self.set_resizable(True)
-        self._update_window_pid()
-        # "resize" event
-        self.connect_resize_event(self._on_resize)
-
-    def _search_window_id(self):
-        try:
-            cmd = f'DISPLAY={self.display} xdotool search --onlyvisible --name "{self._window_name()}"'
-            return ssh(self.host, cmd).strip()
-        except ErrorReturnCode:
-            return None
-
-    def _refresh_window_id(self):
-        new_window_id = self._search_window_id()
-        if new_window_id != self.window_id:
-            self.window_id = new_window_id
-            return True
-        return False
-
-    def _set_app_size(self, width, height):
-        try:
-            ssh(self.host, f'DISPLAY={self.display} xdotool windowsize --sync {self.window_id} {width} {height}')
-        except ErrorReturnCode:
-            if self._refresh_window_id():
-                self._set_app_size(width, height)
-
-    def _get_app_size(self):
-        try:
-            width, height = ssh(self.host, f'DISPLAY={self.display} xdotool getwindowgeometry {self.window_id}').split(' ')[-1].split('x')
-            return int(width), int(height)
-        except ErrorReturnCode:
-            if self._refresh_window_id():
-                return self._get_app_size()
-            return 200, 200
-
-    def _update_window_pid(self):
-        try:
-            self.window_pid = ssh(self.host, f'DISPLAY={self.display} xdotool getwindowpid {self.window_id}').strip()
-            with open(f'/{TMP_DIR}/{self.session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
-                file_pointer.write(self.window_pid)
-        except ErrorReturnCode:
-            if self._refresh_window_id():
-                self._update_window_pid()
-
-    def _update_session_display(self):
-        self.display = self.x11vnc_output.getvalue().split(" Using X display")[1].split("\n")[0].strip()
-        logger.debug("DISPLAY %s", self.display)
-        with open(f'/{TMP_DIR}/{self.session_id}.display', 'w', encoding="UTF-8") as file_pointer:
-            file_pointer.write(self.display)
-
-    def _on_resize(self, width, height):
-        if self.uncolored or width == self.thinclient_resolution[0]:
-            self._set_app_size(width, height)
+        logger.debug("Initializing size")
+        # move to top left corner
+        xdo_move_window_to_top_left(self.host, self.display, self.run_cmd)
+        # if possible resize vncviewer to the original application size
+        width, height = xdo_get_window_size(self.host, self.display, self.run_cmd)
+        if width and height:
+            self.resize(width, height)
         else:
-            self._set_app_size(width - 50, height - 90)
+            logger.warning("Could not get window size.")
+        self.set_resizable(True)
+
+    def _on_resize(self, _width, _height):
+        width, height = _width, _height
+        if not self.thinclient_resolution:
+            self.thinclient_resolution = get_thinclient_resolution()
+        if not self.uncolored and width < self.thinclient_resolution[0]:
+            width, height = _width - 50, _height - 90
+        # resize host application to the size of the vncviewer
+        xdo_set_window_size(self.host, self.display, self.run_cmd, width, height)
 
 
-def cleanup(host, port, session_id):
-    # killing application
-    if os.path.exists(f'/{TMP_DIR}/{session_id}.pid'):
-        with open(f'/{TMP_DIR}/{session_id}.pid', 'r', encoding="UTF-8") as file_pointer:
-            window_pid = file_pointer.read().strip()
-            ssh(
-                host,
-                f'kill -9 {window_pid} || true',
-                _bg=True, _bg_exc=False
-            )
-            os.remove(f'/{TMP_DIR}/{session_id}.pid')
+def save_session_tmp_file(host, session_id, display, run_cmd):
+    # save display
+    with open(f'/{TMP_DIR}/{session_id}.display', 'w', encoding="UTF-8") as file_pointer:
+        file_pointer.write(display)
+    # save host application pid
+    window_pid = xdo_get_window_pid(host, display, run_cmd)
+    if window_pid:
+        with open(f'/{TMP_DIR}/{session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
+            file_pointer.write(window_pid)
+    else:
+        logger.warning("Could not get window pid.")
+
+
+def gen_grep_kill_cmd(grep_arg):
+    return f"ps -ef | grep {grep_arg} | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
+
+def kill_host_application(host, session_id):
+    if not os.path.exists(f'/{TMP_DIR}/{session_id}.pid'):
+        return
+    with open(f'/{TMP_DIR}/{session_id}.pid', 'r', encoding="UTF-8") as file_pointer:
+        window_pid = file_pointer.read().strip()
+        ssh(
+            host,
+            f'kill -9 {window_pid} || true',
+            _bg=True, _bg_exc=False
+        )
+        os.remove(f'/{TMP_DIR}/{session_id}.pid')
+
+def kill_x11vnc(host, port, session_id):
     # killing xvfb and x11vnc
-    if os.path.exists(f'/{TMP_DIR}/{session_id}.display'):
-        with open(f'/{TMP_DIR}/{session_id}.display', 'r', encoding="UTF-8") as file_pointer:
-            display = file_pointer.read().strip()
-            kill_cmd = f"ps -ef | grep -e 'Xvfb {display}' -e '-rfbport {port}' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
-            ssh(
-                host,
-                kill_cmd,
-                _bg=True, _bg_exc=False
-            )
-            os.remove(f'/{TMP_DIR}/{session_id}.display')
-    # killing ssh tunnel
-    ssh_killcmd = f"ps -ef | grep '{port}:localhost:{port} x11vnc' | grep -v grep | awk '{{print $2}}' | xargs kill 2>/dev/null || true"
+    if not os.path.exists(f'/{TMP_DIR}/{session_id}.display'):
+        return
+    with open(f'/{TMP_DIR}/{session_id}.display', 'r', encoding="UTF-8") as file_pointer:
+        display = file_pointer.read().strip()
+        kill_cmd = gen_grep_kill_cmd(f"-e 'Xvfb {display}' -e '-rfbport {port}'")
+        ssh(
+            host,
+            kill_cmd,
+            _bg=True, _bg_exc=False
+        )
+        os.remove(f'/{TMP_DIR}/{session_id}.display')
+
+def kill_ssh_tunnel(port):
+    ssh_killcmd = gen_grep_kill_cmd(f"-e '-L {port}:localhost:{port}'")
     Command('sh')('-c',
         ssh_killcmd,
         _bg=True, _bg_exc=False
     )
+
+# all this processes should already be killed when exiting the host application
+# but let's ensure to not have zombie processes
+def cleanup(host, port, session_id):
+    kill_host_application(host, session_id)
+    kill_x11vnc(host, port, session_id)
+    kill_ssh_tunnel(port)
 
 
 def find_free_port():
