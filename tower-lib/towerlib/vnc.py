@@ -79,13 +79,32 @@ def on_vnc_close(vnc):
     vnc.send_keys([Gdk.KEY_Control_L, Gdk.KEY_q])
     return True
 
-def on_vnc_initialized(x11vnc_output, callback):
+def wait_for_window_id(host, display, run_cmd, session_id, callback):
+    logger.debug("Waiting for window id...")
+    window_id = xdo_get_window_id(host, display, run_cmd)
+    if window_id is None:
+        GLib.timeout_add(interval=100, function=lambda: wait_for_window_id(host, display, run_cmd, session_id, callback))
+    else:
+        on_vnc_window_ready(host, display, run_cmd, session_id, callback)
+
+def on_vnc_window_ready(host, display, run_cmd, session_id, callback):
+     # save session tmp files
+    save_session_tmp_file(host, session_id, display, run_cmd)
+    # move to top left corner
+    xdo_move_window_to_top_left(host, display, run_cmd)
+    # if possible  get the original application size
+    width, height = xdo_get_window_size(host, display, run_cmd)
+    # call vnc viewer window callback
+    callback(display, width, height)
+
+def on_vnc_initialized(host, run_cmd, session_id, x11vnc_output, callback):
     logger.info("Connection initialized")
     display = x11vnc_output.getvalue().split(" Using X display")[1].split("\n")[0].strip()
     logger.debug("DISPLAY %s", display)
-    callback(display)
+    # wait for window application to be ready
+    wait_for_window_id(host, display, run_cmd, session_id, callback)
 
-def initialize_vnc_display(host, port, run_cmd, parent_window):
+def initialize_vnc_display(host, port, run_cmd, session_id, parent_window):
     x11vnc_output = start_vnc_server(host, port, run_cmd)
     vnc = GtkVnc.Display()
     vnc.realize()
@@ -100,7 +119,7 @@ def initialize_vnc_display(host, port, run_cmd, parent_window):
     vnc.connect("vnc-pointer-grab", lambda _: logger.debug("Grabbed pointer"))
     vnc.connect("vnc-pointer-ungrab", lambda _: logger.debug("Ungrabbed pointer"))
     vnc.connect("vnc-connected", lambda _: logger.info("Connected to server"))
-    vnc.connect("vnc-initialized", lambda _: on_vnc_initialized(x11vnc_output, parent_window._vnc_initialized))
+    vnc.connect("vnc-initialized", lambda _: on_vnc_initialized(host, run_cmd, session_id, x11vnc_output, parent_window.vnc_display_initialized))
     vnc.connect("vnc-disconnected", on_vnc_disconnected)
     parent_window.connect('delete-event', lambda _, __: on_vnc_close(vnc))
     # add vnc to window
@@ -109,9 +128,21 @@ def initialize_vnc_display(host, port, run_cmd, parent_window):
     vnc_layout.add(vnc)
 
 
+def save_session_tmp_file(host, session_id, display, run_cmd):
+    # save display
+    with open(f'/{TMP_DIR}/{session_id}.display', 'w', encoding="UTF-8") as file_pointer:
+        file_pointer.write(display)
+    # save host application pid
+    window_pid = xdo_get_window_pid(host, display, run_cmd)
+    if window_pid:
+        with open(f'/{TMP_DIR}/{session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
+            file_pointer.write(window_pid)
+    else:
+        logger.warning("Could not get window pid.")
+
+
 def gen_window_name(run_cmd):
     return run_cmd.split(' ')[0].split('/')[-1]
-
 
 def xdo_get_window_id_cmd(display, run_cmd):
     window_name = gen_window_name(run_cmd)
@@ -167,47 +198,27 @@ class VNCViewer(ColorableWindow):
         self.thinclient_resolution = None
         # close event
         self.connect("destroy", Gtk.main_quit)
+        # set resizable
+        self.set_resizable(True)
         # headerbar
         if not self.uncolored:
             host_color_name = get_host_color_name(self.host)
             self.set_headerbar_color(host_color_name)
         self.set_title(f"[{self.host}] {gen_window_name(run_cmd)}")
         # initialize vnc display
-        initialize_vnc_display(host, port, run_cmd, self)
+        initialize_vnc_display(host, port, run_cmd, session_id, self)
 
-    def _wait_for_window_id(self, callback):
-        logger.debug("Waiting for window id...")
-        window_id = xdo_get_window_id(self.host, self.display, self.run_cmd)
-        if window_id is None:
-            GLib.timeout_add(interval=100, function=lambda: self._wait_for_window_id(callback))
-        else:
-            callback()
-
-    def _vnc_initialized(self, display):
+    def vnc_display_initialized(self, display, width, height):
         self.display = display
-        # wait for window application to be ready
-        self._wait_for_window_id(self._window_host_ready)
-
-    def _window_host_ready(self):
-        # save session tmp files
-        save_session_tmp_file(self.host, self.session_id, self.display, self.run_cmd)
         # set initial size
-        self._init_size()
-        # initialize resize listener
-        self.connect_resize_event(self._on_resize)
-        self.show_all()
-
-    def _init_size(self):
         logger.debug("Initializing size")
-        # move to top left corner
-        xdo_move_window_to_top_left(self.host, self.display, self.run_cmd)
-        # if possible resize vncviewer to the original application size
-        width, height = xdo_get_window_size(self.host, self.display, self.run_cmd)
         if width and height:
             self.resize(width, height)
         else:
             logger.warning("Could not get window size.")
-        self.set_resizable(True)
+        # initialize resize listener
+        self.connect_resize_event(self._on_resize)
+        self.show_all()
 
     def _on_resize(self, _width, _height):
         width, height = _width, _height
@@ -217,19 +228,9 @@ class VNCViewer(ColorableWindow):
             width, height = _width - 50, _height - 90
         # resize host application to the size of the vncviewer
         xdo_set_window_size(self.host, self.display, self.run_cmd, width, height)
-
-
-def save_session_tmp_file(host, session_id, display, run_cmd):
-    # save display
-    with open(f'/{TMP_DIR}/{session_id}.display', 'w', encoding="UTF-8") as file_pointer:
-        file_pointer.write(display)
-    # save host application pid
-    window_pid = xdo_get_window_pid(host, display, run_cmd)
-    if window_pid:
-        with open(f'/{TMP_DIR}/{session_id}.pid', 'w', encoding="UTF-8") as file_pointer:
-            file_pointer.write(window_pid)
-    else:
-        logger.warning("Could not get window pid.")
+    
+    def run(self):
+        Gtk.main()
 
 
 def gen_grep_kill_cmd(grep_arg):
@@ -295,7 +296,7 @@ def run(host, run_cmd, uncolored=False):
     session_id = uuid.uuid1()
     cmd = find_cmd_path(host, run_cmd)
     try:
-        VNCViewer(host, port, cmd, session_id, uncolored)
-        Gtk.main()
+        vnc_viewer = VNCViewer(host, port, cmd, session_id, uncolored)
+        vnc_viewer.run()
     finally:
         cleanup(host, port, session_id)
