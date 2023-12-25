@@ -21,7 +21,7 @@ from gi.repository import GLib
 from towerlib.utils.shell import ssh, Command, ErrorReturnCode_1, ErrorReturnCode
 from towerlib.sshconf import get_host_color_name
 from towerlib.utils.exceptions import ServerTimeoutException, CommandNotFound
-from towerlib.config import VNC_VIEWER_CSS
+from towerlib.utils.gtkwindows import ColorableWindow
 
 logger = logging.getLogger('tower')
 
@@ -90,7 +90,7 @@ def initialize_vnc_display(parent_window, port):
     vnc.open_host("localhost", port)
     vnc.connect("vnc-pointer-grab", lambda _: logger.debug("Grabbed pointer"))
     vnc.connect("vnc-pointer-ungrab", lambda _: logger.debug("Ungrabbed pointer"))
-    vnc.connect("vnc-connected", lambda _: logger.info("Connected to server_"))
+    vnc.connect("vnc-connected", lambda _: logger.info("Connected to server"))
     vnc.connect("vnc-initialized", parent_window._vnc_initialized)
     vnc.connect("vnc-disconnected", on_vnc_disconnected)
     parent_window.connect('delete-event', lambda _, __: on_vnc_close(vnc))
@@ -98,7 +98,7 @@ def initialize_vnc_display(parent_window, port):
 
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
-class VNCViewer(Gtk.Window):
+class VNCViewer(ColorableWindow):
     # pylint: disable=too-many-arguments
     def __init__(self, host, port, run_cmd, session_id, uncolored=False):
         Gtk.Window.__init__(self)
@@ -110,10 +110,6 @@ class VNCViewer(Gtk.Window):
         self.init_size_timer = None
         self.window_id = None
         self.window_pid = None
-        self.ssh_process = None
-        self._timer_id = None
-        self._event_id_size_allocate = None
-        self._remembered_size = None
         self.display = None
         self.set_resizable(False)
         self.thinclient_resolution = get_thinclient_resolution()
@@ -121,7 +117,8 @@ class VNCViewer(Gtk.Window):
         self.connect("destroy", Gtk.main_quit)
         # headerbar
         if not self.uncolored:
-            self._customized_header_bar()
+            host_color_name = get_host_color_name(self.host)
+            self.set_headerbar_color(host_color_name)
         self.set_title(f"[{self.host}] {self._window_name()}")
         self.layout = Gtk.Layout()
         self.add(self.layout)
@@ -129,19 +126,6 @@ class VNCViewer(Gtk.Window):
         # initialize vnc display
         self.vnc = initialize_vnc_display(self, port)
         self.layout.add(self.vnc)
-
-    def _customized_header_bar(self):
-        host_color_name = get_host_color_name(self.host)
-        bg_filename = f"/var/towercomputers/backgrounds/square-{host_color_name.replace(' ', '-').lower()}.png"
-        self.headerbar = Gtk.HeaderBar()
-        self.headerbar.set_show_close_button(True)
-        self.set_titlebar(self.headerbar)
-        screen = Gdk.Screen.get_default()
-        provider = Gtk.CssProvider()
-        style_context = Gtk.StyleContext()
-        style_context.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        css = VNC_VIEWER_CSS.replace('BACKGROUND_FILENAME', bg_filename)
-        provider.load_from_data(css)
 
     def _window_name(self):
         name = self.run_cmd.split(' ')[0]
@@ -166,7 +150,7 @@ class VNCViewer(Gtk.Window):
         self.set_resizable(True)
         self._update_window_pid()
         # "resize" event
-        self._connect_resize_event()
+        self.connect_resize_event(self._on_resize)
 
     def _search_window_id(self):
         try:
@@ -213,48 +197,11 @@ class VNCViewer(Gtk.Window):
         with open(f'/{TMP_DIR}/{self.session_id}.display', 'w', encoding="UTF-8") as file_pointer:
             file_pointer.write(self.display)
 
-    def _connect_resize_event(self):
-        self._timer_id = None
-        eid = self.connect('size-allocate', self._on_size_allocated)
-        self._event_id_size_allocate = eid
-
-    def _on_size_allocated(self, _, alloc):
-        if self.init_size_timer:
-            return
-        # don't install a second timer
-        if self._timer_id:
-            return
-        # remember new size
-        self._remembered_size = alloc
-        # disconnect the 'size-allocate' event
-        self.disconnect(self._event_id_size_allocate)
-        # create a 500ms timer
-        tid = GLib.timeout_add(interval=100, function=self._on_size_timer)
-        # ...and remember its id
-        self._timer_id = tid
-
-    def _on_size_timer(self):
-        # current window size
-        curr = self.get_allocated_size().allocation
-        # was the size changed in the last 500ms?
-        # NO changes anymore
-        if self._remembered_size.equal(curr):  # == doesn't work here
-            logger.debug("Window size changed to %sx%s", curr.width, curr.height)
-            if self.uncolored or curr.width == self.thinclient_resolution[0]:
-                self._set_app_size(curr.width, curr.height)
-            else:
-                self._set_app_size(curr.width - 50, curr.height - 90)
-                #self._set_app_size(curr.width, curr.height)
-            # reconnect the 'size-allocate' event
-            self._connect_resize_event()
-            # stop the timer
-            self._timer_id = None
-            return False
-        # YES size was changed
-        # remember the new size for the next check after 500ms
-        self._remembered_size = curr
-        # repeat timer
-        return True
+    def _on_resize(self, width, height):
+        if self.uncolored or width == self.thinclient_resolution[0]:
+            self._set_app_size(width, height)
+        else:
+            self._set_app_size(width - 50, height - 90)
 
 
 def cleanup(host, port, session_id):
