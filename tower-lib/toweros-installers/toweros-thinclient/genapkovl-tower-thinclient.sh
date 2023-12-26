@@ -19,6 +19,13 @@ trap cleanup EXIT
 # copy overlay prepared by buildthinclient.py
 # cp -r ~/build-toweros-thinclient-work/overlay/* "$tmp"/
 
+mkdir -p "$tmp"/etc/profile.d
+cat <<EOF > "$tmp"/etc/profile.d/install.sh
+apk --force-overwrite --quiet --progress add tower-cli
+sh /var/towercomputers/installer/install-thinclient.sh
+EOF
+chmod +x "$tmp"/etc/profile.d/install.sh
+
 # install services
 rc_add devfs sysinit
 rc_add dmesg sysinit
