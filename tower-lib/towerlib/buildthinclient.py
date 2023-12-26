@@ -3,11 +3,11 @@ import logging
 import os
 from os import makedirs
 from os.path import join as join_path
-from shutil import copytree, copy as copyfile
+from shutil import copy as copyfile
 import sys
+import glob
 
-from towerlib import utils
-from towerlib.utils.shell import rm, git, Command, apk, cp, argparse_manpage, abuild
+from towerlib.utils.shell import rm, git, Command, apk, cp, abuild, abuild_sign
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import doas
 from towerlib import buildhost
@@ -21,7 +21,7 @@ WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
 INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-thinclient')
 REPO_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..', '..')
-
+ALPINE_APORT_REPO = 'https://gitlab.alpinelinux.org/alpine/aports.git'
 
 def wdir(path):
     return join_path(WORKING_DIR, path)
@@ -52,12 +52,18 @@ def prepare_tower_apk():
         apk('update')
     rm('-rf', APK_LOCAL_REPOSITORY)
     abuild('-r', _cwd=REPO_PATH, _err_to_out=True, _out=logger.debug)
+    edges_apks = glob.glob(f'{INSTALLER_DIR}/alpine-edge/x86_64/*.apk')
+    for apk_path in edges_apks:
+        cp(apk_path, f'{APK_LOCAL_REPOSITORY}/x86_64/')
+    edges_apks = glob.glob(f'{APK_LOCAL_REPOSITORY}/x86_64/*.apk')
+    apk('index', '-o', f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz', '--allow-untrusted', *edges_apks)
+    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz')
 
 
 @clitask("Building Thin Client image, be patient...")
 def prepare_image():
     # download alpine aports form gitlab
-    git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
+    git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', ALPINE_APORT_REPO, _cwd=WORKING_DIR)
     # copy tower custom scripts
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))

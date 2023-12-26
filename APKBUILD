@@ -60,6 +60,9 @@ package() {
     mv $pkgdir/usr/lib/python3.11/site-packages/bin/* $pkgdir/usr/bin/
     # install overlay files
     cp -r $srcdir/overlay/* $pkgdir/
+    chmod +x $pkgdir/etc/local.d/*.start
+    chmod +x $pkgdir/etc/init.d/supercronic
+    chmod +x $pkgdir/etc/init.d/iptables
     # install host images
     mkdir -p $pkgdir/var/towercomputers/builds
     cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
