@@ -188,7 +188,7 @@ def xdo_move_window_to_top_left(host, display, run_cmd):
 class VNCViewer(ColorableWindow):
     # pylint: disable=too-many-arguments
     def __init__(self, host, port, run_cmd, session_id, uncolored=False):
-        Gtk.Window.__init__(self)
+        ColorableWindow.__init__(self)
         self.host = host
         self.port = port
         self.run_cmd = run_cmd
@@ -228,7 +228,7 @@ class VNCViewer(ColorableWindow):
             width, height = _width - 50, _height - 90
         # resize host application to the size of the vncviewer
         xdo_set_window_size(self.host, self.display, self.run_cmd, width, height)
-    
+
     def run(self):
         Gtk.main()
 

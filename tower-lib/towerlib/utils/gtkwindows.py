@@ -13,12 +13,14 @@ from towerlib.config import VNC_VIEWER_CSS
 
 logger = logging.getLogger('tower')
 
+# pylint: disable=too-few-public-methods
 class ResizableWindow(Gtk.Window):
     def __init__(self):
-        Gtk.Window.__init__(self)   
+        Gtk.Window.__init__(self)
         self._timer_id = None
         self._event_id_size_allocate = None
         self._remembered_size = None
+        self.on_resize_callback = None
 
     def connect_resize_event(self, on_resize_callback):
         self.on_resize_callback = on_resize_callback
@@ -59,19 +61,19 @@ class ResizableWindow(Gtk.Window):
         return True
 
 
+# pylint: disable=too-few-public-methods
 class ColorableWindow(ResizableWindow):
     def __init__(self):
         ResizableWindow.__init__(self)
 
     def set_headerbar_color(self, color_name):
         bg_filename = f"/var/towercomputers/backgrounds/square-{color_name.replace(' ', '-').lower()}.png"
-        self.headerbar = Gtk.HeaderBar()
-        self.headerbar.set_show_close_button(True)
-        self.set_titlebar(self.headerbar)
+        headerbar = Gtk.HeaderBar()
+        headerbar.set_show_close_button(True)
+        self.set_titlebar(headerbar)
         screen = Gdk.Screen.get_default()
         provider = Gtk.CssProvider()
         style_context = Gtk.StyleContext()
         style_context.add_provider_for_screen(screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         css = VNC_VIEWER_CSS.replace('BACKGROUND_FILENAME', bg_filename)
         provider.load_from_data(css)
-
