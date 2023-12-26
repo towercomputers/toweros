@@ -1,3 +1,4 @@
+alpine-base
 coreutils
 python3
 python3-dev
@@ -111,7 +112,3 @@ procps
 xrandr
 brightnessctl
 gtk-vnc
-sfwbar
-sfwbar-doc
-copyq
-copyq-doc

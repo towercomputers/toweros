@@ -52,12 +52,12 @@ def prepare_tower_apk():
         apk('update')
     rm('-rf', APK_LOCAL_REPOSITORY)
     abuild('-r', _cwd=REPO_PATH, _err_to_out=True, _out=logger.debug)
-    edges_apks = glob.glob(f'{INSTALLER_DIR}/alpine-edge/x86_64/*.apk')
+    """ edges_apks = glob.glob(f'{INSTALLER_DIR}/alpine-edge/x86_64/*.apk')
     for apk_path in edges_apks:
         cp(apk_path, f'{APK_LOCAL_REPOSITORY}/x86_64/')
     edges_apks = glob.glob(f'{APK_LOCAL_REPOSITORY}/x86_64/*.apk')
     apk('index', '-o', f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz', '--allow-untrusted', *edges_apks)
-    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz')
+    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz') """
 
 
 @clitask("Building Thin Client image, be patient...")

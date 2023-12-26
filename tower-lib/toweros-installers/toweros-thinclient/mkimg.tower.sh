@@ -20,6 +20,6 @@ profile_tower() {
 		done
 	done
 	apks="$apks linux-firmware linux-firmware-none"
-	apks="$apks tower-cli"
+	apks="$apks agetty tower-cli"
 }
 
