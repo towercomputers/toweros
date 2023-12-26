@@ -1,6 +1,6 @@
 Function("StartMenu") {
   MenuClear "Menugen_Applications"
-  PipeRead "python /var/towercomputers/startmenu.py"
+  PipeRead "python /usr/local/share/sfwbar/startmenu.py"
   Menu "MenuGen_Applications"
 }
 

@@ -22,17 +22,47 @@ WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
 INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-thinclient')
 REPO_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 
+
 def wdir(path):
     return join_path(WORKING_DIR, path)
+
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
         raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? If not, delete this folder and try again.")
     makedirs(WORKING_DIR)
 
+
 @clitask("Cleaning up...")
 def cleanup():
     rm('-rf', WORKING_DIR, _out=logger.debug)
+
+
+def check_abuild_key():
+    abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
+    abuild_conf = join_path(abuild_folder, 'abuild.conf')
+    if not os.path.exists(abuild_folder) or not os.path.exists(abuild_conf):
+        logger.error("ERROR: You must have an `abuild` key to build the image. Please use `abuild-keygen -a -i`.")
+        sys.exit()
+
+
+def prepare_docs():
+    # copy markdown docs
+    copytree(join_path(REPO_PATH, 'docs', 'src'), wdir('overlay/var/towercomputers/docs'))
+    # generate manpage
+    man1_folder = wdir('overlay/usr/local/share/man/man1')
+    makedirs(man1_folder)
+    argparse_manpage(
+        '--pyfile', join_path(REPO_PATH, 'tower-cli', 'towercli', 'tower.py'),
+        '--function', 'towercli_parser',
+        '--author', "TowerOS",
+        '--project-name', 'TowerOS',
+        '--url', 'https://toweros.org',
+        '--prog', 'tower',
+        '--manual-title', 'Tower CLI Manual',
+        '--output', wdir(f'{man1_folder}/tower.1'),
+    )
+
 
 def prepare_host_image():
     host_image = utils.builds.find_host_image()
@@ -43,59 +73,33 @@ def prepare_host_image():
         logger.info("Using host image %s", host_image)
     return host_image
 
-def check_abuild_key():
-    abuild_folder = join_path(os.path.expanduser('~'), '.abuild')
-    abuild_conf = join_path(abuild_folder, 'abuild.conf')
-    if not os.path.exists(abuild_folder) or not os.path.exists(abuild_conf):
-        logger.error("ERROR: You must have an `abuild` key to build the image. Please use `abuild-keygen -a -i`.")
-        sys.exit()
+
+def prepare_builds():
+    makedirs(wdir('overlay/var/towercomputers/builds'))
+    host_image_path = prepare_host_image()
+    copyfile(host_image_path, wdir('overlay/var/towercomputers/builds'))
+
+
+def prepare_overlay():
+    copytree(join_path(INSTALLER_DIR, 'overlay'), WORKING_DIR)
+    prepare_docs()
+    prepare_builds()
+
 
 @clitask("Prepare Tower CLI APK package...")
-def prepare_pip_packages():
+def prepare_tower_apk():
     with doas:
         apk('update')
     rm('-rf', APK_LOCAL_REPOSITORY)
     abuild('-r', _cwd=REPO_PATH)
 
-def prepare_installer():
-    makedirs(wdir('overlay/var/towercomputers/'), exist_ok=True)
-    copytree(join_path(INSTALLER_DIR, 'installer'), wdir('overlay/var/towercomputers/installer'))
-
-def prepare_docs():
-    makedirs(wdir('overlay/var/towercomputers/'), exist_ok=True)
-    copytree(join_path(REPO_PATH, 'docs', 'src'), wdir('overlay/var/towercomputers/docs'))
-    argparse_manpage(
-        '--pyfile', join_path(REPO_PATH, 'tower-cli', 'towercli', 'tower.py'),
-        '--function', 'towercli_parser',
-        '--author', "TowerOS",
-        '--project-name', 'TowerOS',
-        '--url', 'https://toweros.org',
-        '--prog', 'tower',
-        '--manual-title', 'Tower CLI Manual',
-        '--output', wdir('overlay/var/towercomputers/docs/tower.1'),
-    )
-
-def prepare_build():
-    makedirs(wdir('overlay/var/towercomputers/builds'))
-    host_image_path = prepare_host_image()
-    copyfile(host_image_path, wdir('overlay/var/towercomputers/builds'))
-
-def prepare_etc_folder():
-    copytree(join_path(INSTALLER_DIR, 'etc'), wdir('overlay/etc'))
-
-def prepare_overlay():
-    prepare_pip_packages()
-    prepare_installer()
-    prepare_docs()
-    prepare_etc_folder()
-    prepare_build()
 
 @clitask("Building Thin Client image, be patient...")
 def prepare_image():
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))
-    copyfile(join_path(INSTALLER_DIR, 'etc', 'apk', 'world'), wdir('aports/scripts'))
+    copyfile(join_path(INSTALLER_DIR, 'overlay', 'etc', 'apk', 'world'), wdir('aports/scripts'))
     with doas:
         apk('update')
     Command('sh')(
@@ -126,6 +130,7 @@ def build_image():
         check_abuild_key()
         prepare_working_dir()
         prepare_overlay()
+        prepare_tower_apk()
         image_path = prepare_image()
     finally:
         cleanup()

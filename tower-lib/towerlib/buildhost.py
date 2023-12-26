@@ -162,10 +162,10 @@ def prepare_rpi_partitions(loop_dev):
     rsync('-rtxv', wdir("EXPORT_BOOTFS_DIR/"), wdir("BOOTFS_DIR/"), _out=logger.debug)
 
 @clitask("Compressing image with xz...")
-def compress_image():
+def compress_image(build_dir):
     image_name = datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img.xz')
     tmp_image_path = os.path.join(tempfile.gettempdir(), image_name)
-    image_path = os.path.join(config.TOWER_BUILDS_DIR, image_name)
+    image_path = os.path.join(build_dir or config.TOWER_BUILDS_DIR, image_name)
     xz(
         '--compress', '--force',
         '--threads', 0, '--memlimit-compress=90%', '--best',
@@ -177,8 +177,8 @@ def compress_image():
     return image_path
 
 @clitask("Copying image...")
-def copy_image():
-    image_path = os.path.join(config.TOWER_BUILDS_DIR, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
+def copy_image(build_dir):
+    image_path = os.path.join(build_dir or config.TOWER_BUILDS_DIR, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wdir("toweros-host.img"), image_path)
     chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
@@ -202,7 +202,7 @@ def prepare_apk_key():
     return private_key_path, public_key_path
 
 @clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
-def build_image(uncompressed=False):
+def build_image(uncompressed=False, build_dir=None):
     alpine_tar_path = utils.download_alpine_rpi()
     loop_dev = None
     image_path = None
@@ -216,9 +216,9 @@ def build_image(uncompressed=False):
         prepare_rpi_partitions(loop_dev)
         unmount_all()
         if uncompressed:
-            image_path = copy_image()
+            image_path = copy_image(build_dir)
         else:
-            image_path = compress_image()
+            image_path = compress_image(build_dir)
     finally:
         cleanup()
     if image_path:
