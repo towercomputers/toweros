@@ -12,7 +12,7 @@ profile_tower() {
 	boot_addons="amd-ucode intel-ucode"
 	initrd_ucode="/boot/amd-ucode.img /boot/intel-ucode.img"
 	apkovl="aports/scripts/genapkovl-tower-thinclient.sh"
-	apks="$apks $(cat aports/scripts/world)"
+	apks="$apks tower-cli"
 	local _k _a
 	for _k in $kernel_flavors; do
 		apks="$apks linux-$_k"

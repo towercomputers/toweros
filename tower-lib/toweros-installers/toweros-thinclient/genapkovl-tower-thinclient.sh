@@ -17,7 +17,7 @@ tmp="$(mktemp -d)"
 trap cleanup EXIT
 
 # copy overlay prepared by buildthinclient.py
-cp -r ~/build-toweros-thinclient-work/overlay/* "$tmp"/
+# cp -r ~/build-toweros-thinclient-work/overlay/* "$tmp"/
 
 # install services
 rc_add devfs sysinit

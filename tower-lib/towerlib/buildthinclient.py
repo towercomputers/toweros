@@ -46,60 +46,21 @@ def check_abuild_key():
         sys.exit()
 
 
-def prepare_docs():
-    # copy markdown docs
-    copytree(join_path(REPO_PATH, 'docs', 'src'), wdir('overlay/var/towercomputers/docs'))
-    # generate manpage
-    man1_folder = wdir('overlay/usr/local/share/man/man1')
-    makedirs(man1_folder)
-    argparse_manpage(
-        '--pyfile', join_path(REPO_PATH, 'tower-cli', 'towercli', 'tower.py'),
-        '--function', 'towercli_parser',
-        '--author', "TowerOS",
-        '--project-name', 'TowerOS',
-        '--url', 'https://toweros.org',
-        '--prog', 'tower',
-        '--manual-title', 'Tower CLI Manual',
-        '--output', wdir(f'{man1_folder}/tower.1'),
-    )
-
-
-def prepare_host_image():
-    host_image = utils.builds.find_host_image()
-    if not host_image:
-        logger.info("Host image not found in builds directory. Building a new image.")
-        host_image = buildhost.build_image()
-    else:
-        logger.info("Using host image %s", host_image)
-    return host_image
-
-
-def prepare_builds():
-    makedirs(wdir('overlay/var/towercomputers/builds'))
-    host_image_path = prepare_host_image()
-    copyfile(host_image_path, wdir('overlay/var/towercomputers/builds'))
-
-
-def prepare_overlay():
-    copytree(join_path(INSTALLER_DIR, 'overlay'), WORKING_DIR)
-    prepare_docs()
-    prepare_builds()
-
-
 @clitask("Prepare Tower CLI APK package...")
 def prepare_tower_apk():
     with doas:
         apk('update')
     rm('-rf', APK_LOCAL_REPOSITORY)
-    abuild('-r', _cwd=REPO_PATH)
+    abuild('-r', _cwd=REPO_PATH, _err_to_out=True, _out=logger.debug)
 
 
 @clitask("Building Thin Client image, be patient...")
 def prepare_image():
+    # download alpine aports form gitlab
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', 'https://gitlab.alpinelinux.org/alpine/aports.git', _cwd=WORKING_DIR)
+    # copy tower custom scripts
     copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
     copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))
-    copyfile(join_path(INSTALLER_DIR, 'overlay', 'etc', 'apk', 'world'), wdir('aports/scripts'))
     with doas:
         apk('update')
     Command('sh')(
@@ -129,7 +90,6 @@ def build_image():
     try:
         check_abuild_key()
         prepare_working_dir()
-        prepare_overlay()
         prepare_tower_apk()
         image_path = prepare_image()
     finally:

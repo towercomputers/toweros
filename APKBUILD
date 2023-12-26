@@ -27,7 +27,7 @@ build() {
     cp -r tower-lib/toweros-installers/toweros-thinclient/overlay $srcdir/
     # build toweros-host image
     cd tower-build-cli
-    ./tower-build host --build-dir $srcdir
+    #./tower-build host --build-dir $srcdir
     cd ..
     # copy documentation
     cp -r docs/src $srcdir/docs
@@ -39,6 +39,7 @@ build() {
         --prog tower \
         --manual-title 'Tower CLI Manual' \
         --output $srcdir/tower.1
+    gzip $srcdir/tower.1
 }
 
 check() {
@@ -61,9 +62,9 @@ package() {
     cp -r $srcdir/overlay/* $pkgdir/
     # install host images
     mkdir -p $pkgdir/var/towercomputers/builds
-    cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
+    #cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
     # install docs
     cp -r $srcdir/docs $pkgdir/var/towercomputers/
     mkdir -p $pkgdir/usr/share/man/man1
-    cp $srcdir/tower.1 $pkgdir/usr/share/man/man1/
+    cp $srcdir/tower.1.gz $pkgdir/usr/share/man/man1/
 }
