@@ -31,4 +31,4 @@ if [ -z "$DISPLAY" ] && [ "$(tty)" == "/dev/tty1" ] && [ "$STARTW_ON_LOGIN" == "
 fi
 
 # ensure that tower.widget is linked
-ln -s ~/.local/tower/tower.widget /mnt/usr/local/share/sfwbar/tower.widget || true
+ln -s ~/.local/tower/tower.widget /usr/local/share/sfwbar/tower.widget || true

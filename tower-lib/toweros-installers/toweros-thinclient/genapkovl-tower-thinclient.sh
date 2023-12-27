@@ -46,6 +46,8 @@ EOF
 mkdir -p "$tmp"/etc/apk
 cat <<EOF > "$tmp"/etc/apk/world
 alpine-base
+linux-firmware
+linux-firmware-none
 toweros-thinclient
 EOF
 
