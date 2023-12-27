@@ -16,9 +16,7 @@ rc_add() {
 tmp="$(mktemp -d)"
 trap cleanup EXIT
 
-# copy overlay prepared by buildthinclient.py
-# cp -r ~/build-toweros-thinclient-work/overlay/* "$tmp"/
-
+# launch installer on login
 mkdir -p "$tmp"/etc/profile.d
 cat <<EOF > "$tmp"/etc/profile.d/install.sh
 #!/bin/sh
@@ -26,6 +24,7 @@ sh /var/towercomputers/installer/install-thinclient.sh
 EOF
 chmod +x "$tmp"/etc/profile.d/install.sh
 
+# auto-login
 cat <<EOF > "$tmp"/etc/inittab
 # /etc/inittab
 ::sysinit:/sbin/openrc sysinit

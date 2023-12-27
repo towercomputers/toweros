@@ -1,7 +1,7 @@
-pkgname=tower-cli
+pkgname=toweros-thinclient
 pkgver=$(cat tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
 pkgrel=0
-pkgdesc="Tower CLI"
+pkgdesc="TowerOS-ThinClient"
 url="https://toweros.org/"
 arch="x86_64"
 license="Apache-2.0"
@@ -46,6 +46,11 @@ check() {
     return 0
 }
 
+rc_add() {
+	mkdir -p "$pkgdir"/etc/runlevels/"$2"
+	ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
+}
+
 package() {
     # wheel packages
     for pk in $(ls $srcdir/*.whl); do
@@ -63,6 +68,7 @@ package() {
     chmod +x $pkgdir/etc/local.d/*.start
     chmod +x $pkgdir/etc/init.d/supercronic
     chmod +x $pkgdir/etc/init.d/iptables
+    chmod +x $pkgdir/etc/profile.d/tower-env.sh
     # install host images
     mkdir -p $pkgdir/var/towercomputers/builds
     cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
@@ -70,4 +76,21 @@ package() {
     cp -r $srcdir/docs $pkgdir/var/towercomputers/
     mkdir -p $pkgdir/usr/share/man/man1
     cp $srcdir/tower.1.gz $pkgdir/usr/share/man/man1/
+    # migrate from sudo to doas
+    ln -s $pkgdir/usr/bin/doas /usr/bin/sudo || true
+    # add services
+    rc_add lvm default
+    rc_add dmcrypt default
+    rc_add iptables default
+    rc_add dbus default
+    rc_add local default
+    rc_add seatd default
+    rc_add acpid default
+    rc_add supercronic default
+    # enabling udev service
+    # see setup-devd source
+    rc_add udev sysinit
+	rc_add udev-trigger sysinit
+	rc_add udev-settle sysinit
+	rc_add udev-postmount default
 }

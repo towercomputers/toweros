@@ -51,6 +51,8 @@ losetup
 dbus
 dbus-x11
 eudev
+udev-init-scripts
+udev-init-scripts-openrc
 mesa-dri-gallium
 mesa-va-gallium
 intel-media-driver
