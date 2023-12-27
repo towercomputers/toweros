@@ -20,6 +20,10 @@ profile_tower() {
 		done
 	done
 	apks="$apks linux-firmware linux-firmware-none"
-	apks="$apks agetty tower-cli"
+	apks="$apks tower-cli"
+	# alpine-base busybox chrony dhcpcd doas e2fsprogs
+	# kbd-bkeymaps network-extras openntpd openssl openssh
+	# tzdata wget tiny-cloud-alpine linux-lts xtables-addons-lts 
+	# zfs-lts linux-firmware linux-firmware-none tower-cli
 }
 

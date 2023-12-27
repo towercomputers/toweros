@@ -22,7 +22,6 @@ trap cleanup EXIT
 mkdir -p "$tmp"/etc/profile.d
 cat <<EOF > "$tmp"/etc/profile.d/install.sh
 #!/bin/sh
-apk --force-overwrite --quiet --progress add tower-cli
 sh /var/towercomputers/installer/install-thinclient.sh
 EOF
 chmod +x "$tmp"/etc/profile.d/install.sh
@@ -43,6 +42,12 @@ tty6::respawn:/sbin/getty 38400 tty6
 ::ctrlaltdel:/sbin/reboot
 # Stuff to do before rebooting
 ::shutdown:/sbin/openrc shutdown
+EOF
+
+mkdir -p "$tmp"/etc/apk
+cat <<EOF > "$tmp"/etc/apk/world
+alpine-base
+tower-cli
 EOF
 
 # install services
