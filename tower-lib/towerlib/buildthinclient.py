@@ -51,13 +51,19 @@ def prepare_tower_apk():
     with doas:
         apk('update')
     rm('-rf', APK_LOCAL_REPOSITORY)
-    abuild('-r', _cwd=REPO_PATH, _err_to_out=True, _out=logger.debug)
-    """ edges_apks = glob.glob(f'{INSTALLER_DIR}/alpine-edge/x86_64/*.apk')
+    # copy apks to local repository
+    makedirs(f'{APK_LOCAL_REPOSITORY}/x86_64')
+    edges_apks = glob.glob(f'{INSTALLER_DIR}/alpine-edge/x86_64/*.apk')
     for apk_path in edges_apks:
         cp(apk_path, f'{APK_LOCAL_REPOSITORY}/x86_64/')
+    # get new apks paths
     edges_apks = glob.glob(f'{APK_LOCAL_REPOSITORY}/x86_64/*.apk')
-    apk('index', '-o', f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz', '--allow-untrusted', *edges_apks)
-    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz') """
+    # create index
+    apk('index', '-o', f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz', '--no-warnings', *edges_apks)
+    # sign index
+    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz')
+    # build tower-cli
+    abuild('-r', _cwd=REPO_PATH, _err_to_out=True, _out=logger.debug)
 
 
 @clitask("Building Thin Client image, be patient...")

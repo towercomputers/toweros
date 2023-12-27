@@ -111,3 +111,7 @@ procps
 xrandr
 brightnessctl
 gtk-vnc
+copyq
+copyq-doc
+sfwbar
+sfwbar-doc
