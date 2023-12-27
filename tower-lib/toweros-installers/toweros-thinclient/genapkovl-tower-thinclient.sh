@@ -46,7 +46,7 @@ EOF
 mkdir -p "$tmp"/etc/apk
 cat <<EOF > "$tmp"/etc/apk/world
 alpine-base
-tower-cli
+toweros-thinclient
 EOF
 
 # install services
