@@ -82,8 +82,6 @@ package() {
     cp -r $srcdir/docs $pkgdir/var/towercomputers/
     mkdir -p $pkgdir/usr/share/man/man1
     cp $srcdir/tower.1.gz $pkgdir/usr/share/man/man1/
-    # migrate from sudo to doas
-    ln -s $pkgdir/usr/bin/doas /usr/bin/sudo || true
     # add default services
     rc_add devfs sysinit
     rc_add dmesg sysinit
