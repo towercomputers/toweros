@@ -45,8 +45,8 @@ toweros-thinclient
 EOF
 
 rc_add() {
-    mkdir -p "$pkgdir"/etc/runlevels/"$2"
-    ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
+    mkdir -p "$tmp"/etc/runlevels/"$2"
+    ln -sf /etc/init.d/"$1" "$tmp"/etc/runlevels/"$2"/"$1"
 }
 
 rc_add modloop sysinit
