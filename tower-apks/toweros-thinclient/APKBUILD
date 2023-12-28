@@ -9,7 +9,7 @@ url="https://toweros.org/"
 arch="x86_64"
 license="Apache-2.0"
 depends=$(cat $CURRENT_DIR/world | tr '\n' ' ')
-makedepends="py3-gpep517 python3-dev py3-hatchling py3-wheel"
+makedepends="py3-gpep517 python3-dev py3-hatchling py3-wheel oxygen-icons5"
 # no apk for these
 pipdepends="sh==2.0.6 shtab==1.6.5 sshconf==0.2.5 yaspin==3.0.1 \
             argparse-manpage==4.5 backports.pbkdf2==0.1"
@@ -47,6 +47,9 @@ build() {
     cd $ROOT_DIR/tower-build-cli
     ./tower-build host --build-dir $srcdir
     cd $CURRENT_DIR
+    # copy oxygen theme icons
+    mkdir -p $srcdir/icons
+    cp -r /usr/share/icons/oxygen/base/48x48/* $srcdir/icons/
 }
 
 check() {
@@ -112,4 +115,6 @@ package() {
     # save iptables rules
     mkdir -p $pkgdir/etc/iptables
     cp $srcdir/rules-save $pkgdir/etc/iptables/rules-save
+    # install oxygen theme icons
+    cp -r $srcdir/icons/* $pkgdir/usr/share/icons/hicolor/48x48/
 }
