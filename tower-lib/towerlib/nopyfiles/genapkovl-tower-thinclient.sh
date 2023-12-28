@@ -44,6 +44,13 @@ alpine-base
 toweros-thinclient
 EOF
 
+rc_add() {
+    mkdir -p "$pkgdir"/etc/runlevels/"$2"
+    ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
+}
+
+rc_add modloop sysinit
+
 # generate apk overlay
 tar -c -C "$tmp" ./ | gzip -9n > $HOSTNAME.apkovl.tar.gz
 #cp $HOSTNAME.apkovl.tar.gz ~/

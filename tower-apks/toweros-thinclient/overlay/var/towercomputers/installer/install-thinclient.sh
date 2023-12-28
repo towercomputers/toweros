@@ -281,6 +281,9 @@ clone_live_system_to_disk() {
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
+
+    # disable modloop in /mnt
+    rm -f /mnt/etc/runlevels/sysinit/modloop
 }
 
 

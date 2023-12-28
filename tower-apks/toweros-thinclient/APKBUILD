@@ -54,8 +54,8 @@ check() {
 }
 
 rc_add() {
-	mkdir -p "$pkgdir"/etc/runlevels/"$2"
-	ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
+    mkdir -p "$pkgdir"/etc/runlevels/"$2"
+    ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
 }
 
 package() {
