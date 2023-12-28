@@ -19,9 +19,10 @@ if [ -f ~/.local/tower/osconfig ]; then
     source ~/.local/tower/osconfig
 fi
 
-# start actkbd.py
+# start actkbd.py and supercronic
 if [ "$(tty)" == "/dev/tty1" ]; then
     /var/towercomputers/scripts/actkbd.py >/dev/null 2>&1 &
+    supercronic /etc/crontabs/supercronic >/dev/null 2>&1 &
 fi
 
 # start labwc on login

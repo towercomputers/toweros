@@ -198,13 +198,6 @@ configure_user() {
     fi
     # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
-    # set crontab
-    mkdir -p /mnt/etc/crontabs
-    cat <<EOF > /mnt/etc/crontabs/supercronic
-*/10 * * * * * * runuser -u $USERNAME -- python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
-*/10 * * * * * * runuser -u $USERNAME -- sh /var/towercomputers/scripts/screenlocker.sh
-*/5 * * * * runuser -u $USERNAME -- tower synctime
-EOF
 }
 
 

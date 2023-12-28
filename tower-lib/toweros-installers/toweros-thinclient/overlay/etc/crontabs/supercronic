@@ -1,0 +1,3 @@
+*/10 * * * * * * python -c 'from towerlib.utils.menu import generate_hosts_status; generate_hosts_status()'
+*/10 * * * * * * sh /var/towercomputers/scripts/screenlocker.sh
+*/5 * * * * tower synctime

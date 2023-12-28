@@ -69,7 +69,6 @@ package() {
     # install overlay files
     cp -r $srcdir/overlay/* $pkgdir/
     chmod +x $pkgdir/etc/local.d/*.start
-    chmod +x $pkgdir/etc/init.d/supercronic
     chmod +x $pkgdir/etc/init.d/iptables
     chmod +x $pkgdir/etc/profile.d/tower-env.sh
     # install host images
@@ -89,7 +88,6 @@ package() {
     rc_add local default
     rc_add seatd default
     rc_add acpid default
-    rc_add supercronic default
     # enabling udev service
     # see setup-devd source
     rc_add udev sysinit
