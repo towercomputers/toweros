@@ -40,6 +40,9 @@ build() {
         --manual-title 'Tower CLI Manual' \
         --output $srcdir/tower.1
     gzip $srcdir/tower.1
+    # generate iptables rules
+    sudo sh tower-lib/toweros-installers/toweros-thinclient/overlay/var/towercomputers/installer/configure-firewall.sh
+    sudo iptables-save > $srcdir/rules-save
 }
 
 check() {
@@ -90,7 +93,10 @@ package() {
     # enabling udev service
     # see setup-devd source
     rc_add udev sysinit
-	rc_add udev-trigger sysinit
-	rc_add udev-settle sysinit
-	rc_add udev-postmount default
+    rc_add udev-trigger sysinit
+    rc_add udev-settle sysinit
+    rc_add udev-postmount default
+    # save iptables rules
+    mkdir -p $pkgdir/etc/iptables
+    cp $srcdir/rules-save $pkgdir/etc/iptables/rules-save
 }

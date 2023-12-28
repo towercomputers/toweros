@@ -243,8 +243,6 @@ disable_installer() {
 
 
 update_live_system() {
-    # configure firewall
-    sh $SCRIPT_DIR/configure-firewall.sh
     configure_user
     configure_locales
     disable_installer
