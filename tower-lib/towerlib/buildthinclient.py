@@ -10,7 +10,7 @@ import glob
 from towerlib.utils.shell import rm, git, Command, apk, cp, abuild, abuild_sign
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import doas
-from towerlib import buildhost
+from towerlib.utils.network import download_file
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException
 from towerlib.config import THINCLIENT_ALPINE_BRANCH, APK_LOCAL_REPOSITORY, TOWER_BUILDS_DIR
@@ -19,9 +19,17 @@ logger = logging.getLogger('tower')
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
-INSTALLER_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-thinclient')
+NOPYFILES_DIR = join_path(os.path.dirname(os.path.abspath(__file__)), 'nopyfiles')
 REPO_PATH = join_path(os.path.dirname(os.path.abspath(__file__)), '..', '..')
 ALPINE_APORT_REPO = 'https://gitlab.alpinelinux.org/alpine/aports.git'
+
+EDGE_REPO = 'https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/'
+EDGE_APKS = [
+    'copyq-7.1.0-r2.apk',
+    'copyq-doc-7.1.0-r2.apk',
+    'sfwbar-1.0_beta13-r0.apk',
+    'sfwbar-doc-1.0_beta13-r0.apk',
+]
 
 def wdir(path):
     return join_path(WORKING_DIR, path)
@@ -46,24 +54,26 @@ def check_abuild_key():
         sys.exit()
 
 
+def download_edge_apks():
+    rm('-rf', APK_LOCAL_REPOSITORY)
+    makedirs(f'{APK_LOCAL_REPOSITORY}/x86_64')
+    edge_apks = []
+    for apk_file in EDGE_APKS:
+        local_path = f'{APK_LOCAL_REPOSITORY}/x86_64/{apk_file}'
+        download_file(f'{EDGE_REPO}{apk_file}', local_path)
+        edge_apks.append(local_path)
+    # create index
+    apk('index', '-o', f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz', '--no-warnings', *edge_apks)
+    # sign index
+    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz')
+
+
 @clitask("Prepare Tower CLI APK package...")
 def prepare_tower_apk():
     with doas:
         apk('update')
-    rm('-rf', APK_LOCAL_REPOSITORY)
-    # copy apks to local repository
-    makedirs(f'{APK_LOCAL_REPOSITORY}/x86_64')
-    edges_apks = glob.glob(f'{INSTALLER_DIR}/alpine-edge/x86_64/*.apk')
-    for apk_path in edges_apks:
-        cp(apk_path, f'{APK_LOCAL_REPOSITORY}/x86_64/')
-    # get new apks paths
-    edges_apks = glob.glob(f'{APK_LOCAL_REPOSITORY}/x86_64/*.apk')
-    # create index
-    apk('index', '-o', f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz', '--no-warnings', *edges_apks)
-    # sign index
-    abuild_sign(f'{APK_LOCAL_REPOSITORY}/x86_64/APKINDEX.tar.gz')
     # build tower-cli
-    abuild('-r', _cwd=REPO_PATH, _err_to_out=True, _out=logger.debug)
+    abuild('-r', _cwd=f"{REPO_PATH}/tower-apks/toweros-thinclient", _err_to_out=True, _out=logger.debug)
 
 
 @clitask("Building Thin Client image, be patient...")
@@ -71,8 +81,8 @@ def prepare_image():
     # download alpine aports form gitlab
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', ALPINE_APORT_REPO, _cwd=WORKING_DIR)
     # copy tower custom scripts
-    copyfile(join_path(INSTALLER_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
-    copyfile(join_path(INSTALLER_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))
+    copyfile(join_path(NOPYFILES_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
+    copyfile(join_path(NOPYFILES_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))
     with doas:
         apk('update')
     Command('sh')(
@@ -102,6 +112,7 @@ def build_image():
     try:
         check_abuild_key()
         prepare_working_dir()
+        download_edge_apks()
         prepare_tower_apk()
         image_path = prepare_image()
     finally:

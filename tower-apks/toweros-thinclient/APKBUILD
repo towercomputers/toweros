@@ -1,37 +1,37 @@
+CURRENT_DIR=$(pwd)
+ROOT_DIR="$CURRENT_DIR/../.."
+
 pkgname=toweros-thinclient
-pkgver=$(cat tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
+pkgver=$(cat $ROOT_DIR/tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
 pkgrel=0
 pkgdesc="TowerOS-ThinClient"
 url="https://toweros.org/"
 arch="x86_64"
 license="Apache-2.0"
-depends=$(cat tower-lib/toweros-installers/toweros-thinclient/world | tr '\n' ' ')
+depends=$(cat $CURRENT_DIR/world | tr '\n' ' ')
 makedepends="py3-gpep517 python3-dev py3-hatchling py3-wheel"
 # no apk for these
 pipdepends="sh==2.0.6 shtab==1.6.5 sshconf==0.2.5 yaspin==3.0.1 \
             argparse-manpage==4.5 backports.pbkdf2==0.1"
 
+
 build() {
     # build tower-lib and tower-cli
-	cd tower-lib
+	cd $ROOT_DIR/tower-lib
     hatchling build -t wheel
-    cd ../tower-cli
+    cd $ROOT_DIR/tower-cli
     hatchling build -t wheel
-    cd ..
     # put built packages in srcdir
-    cp tower-lib/dist/tower_lib-$pkgver-py3-none-any.whl $srcdir
-    cp tower-cli/dist/tower_cli-$pkgver-py3-none-any.whl $srcdir
+    cp $ROOT_DIR/tower-lib/dist/tower_lib-$pkgver-py3-none-any.whl $srcdir
+    cp $ROOT_DIR/tower-cli/dist/tower_cli-$pkgver-py3-none-any.whl $srcdir
     # download dependencies in srcdir
+    cd $CURRENT_DIR
     pip download $pipdepends -d $srcdir
     # copy overlay files in srcdir
-    cp -r tower-lib/toweros-installers/toweros-thinclient/overlay $srcdir/
-    # build toweros-host image
-    cd tower-build-cli
-    ./tower-build host --build-dir $srcdir
-    cd ..
+    cp -r $CURRENT_DIR/overlay $srcdir/
     # copy documentation
-    cp -r docs/src $srcdir/docs
-    argparse-manpage --pyfile tower-cli/towercli/tower.py \
+    cp -r $ROOT_DIR/docs/src $srcdir/docs
+    argparse-manpage --pyfile $ROOT_DIR/tower-cli/towercli/tower.py \
         --function towercli_parser \
         --author TowerOS \
         --project-name TowerOS \
@@ -41,8 +41,12 @@ build() {
         --output $srcdir/tower.1
     gzip $srcdir/tower.1
     # generate iptables rules
-    sudo sh tower-lib/toweros-installers/toweros-thinclient/overlay/var/towercomputers/installer/configure-firewall.sh
+    sudo sh $CURRENT_DIR/overlay/var/towercomputers/installer/configure-firewall.sh
     sudo iptables-save > $srcdir/rules-save
+    # build toweros-host image
+    cd $ROOT_DIR/tower-build-cli
+    ./tower-build host --build-dir $srcdir
+    cd $CURRENT_DIR
 }
 
 check() {
@@ -80,7 +84,21 @@ package() {
     cp $srcdir/tower.1.gz $pkgdir/usr/share/man/man1/
     # migrate from sudo to doas
     ln -s $pkgdir/usr/bin/doas /usr/bin/sudo || true
-    # add services
+    # add default services
+    rc_add devfs sysinit
+    rc_add dmesg sysinit
+    rc_add mdev sysinit
+    rc_add hwdrivers sysinit
+    rc_add modloop sysinit
+    rc_add hwclock boot
+    rc_add modules boot
+    rc_add sysctl boot
+    rc_add bootmisc boot
+    rc_add syslog-ng boot
+    rc_add mount-ro shutdown
+    rc_add killprocs shutdown
+    rc_add savecache shutdown
+    # add services needed by toweros
     rc_add lvm default
     rc_add dmcrypt default
     rc_add iptables default
