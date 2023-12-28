@@ -44,16 +44,25 @@ swap_eth0_with() {
 }
 
 check_eth0_mac() {
-  if [ -f /etc/local.d/eth0_mac ]; then
-    ETH0_MAC=$(cat /etc/local.d/eth0_mac)
-    BOOT_IFACE=$(search_mac $ETH0_MAC)
-    if [ ! "$BOOT_IFACE" == "eth0" ]; then
-      swap_eth0_with $BOOT_IFACE
-    else
-      echo "eth0 MAC is OK"
-    fi
+  ETH0_MAC=$(cat /etc/local.d/eth0_mac)
+  BOOT_IFACE=$(search_mac $ETH0_MAC)
+  if [ ! "$BOOT_IFACE" == "eth0" ]; then
+    swap_eth0_with $BOOT_IFACE
+  else
+    echo "eth0 MAC is OK"
   fi
 }
 
-init_interface
-check_eth0_mac
+save_eth0_mac() {
+  if [ ! -f /etc/local.d/eth0_mac ]; then
+    cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
+  fi
+}
+
+init_network() {
+  save_eth0_mac
+  init_interface
+  check_eth0_mac
+}
+
+init_network

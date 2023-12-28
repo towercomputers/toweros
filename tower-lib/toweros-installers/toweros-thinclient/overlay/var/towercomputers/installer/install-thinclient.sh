@@ -243,19 +243,10 @@ disable_installer() {
 
 
 update_live_system() {
-    # ensure eth0 exists and store its MAC address
-    if [  ! -f /sys/class/net/eth0/address ]; then
-        echo "eth0 not found"
-        exit 1
-    fi
-    cp /sys/class/net/eth0/address /etc/local.d/eth0_mac
-
     # configure firewall
     sh $SCRIPT_DIR/configure-firewall.sh
-    
     configure_user
     configure_locales
-
     disable_installer
 }
 
