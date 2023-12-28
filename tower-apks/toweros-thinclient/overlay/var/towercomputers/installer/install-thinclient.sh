@@ -266,10 +266,7 @@ clone_live_system_to_disk() {
     # install packages
     local apkflags="--quiet --progress --update-cache --clean-protected"
     # default alpine packages
-    local pkgs="alpine-base busybox chrony dhcpcd doas e2fsprogs"
-	pkgs="$pkgs kbd-bkeymaps network-extras openntpd openssl openssh"
-	pkgs="$pkgs tzdata wget tiny-cloud-alpine linux-lts xtables-addons-lts"
-	pkgs="$pkgs zfs-lts linux-firmware linux-firmware-none"
+    local pkgs="alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none"
     # toweros packages
     pkgs="$pkgs toweros-thinclient"
     # local repos
