@@ -87,7 +87,6 @@ package() {
     rc_add dmesg sysinit
     rc_add mdev sysinit
     rc_add hwdrivers sysinit
-    rc_add modloop sysinit
     rc_add hwclock boot
     rc_add modules boot
     rc_add sysctl boot
