@@ -1,0 +1,14 @@
+Function("StartMenu") {
+  MenuClear "Menugen_Applications"
+  PipeRead "python /usr/share/sfwbar/startmenu.py"
+  Menu "MenuGen_Applications"
+}
+
+layout {
+  button {
+    value = "open-menu-symbolic"
+    style = "startmenu"
+    action = Function "StartMenu"
+    tooltip = "Application menu"
+  }
+}

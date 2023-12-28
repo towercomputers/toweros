@@ -1,0 +1,120 @@
+CURRENT_DIR=$(pwd)
+ROOT_DIR="$CURRENT_DIR/../.."
+
+pkgname=toweros-thinclient
+pkgver=$(cat $ROOT_DIR/tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
+pkgrel=0
+pkgdesc="TowerOS-ThinClient"
+url="https://toweros.org/"
+arch="x86_64"
+license="Apache-2.0"
+depends=$(cat $CURRENT_DIR/world | tr '\n' ' ')
+makedepends="py3-gpep517 python3-dev py3-hatchling py3-wheel oxygen-icons5"
+# no apk for these
+pipdepends="sh==2.0.6 shtab==1.6.5 sshconf==0.2.5 yaspin==3.0.1 \
+            argparse-manpage==4.5 backports.pbkdf2==0.1"
+
+
+build() {
+    # build tower-lib and tower-cli
+	cd $ROOT_DIR/tower-lib
+    hatchling build -t wheel
+    cd $ROOT_DIR/tower-cli
+    hatchling build -t wheel
+    # put built packages in srcdir
+    cp $ROOT_DIR/tower-lib/dist/tower_lib-$pkgver-py3-none-any.whl $srcdir
+    cp $ROOT_DIR/tower-cli/dist/tower_cli-$pkgver-py3-none-any.whl $srcdir
+    # download dependencies in srcdir
+    cd $CURRENT_DIR
+    pip download $pipdepends -d $srcdir
+    # copy overlay files in srcdir
+    cp -r $CURRENT_DIR/overlay $srcdir/
+    # copy documentation
+    cp -r $ROOT_DIR/docs/src $srcdir/docs
+    argparse-manpage --pyfile $ROOT_DIR/tower-cli/towercli/tower.py \
+        --function towercli_parser \
+        --author TowerOS \
+        --project-name TowerOS \
+        --url 'https://toweros.org' \
+        --prog tower \
+        --manual-title 'Tower CLI Manual' \
+        --output $srcdir/tower.1
+    gzip $srcdir/tower.1
+    # generate iptables rules
+    sudo sh $CURRENT_DIR/overlay/var/towercomputers/installer/configure-firewall.sh
+    sudo iptables-save > $srcdir/rules-save
+    # build toweros-host image
+    cd $ROOT_DIR/tower-build-cli
+    ./tower-build host --build-dir $srcdir
+    cd $CURRENT_DIR
+    # copy oxygen theme icons
+    mkdir -p $srcdir/icons
+    cp -r /usr/share/icons/oxygen/base/48x48/* $srcdir/icons/
+}
+
+check() {
+    return 0
+}
+
+rc_add() {
+    mkdir -p "$pkgdir"/etc/runlevels/"$2"
+    ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
+}
+
+package() {
+    # wheel packages
+    for pk in $(ls $srcdir/*.whl); do
+        echo "Installing: $pk"
+        python3 -m installer -d "$pkgdir" $pk
+    done
+    # old packages
+    pip3 install --target="$pkgdir/usr/lib/python3.11/site-packages/" --find-links="$srcdir" \
+                --use-pep517 --no-warn-script-location --no-deps --ignore-requires-python --no-cache-dir \
+                --use-deprecated=legacy-resolver --upgrade --root-user-action=ignore \
+                argparse-manpage==4.5 backports.pbkdf2==0.1
+    mv $pkgdir/usr/lib/python3.11/site-packages/bin/* $pkgdir/usr/bin/
+    # install overlay files
+    cp -r $srcdir/overlay/* $pkgdir/
+    chmod +x $pkgdir/etc/local.d/*.start
+    chmod +x $pkgdir/etc/init.d/iptables
+    chmod +x $pkgdir/etc/profile.d/tower-env.sh
+    # install host images
+    mkdir -p $pkgdir/var/towercomputers/builds
+    cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
+    # install docs
+    cp -r $srcdir/docs $pkgdir/var/towercomputers/
+    mkdir -p $pkgdir/usr/share/man/man1
+    cp $srcdir/tower.1.gz $pkgdir/usr/share/man/man1/
+    # add default services
+    rc_add devfs sysinit
+    rc_add dmesg sysinit
+    rc_add mdev sysinit
+    rc_add hwdrivers sysinit
+    rc_add hwclock boot
+    rc_add modules boot
+    rc_add sysctl boot
+    rc_add bootmisc boot
+    rc_add syslog-ng boot
+    rc_add mount-ro shutdown
+    rc_add killprocs shutdown
+    rc_add savecache shutdown
+    # add services needed by toweros
+    rc_add lvm default
+    rc_add dmcrypt default
+    rc_add iptables default
+    rc_add dbus default
+    rc_add local default
+    rc_add seatd default
+    rc_add acpid default
+    # enabling udev service
+    # see setup-devd source
+    rc_add udev sysinit
+    rc_add udev-trigger sysinit
+    rc_add udev-settle sysinit
+    rc_add udev-postmount default
+    # save iptables rules
+    mkdir -p $pkgdir/etc/iptables
+    cp $srcdir/rules-save $pkgdir/etc/iptables/rules-save
+    # install oxygen theme icons
+    cp -r $srcdir/icons/* $pkgdir/usr/share/icons/hicolor/48x48/
+}
