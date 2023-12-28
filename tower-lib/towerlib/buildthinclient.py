@@ -5,7 +5,6 @@ from os import makedirs
 from os.path import join as join_path
 from shutil import copy as copyfile
 import sys
-import glob
 
 from towerlib.utils.shell import rm, git, Command, apk, cp, abuild, abuild_sign
 from towerlib.utils.decorators import clitask
@@ -82,7 +81,7 @@ def prepare_image():
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', ALPINE_APORT_REPO, _cwd=WORKING_DIR)
     # copy tower custom scripts
     copyfile(join_path(NOPYFILES_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
-    copyfile(join_path(NOPYFILES_DIR, 'genapkovl-tower-thinclient.sh'), wdir('aports/scripts'))
+    copyfile(join_path(NOPYFILES_DIR, 'genapkovl-toweros-thinclient.sh'), wdir('aports/scripts'))
     with doas:
         apk('update')
     Command('sh')(

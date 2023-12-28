@@ -1,4 +1,8 @@
 alpine-base
+linux-rpi
+raspberrypi-bootloader
+linux-firmware-brcm
+linux-firmware-brcm-cm4
 openssl
 nx-libs
 dosfstools
@@ -17,16 +21,12 @@ tzdata
 wpa_supplicant
 dbus
 acct
-linux-rpi4
-raspberrypi-bootloader
 font-dejavu
 adw-gtk3
 mesa-dri-gallium
 udev
 syslog-ng
 chrony
-linux-firmware-brcm
-linux-firmware-brcm-cm4
 cryptsetup
 lvm2
 tor

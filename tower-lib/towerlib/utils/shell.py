@@ -9,7 +9,7 @@ from sh import (
     nxproxy, xsetroot, mcookie, waypipe,
     argparse_manpage,
     locale as getlocale,
-    doas,
+    doas, runuser,
 )
 # pylint: enable=import-error,unused-import,no-name-in-module
 

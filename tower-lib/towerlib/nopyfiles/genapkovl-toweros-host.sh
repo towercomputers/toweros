@@ -18,6 +18,19 @@ trap cleanup EXIT
 # copy overlay prepared by buildhost.py
 cp -r $OVERLAY_PATH/* "$tmp"/
 
+# launch installer on boot
+mkdir -p "$tmp"/etc/local.d
+cat <<EOF > "$tmp"/etc/local.d/install-host.start
+#!/bin/sh
+sh /var/towercomputers/installer/install-host.sh
+EOF
+chmod +x "$tmp"/etc/local.d/install-host.start
+
+mkdir -p "$tmp"/etc/apk
+cat <<EOF > "$tmp"/etc/apk/world
+toweros-host
+EOF
+
 # install services
 rc_add devfs sysinit
 rc_add dmesg sysinit

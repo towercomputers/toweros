@@ -13,12 +13,13 @@ from towerlib.utils.shell import (
     cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl,
+    scp, ssh, runuser,
 )
 
 from towerlib import utils, config
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
-from towerlib.config import TOWER_DIR, HOST_ALPINE_BRANCH
+from towerlib.config import TOWER_DIR, HOST_ALPINE_BRANCH, APK_LOCAL_REPOSITORY
 from towerlib.utils.exceptions import LockException, BuildException
 
 mkfs_ext4 = Command('mkfs.ext4')
@@ -27,21 +28,27 @@ fsck_ext4 = Command('fsck.ext4')
 logger = logging.getLogger('tower')
 
 WORKING_DIR = os.path.join(os.path.expanduser('~'), 'build-toweros-host-work')
-INSTALLER_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'toweros-installers', 'toweros-host')
+NOPYFILES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'nopyfiles')
+REPO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
+TMP_DIR = tempfile.gettempdir()
 
+BUILDER_HOST = "builder"
 USERNAME = getpass.getuser()
 ARCH = "aarch64"
 
 def sprint(value):
     print(value, end='', flush=True)
 
+
 def wdir(path):
     return os.path.join(WORKING_DIR, path)
+
 
 def prepare_working_dir():
     if os.path.exists(WORKING_DIR):
         raise LockException(f"f{WORKING_DIR} already exists! Is another build in progress? If not, delete this folder and try again.")
     os.makedirs(WORKING_DIR)
+
 
 def fetch_apk_packages(repo_path, branch, packages):
     apk(
@@ -52,11 +59,9 @@ def fetch_apk_packages(repo_path, branch, packages):
         '-o', repo_path, *packages, _out=logger.debug
     )
 
-def prepare_apk_repos(private_key_path):
-    repo_path = wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/")
-    rm('-rf', repo_path)
-    mkdir('-p',repo_path)
-    world_path = os.path.join(INSTALLER_DIR, 'etc', 'apk', 'world')
+
+def download_apk_packages(repo_path):
+    world_path = os.path.join(REPO_PATH, 'tower-apks', 'toweros-host', 'world')
     apks = []
     for line in cat(world_path, _iter=True):
         package = line.strip()
@@ -65,13 +70,41 @@ def prepare_apk_repos(private_key_path):
         apks.append(line.strip())
     # download packages
     fetch_apk_packages(repo_path, HOST_ALPINE_BRANCH, apks)
+
+
+def build_brcrm_cm4_apk(repo_path):
     # build and copy linux-firmware-brcm-cm4
     Command('sh')(
         '-c',
         f'runuser -u {USERNAME} -- abuild -r',
-        _cwd=os.path.join(INSTALLER_DIR, 'linux-firmware-brcm-cm4')
+        _cwd=f"{REPO_PATH}/tower-apks/linux-firmware-brcm-cm4"
     )
-    cp("/home/tower/packages/toweros-host/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
+    cp(f"{APK_LOCAL_REPOSITORY}/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
+
+
+def build_toweros_host_apk(repo_path):
+    out = {"_out": logger.debug, "_err_to_out": True}
+    with runuser.bake('-u', USERNAME, '--'):
+        ssh(BUILDER_HOST, 'sudo apk add alpine-sdk', **out)
+        ssh(BUILDER_HOST, f'sudo addgroup {USERNAME} abuild', **out)
+        ssh(BUILDER_HOST, 'rm -rf .abuild tower-apks tower-lib', **out)
+        scp('-r', f'{REPO_PATH}/tower-apks', f'{BUILDER_HOST}:', **out)
+        scp('-r', f'{REPO_PATH}/tower-lib', f'{BUILDER_HOST}:', **out)
+        scp('-r', f'/home/{USERNAME}/.abuild', f'{BUILDER_HOST}:', **out)
+        ssh(BUILDER_HOST, 'sudo cp .abuild/*.pub /etc/apk/keys/', **out)
+        ssh(BUILDER_HOST, 'cd tower-apks/toweros-host && abuild -r', **out)
+        scp(f'{BUILDER_HOST}:packages/tower-apks/{ARCH}/toweros-host-{__version__}-r0.apk', TMP_DIR, **out)
+    cp(f'{TMP_DIR}/toweros-host-{__version__}-r0.apk', repo_path)
+
+
+def prepare_apk_repos(private_key_path):
+    repo_path = wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/")
+    rm('-rf', repo_path)
+    mkdir('-p',repo_path)
+    # download packages
+    build_toweros_host_apk(repo_path)
+    download_apk_packages(repo_path)
+    build_brcrm_cm4_apk(repo_path)
     # prepare index
     apks = glob.glob(wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/*.apk"))
     apk_index_path = wdir(f"EXPORT_BOOTFS_DIR/apks/{ARCH}/APKINDEX.tar.gz")
@@ -79,6 +112,7 @@ def prepare_apk_repos(private_key_path):
     apk(*apk_index_opts, '-o', apk_index_path, *apks, _out=logger.debug)
     # sign index
     abuild_sign('-k', private_key_path, apk_index_path, _out=logger.debug)
+
 
 @clitask("Preparing Alpine Linux system...")
 def prepare_system_image(alpine_tar_path, private_key_path):
@@ -100,23 +134,20 @@ def prepare_system_image(alpine_tar_path, private_key_path):
     # synchronize folder
     sync(wdir("EXPORT_BOOTFS_DIR"))
 
+
 def prepare_overlay(pub_key_path):
-    # put installer in local.d
-    mkdir('-p', wdir("overlay/etc/local.d/"))
-    cp('-r', os.path.join(INSTALLER_DIR, 'etc'), wdir("overlay/"))
-    cp(os.path.join(INSTALLER_DIR, 'installer', 'install-host.sh'), wdir("overlay/etc/local.d/install-host.start"))
-    cp(os.path.join(INSTALLER_DIR, 'installer', 'configure-firewall.sh'), wdir("overlay/etc/local.d/configure-firewall.sh"))
     # put public key used to signe apk index
     mkdir('-p', wdir("overlay/etc/apk/keys/"))
     cp(pub_key_path, wdir(f"overlay/etc/apk/keys/{os.path.basename(pub_key_path)}"))
     # generate the overlay in the boot folder
     Command('sh')(
-        os.path.join(INSTALLER_DIR, 'genapkovl-toweros-host.sh'),
+        os.path.join(NOPYFILES_DIR, 'genapkovl-toweros-host.sh'),
         wdir("overlay"),
         _cwd=wdir("EXPORT_BOOTFS_DIR/"),
         _out=print
     )
     tee(wdir("EXPORT_BOOTFS_DIR/usercfg.txt"), _in=echo("dtoverlay=dwc2,dr_mode=host"))
+
 
 @clitask("Creating RPI partitions...")
 def create_rpi_boot_partition():
@@ -139,6 +170,7 @@ def create_rpi_boot_partition():
     parted('--script', image_file, 'mklabel', 'msdos', _out=logger.debug)
     parted('--script', image_file, 'unit', 'B', 'mkpart', 'primary', 'fat32', boot_part_start, boot_part_end, _out=logger.debug)
 
+
 def create_loop_device(image_file):
     loop_dev = losetup('--show', '--find', '--partscan', image_file).strip()
     retry = 1
@@ -150,6 +182,7 @@ def create_loop_device(image_file):
         return loop_dev
     raise BuildException("losetup failed; exiting")
 
+
 @clitask("Copying Alpine Linux system in RPI partitions...")
 def prepare_rpi_partitions(loop_dev):
     boot_dev = f"{loop_dev}p1"
@@ -160,6 +193,7 @@ def prepare_rpi_partitions(loop_dev):
     mount('-v', boot_dev, wdir("BOOTFS_DIR"), '-t', 'vfat')
     # copy system in partitions
     rsync('-rtxv', wdir("EXPORT_BOOTFS_DIR/"), wdir("BOOTFS_DIR/"), _out=logger.debug)
+
 
 @clitask("Compressing image with xz...")
 def compress_image(build_dir):
@@ -176,12 +210,14 @@ def compress_image(build_dir):
     chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
 
+
 @clitask("Copying image...")
 def copy_image(build_dir):
     image_path = os.path.join(build_dir or config.TOWER_BUILDS_DIR, datetime.now().strftime(f'toweros-host-{__version__}-%Y%m%d%H%M%S.img'))
     cp(wdir("toweros-host.img"), image_path)
     chown(f"{USERNAME}:{USERNAME}", image_path)
     return image_path
+
 
 def unmount_all():
     utils.lazy_umount(wdir("BOOTFS_DIR"))
