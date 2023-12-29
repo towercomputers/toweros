@@ -50,6 +50,8 @@ def start_vnc_server(host, port, run_cmd):
         '-ncache 20', '-ncache_cr',
         '-input KMBCF',
         '-grabptr', '-grabkbd',
+        '-seldir send,recv',
+        '-capslock',
         f'-env FD_GEOM={resolution[0]}x{resolution[1]}x16',
         f"-env FD_PROG='{run_cmd}'",
         "-env PULSE_SERVER=tcp:localhost:4713",
