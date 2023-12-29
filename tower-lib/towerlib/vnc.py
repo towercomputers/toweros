@@ -49,7 +49,6 @@ def start_vnc_server(host, port, run_cmd, args):
         '-cursor arrow', 
         '-ncache 20', '-ncache_cr',
         '-input KMBCF',
-        '-grabptr', '-grabkbd',
         '-seldir send,recv',
         '-capslock',
         '-nowireframe', '-nowireframelocal', '-nowirecopyrect',
@@ -61,6 +60,8 @@ def start_vnc_server(host, port, run_cmd, args):
     ])
     if args.vnc_speeds:
         vnc_params += f" -speeds {args.vnc_speeds}"
+    if "firefox" in run_cmd or args.vnc_grab:
+        vnc_params += " -grabptr -grabkbd"
     vnc_cmd = f"x11vnc {vnc_params}"
     ssh(
         host,

@@ -37,6 +37,13 @@ def add_args(argparser):
         required=False
     )
     run_parser.add_argument(
+        '--vnc-grab',
+        help="""Grab host keyboard and mouse events (run x11vnc with -grabkbd and -grabptr flags). (Default: False except for Firefox)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
+    run_parser.add_argument(
         '--nx',
         help="""Use `nx` instead `vnc`. (Default: False)""",
         required=False,
