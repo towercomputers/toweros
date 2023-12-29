@@ -52,6 +52,8 @@ def start_vnc_server(host, port, run_cmd, args):
         '-grabptr', '-grabkbd',
         '-seldir send,recv',
         '-capslock',
+        '-nowireframe', '-nowireframelocal', '-nowirecopyrect',
+        '-scrollcopyrect always', '-nodragging', '-allinput',
         f'-env FD_GEOM={resolution[0]}x{resolution[1]}x16',
         f"-env FD_PROG='{run_cmd}'",
         "-env PULSE_SERVER=tcp:localhost:4713",
