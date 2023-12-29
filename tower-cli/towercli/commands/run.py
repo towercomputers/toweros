@@ -32,6 +32,11 @@ def add_args(argparser):
         default=False
     )
     run_parser.add_argument(
+        '--vnc-speeds',
+        help="""The triple rd,bw,lat corresponds to video h/w read rate in MB/sec, network bandwidth to clients in KB/sec, and network latency to clients in milliseconds, respectively. If a value is left blank, e.g. "-speeds ,100,15", then the internal scheme is used to estimate the empty value(s).""",
+        required=False
+    )
+    run_parser.add_argument(
         '--nx',
         help="""Use `nx` instead `vnc`. (Default: False)""",
         required=False,
@@ -166,6 +171,6 @@ def execute(args):
                 waypipe_args += ["--video", args.wp_video]
             gui.run_waypipe(args.host[0], waypipe_args, *args.run_command)
         else:
-            vnc.run(args.host[0], ' '.join(args.run_command), args.uncolored)
+            vnc.run(args.host[0], ' '.join(args.run_command), args)
     else:
         raise TowerException("`tower run` requires a running desktop environment. Use `startw` to start Labwc.")

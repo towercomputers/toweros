@@ -40,7 +40,7 @@ def wait_for_output(_out, expected_output):
             raise ServerTimeoutException(f"x11vnc not ready after {X11VNC_TIMEOUT}s")
     logger.debug(process_output)
 
-def start_vnc_server(host, port, run_cmd):
+def start_vnc_server(host, port, run_cmd, args):
     resolution = get_thinclient_resolution()
     x11vnc_output = StringIO()
     vnc_params = ' '.join([
@@ -57,6 +57,8 @@ def start_vnc_server(host, port, run_cmd):
         "-env PULSE_SERVER=tcp:localhost:4713",
         f"-rfbport {port}",
     ])
+    if args.vnc_speeds:
+        vnc_params += f" -speeds {args.vnc_speeds}"
     vnc_cmd = f"x11vnc {vnc_params}"
     ssh(
         host,
@@ -108,8 +110,8 @@ def on_vnc_initialized(host, run_cmd, session_id, x11vnc_output, callback):
     # wait for window application to be ready
     wait_for_window_id(host, display, run_cmd, session_id, callback)
 
-def initialize_vnc_display(host, port, run_cmd, session_id, parent_window):
-    x11vnc_output = start_vnc_server(host, port, run_cmd)
+def initialize_vnc_display(host, port, run_cmd, session_id, parent_window, args):
+    x11vnc_output = start_vnc_server(host, port, run_cmd, args)
     vnc = GtkVnc.Display()
     #vnc.realize()
     vnc.set_pointer_grab(True)
@@ -193,13 +195,13 @@ def xdo_move_window_to_top_left(host, display, run_cmd):
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class VNCViewer(ColorableWindow):
     # pylint: disable=too-many-arguments
-    def __init__(self, host, port, run_cmd, session_id, uncolored=False):
+    def __init__(self, host, port, run_cmd, session_id, args):
         ColorableWindow.__init__(self)
         self.host = host
         self.port = port
         self.run_cmd = run_cmd
         self.session_id = session_id
-        self.uncolored = uncolored
+        self.uncolored = args.uncolored
         self.display = None
         self.thinclient_resolution = None
         # close event
@@ -212,7 +214,7 @@ class VNCViewer(ColorableWindow):
             self.set_headerbar_color(host_color_name)
         self.set_title(f"[{self.host}] {gen_window_name(run_cmd)}")
         # initialize vnc display
-        initialize_vnc_display(host, port, run_cmd, session_id, self)
+        initialize_vnc_display(host, port, run_cmd, session_id, self, args)
 
     def vnc_display_initialized(self, display, width, height):
         self.display = display
@@ -298,12 +300,12 @@ def find_cmd_path(host, run_cmd):
         raise CommandNotFound(f'Command {run_cmd} not found on host {host}') from exc
 
 
-def run(host, run_cmd, uncolored=False):
+def run(host, run_cmd, args):
     port = str(find_free_port())
     session_id = uuid.uuid1()
     cmd = find_cmd_path(host, run_cmd)
     try:
-        vnc_viewer = VNCViewer(host, port, cmd, session_id, uncolored)
+        vnc_viewer = VNCViewer(host, port, cmd, session_id, args)
         vnc_viewer.run()
     finally:
         cleanup(host, port, session_id)
