@@ -146,7 +146,8 @@ def gen_window_name(run_cmd):
 
 def xdo_get_window_id_cmd(display, run_cmd):
     window_name = gen_window_name(run_cmd)
-    return f'DISPLAY={display} xdotool search --onlyvisible --name "{window_name}"'
+    search_expr = window_name.split('-')[0]
+    return f'DISPLAY={display} xdotool search --onlyvisible --name "{search_expr}"'
 
 def xdo_get_window_id(host, display, run_cmd):
     try:
@@ -272,6 +273,7 @@ def kill_ssh_tunnel(port):
 # all this processes should already be killed when exiting the host application
 # but let's ensure to not have zombie processes
 def cleanup(host, port, session_id):
+    logger.info("Cleaning up...")
     kill_host_application(host, session_id)
     kill_x11vnc(host, port, session_id)
     kill_ssh_tunnel(port)
