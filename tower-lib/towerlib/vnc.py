@@ -48,6 +48,8 @@ def start_vnc_server(host, port, run_cmd):
         '-nopw', '-listen 127.0.0.1',
         '-cursor arrow', 
         '-ncache 20', '-ncache_cr',
+        '-input KMBCF',
+        '-grabptr', '-grabkbd',
         f'-env FD_GEOM={resolution[0]}x{resolution[1]}x16',
         f"-env FD_PROG='{run_cmd}'",
         "-env PULSE_SERVER=tcp:localhost:4713",
@@ -107,7 +109,7 @@ def on_vnc_initialized(host, run_cmd, session_id, x11vnc_output, callback):
 def initialize_vnc_display(host, port, run_cmd, session_id, parent_window):
     x11vnc_output = start_vnc_server(host, port, run_cmd)
     vnc = GtkVnc.Display()
-    vnc.realize()
+    #vnc.realize()
     vnc.set_pointer_grab(True)
     vnc.set_keyboard_grab(True)
     # Example to change grab key combination to Ctrl+Alt+g
@@ -184,6 +186,7 @@ def xdo_move_window_to_top_left(host, display, run_cmd):
         ssh(host, cmd)
     except ErrorReturnCode:
         pass
+
 
 # pylint: disable=too-many-instance-attributes,too-few-public-methods
 class VNCViewer(ColorableWindow):
