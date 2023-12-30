@@ -236,7 +236,7 @@ class VNCViewer(ColorableWindow):
         if not self.thinclient_resolution:
             self.thinclient_resolution = get_thinclient_resolution()
         if not self.uncolored and width < self.thinclient_resolution[0]:
-            width, height = _width - 50, _height - 90
+            width, height = _width - 50, _height - 85
         # resize host application to the size of the vncviewer
         xdo_set_window_size(self.host, self.display, self.run_cmd, width, height)
 
