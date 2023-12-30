@@ -1,0 +1,7 @@
+#!/sbin/openrc-run
+
+name="wl-copy-tunneler"
+command="sh"
+pidfile="/run/wl-copy-tunneler.pid"
+command_args="/var/towercomputers/scripts/wl-copy-tunneler.sh"
+command_background=true

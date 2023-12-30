@@ -1,0 +1,7 @@
+#!/sbin/openrc-run
+
+name="wl-copy-server"
+command="sh"
+pidfile="/run/wl-copy-server.pid"
+command_args="/var/towercomputers/scripts/wl-copy-server.sh"
+command_background=true

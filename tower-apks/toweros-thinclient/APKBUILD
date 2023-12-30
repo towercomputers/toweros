@@ -77,6 +77,9 @@ package() {
     cp -r $srcdir/overlay/* $pkgdir/
     chmod +x $pkgdir/etc/local.d/*.start
     chmod +x $pkgdir/etc/init.d/iptables
+    chmod +x $pkgdir/etc/init.d/wl-copy-server
+    chmod +x $pkgdir/etc/init.d/wl-copy-watch
+    chmod +x $pkgdir/etc/init.d/wl-copy-tunneler
     chmod +x $pkgdir/etc/profile.d/tower-env.sh
     # install host images
     mkdir -p $pkgdir/var/towercomputers/builds
@@ -112,6 +115,10 @@ package() {
     rc_add udev-trigger sysinit
     rc_add udev-settle sysinit
     rc_add udev-postmount default
+    # add clipboard services
+    rc_add wl-copy-server default
+    rc_add wl-copy-watch default
+    rc_add wl-copy-tunneler default
     # save iptables rules
     mkdir -p $pkgdir/etc/iptables
     cp $srcdir/rules-save $pkgdir/etc/iptables/rules-save

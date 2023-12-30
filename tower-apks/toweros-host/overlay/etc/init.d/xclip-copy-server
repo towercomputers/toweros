@@ -1,0 +1,7 @@
+#!/sbin/openrc-run
+
+name="xclip-copy-server"
+command="sh"
+pidfile="/run/xclip-copy-server.pid"
+command_args="/var/towercomputers/scripts/xclip-copy-server.sh"
+command_background=true

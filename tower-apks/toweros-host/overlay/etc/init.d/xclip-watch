@@ -1,0 +1,7 @@
+#!/sbin/openrc-run
+
+name="xclip-watch"
+command="sh"
+pidfile="/run/xclip-watch.pid"
+command_args="/var/towercomputers/scripts/xclip-watch.sh"
+command_background=true

@@ -1,0 +1,7 @@
+#!/sbin/openrc-run
+
+name="wl-copy-watch"
+command="sh"
+pidfile="/run/wl-copy-watch.pid"
+command_args="/var/towercomputers/scripts/wl-copy-watch.sh"
+command_background=true
