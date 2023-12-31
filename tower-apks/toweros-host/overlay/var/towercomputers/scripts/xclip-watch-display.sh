@@ -6,6 +6,7 @@ LAST_CONTENT=$(DISPLAY="$1" runuser -u "$DISPLAY_OWNER" -- xclip -o -sel cl)
 
 while $(DISPLAY="$1" runuser -u "$DISPLAY_OWNER" -- clipnotify -s clipboard); do
     CONTENT=$(DISPLAY="$1" runuser -u "$DISPLAY_OWNER "-- xclip -o -sel cl)
+    CONTENT=${CONTENT:0:1048576}
     if [ "$CONTENT" != "$LAST_CONTENT" ]; then
         echo -n "$CONTENT"| nc -w 1 127.0.0.1 5557
         LAST_CONTENT="$CONTENT"

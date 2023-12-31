@@ -1,6 +1,7 @@
 #!/bin/bash
 
 NEW_CONTENT="$(cat)"
+NEW_CONTENT=${NEW_CONTENT:0:1048576}
 
 if [ "$NEW_CONTENT" == "" ]; then
     exit 0
