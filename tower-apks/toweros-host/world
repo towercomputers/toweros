@@ -39,4 +39,5 @@ procps
 x11vnc
 xvfb
 xdotool
+xclip
 runuser
