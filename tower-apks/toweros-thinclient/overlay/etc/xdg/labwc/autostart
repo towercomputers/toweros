@@ -23,8 +23,6 @@ kanshi >/dev/null 2>&1 &
 sfwbar >/dev/null 2>&1 &
 # wait for waybar to be ready
 sleep 1
-# start copyq
-sh /var/towercomputers/scripts/start-copyq.sh  >/dev/null 2>&1 &
 
 # Lock screen after 5 minutes; turn off display after another 5 minutes.
 #

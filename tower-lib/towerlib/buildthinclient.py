@@ -24,8 +24,6 @@ ALPINE_APORT_REPO = 'https://gitlab.alpinelinux.org/alpine/aports.git'
 
 EDGE_REPO = 'https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/'
 EDGE_APKS = [
-    'copyq-7.1.0-r2.apk',
-    'copyq-doc-7.1.0-r2.apk',
     'sfwbar-1.0_beta13-r0.apk',
     'sfwbar-doc-1.0_beta13-r0.apk',
 ]

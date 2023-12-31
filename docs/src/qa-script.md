@@ -30,7 +30,6 @@
 | `labwc` auto start should be configurable. | Edit the `STARTW_ON_LOGIN` value in `~/.local/tower/osconfig` to "false" and reboot. | `labwc` should not start after login. |
 | The wallpaper should be correctyly displayed | Check the wallpaper. | Tower's logo. |
 | The `sfwbar` menu bar should appear correctly. | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom. |
-| `CopyQ` must be correctly started. | Check the presence of the icon in the taskbar. | ![copyq](img/copyq.png) |
 | Wallpaper should be configurable. | Edit the `WALLPAPER_IMAGE` value in `~/.local/tower/osconfig` and restart `labwc`. | Wallpaper must change. |
 | When `labwc` is open, the screen locker should activate correctly after 5 minutes of inactivity. | Stay inactive 5mn. | Black screen with password prompt. |
 | In the terminal, the screen locker should activate correctly after 5 minutes of inactivity. | Exit `labwc` and stay inactive 5mn. | Black screen with password prompt. |
