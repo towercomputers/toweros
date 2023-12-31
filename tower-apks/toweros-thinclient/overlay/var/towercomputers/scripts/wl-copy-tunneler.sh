@@ -19,6 +19,8 @@ while (true); do
             if [ $(ps -ax | grep "ssh $host -R 5557:localhost:5556 -L " |  grep -vc 'grep') -eq 0 ]; then
                 port=$(get_free_port)
                 runuser -u $WAYLAND_OWNER -- ssh $host -R 5557:localhost:5556 -L $port:localhost:5556 -N &
+                # let's wait ssh to avoid racing conditions
+                sleep 1
             fi
         done
         # find all running tunnels and kill them if their x11vnc process is not running
