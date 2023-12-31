@@ -10,7 +10,7 @@ while (true); do
         rm -f $OLD_CONTENT_FILE
         # watch clipboard for changes
         WATCH_CMD="WAYLAND_DISPLAY=wayland-0 XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR wl-paste --watch sh $SCRIPTS_DIR/wl-copy-publish.sh"
-        runuser -u $WAYLAND_OWNER -- bash -c "$WATCH_CMD"
+        runuser -u "$WAYLAND_OWNER" -- bash -c "$WATCH_CMD"
     fi
     sleep 1
 done

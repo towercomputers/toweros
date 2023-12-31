@@ -18,7 +18,7 @@ while (true); do
         for host in $(ps -ax | grep 'x11vnc -create' | grep -v 'grep' | awk '{print $6}'); do
             if [ $(ps -ax | grep "ssh $host -R 5557:localhost:5556 -L " |  grep -vc 'grep') -eq 0 ]; then
                 port=$(get_free_port)
-                runuser -u $WAYLAND_OWNER -- ssh $host -R 5557:localhost:5556 -L $port:localhost:5556 -N &
+                runuser -u $WAYLAND_OWNER -- ssh "$host" -R 5557:localhost:5556 -L $port:localhost:5556 -N &
                 # let's wait ssh to avoid racing conditions
                 sleep 1
             fi
