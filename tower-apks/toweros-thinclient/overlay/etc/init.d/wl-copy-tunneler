@@ -1,7 +1,20 @@
 #!/sbin/openrc-run
 
 name="wl-copy-tunneler"
-command="sh"
 pidfile="/run/wl-copy-tunneler.pid"
-command_args="/var/towercomputers/scripts/wl-copy-tunneler.sh"
 command_background=true
+
+start() {
+    ebegin "Starting wl-copy-tunneler"
+        sh /var/towercomputers/scripts/wl-copy-tunneler.sh &
+        echo $! > $pidfile
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping wl-copy-tunneler"
+        kill $(cat $pidfile) >/dev/null 2>&1 || true
+        # kill all tunnels
+        ps -ef | grep '\-R 5557:localhost:5556 -L ' | grep -v grep | awk '{{print $2}}' | xargs kill >/dev/null 2>&1 || true
+    eend $?
+}

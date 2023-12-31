@@ -1,7 +1,22 @@
 #!/sbin/openrc-run
 
 name="wl-copy-watch"
-command="sh"
 pidfile="/run/wl-copy-watch.pid"
-command_args="/var/towercomputers/scripts/wl-copy-watch.sh"
 command_background=true
+
+start() {
+    ebegin "Starting wl-copy-watch"
+        sh /var/towercomputers/scripts/wl-copy-watch.sh &
+        echo $! > $pidfile
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping wl-copy-watch"
+        kill $(cat $pidfile) >/dev/null 2>&1 || true
+        # kill all sub processes
+        for pid in $(ps -ax | grep -e 'wl-copy-watch' -e 'wl-copy-publish' | grep -v 'grep' | grep -v 'openrc-run' | awk '{print $1}'); do
+            kill $pid >/dev/null 2>&1 || true
+        done
+    eend $?
+}
