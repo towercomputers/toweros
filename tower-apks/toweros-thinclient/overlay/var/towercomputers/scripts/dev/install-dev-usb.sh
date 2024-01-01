@@ -30,7 +30,7 @@ SCRIPTS_DIR="$(cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P)"
 source $SCRIPTS_DIR/devenv
 
 sh /var/towercomputers/scripts/dev/connect-wifi.sh
-sh /var/towercomputers/scripts/dev/configure-git.sh "$GIT_NAME" "$GIT_EMAIL" "$GIT_KEY_PATH"
+sh /var/towercomputers/scripts/dev/configure-git.sh "$GIT_NAME" "$GIT_EMAIL" "$SCRIPTS_DIR/$GIT_KEY_PATH"
 if [ ! -z "$AUTHORIZED_KEY" ]; then
     sh /var/towercomputers/scripts/dev/open-ssh.sh "$AUTHORIZED_KEY"
 fi
