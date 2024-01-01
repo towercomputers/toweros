@@ -227,6 +227,9 @@ def provision(name, args, upgrade=False):
         check_network(host_config['ONLINE'] == 'true')
     # display warnings
     display_pre_provision_warning(name, boot_device, upgrade)
+    # poweroff host if upgrading
+    if upgrade:
+        sshconf.poweroff(name)
     # ask confirmation
     if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
         return
