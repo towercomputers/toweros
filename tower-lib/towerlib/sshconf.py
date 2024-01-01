@@ -330,3 +330,15 @@ def sync_time(offline_host = None):
     # update thinclient time
     now = ssh(ROUTER_HOSTNAME, 'date').strip()
     Command('sh')('-c', f"sudo date -s '{now}'")
+
+@clitask("Shutting down host `{0}`...")
+def poweroff_host(host):
+    if is_up(host):
+        ssh(host, 'sudo poweroff')
+
+def poweroff(host=None):
+    if host:
+        poweroff_host(host)
+    else:
+        for host in hosts():
+             poweroff_host(host)
