@@ -167,7 +167,6 @@ Here are the different steps performed by `vnc.py` when a user executes `tower r
 
         /usr/bin/xinit /usr/bin/mousepad -- /usr/bin/Xvfb :20 -screen 0 1366x768x16
 
-
 1. Searching for a free port for the VNC server (`vnc_port`).
 
 1. Launching `x11vnc` which shares the virtual screen on `localhost:<vnc_port>`.
