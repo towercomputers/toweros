@@ -68,7 +68,7 @@ def cleanup_offline_host(host):
     offline_cmd(host, "sudo iptables -t nat -F")
 
 def kill_ssh():
-    killcmd = f"ps -ef | grep '{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
+    killcmd = f"ps -ax | grep '{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
     #print(killcmd)
     Command('sh')('-c', killcmd)
 
