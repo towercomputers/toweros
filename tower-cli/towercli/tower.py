@@ -16,6 +16,7 @@ from towercli.commands import (
     mdhelp,
     synctime,
     poweroff,
+    deprovision,
 )
 
 
@@ -52,6 +53,7 @@ def towercli_parser():
     wlanconnect.add_args(subparser)
     version.add_args(subparser)
     poweroff.add_args(subparser)
+    deprovision.add_args(subparser)
     mdhelp.add_args(subparser) # hidden command
     synctime.add_args(subparser) # hidden command
     utils.mdhelp.insert_autocompletion_command(parser) # hidden command

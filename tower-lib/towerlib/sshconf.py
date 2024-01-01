@@ -331,10 +331,12 @@ def sync_time(offline_host = None):
     now = ssh(ROUTER_HOSTNAME, 'date').strip()
     Command('sh')('-c', f"sudo date -s '{now}'")
 
+
 @clitask("Shutting down host `{0}`...")
 def poweroff_host(host):
     if is_up(host):
         ssh(host, 'sudo poweroff')
+
 
 def poweroff(host=None):
     if host:
@@ -342,3 +344,20 @@ def poweroff(host=None):
     else:
         for host in hosts():
              poweroff_host(host)
+
+@clitask("Deleting `{0}` config...")
+def delete_host_config(host):
+    if not exists(host):
+        return
+    config = ssh_config()
+    host_ip = config.host(host)['hostname']
+    config.remove(host)
+    config.write(TOWER_SSH_CONFIG_PATH)
+    if os.path.exists(KNOWN_HOSTS_PATH):
+        sed('-i', f'/{host_ip}/d', KNOWN_HOSTS_PATH)
+    host_dir = os.path.join(TOWER_DIR, 'hosts', host)
+    if os.path.exists(host_dir):
+        Command('sh')('-c', f"rm -rf {host_dir}")
+    status_file = os.path.join(TOWER_DIR, f'{host}_status')
+    if os.path.exists(status_file):
+        Command('sh')('-c', f"rm -f {status_file}")
