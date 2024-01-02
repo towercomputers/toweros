@@ -113,6 +113,7 @@ def on_vnc_initialized(host, run_cmd, session_id, x11vnc_output, callback):
     # wait for window application to be ready
     wait_for_window_id(host, display, run_cmd, session_id, callback)
 
+
 def initialize_vnc_display(host, port, run_cmd, session_id, parent_window, args):
     x11vnc_output = start_vnc_server(host, port, run_cmd, args)
     vnc = GtkVnc.Display()
@@ -181,7 +182,8 @@ def xdo_get_window_size(host, display, run_cmd):
         return None, None
 
 def xdo_set_window_size(host, display, run_cmd, width, height):
-    cmd = f'DISPLAY={display} xdotool windowsize --sync $({xdo_get_window_id_cmd(display, run_cmd)}) {width} {height}'
+    window_name = gen_window_name(run_cmd)
+    cmd = f'DISPLAY={display} python /var/towercomputers/scripts/xdotool-resize.py {window_name} {width} {height}'
     try:
         ssh(host, cmd)
     except ErrorReturnCode:
