@@ -224,10 +224,12 @@ def unmount_all():
     utils.lazy_umount(wdir("EXPORT_BOOTFS_DIR"))
     losetup('-D')
 
+
 @clitask("Cleaning up...")
 def cleanup():
     unmount_all()
     rm('-rf', WORKING_DIR, _out=logger.debug)
+
 
 def prepare_apk_key():
     mkdir('-p', wdir("apk-keys"))
@@ -236,6 +238,7 @@ def prepare_apk_key():
     openssl('genrsa', '-out', private_key_path, '2048')
     openssl('rsa', '-in', private_key_path, '-pubout', '-out', public_key_path)
     return private_key_path, public_key_path
+
 
 @clitask("Building TowerOS-Host image...", timer_message="TowserOS-Host image built in {0}.", sudo=True, task_parent=True)
 def build_image(uncompressed=False, build_dir=None):
@@ -261,6 +264,7 @@ def build_image(uncompressed=False, build_dir=None):
         logger.info("Image ready: %s", image_path)
     return image_path
 
+
 @clitask("Copying {0} in {1}...")
 def copy_image_in_device(image_file, device):
     utils.unmount_all(device)
@@ -279,9 +283,11 @@ def copy_image_in_device(image_file, device):
         raise BuildException("Invalid partitions")
     return boot_part
 
+
 @clitask("Zeroing {0} please be patient...")
 def zeroing_device(device):
     dd('if=/dev/zero', f'of={device}', 'bs=8M', _out=logger.debug)
+
 
 @clitask("Configuring image...")
 def insert_tower_env(boot_part, host_config):
@@ -300,6 +306,7 @@ def insert_tower_env(boot_part, host_config):
         cp(host_keys_path, wdir(f"BOOTFS_DIR/ssh_host_{key_type}_key"))
         cp(f"{host_keys_path}.pub", wdir(f"BOOTFS_DIR/ssh_host_{key_type}_key.pub"))
 
+
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", sudo=True, task_parent=True)
 def burn_image(image_file, device, new_config, zero_device=False):
     try:
@@ -312,5 +319,78 @@ def burn_image(image_file, device, new_config, zero_device=False):
             zeroing_device(device)
         boot_part = copy_image_in_device(image_file, device)
         insert_tower_env(boot_part, host_config)
+    finally:
+        cleanup()
+
+
+@clitask("Copying image {0} to host `{1}`...")
+def copy_image_to_host(image_file, host):
+    scp(image_file, f'{host}:')
+
+@clitask("Zeroing {0} please be patient...")
+def zero_device_in_host(host, device):
+    ssh(host, f'sudo dd if=/dev/zero of={device} bs=8M')
+
+@clitask("Burning image {1} in `{2}`...")
+def copy_image_in_host_device(host, image_file, device):
+    try:
+        buf = StringIO()
+        ssh(host, f'sudo dd if={image_file} of={device} bs=8M', _out=buf)
+    except ErrorReturnCode as exc:
+        error_message = "Error copying image. Please check the boot device integrity and try again with the flag `--zero-device`."
+        logger.error(buf.getvalue())
+        logger.error(error_message)
+        raise BuildException(error_message) from exc
+    # determine partition name
+    boot_part = ssh(host, f"sh -c 'ls {device}*1'").strip()
+    if not boot_part:
+        raise BuildException("Invalid partitions")
+    return boot_part
+
+
+@clitask("Configuring image...")
+def insert_tower_env_in_host(host, boot_part, host_config):
+    # mount boot partition
+    ssh(host, 'sudo mkdir -p /boot')
+    ssh(host, f'sudo mount {boot_part} /boot -t vfat')
+    str_env = "\n".join([f"{key}='{value}'" for key, value in host_config.items()])
+    # insert tower.env file in boot partition
+    tee(wdir("tower.env"), _in=echo(str_env))
+    scp(wdir("tower.env"), f'{host}:')
+    ssh(host, 'sudo mv tower.env /boot/tower.env')
+    # insert luks key in boot partition
+    keys_path = os.path.join(TOWER_DIR, 'hosts', host, "crypto_keyfile.bin")
+    scp(keys_path, f'{host}:')
+    ssh(host, 'sudo mv crypto_keyfile.bin /boot/crypto_keyfile.bin')
+    # insert host ssh keys in boot partition
+    for key_type in ['ecdsa', 'rsa', 'ed25519']:
+        host_keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], f"ssh_host_{key_type}_key")
+        scp(host_keys_path, f'{host}:')
+        ssh(host, f'sudo mv ssh_host_{key_type}_key /boot/ssh_host_{key_type}_key')
+        scp(f"{host_keys_path}.pub", f'{host}:')
+        ssh(host, f'sudo mv ssh_host_{key_type}_key.pub /boot/ssh_host_{key_type}_key.pub')
+
+
+@clitask("Rebooting host `{0}`...")
+def reboot_host(host):
+    ssh(host, "sudo reboot")
+
+
+@clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", task_parent=True) 
+def burn_image_in_host(host, image_file, device, new_config, zero_device=False):
+    try:
+        # make sure the password is not stored in th sd-card
+        host_config = {**new_config}
+        if 'PASSWORD' in host_config:
+            del host_config['PASSWORD']
+        prepare_working_dir()
+        # move image to host and copy it in device
+        ssh(host, 'sudo umount /boot', _ok_code=[0, 1])
+        if zero_device:
+            zero_device_in_host(host, device)
+        copy_image_to_host(image_file, host)
+        boot_part = copy_image_in_host_device(host, image_file, device)
+        insert_tower_env_in_host(host, boot_part, host_config)
+        reboot_host(host)
     finally:
         cleanup()

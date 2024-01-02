@@ -2,15 +2,22 @@ import os
 import secrets
 import logging
 import tempfile
+import json
 
 from passlib.hash import sha512_crypt
 from rich.prompt import Confirm, Prompt
 from rich.text import Text
 from rich import print as rprint
 
-from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd
+from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd, ErrorReturnCode
 from towerlib import utils, buildhost, sshconf, config, install
-from towerlib.utils.exceptions import DiscoveringTimeOut, MissingEnvironmentValue, NetworkException, DiscoveringException
+from towerlib.utils.exceptions import (
+    DiscoveringTimeOut,
+    MissingEnvironmentValue,
+    NetworkException,
+    DiscoveringException,
+    TowerException
+)
 
 logger = logging.getLogger('tower')
 
@@ -126,6 +133,19 @@ def prepare_host_image(image_arg):
     return image_path
 
 
+def find_no_root_device(host):
+    disk_list = json.loads(ssh(host, "lsblk --json").strip())
+    no_root_devices = []
+    for device in disk_list['blockdevices']:
+        if 'children' not in device:
+            no_root_devices.append(f"/dev/{device['name']}")
+            continue
+        if device['children'][0]['name'] != 'lvmcrypt':
+            no_root_devices.append(f"/dev/{device['name']}")
+            continue
+    return no_root_devices
+
+
 def prepare_provision(args, upgrade=False):
     if upgrade:
         # use existing key pair
@@ -133,6 +153,11 @@ def prepare_provision(args, upgrade=False):
         # load configuration
         host_config = sshconf.get_host_config(args.name[0])
         host_config['INSTALLATION_TYPE'] = "upgrade"
+        # determine target device
+        no_root_devices = [args.boot_device] if  args.boot_device else find_no_root_device(args.name[0])
+        if len(no_root_devices) != 1:
+            raise TowerException(f"Unable to determine the boot device for host `{args.name[0]}`. Please specify it with the option `--boot-device`.")
+        boot_device = no_root_devices[0]
     else:
         # generate key pair
         if not args.public_key_path:
@@ -143,9 +168,9 @@ def prepare_provision(args, upgrade=False):
         generate_ssh_host_keys(args.name[0])
         # generate host configuration
         host_config = prepare_host_config(args)
-    # determine target device
-    boot_device = args.boot_device or utils.select_boot_device()
-    check_environment_value('boot-device', boot_device)
+        # determine target device
+        boot_device = args.boot_device or utils.select_boot_device()
+        check_environment_value('boot-device', boot_device)
     # find TowerOS-Host image
     image_path = prepare_host_image(args.image)
     check_environment_value('image', image_path)
@@ -180,12 +205,9 @@ def check_network(online):
         raise NetworkException(f"Unable to connect to the network. Please make sure that the interface `{interface}` is attached to the IP `{host_ip}`.")
 
 
-def display_pre_provision_warning(host, boot_device, upgrade):
+def display_pre_provision_warning(host, boot_device):
     warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the thin client."
-    if not upgrade:
-        warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{host}`"
-    else:
-        warning_message += f"\nWARNING: This will completely re-install TowerOS on the host `{host}`. Your home directory will be preserved."
+    warning_message += f"\nWARNING: This will completely wipe the root device plugged into the host `{host}`"
     warning_text = Text(warning_message, style='red')
     rprint(warning_text)
 
@@ -238,15 +260,47 @@ def prepare_thin_client(host, host_config, private_key_path):
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
 def provision(host, args, upgrade=False):
     # prepare provisioning
-    image_path, boot_device, host_config, private_key_path = prepare_provision(args, upgrade)
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args, False)
     # check network
     if not args.force:
         check_network(host_config['ONLINE'] == 'true')
     # display warnings
-    display_pre_provision_warning(host, boot_device, upgrade)
-    # poweroff host if upgrading
-    if upgrade:
-        sshconf.poweroff(host)
+    display_pre_provision_warning(host, boot_device)
+    # ask confirmation
+    if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
+        return
+    # copy TowerOS-Host image to boot device
+    buildhost.burn_image_in_host(host, image_path, boot_device, host_config, args.zero_device)
+    # save necessary files in Thin Client
+    prepare_thin_client(host, host_config, private_key_path)
+    # display pre discovering message
+    display_pre_discovering_message()
+    # wait for host to be ready
+    if not args.no_wait:
+        wait_for_host(host, args.timeout)
+         # sync time
+        if host_config['ONLINE'] == 'false':
+            sshconf.sync_time(host)
+    # display post discovering message
+    display_post_discovering_message(host, host_config['STATIC_HOST_IP'])
+
+
+def display_pre_upgrade_warning(host, boot_device):
+    warning_message = f"WARNING: This will completely wipe the boot device `{boot_device}` plugged into the host `{host}`."
+    warning_message += f"\nWARNING: This will completely re-install TowerOS on the host `{host}`. Your home directory will be preserved."
+    warning_text = Text(warning_message, style='red')
+    rprint(warning_text)
+
+
+@utils.clitask("Upgrading {0}...", timer_message="Host upgraded in {0}.", task_parent=True)
+def upgrade(host, args):
+    # prepare provisioning
+    image_path, boot_device, host_config, private_key_path = prepare_provision(args, True)
+    # check network
+    if not args.force:
+        check_network(host_config['ONLINE'] == 'true')
+    # display warnings
+    display_pre_upgrade_warning(host, boot_device)
     # ask confirmation
     if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
         return
@@ -265,11 +319,11 @@ def provision(host, args, upgrade=False):
     # display post discovering message
     display_post_discovering_message(host, host_config['STATIC_HOST_IP'])
     # re-install packages
-    if upgrade:
-        if not args.no_wait:
-            install.reinstall_all_packages(host)
-        else:
-            rprint(Text("WARNING: Packages were not re-installed. Please re-install them manually when the host is ready", style='red'))
+    if not args.no_wait:
+        install.reinstall_all_packages(host)
+    else:
+        rprint(Text("WARNING: Packages were not re-installed. Please re-install them manually when the host is ready", style='red'))
+
 
 
 utils.clitask("Deprovisioning {0}...", timer_message="Host deprovisioned in {0}.", task_parent=True)

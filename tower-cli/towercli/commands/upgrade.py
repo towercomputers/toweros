@@ -17,6 +17,6 @@ def check_args(args, parser_error):
 
 def execute(args):
     try:
-        provision.provision(args.name[0], args, upgrade=True)
+        provision.upgrade(args.name[0], args)
     except provision.MissingEnvironmentValue as exc:
         sys.exit(str(exc))
