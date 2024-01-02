@@ -64,7 +64,7 @@ Finally delete the container with:
 ```
 [thinclient]$ apk add alpine-base coreutils python3 py3-pip py3-rich sudo openssh dhcpcd avahi \
       avahi-tools wpa_supplicant rsync git iptables rsync lsblk perl-utils xz \
-      musl-locales e2fsprogs-extra nx-libs xsetroot mcookie parted lsscsi figlet \
+      musl-locales e2fsprogs-extra xsetroot mcookie parted lsscsi figlet \
       alpine-sdk build-base apk-tools acct acct-openrc alpine-conf sfdisk busybox \
       fakeroot syslinux xorriso squashfs-tools mtools dosfstools grub-efi abuild \
       agetty runuser nano vim net-tools losetup xorg-server xf86-input-libinput \

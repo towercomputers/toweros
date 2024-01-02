@@ -4,7 +4,6 @@ raspberrypi-bootloader
 linux-firmware-brcm
 linux-firmware-brcm-cm4
 openssl
-nx-libs
 dosfstools
 e2fsprogs
 e2fsprogs-extra

@@ -6,7 +6,7 @@ from sh import (
     sync, rsync, tar, xz,
     ssh as sshcli, scp, ssh_keygen, openssl, abuild, abuild_sign, shasum,
     git as gitcli, pip, apk,
-    nxproxy, xsetroot, mcookie, waypipe,
+    xsetroot, mcookie, waypipe,
     argparse_manpage,
     locale as getlocale,
     doas, runuser,
