@@ -114,7 +114,12 @@ def add_connect_timeout():
 
 
 def hosts():
-    return ssh_config().hosts()
+    hosts = sorted(ssh_config().hosts())
+    # put router in first position
+    if ROUTER_HOSTNAME in hosts:
+        router_index = hosts.index(ROUTER_HOSTNAME)
+        hosts.insert(0, hosts.pop(router_index))
+    return hosts
 
 
 def exists(host):
@@ -169,7 +174,7 @@ def status(host = None, full = True):
                 host_info['cpu-temperature'] = 'N/A'
             host_info['packages-installed'] = ', '.join(get_installed_packages(host))
         return host_info
-    return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])
+    return [status(host, False) for host in hosts()]
 
 
 def display_status(host = None):

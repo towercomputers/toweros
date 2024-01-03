@@ -297,11 +297,6 @@ def display_pre_upgrade_warning(host, boot_device):
 
 @utils.clitask("Upgrading {0}...", timer_message="Host upgraded in {0}.", task_parent=True)
 def upgrade(hosts, args):
-    # put router in first position
-    if config.ROUTER_HOSTNAME in hosts:
-        router_index = hosts.index(config.ROUTER_HOSTNAME)
-        hosts.insert(0, hosts.pop(router_index))
-
     host_params = {}
     for host in hosts:
         if not sshconf.is_up(host):
