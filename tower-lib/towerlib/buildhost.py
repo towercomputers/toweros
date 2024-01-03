@@ -381,7 +381,7 @@ def reboot_host(host):
         time.sleep(1)
 
 
-@clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", task_parent=True) 
+@clitask("Installing TowserOS-Host on {0}...", timer_message="TowserOS-Host installed in {0}.", task_parent=True) 
 def burn_image_in_host(host, image_file, device, new_config, zero_device=False):
     try:
         # make sure the password is not stored in th sd-card

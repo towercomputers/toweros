@@ -23,15 +23,22 @@ def upgrade_parser(argparser):
 
 def add_args(argparser, upgrade=False):
     parser = upgrade_parser(argparser) if upgrade else provision_parser(argparser)
-
-    parser.add_argument(
-        'name',
-        nargs=1,
-        help="""Host's name, used to refer to the host when performing other actions (Required)"""
-    )
+    if not upgrade:
+        parser.add_argument(
+            'name',
+            nargs=1,
+            help="""Host's name, used to refer to the host when performing other actions. (Required)"""
+        )
+    else:
+        parser.add_argument(
+            '--hosts',
+            nargs='*',
+            help="""Hosts names to upgrade. (Default: all)""",
+            required=False,
+        )
     parser.add_argument(
         '--boot-device',
-        help="""Path to virtual device for the SD card or USB drive""",
+        help="""Path to virtual device for the SD card or USB drive.""",
         required=False,
         default=""
     )
@@ -157,6 +164,7 @@ def add_args(argparser, upgrade=False):
             default=next_color_name
         )
 
+
 def check_common_args(args, parser_error):
     if args.boot_device:
         disk_list = utils.get_device_list()
@@ -175,6 +183,7 @@ def check_common_args(args, parser_error):
         if args.ifname not in interaces:
             parser_error(message=f"Invalid network interface. Must be one of: {', '.join(interaces)}.")
 
+
 def check_locale_args(args, parser_error):
     if args.keyboard_layout:
         if re.match(r'^[a-zA-Z]{2}$', args.keyboard_layout) is None:
@@ -189,6 +198,7 @@ def check_locale_args(args, parser_error):
         if  re.match(r'^[a-z]{2}_[A-Z]{2}$', args.lang) is None:
             parser_error(message="Language invalid. Must be in `<lang>_<country>` format, e.g. `en_US`.")
 
+
 def check_keys_args(args, parser_error):
     if args.public_key_path:
         if not args.private_key_path :
@@ -201,6 +211,7 @@ def check_keys_args(args, parser_error):
             parser_error("You must provide both keys or none.")
         if not os.path.exists(args.private_key_path):
             parser_error("Private_key path invalid.")
+
 
 def check_provision_args(args, parser_error):
     if re.match(r'/^(?![0-9]{1,15}$)[a-z0-9-]{1,15}$/', args.name[0]):
@@ -223,9 +234,11 @@ def check_provision_args(args, parser_error):
     check_keys_args(args, parser_error)
     check_locale_args(args, parser_error)
 
+
 def check_args(args, parser_error):
     check_common_args(args, parser_error)
     check_provision_args(args, parser_error)
+
 
 def execute(args):
     try:

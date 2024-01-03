@@ -232,6 +232,16 @@ def wait_for_host_sshd(host, timeout):
         time.sleep(3)
 
 
+@clitask("Waiting for hosts {0} to be ready...")
+def wait_for_hosts_sshd(hosts, timeout):
+    start_time = time.time()
+    while not all([is_up(host) for host in hosts]):
+        duration = time.time() - start_time
+        if timeout and duration > timeout:
+            raise DiscoveringTimeOut("Hosts discovery timeout")
+        time.sleep(3)
+
+
 def get_host_config(host):
     conf_path = os.path.join(TOWER_DIR, 'hosts', host, "tower.env")
     with open(conf_path, 'r', encoding="UTF-8") as file_pointer:
@@ -344,6 +354,7 @@ def poweroff(host=None):
     else:
         for host in hosts():
              poweroff_host(host)
+
 
 @clitask("Deleting `{0}` config...")
 def delete_host_config(host):
