@@ -294,6 +294,8 @@ def display_pre_upgrade_warning(host, boot_device):
 
 @utils.clitask("Upgrading {0}...", timer_message="Host upgraded in {0}.", task_parent=True)
 def upgrade(host, args):
+    if not sshconf.is_up(host):
+        raise TowerException(f"`{host}` is down. Please start it first.")
     # prepare provisioning
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, True)
     # check network
