@@ -21,8 +21,10 @@ APK_REPOS_URL = [
 ]
 LOCAL_TUNNELING_PORT = 8666
 
+
 def sprint(value):
     print(value.decode("utf-8", 'ignore') if isinstance(value, bytes) else value, end='', flush=True)
+
 
 def prepare_repositories_file(host):
     file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
@@ -38,11 +40,13 @@ def prepare_repositories_file(host):
         scp(file_name, f"{host}:~/")
         rm('-f', file_name)
 
+
 def offline_cmd(host, cmd):
     if host == 'thinclient':
         Command('sh')('-c', cmd)
     else:
         ssh(host, cmd)
+
 
 @clitask("Preparing installation...")
 def prepare_offline_host(host):
@@ -54,6 +58,7 @@ def prepare_offline_host(host):
     # add iptables rule to redirect http requests to port
     tunnel_port = LOCAL_TUNNELING_PORT if host == 'thinclient' else 4443
     offline_cmd(host, f"sudo iptables -t nat -A OUTPUT -p tcp -m tcp --dport 80 -j REDIRECT --to-ports {tunnel_port}")
+
 
 def cleanup_offline_host(host):
     # remove temporary apk repositories in thinclient
@@ -67,15 +72,18 @@ def cleanup_offline_host(host):
     # sudo iptables -t nat -D OUTPUT $(sudo iptables -nvL -t nat --line-numbers | grep -m 1 '443 redir ports 4443' | awk '{print $1}'
     offline_cmd(host, "sudo iptables -t nat -F")
 
+
 def kill_ssh():
     killcmd = f"ps -ax | grep '{LOCAL_TUNNELING_PORT}:{APK_REPOS_HOST}:80' | grep -v grep | awk '{{print $1}}' | xargs kill 2>/dev/null || true"
     #print(killcmd)
     Command('sh')('-c', killcmd)
 
+
 @clitask("Cleaning up...")
 def cleanup(host):
     kill_ssh()
     cleanup_offline_host(host)
+
 
 @clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_online_host(host, packages):
@@ -101,6 +109,7 @@ def open_router_tunnel():
     )
     # wait for ssh tunnel to be ready
     time.sleep(1)
+
 
 @clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_offline_host(host, packages):
@@ -128,6 +137,7 @@ def install_in_offline_host(host, packages):
         if error:
             raise TowerException(f"Error while installing packages in {host}")
 
+
 @clitask("Installing {0} in Thin Client...", task_parent=True)
 def install_in_thinclient(packages):
     error = False
@@ -150,11 +160,13 @@ def install_in_thinclient(packages):
         if error:
             raise TowerException("Error while installing packages in Thin Client")
 
+
 def can_install(host):
     if host != "thinclient" and not sshconf.is_up(host):
         raise TowerException(f"`{host}` is down. Please start it first.")
     if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(config.ROUTER_HOSTNAME):
         raise TowerException(f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
+
 
 def install_packages(host, packages):
     can_install(host)
@@ -173,7 +185,7 @@ def install_packages(host, packages):
     else:
         install_in_offline_host(host, packages)
 
-@clitask("Re-installing all packages on {0}...", task_parent=True)
+
 def reinstall_all_packages(host):
     can_install(host)
     packages = get_installed_packages(host)
