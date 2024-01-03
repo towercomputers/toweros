@@ -152,9 +152,9 @@ def install_in_thinclient(packages):
 
 def can_install(host):
     if host != "thinclient" and not sshconf.is_up(host):
-        raise TowerException(message=f"`{host}` is down. Please start it first.")
+        raise TowerException(f"`{host}` is down. Please start it first.")
     if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(config.ROUTER_HOSTNAME):
-        raise TowerException(message=f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
+        raise TowerException(f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
 
 def install_packages(host, packages):
     can_install(host)

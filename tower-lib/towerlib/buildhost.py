@@ -16,7 +16,7 @@ from towerlib.utils.shell import (
     scp, ssh, runuser,
 )
 
-from towerlib import utils, config
+from towerlib import utils, config, sshconf
 from towerlib.utils import clitask
 from towerlib.__about__ import __version__
 from towerlib.config import TOWER_DIR, HOST_ALPINE_BRANCH, APK_LOCAL_REPOSITORY
@@ -323,7 +323,7 @@ def burn_image(image_file, device, new_config, zero_device=False):
         cleanup()
 
 
-@clitask("Copying image {0} to host `{1}`...")
+@clitask("Transfering image {0} to host `{1}`...")
 def copy_image_to_host(image_file, host):
     scp(image_file, f'{host}:')
 
@@ -335,7 +335,7 @@ def zero_device_in_host(host, device):
 def copy_image_in_host_device(host, image_file, device):
     try:
         buf = StringIO()
-        ssh(host, f'sudo dd if={image_file} of={device} bs=8M', _out=buf)
+        ssh(host, f'sudo dd if={os.path.basename(image_file)} of={device} bs=8M', _out=buf, _err_to_out=True)
     except ErrorReturnCode as exc:
         error_message = "Error copying image. Please check the boot device integrity and try again with the flag `--zero-device`."
         logger.error(buf.getvalue())
@@ -350,30 +350,35 @@ def copy_image_in_host_device(host, image_file, device):
 
 @clitask("Configuring image...")
 def insert_tower_env_in_host(host, boot_part, host_config):
+    debug_args = {"_out": logger.debug, "_err_to_out": True}
     # mount boot partition
-    ssh(host, 'sudo mkdir -p /boot')
-    ssh(host, f'sudo mount {boot_part} /boot -t vfat')
+    ssh(host, 'sudo mkdir -p /boot', **debug_args)
+    ssh(host, f'sudo mount {boot_part} /boot -t vfat',**debug_args)
     str_env = "\n".join([f"{key}='{value}'" for key, value in host_config.items()])
     # insert tower.env file in boot partition
     tee(wdir("tower.env"), _in=echo(str_env))
-    scp(wdir("tower.env"), f'{host}:')
-    ssh(host, 'sudo mv tower.env /boot/tower.env')
+    scp(wdir("tower.env"), f'{host}:', **debug_args)
+    ssh(host, 'sudo cp tower.env /boot/tower.env', **debug_args)
     # insert luks key in boot partition
     keys_path = os.path.join(TOWER_DIR, 'hosts', host, "crypto_keyfile.bin")
-    scp(keys_path, f'{host}:')
-    ssh(host, 'sudo mv crypto_keyfile.bin /boot/crypto_keyfile.bin')
+    scp(keys_path, f'{host}:', **debug_args)
+    ssh(host, 'sudo cp crypto_keyfile.bin /boot/crypto_keyfile.bin', **debug_args)
     # insert host ssh keys in boot partition
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
         host_keys_path = os.path.join(TOWER_DIR, 'hosts', host_config['HOSTNAME'], f"ssh_host_{key_type}_key")
-        scp(host_keys_path, f'{host}:')
-        ssh(host, f'sudo mv ssh_host_{key_type}_key /boot/ssh_host_{key_type}_key')
-        scp(f"{host_keys_path}.pub", f'{host}:')
-        ssh(host, f'sudo mv ssh_host_{key_type}_key.pub /boot/ssh_host_{key_type}_key.pub')
+        scp(host_keys_path, f'{host}:', **debug_args)
+        ssh(host, f'sudo cp ssh_host_{key_type}_key /boot/ssh_host_{key_type}_key', **debug_args)
+        scp(f"{host_keys_path}.pub", f'{host}:', **debug_args)
+        ssh(host, f'sudo cp ssh_host_{key_type}_key.pub /boot/ssh_host_{key_type}_key.pub', **debug_args)
+    ssh(host, 'sudo umount /boot', **debug_args)
+    ssh(host, 'sudo rm -rf /boot', **debug_args)
 
 
 @clitask("Rebooting host `{0}`...")
 def reboot_host(host):
     ssh(host, "sudo reboot")
+    while sshconf.is_up(host):
+        time.sleep(1)
 
 
 @clitask("Installing TowserOS-Host on {1}...", timer_message="TowserOS-Host installed in {0}.", task_parent=True) 

@@ -258,7 +258,7 @@ def prepare_thin_client(host, host_config, private_key_path):
 
 
 @utils.clitask("Provisioning {0}...", timer_message="Host provisioned in {0}.", task_parent=True)
-def provision(host, args, upgrade=False):
+def provision(host, args):
     # prepare provisioning
     image_path, boot_device, host_config, private_key_path = prepare_provision(args, False)
     # check network
@@ -270,7 +270,7 @@ def provision(host, args, upgrade=False):
     if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
         return
     # copy TowerOS-Host image to boot device
-    buildhost.burn_image_in_host(host, image_path, boot_device, host_config, args.zero_device)
+    buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
     # save necessary files in Thin Client
     prepare_thin_client(host, host_config, private_key_path)
     # display pre discovering message
@@ -305,7 +305,7 @@ def upgrade(host, args):
     if not args.no_confirm and not Confirm.ask("Do you want to continue?", default=True):
         return
     # copy TowerOS-Host image to boot device
-    buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
+    buildhost.burn_image_in_host(host, image_path, boot_device, host_config, args.zero_device)
     # save necessary files in Thin Client
     prepare_thin_client(host, host_config, private_key_path)
     # display pre discovering message
