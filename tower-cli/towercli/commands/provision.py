@@ -36,6 +36,12 @@ def add_args(argparser, upgrade=False):
             help="""Hosts names to upgrade. (Default: all)""",
             required=False,
         )
+        parser.add_argument(
+            '--install-device',
+            nargs='*',
+            help="""Path to virtual device for the SD card or USB drive.""",
+            required=False,
+        )
     parser.add_argument(
         '--boot-device',
         help="""Path to virtual device for the SD card or USB drive.""",

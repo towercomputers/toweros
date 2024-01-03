@@ -18,7 +18,10 @@ def check_args(args, parser_error):
 
 def execute(args):
     try:
-        hosts = args.hosts if args.hosts else list(sshconf.hosts())
-        provision.upgrade(hosts, args)
+        if args.hosts is None:
+            provision.upgrade_thinclient(args)
+        else:
+            hosts = args.hosts if len(args.hosts) > 0 else list(sshconf.hosts())
+            provision.upgrade(hosts, args)
     except provision.MissingEnvironmentValue as exc:
         sys.exit(str(exc))

@@ -9,7 +9,7 @@ from rich.prompt import Confirm, Prompt
 from rich.text import Text
 from rich import print as rprint
 
-from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd, ErrorReturnCode
+from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd, ErrorReturnCode, scp, Command, doas
 from towerlib import utils, buildhost, sshconf, config, install
 from towerlib.utils.exceptions import (
     DiscoveringTimeOut,
@@ -348,7 +348,48 @@ def upgrade(hosts, args):
         rprint(Text("WARNING: Packages were not re-installed. Please re-install them manually when hosts are ready", style='red'))
 
 
-utils.clitask("Deprovisioning {0}...", timer_message="Host deprovisioned in {0}.", task_parent=True)
+@utils.clitask("Downloading releases file...")
+def get_latest_release_url():
+    releases_filename = os.path.basename(config.RELEASES_URL)
+    ssh(config.ROUTER_HOSTNAME, f"rm -f {releases_filename}")
+    ssh(config.ROUTER_HOSTNAME, f"wget {config.RELEASES_URL}")
+    latest_release_url = ssh(config.ROUTER_HOSTNAME, f"cat {releases_filename}").strip().split("\n")[0]
+    return latest_release_url
+
+
+@utils.clitask("Downloading latest release...")
+def download_latest_release(latest_release_url):
+    latest_release_filename = os.path.basename(latest_release_url)
+    ssh(config.ROUTER_HOSTNAME, f"rm -f {latest_release_filename}")
+    ssh(config.ROUTER_HOSTNAME, f"wget {latest_release_url}")
+    scp(f"{config.ROUTER_HOSTNAME}:{latest_release_filename}", config.TOWER_DIR)
+    Command('sh')('-c', f"sudo mv {config.TOWER_DIR}/{latest_release_filename} {config.TOWER_BUILDS_DIR}")
+    return f"{config.TOWER_BUILDS_DIR}/{latest_release_filename}"
+
+
+@utils.clitask("Upgrading Thin Client...", task_parent=True)
+def upgrade_thinclient(args):
+    # check if `router` is up
+    install.can_install("thinclient")
+    latest_release_url = get_latest_release_url()
+    latest_release_path = download_latest_release(latest_release_url)
+    install_device = args.install_device or utils.select_install_device()
+    with doas:
+        if args.zero_device:
+            buildhost.zero_device(install_device)
+        buildhost.copy_image_in_device(latest_release_path, install_device)
+    warning_message = f"WARNING: This will completely wipe the install device `{install_device}` plugged into the thin client."
+    warning_message += f"\nWARNING: This will completely re-install TowerOS on the thin client. Your home directory will be preserved."
+    rprint(Text(warning_message, style='red'))
+    success_message = f"The `{install_device}` installation device is ready. Make sure it is the only one connected to the thin client and reboot."
+    rprint(Text(success_message, style='green'))
+    # ask confirmation
+    if not args.no_confirm and not Confirm.ask("Do you want to reboot now?", default=True):
+        return
+    Command('sh')('-c', "sudo reboot")
+
+
+@utils.clitask("Deprovisioning {0}...", timer_message="Host deprovisioned in {0}.", task_parent=True)
 def deprovision(host, no_confirm=False):
     confirm_message = f"Are you sure you want to deprovision `{host}`? To confirm please enter the host name `{host}` and press enter"
     contirm_text = Text(confirm_message, style='red')

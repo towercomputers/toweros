@@ -17,6 +17,7 @@ SSH_CONFIG_PATH = os.path.expanduser('~/.ssh/config')
 KNOWN_HOSTS_PATH = os.path.expanduser('~/.ssh/known_hosts')
 DESKTOP_FILES_DIR = os.path.expanduser('~/.local/share/applications')
 APK_LOCAL_REPOSITORY = os.path.expanduser('~/packages/tower-apks')
+RELEASES_URL = "https://raw.githubusercontent.com/towercomputers/toweros/dev/RELEASES"
 COLORS = [
     [39, "White", "ffffff"],
     [31, "Red", "cc0000"],

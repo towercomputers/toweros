@@ -327,9 +327,11 @@ def burn_image(image_file, device, new_config, zero_device=False):
 def copy_image_to_host(image_file, host):
     scp(image_file, f'{host}:')
 
+
 @clitask("Zeroing {0} please be patient...")
 def zero_device_in_host(host, device):
     ssh(host, f'sudo dd if=/dev/zero of={device} bs=8M')
+
 
 @clitask("Burning image {1} in `{2}`...")
 def copy_image_in_host_device(host, image_file, device):
