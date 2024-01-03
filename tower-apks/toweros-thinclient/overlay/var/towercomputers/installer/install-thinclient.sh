@@ -330,6 +330,16 @@ install_secure_boot() {
 }
 
 
+upgrade_hosts() {
+    if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
+        mkdir -p /mnt/home/$USERNAME/.local/
+        cp -r /mnt/home/$USERNAME/.local/tower /home/$USERNAME/.local/
+        chown -R $USERNAME:$USERNAME /home/$USERNAME/
+        runuser -u $USERNAME -- tower upgrade --hosts
+    fi
+}
+
+
 install_thinclient() {
     # make sure /bin and /lib are executable
     chmod 755 /
