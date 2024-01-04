@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import subprocess
+import subprocess # nosec B404
 import json
 import sys
 
@@ -21,7 +21,7 @@ def resize_window(name, width, height):
             run_cmd(["xdotool", "windowsize", '--sync', window_id, width, height])
 
 if __name__ == '__main__':
-    name = sys.argv[1]
-    width = sys.argv[2]
-    height = sys.argv[3]
-    sys.exit(resize_window(name, width, height))
+    window_name = sys.argv[1]
+    window_width = sys.argv[2]
+    window_height = sys.argv[3]
+    sys.exit(resize_window(window_name, window_width, window_height))

@@ -3,7 +3,7 @@ import sys
 
 from towercli.commands import provision as provision_command
 
-from towerlib import provision, sshconf, config
+from towerlib import provision, sshconf
 
 logger = logging.getLogger('tower')
 
@@ -22,6 +22,6 @@ def execute(args):
             provision.upgrade_thinclient(args)
         else:
             hosts = args.hosts if len(args.hosts) > 0 else list(sshconf.hosts())
-            provision.upgrade(hosts, args)
+            provision.upgrade_hosts(hosts, args)
     except provision.MissingEnvironmentValue as exc:
         sys.exit(str(exc))

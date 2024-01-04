@@ -1,6 +1,5 @@
 import os
 import logging
-import re
 
 from towerlib import sshconf
 from towerlib import vnc

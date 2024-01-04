@@ -11,6 +11,7 @@ def add_args(argparser):
         nargs=1,
         help="""Host's name to delete (Required)"""
     )
+    # pylint: disable=duplicate-code
     parser.add_argument(
         '--no-confirm',
         help="""Don't ask for confirmation. (Default: False)""",

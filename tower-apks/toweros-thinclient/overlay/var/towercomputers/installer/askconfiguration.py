@@ -6,6 +6,7 @@ import re
 import sys
 import subprocess # nosec B404
 from base64 import b64encode
+import tempfile
 
 from rich import print as rprint
 from rich.columns import Columns
@@ -336,7 +337,7 @@ def end_upgrade():
     upgradable_hosts_str = ", ".join([f"`{host}`" for host in upgradable_hosts])
     upgradable_hosts_text = Text(f"Do you want to upgrade the following hosts: {upgradable_hosts_str}?", style="purple bold")
     if Confirm.ask(upgradable_hosts_text, default=True):
-        with open("/tmp/upgradable-hosts", 'w', encoding="UTF-8") as fptower:
+        with open(f"{tempfile.gettempdir()}/upgradable-hosts", 'w', encoding="UTF-8") as fptower:
             fptower.write(" ".join(upgradable_hosts))
     else:
         rprint(END_MESSAGE)

@@ -114,12 +114,12 @@ def add_connect_timeout():
 
 
 def hosts():
-    hosts = sorted(ssh_config().hosts())
+    hosts_list = sorted(ssh_config().hosts())
     # put router in first position
-    if ROUTER_HOSTNAME in hosts:
-        router_index = hosts.index(ROUTER_HOSTNAME)
-        hosts.insert(0, hosts.pop(router_index))
-    return hosts
+    if ROUTER_HOSTNAME in hosts_list:
+        router_index = hosts_list.index(ROUTER_HOSTNAME)
+        hosts_list.insert(0, hosts_list.pop(router_index))
+    return hosts_list
 
 
 def exists(host):
@@ -238,9 +238,9 @@ def wait_for_host_sshd(host, timeout):
 
 
 @clitask("Waiting for hosts {0} to be ready...")
-def wait_for_hosts_sshd(hosts, timeout):
+def wait_for_hosts_sshd(hosts_list, timeout):
     start_time = time.time()
-    while not all([is_up(host) for host in hosts]):
+    while not all((is_up(host) for host in hosts_list)):
         duration = time.time() - start_time
         if timeout and duration > timeout:
             raise DiscoveringTimeOut("Hosts discovery timeout")
@@ -357,8 +357,8 @@ def poweroff(host=None):
     if host:
         poweroff_host(host)
     else:
-        for host in hosts():
-             poweroff_host(host)
+        for the_host in hosts():
+            poweroff_host(the_host)
 
 
 @clitask("Deleting `{0}` config...")

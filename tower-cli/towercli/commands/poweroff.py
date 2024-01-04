@@ -1,5 +1,7 @@
 from towerlib import sshconf
 
+from towercli.commands import status as status_command
+
 def add_args(argparser):
     help_message = "Poweroff all hosts."
     status_parser = argparser.add_parser(
@@ -15,11 +17,7 @@ def add_args(argparser):
 
 
 def check_args(args, parser_error):
-    if not args.host:
-        return
-    config = sshconf.get(args.host)
-    if config is None:
-        parser_error("Unknown host.")
+    status_command.check_args(args, parser_error)
 
 
 def execute(args):

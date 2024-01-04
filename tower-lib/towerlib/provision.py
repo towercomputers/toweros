@@ -9,7 +9,7 @@ from rich.prompt import Confirm, Prompt
 from rich.text import Text
 from rich import print as rprint
 
-from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd, ErrorReturnCode, scp, Command, doas
+from towerlib.utils.shell import ssh_keygen, xz, ssh, cp, dd, scp, Command, doas
 from towerlib import utils, buildhost, sshconf, config, install
 from towerlib.utils.exceptions import (
     DiscoveringTimeOut,
@@ -307,7 +307,7 @@ def get_upgradable_hosts():
 
 
 @utils.clitask("Upgrading {0}...", timer_message="Host upgraded in {0}.", task_parent=True)
-def upgrade(hosts, args):
+def upgrade_hosts(hosts, args):
     host_params = {}
     for host in hosts:
         if not sshconf.is_up(host):
@@ -333,7 +333,7 @@ def upgrade(hosts, args):
     for host in hosts:
         # copy TowerOS-Host image to boot device
         buildhost.burn_image_in_host(
-            host, 
+            host,
             host_params[host]['image_path'],
             host_params[host]['boot_device'],
             host_params[host]['host_config'],
@@ -387,10 +387,10 @@ def upgrade_thinclient(args):
     install_device = args.install_device or utils.select_install_device()
     with doas:
         if args.zero_device:
-            buildhost.zero_device(install_device)
+            buildhost.zeroing_device(install_device)
         buildhost.copy_image_in_device(latest_release_path, install_device)
     warning_message = f"WARNING: This will completely wipe the install device `{install_device}` plugged into the thin client."
-    warning_message += f"\nWARNING: This will completely re-install TowerOS on the thin client. Your home directory will be preserved."
+    warning_message += "\nWARNING: This will completely re-install TowerOS on the thin client. Your home directory will be preserved."
     rprint(Text(warning_message, style='red'))
     success_message = f"The `{install_device}` installation device is ready. Make sure it is the only one connected to the thin client and reboot."
     rprint(Text(success_message, style='green'))

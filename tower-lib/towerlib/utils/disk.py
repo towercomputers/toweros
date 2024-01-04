@@ -49,12 +49,12 @@ def select_device(device_name):
     new_devices = list(set(devices_after) - set(devices_before))
 
     if len(new_devices) == 0:
-        logger.error(f"{device_name} device not found.")
+        logger.error("%s device not found.", device_name)
         return None
     if len(new_devices) > 1:
         logger.error("More than one disk found.")
         return None
-    logger.info(f"{device_name} device found: %s", new_devices[0])
+    logger.info("%s device found: %s", device_name, new_devices[0])
     return new_devices[0]
 
 
