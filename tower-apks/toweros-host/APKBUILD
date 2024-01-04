@@ -26,7 +26,6 @@ package() {
     # install overlay files
     mkdir -p $pkgdir
     cp -r $srcdir/overlay/* $pkgdir/
-    chmod +x $pkgdir/etc/init.d/iptables
     chmod +x $pkgdir/etc/init.d/xclip-copy-server
     chmod +x $pkgdir/etc/init.d/xclip-watch
     # add services

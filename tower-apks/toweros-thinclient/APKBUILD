@@ -78,7 +78,6 @@ package() {
     # install overlay files
     cp -r $srcdir/overlay/* $pkgdir/
     chmod +x $pkgdir/etc/local.d/*.start
-    chmod +x $pkgdir/etc/init.d/iptables
     chmod +x $pkgdir/etc/init.d/wl-copy-server
     chmod +x $pkgdir/etc/init.d/wl-copy-watch
     chmod +x $pkgdir/etc/init.d/wl-copy-tunneler

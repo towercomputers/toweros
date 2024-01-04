@@ -170,8 +170,6 @@ EOF
 			echo "nameserver 8.8.4.4" >> /etc/resolv.conf
 		fi
 	fi
-
-	chmod a+x /etc/init.d/*
 	
 	# setup services
 	rc-update add iptables default
