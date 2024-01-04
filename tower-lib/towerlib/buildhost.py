@@ -222,13 +222,14 @@ def copy_image(build_dir):
 def unmount_all():
     utils.lazy_umount(wdir("BOOTFS_DIR"))
     utils.lazy_umount(wdir("EXPORT_BOOTFS_DIR"))
-    losetup('-D')
 
 
 @clitask("Cleaning up...")
-def cleanup():
+def cleanup(loopdev = None):
     unmount_all()
     rm('-rf', WORKING_DIR, _out=logger.debug)
+    if loopdev:
+        losetup('-d', loopdev)
 
 
 def prepare_apk_key():
@@ -259,7 +260,7 @@ def build_image(uncompressed=False, build_dir=None):
         else:
             image_path = compress_image(build_dir)
     finally:
-        cleanup()
+        cleanup(loop_dev)
     if image_path:
         logger.info("Image ready: %s", image_path)
     return image_path
