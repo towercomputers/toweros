@@ -19,8 +19,10 @@ build() {
     # build tower-lib and tower-cli
 	cd $ROOT_DIR/tower-lib
     hatchling build -t wheel
+    sudo pip install -e . --break-system-packages
     cd $ROOT_DIR/tower-cli
     hatchling build -t wheel
+    sudo pip install -e . --break-system-packages
     # put built packages in srcdir
     cp $ROOT_DIR/tower-lib/dist/tower_lib-$pkgver-py3-none-any.whl $srcdir
     cp $ROOT_DIR/tower-cli/dist/tower_cli-$pkgver-py3-none-any.whl $srcdir
