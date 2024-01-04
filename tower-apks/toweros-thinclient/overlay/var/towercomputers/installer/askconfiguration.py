@@ -13,6 +13,8 @@ from rich.text import Text
 from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
+from towerlib import provision
+
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
 with open(LOCALE_FILE, "r", encoding="UTF-8") as file_pointer:
     LOCALE = json.load(file_pointer)
@@ -20,6 +22,7 @@ with open(LOCALE_FILE, "r", encoding="UTF-8") as file_pointer:
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
+END_MESSAGE = Text("Be sure to remove the drive that contains the installation image. Then press \"Enter\" to reboot.", style="purple bold")
 
 
 def run_cmd(cmd, to_json=False):
@@ -310,12 +313,42 @@ def ask_config():
     return config
 
 
-def congratulations():
+def end_install():
     print_header()
     print("\n")
     rprint(Text("Congratulations! TowerOS-ThinClient has been successfully installed.", style="green bold"))
     print("\n")
-    rprint(Text("Be sure to remove the drive that contains the installation image. Then press \"Enter\" to reboot.", style="purple bold"))
+    rprint(END_MESSAGE)
+    input()
+
+
+def end_upgrade():
+    print_header()
+    print("\n")
+    rprint(Text("Congratulations! TowerOS-ThinClient has been successfully installed.", style="green bold"))
+    print("\n")
+    upgradable_hosts = provision.get_upgradable_hosts()
+    if len(upgradable_hosts) == 0:
+        rprint(Text("No hosts are upgradable.", style="purple bold"))
+        rprint(END_MESSAGE)
+        input()
+        return
+    upgradable_hosts_str = ", ".join([f"`{host}`" for host in upgradable_hosts])
+    upgradable_hosts_text = Text(f"Do you want to upgrade the following hosts: {upgradable_hosts_str}?", style="purple bold")
+    if Confirm.ask(upgradable_hosts_text, default=True):
+        with open("/tmp/upgradable-hosts", 'w', encoding="UTF-8") as fptower:
+            fptower.write(" ".join(upgradable_hosts))
+    else:
+        rprint(END_MESSAGE)
+        input()
+
+
+def end_hosts_upgrade():
+    print_header()
+    print("\n")
+    rprint(Text("Congratulations! TowerOS-Host has been successfully installed in hosts.", style="green bold"))
+    print("\n")
+    rprint(END_MESSAGE)
     input()
 
 
@@ -328,6 +361,10 @@ def main():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1 and sys.argv[1] == "congratulations":
-        sys.exit(congratulations())
+    if len(sys.argv) > 1 and sys.argv[1] == "end-install":
+        sys.exit(end_install())
+    elif len(sys.argv) > 1 and sys.argv[1] == "end-upgrade":
+        sys.exit(end_upgrade())
+    elif len(sys.argv) > 1 and sys.argv[1] == "end-hosts-upgrade":
+        sys.exit(end_hosts_upgrade())
     sys.exit(main())

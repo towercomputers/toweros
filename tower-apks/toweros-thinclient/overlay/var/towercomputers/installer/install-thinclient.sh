@@ -331,11 +331,24 @@ install_secure_boot() {
 
 
 upgrade_hosts() {
-    if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
-        mkdir -p /mnt/home/$USERNAME/.local/
+    if [ -d /mnt/home/$USERNAME/.local/tower ]; then
+        # move tower configuration
+        mkdir -p /home/$USERNAME/.local/
         cp -r /mnt/home/$USERNAME/.local/tower /home/$USERNAME/.local/
         chown -R $USERNAME:$USERNAME /home/$USERNAME/
-        runuser -u $USERNAME -- tower upgrade --hosts
+        # ask confirmation to upgrade hosts
+        runuser -u $USERNAME -- python $SCRIPT_DIR/askconfiguration.py end-upgrade
+        if [ -f /tmp/upgradable-hosts ]; then
+            # upgrade upgradable hosts
+            runuser -u $USERNAME -- tower upgrade --hosts $(cat /tmp/upgradable-hosts)
+            python $SCRIPT_DIR/askconfiguration.py end-hosts-upgrade
+        fi
+        # move updated tower configuration back
+        cp -r /mnt/home/$USERNAME/.local/tower /home/$USERNAME/.local/
+        chown -R $USERNAME:$USERNAME /home/$USERNAME/
+    else
+        # no tower configuration found
+        python $SCRIPT_DIR/askconfiguration.py end-install
     fi
 }
 
@@ -346,11 +359,18 @@ install_thinclient() {
     chmod 755 /bin
     chmod 755 /lib
     
+    set_configuration
     prepare_drive
     update_live_system
     clone_live_system_to_disk
     install_bootloader
     install_secure_boot
+    if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
+        upgrade_hosts
+    else
+        python $SCRIPT_DIR/askconfiguration.py end-install
+    fi
+    unmount_and_reboot
 }
 
 
@@ -359,7 +379,6 @@ unmount_and_reboot() {
     umount /mnt/boot
     umount /mnt/home
     umount /mnt
-    python $SCRIPT_DIR/askconfiguration.py congratulations
     reboot
 }
 
@@ -380,7 +399,4 @@ set_configuration() {
     fi
 }
 
-
-set_configuration
 install_thinclient
-unmount_and_reboot

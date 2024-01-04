@@ -295,7 +295,7 @@ def display_pre_upgrade_warning(host, boot_device):
     rprint(warning_text)
 
 
-def upgradable_host():
+def get_upgradable_hosts():
     upgradable_hosts = []
     for host in sshconf.hosts():
         if not sshconf.is_up(host):
