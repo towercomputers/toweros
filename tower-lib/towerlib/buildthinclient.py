@@ -1,4 +1,3 @@
-from datetime import datetime
 import logging
 import os
 from os import makedirs
@@ -96,7 +95,7 @@ def prepare_image():
     image_src_path = wdir(f"alpine-tower-{__version__}-x86_64.iso")
     image_dest_path = join_path(
         TOWER_BUILDS_DIR,
-        datetime.now().strftime(f'toweros-thinclient-{__version__}-%Y%m%d%H%M%S-x86_64.iso')
+        f'toweros-thinclient-{__version__}-x86_64.iso'
     )
     with doas:
         cp(image_src_path, image_dest_path)
