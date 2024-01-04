@@ -335,6 +335,7 @@ upgrade_hosts() {
         # move tower configuration
         mkdir -p /home/$USERNAME/.local/
         cp -r /mnt/home/$USERNAME/.local/tower /home/$USERNAME/.local/
+        cp -r /mnt/home/$USERNAME/.ssh /home/$USERNAME/
         chown -R $USERNAME:$USERNAME /home/$USERNAME/
         # ask confirmation to upgrade hosts
         runuser -u $USERNAME -- python $SCRIPT_DIR/askconfiguration.py end-upgrade
