@@ -23,7 +23,7 @@ fi
 if [ "$(tty)" == "/dev/tty1" ]; then
     # ensure actkbd.py is running
     if [ $(ps -ax | grep 'actkbd' | grep -vc 'grep') -eq 0 ]; then
-        /var/towercomputers/scripts/actkbd.py >/dev/null 2>&1 &
+        python /var/towercomputers/scripts/actkbd.py >/dev/null 2>&1 &
     fi
     # ensure supercronic is running
     if [ $(ps -ax | grep 'supercronic' | grep -vc 'grep') -eq 0 ]; then
