@@ -344,7 +344,6 @@ install_secure_boot() {
 
 
 upgrade_hosts() {
-    umount /mnt/boot
     if [ -d /mnt/home/$USERNAME/.local/tower ]; then
         # move tower configuration
         mkdir -p /home/$USERNAME/.local/
@@ -380,6 +379,7 @@ install_thinclient() {
     clone_live_system_to_disk
     install_bootloader
     install_secure_boot
+    umount /mnt/boot
     if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
         upgrade_hosts
     else
