@@ -8,7 +8,7 @@
 ## COMMANDS
 <div style="margin:0 50px">
 <b>tower</b> <u><a href="#tower-provision">provision</a></u><br /><div style="margin:0 50px">Prepare the bootable device needed to provision a host</div><br />
-<b>tower</b> <u><a href="#tower-upgrade">upgrade</a></u><br /><div style="margin:0 50px">Upgrade the Thin Client or hosts to the latest ToweOS version</div><br />
+<b>tower</b> <u><a href="#tower-upgrade">upgrade</a></u><br /><div style="margin:0 50px">Upgrade the thin client or hosts to the latest ToweOS version</div><br />
 <b>tower</b> <u><a href="#tower-install">install</a></u><br /><div style="margin:0 50px">Install an application on a host with APK</div><br />
 <b>tower</b> <u><a href="#tower-run">run</a></u><br /><div style="margin:0 50px">Run an application on the specified host, with the GUI on the thin client.</div><br />
 <b>tower</b> <u><a href="#tower-status">status</a></u><br /><div style="margin:0 50px">Check the status of all hosts in the Tower system.</div><br />
@@ -44,10 +44,10 @@ Options:
 <b>--offline</b><br /><div style="margin:0 50px">Host will *NOT* be able to access the Internet via the router. (Default: False)</div><br />
 <b>--wlan-ssid</b><br /><div style="margin:0 50px">WiFi SSID (Default: same as that currently in use by the thin client)</div><br />
 <b>--wlan-password</b><br /><div style="margin:0 50px">WiFi password (Default: same as that currently currently in use by the thin client)</div><br />
-<b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Yellow)</div><br />
+<b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Green)</div><br />
 </div>
 ### `tower upgrade`
-Upgrade the Thin Client or hosts to the latest ToweOS version
+Upgrade the thin client or hosts to the latest ToweOS version
 <div style="margin:0 50px; font-family:Courier">usage: tower upgrade [-h] [--hosts [HOSTS ...]] [--install-device [INSTALL_DEVICE ...]] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force]</div>
 Options:
 <div style="margin:0 50px">

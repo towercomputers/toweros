@@ -138,7 +138,7 @@ def install_in_offline_host(host, packages):
             raise TowerException(f"Error while installing packages in {host}")
 
 
-@clitask("Installing {0} in Thin Client...", task_parent=True)
+@clitask("Installing {0} in thin client...", task_parent=True)
 def install_in_thinclient(packages):
     error = False
     try:
@@ -158,7 +158,7 @@ def install_in_thinclient(packages):
     finally:
         cleanup("thinclient")
         if error:
-            raise TowerException("Error while installing packages in Thin Client")
+            raise TowerException("Error while installing packages in thin client")
 
 
 def can_install(host):

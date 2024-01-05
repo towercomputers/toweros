@@ -48,7 +48,7 @@ Hosts are configured the same way, but with the following additional rules:
 
 ## Building your own TowerOS Images
 
-### Image for Thin Clients
+### Image for thin clients
 
 `buildthinclient.py` is the module responsible for generating an image of TowerOS with the `build-tower-image thinclient` command, which uses the `mkimage` tool (see <https://wiki.alpinelinux.org/wiki/How_to_make_a_custom_ISO_image_with_mkimage>).
 
@@ -155,10 +155,10 @@ Once a host has been provisioned, it should be accessible with `$ ssh <host>` or
 
 ### VNC Server
 
-`vnc.py` is the module that allows you to use graphical applications installed on the hosts on the Thin Client. As the name suggests, `vnc.py` uses the VNC protocol with the following tools:
+`vnc.py` is the module that allows you to use graphical applications installed on the hosts on the thin clientt. As the name suggests, `vnc.py` uses the VNC protocol with the following tools:
 
 - `xvfb` to run applications in headless mode on hosts.
-- `x11vnc` to share the `xvfb` virtual screen with the Thin Client.
+- `x11vnc` to share the `xvfb` virtual screen with the thin client.
 - `gtk-vnc` as VNC client on the ThinClient.
 
 Here are the different steps performed by `vnc.py` when a user executes `tower run <host> <application_name>`:
@@ -171,15 +171,15 @@ Here are the different steps performed by `vnc.py` when a user executes `tower r
 
 1. Launching `x11vnc` which shares the virtual screen on `localhost:<vnc_port>`.
 
-1. Opening a `ssh` tunnel between the Thin Client and the host:
+1. Opening a `ssh` tunnel between the thin client and the host:
 
         ssh office -L <vnc_port>:localhost:<vnc_port>
 
-1. Opening a custom VNC client based on `gtk-vnc` on the Thin Client.
+1. Opening a custom VNC client based on `gtk-vnc` on the thin client.
 
 ### Custom VNC client
 
-`x11vnc` shares the entire virtual screen and not just the application. To give the impression that the application is running directly on the Thin Client, the VNC client takes care of:
+`x11vnc` shares the entire virtual screen and not just the application. To give the impression that the application is running directly on the thin client, the VNC client takes care of:
 
 - Open the application on the upper left corner of the host virtual screen.
 - When starting, resize the VNC client to the same size as the application.
@@ -192,20 +192,20 @@ For the moment the two disadvantages of this system are:
 
 ### Sharing sound
 
-Sound sharing is done via `pulseaudio`. On the Thin Client the `pulseaudio` server is run with the module which allows it to be accessible on `localhost` via `tcp`:
+Sound sharing is done via `pulseaudio`. On the thin client the `pulseaudio` server is run with the module which allows it to be accessible on `localhost` via `tcp`:
 
 ```
 load-module module-native-protocol-tcp auth-ip-acl=127.0.0.1 auth-anonymous=1
 ```
 
 On the host, the `PULSE_SERVER` variable is configured with `tcp:localhost:4713`.
-Then a `ssh` tunnel is open between the host and the Thin Client:
+Then a `ssh` tunnel is open between the host and the thin client:
 
 ```
 ssh <host> -R 4713:localhost:4713
 ```
 
-This allows sounds played on the host to be automatically redirected to the Thin Client's `pulseaudio` server.
+This allows sounds played on the host to be automatically redirected to the thin client's `pulseaudio` server.
 
 ### Clipboard sharing
 
@@ -214,17 +214,17 @@ On each host there are two services that use `netcat` and `xclip`:
 - `xclip-copy-server`. This service listens on port 5556 and copies received messages to the clipboard of all open `xvfb` virtual displays.
 - `xclip-watch`. This service monitors the clipboard of all open `xvfb` virtual screens and on each change (e.g. when the user presses ctrl-c) sends the contents of the clipboard to port 5557.
 
-On the Thin Client there are 3 services that use `netcat` and `wl-clipboard` (the equivalent of `xclip` for Wayland):
+On the thin client there are 3 services that use `netcat` and `wl-clipboard` (the equivalent of `xclip` for Wayland):
 
-- `wl-copy-server`. This service listens on port 5556 and copies received messages to the Thin Client clipboard.
-- `wl-copy-watch`. This service monitors the Thin Client clipboard and at each change (e.g. when the user presses ctrl-c) sends the contents of the clipboard to a different port for each host. The port used for each host is defined by the `wl-copy-tunneler` service.
+- `wl-copy-server`. This service listens on port 5556 and copies received messages to the thin client clipboard.
+- `wl-copy-watch`. This service monitors the thin client clipboard and at each change (e.g. when the user presses ctrl-c) sends the contents of the clipboard to a different port for each host. The port used for each host is defined by the `wl-copy-tunneler` service.
 - `wl-copy-tunneler`. This service monitors the existence of VNC connection with the hosts and for each of them chooses a free port and opens a double tunnel:
 
         ```
         ssh "$host" -R 5557:localhost:5556 -L $port:localhost:5556 -N
         ```
 
-With all these services running, when the content of a clipboard is modified on an application, it is automatically shared with the Wayland clipboard of the Thin Client and with all the X11 clipboards of the applications open on the hosts (as a reminder there is a `xvfb` server per application, even on the same host).
+With all these services running, when the content of a clipboard is modified on an application, it is automatically shared with the Wayland clipboard of the thin client and with all the X11 clipboards of the applications open on the hosts (as a reminder there is a `xvfb` server per application, even on the same host).
 
 ## Package Management
 

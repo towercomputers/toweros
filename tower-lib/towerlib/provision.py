@@ -250,7 +250,7 @@ def wait_for_host(host, timeout):
 
 
 def prepare_thin_client(host, host_config, private_key_path):
-    # save host configuration in Thin Client
+    # save host configuration in thin client
     save_host_config(host_config)
     if host_config['INSTALLATION_TYPE'] == "upgrade":
         return
@@ -274,7 +274,7 @@ def provision(host, args):
         return
     # copy TowerOS-Host image to boot device
     buildhost.burn_image(image_path, boot_device, host_config, args.zero_device)
-    # save necessary files in Thin Client
+    # save necessary files in thin client
     prepare_thin_client(host, host_config, private_key_path)
     # display pre discovering message
     display_pre_discovering_message()
@@ -342,7 +342,7 @@ def upgrade_hosts(hosts, args):
             host_params[host]['host_config'],
             args.zero_device
         )
-        # save necessary files in Thin Client
+        # save necessary files in thin client
         prepare_thin_client(
             host,
             host_params[host]['host_config'],
@@ -381,7 +381,7 @@ def download_latest_release(latest_release_url):
     return f"{config.TOWER_BUILDS_DIR}/{latest_release_filename}"
 
 
-@utils.clitask("Upgrading Thin Client...", task_parent=True)
+@utils.clitask("Upgrading thin client...", task_parent=True)
 def upgrade_thinclient(args):
     # check if `router` is up
     install.can_install("thinclient")

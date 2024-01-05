@@ -287,7 +287,7 @@ def confirm_config(config):
 def print_header():
     Console().clear()
     title = subprocess.run( # nosec
-        ['figlet', '-w', '160', 'TowerOS - Thin Client'],
+        ['figlet', '-w', '160', 'TowerOS-ThinClient'],
         capture_output=True, encoding="UTF-8", check=False
     ).stdout
     print(title)

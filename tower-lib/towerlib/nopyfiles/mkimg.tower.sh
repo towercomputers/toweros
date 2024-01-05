@@ -4,7 +4,7 @@ profile_tower() {
 	profile_base
 	profile_abbrev="tower"
 	title="TowerOS"
-	desc="TowerOS for Thin Clients."
+	desc="TowerOS for thin clients."
 	image_ext="iso"
 	output_format="iso"
 	arch="x86 x86_64"

@@ -72,7 +72,7 @@ def prepare_tower_apk():
     abuild('-r', _cwd=f"{REPO_PATH}/tower-apks/toweros-thinclient", _err_to_out=True, _out=logger.debug)
 
 
-@clitask("Building Thin Client image, be patient...")
+@clitask("Building thin client image, be patient...")
 def prepare_image():
     # download alpine aports form gitlab
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', ALPINE_APORT_REPO, _cwd=WORKING_DIR)

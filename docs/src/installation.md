@@ -55,7 +55,7 @@ If all of these checks are OK and you still cannot access the host, you must con
 
 ## Thin Client Upgrades
 
-To upgrade the Thin Client use the following command:
+To upgrade the thin client use the following command:
 
 ```
 [thinclient]$ tower upgrade
@@ -69,7 +69,7 @@ Before starting the upgrade, make sure that:
 
 ## Host Upgrades
 
-The hosts are automatically upgraded at the end of the Thin Client upgrade. You can also manually upgrade them with:
+The hosts are automatically upgraded at the end of the thin client upgrade. You can also manually upgrade them with:
 
 ```
 [thinclient]$ tower upgrade --hosts

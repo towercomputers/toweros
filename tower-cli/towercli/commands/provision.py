@@ -15,7 +15,7 @@ def provision_parser(argparser):
     )
 
 def upgrade_parser(argparser):
-    help_message = "Upgrade the Thin Client or hosts to the latest ToweOS version"
+    help_message = "Upgrade the thin client or hosts to the latest ToweOS version"
     return argparser.add_parser(
         'upgrade',
         help=help_message, description=help_message

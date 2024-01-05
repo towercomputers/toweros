@@ -14,9 +14,9 @@ The architecture of TowerOS requires a significant amount of computer hardware t
 
 The TowerOS network can work in three different ways:
 
-- The Thin Client is connected to two switches with two cables.
-- The Thin Client is connected to a switch with two cables.
-- The Thin Client is connected to a switch with a cable.
+- The thin client is connected to two switches with two cables.
+- The thin client is connected to a switch with two cables.
+- The thin client is connected to a switch with a cable.
 
 We strongly recommend using the first way and connecting the offline and online hosts to different switches. This guarantees physical isolation of each network.
 

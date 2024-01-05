@@ -81,7 +81,7 @@ Once the `router` is installed:
 
 | Feature | Action | Result |
 | ------- | ------ | ------ |
-| APK packages can be installed on the Thin Client | `[thinclient]$ tower install thinclient fortune`<br />`[thinclient]$ fortune` | Random message. |
+| APK packages can be installed on the thin client | `[thinclient]$ tower install thinclient fortune`<br />`[thinclient]$ fortune` | Random message. |
 | APK packages can be installed on online host | `[thinclient]$ tower install web fortune`<br />`[thinclient]$ fortune` | Random message. |
 | APK packages can be installed on offline host | `[thinclient]$ tower install office fortune`<br />`[thinclient]$ fortune` | Random message. |
 | Once installed, graphical applications should appear in the `sfwbar` menu with icons. | `[thinclient]$ tower install office galculator` then check the taskbar menu. | ![galculator](img/galculator.png) |

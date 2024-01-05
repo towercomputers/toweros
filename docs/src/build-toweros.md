@@ -2,7 +2,7 @@
 
 Connect to internet and download Github repository as explained in the first paragraph above.
 
-### TowerOS Host
+### TowerOS-Host
 
 ```
 [thinclient]$ cd ~/towercomputers/toweros/tower-build-cli
@@ -11,7 +11,7 @@ Connect to internet and download Github repository as explained in the first par
 
 This will generate a TowerOS-Host image file compressed with xz in `~/.cache/tower/builds/`. Images in this folder will be used by default by the `provision` command (if the `--image` flag is not provided).
 
-### TowerOS Thin Client
+### TowerOS-ThinClient
 
 ```
 [thinclient]$ ./tower-build thinclient
@@ -57,7 +57,7 @@ Finally delete the container with:
               build-tower-image thinclient
 ```
 
-## Build your own custom Thin Client (Linux)
+## Build your own custom thin client (Linux)
 
 ### Install Dependencies
 
