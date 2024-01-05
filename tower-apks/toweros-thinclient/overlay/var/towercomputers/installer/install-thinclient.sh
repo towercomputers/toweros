@@ -206,6 +206,11 @@ configure_user() {
     # copy ETH0_MAC if exists
     mkdir -p /mnt/etc/local.d
     cp /etc/local.d/eth0_mac /mnt/etc/local.d/ || true
+    # install user abuild keys
+    if [ -d /mnt/home/$USERNAME/.abuild ]; then
+        mkdir -p /mnt/etc/apk/keys/
+        cp /mnt/home/$USERNAME/.abuild/*.pub /mnt/etc/apk/keys/
+    fi
 }
 
 
