@@ -1,0 +1,34 @@
+CURRENT_DIR=$(pwd)
+ROOT_DIR="$CURRENT_DIR/../.."
+arch="aarch64"
+pkgname=toweros-host
+pkgver=$(cat $ROOT_DIR/tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
+pkgrel=0
+pkgdesc="TowerOS-Host"
+url="https://toweros.org/"
+license="Apache-2.0"
+depends=$(cat $CURRENT_DIR/world | tr '\n' ' ')
+
+build() {
+    cp -r $CURRENT_DIR/overlay $srcdir/
+}
+
+check() {
+    return 0
+}
+
+rc_add() {
+    mkdir -p "$pkgdir"/etc/runlevels/"$2"
+    ln -sf /etc/init.d/"$1" "$pkgdir"/etc/runlevels/"$2"/"$1"
+}
+
+package() {
+    # install overlay files
+    mkdir -p $pkgdir
+    cp -r $srcdir/overlay/* $pkgdir/
+    chmod +x $pkgdir/etc/init.d/xclip-copy-server
+    chmod +x $pkgdir/etc/init.d/xclip-watch
+    # add services
+    rc_add xclip-copy-server default
+    rc_add xclip-watch default
+}

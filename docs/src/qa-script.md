@@ -30,7 +30,6 @@
 | `labwc` auto start should be configurable. | Edit the `STARTW_ON_LOGIN` value in `~/.local/tower/osconfig` to "false" and reboot. | `labwc` should not start after login. |
 | The wallpaper should be correctyly displayed | Check the wallpaper. | Tower's logo. |
 | The `sfwbar` menu bar should appear correctly. | `[thinclient]$ dbus-launch labwc` | Menu bar must be present on the bottom. |
-| `CopyQ` must be correctly started. | Check the presence of the icon in the taskbar. | ![copyq](img/copyq.png) |
 | Wallpaper should be configurable. | Edit the `WALLPAPER_IMAGE` value in `~/.local/tower/osconfig` and restart `labwc`. | Wallpaper must change. |
 | When `labwc` is open, the screen locker should activate correctly after 5 minutes of inactivity. | Stay inactive 5mn. | Black screen with password prompt. |
 | In the terminal, the screen locker should activate correctly after 5 minutes of inactivity. | Exit `labwc` and stay inactive 5mn. | Black screen with password prompt. |
@@ -82,7 +81,7 @@ Once the `router` is installed:
 
 | Feature | Action | Result |
 | ------- | ------ | ------ |
-| APK packages can be installed on the Thin Client | `[thinclient]$ tower install thinclient fortune`<br />`[thinclient]$ fortune` | Random message. |
+| APK packages can be installed on the thin client | `[thinclient]$ tower install thinclient fortune`<br />`[thinclient]$ fortune` | Random message. |
 | APK packages can be installed on online host | `[thinclient]$ tower install web fortune`<br />`[thinclient]$ fortune` | Random message. |
 | APK packages can be installed on offline host | `[thinclient]$ tower install office fortune`<br />`[thinclient]$ fortune` | Random message. |
 | Once installed, graphical applications should appear in the `sfwbar` menu with icons. | `[thinclient]$ tower install office galculator` then check the taskbar menu. | ![galculator](img/galculator.png) |
@@ -91,7 +90,10 @@ Once the `router` is installed:
 | SSH welcome message is disabled. | `[thinclient]$ ssh <host>` | No message before the prompt. |
 | Graphical applications can be launched via the `sfwbar` menu.  | Click on the desired application. | Application should be launched. |
 | Graphical applications can be launched via the terminal.  | `[thinclient]$ tower <host> run <application>` | Application should be launched. |
+| Graphical applications can be resized.  | `[thinclient]$ tower <host> run <application>` and resize the window. | Application on the host should be resized. |
 | Copy/past is possible between two hosts. | Open two graphicals application on two different host and try a copy/past. | Past must work. |
+| Copy/past is possible from thinclient to host. | Open two graphicals application on the host and the thinclient and try a copy/past. | Past must work. |
+| Copy/past is possible from host to thinclient. | Open two graphicals application on the host and the thinclient and try a copy/past. | Past must work. |
 | Online applications must work correctly on online hosts. | `[thinclient]$ tower web install midori`<br />`[thinclient]$ tower web run midori` | You can browse the web. |
 | `tor` proxy is enabled for online host. | `[thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip` | `{"IsTor":true,"IP":"109.70.100.71"}` |
 | The time on online hosts must be correct. | `[thinclient]$ ssh web date` | The correct date and time. |

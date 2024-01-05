@@ -30,7 +30,7 @@ It is recommended to reserve one of your hosts, for example `storage`, to store 
 
         [thinclient]$ restic -r sftp:storage:backup copy --from-repo sftp:office:backup latest
 
-    Note: here `restic` copies the backup from the `office` host to the Thin Client, and then copies it to the `storage` host. You can optionally clear the cache stored on the Thin Client:
+    Note: here `restic` copies the backup from the `office` host to the thin client, and then copies it to the `storage` host. You can optionally clear the cache stored on the thin client:
         
         [thinclient]$ rm -rf ~/.cache/restic
 

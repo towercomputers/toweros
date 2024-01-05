@@ -6,7 +6,7 @@ To use TowerOS, you must first install the image for the thin client on the devi
 
 1. Download the latest installation image from the **[TowerOS GitHub releases page](https://github.com/towercomputers/toweros/releases/latest)**.
 2. Prepare a bootable USB medium using the above image.
-3. Boot the thin client with the USB drive and follow the on-screen instructions.
+3. Boot the thin client with the USB device and follow the on-screen instructions.
 
 ## Provisioning Hosts
 Hosts are divided into two types: *online* and *offline*. Online hosts live on a separate LAN from offline hosts, and the thin client is connected to both networks. One online host is identified as the “router”, and the router is responsible for providing Internet access to the thin client and all other hosts. If you do not wish to maintain two separate networks, you can simply not provision any offline hosts.
@@ -24,7 +24,7 @@ The first online host that you must provision is the router, which connects to t
 
 1. Insert the root device (SD card or USB key for RPI, M.2 SSD for CM4) into the *host device*.
 2. Insert the boot device (SD card or USB key for RPI, SD card for CM4) into the *thin client*.
-3. Run `[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>` to prepare the host boot drive.
+3. Run `[thinclient]$ tower provision router –wlan-ssid <ssid> –wlan-password <password>` to prepare the host boot device.
 4. Remove the boot device from the thin client and insert it into the target host device.
 5. Turn on the host device.
 6. Wait for the provisioning process to complete (on the thin client).
@@ -55,22 +55,32 @@ If all of these checks are OK and you still cannot access the host, you must con
 
 ## Thin Client Upgrades
 
-To upgrade the thin client, you must proceed in exactly the same way as for the installation and select "Upgrade TowerOS-Thinclient" in the first CLI prompt.
+To upgrade the thin client use the following command:
 
-During an upgrade the system is completely reinstalled. Only the `/home` folder, which contains the TowerOS configuration and keys is kept. If you have data outside of `/home`, make sure to make a backup before starting the upgrade.
+```
+[thinclient]$ tower upgrade
+```
 
+During an upgrade the system is completely reinstalled. Only the `/home` folder, which contains the TowerOS configuration and keys is kept.
+Before starting the upgrade, make sure that:
+
+- If you have data outside of thinclient and/or hosts `/home`, make sure to make a backup.
+- All hosts are turned on with their own boot devices inserted.
 
 ## Host Upgrades
 
-To upgrade a host, run the following command:
+The hosts are automatically upgraded at the end of the thin client upgrade. You can also manually upgrade them with:
 
 ```
-[thinclient]$ tower upgrade <host>
+[thinclient]$ tower upgrade --hosts
+```
+
+or upgrade only some hosts with:
+
+```
+[thinclient]$ tower upgrade --hosts <host1> <host2> ...
 ```
 
 During an upgrade the system is completely reinstalled; only the `/home` folder is kept. If you have data stored on the host outside of `/home`, make sure to make a backup before starting the upgrade.
   
 Once the system has been upgraded, all applications installed with `tower install <host>` are automatically re-installed.
-
-*Note:* Always upgrade the router before other hosts.
-

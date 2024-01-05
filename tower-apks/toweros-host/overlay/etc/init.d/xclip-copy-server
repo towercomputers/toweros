@@ -1,0 +1,22 @@
+#!/sbin/openrc-run
+
+name="xclip-copy-server"
+pidfile="/run/xclip-copy-server.pid"
+command_background=true
+
+start() {
+    ebegin "Starting xclip-copy-server"
+        sh /var/towercomputers/scripts/xclip-copy-server.sh &
+        echo $! > $pidfile
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping xclip-copy-server"
+        kill $(cat $pidfile) >/dev/null 2>&1 || true
+        # kill all sub processes
+        for pid in $(ps -ax | grep -e 'xclip-copy' -e 'xclip -sel c -d :' | grep -v 'grep' | grep -v 'openrc-run' | awk '{print $1}'); do
+            kill $pid >/dev/null 2>&1 || true
+        done
+    eend $?
+}

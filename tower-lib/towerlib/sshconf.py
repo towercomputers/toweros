@@ -24,11 +24,13 @@ from towerlib.config import (
 
 logger = logging.getLogger('tower')
 
+
 def create_ssh_dir():
     ssh_dir = os.path.dirname(SSH_CONFIG_PATH)
     if not os.path.exists(ssh_dir):
         os.makedirs(ssh_dir)
         os.chmod(ssh_dir, 0o700)
+
 
 def insert_include_directive():
     directive = f"Include {TOWER_SSH_CONFIG_PATH}"
@@ -46,14 +48,17 @@ def insert_include_directive():
             file_pointer.write(directive + '\n\n')
         os.chmod(SSH_CONFIG_PATH, 0o600)
 
+
 def ssh_config():
     return read_ssh_config(TOWER_SSH_CONFIG_PATH) if os.path.exists(TOWER_SSH_CONFIG_PATH) else empty_ssh_config_file()
+
 
 def get(host):
     config = ssh_config()
     if host in config.hosts():
         return config.host(host)
     return None
+
 
 def update_known_hosts(host, host_ip):
     if os.path.exists(KNOWN_HOSTS_PATH):
@@ -64,6 +69,7 @@ def update_known_hosts(host, host_ip):
     for key_type in ['ecdsa', 'rsa', 'ed25519']:
         host_key_path = os.path.join(TOWER_DIR, 'hosts', host, f"ssh_host_{key_type}_key.pub")
         Command('sh')('-c', f'echo "{host_ip} $(cat {host_key_path})" >> {KNOWN_HOSTS_PATH}')
+
 
 @clitask(f"Updating Tower config file {TOWER_SSH_CONFIG_PATH}...")
 def update_config(host, host_ip, private_key_path):
@@ -91,31 +97,50 @@ def update_config(host, host_ip, private_key_path):
         Hostname=host_ip,
         User=DEFAULT_SSH_USER,
         IdentityFile=private_key_path,
-        LogLevel="FATAL"
+        LogLevel="FATAL",
+        ConnectTimeout=1,
     )
     if not os.path.exists(TOWER_DIR):
         os.makedirs(TOWER_DIR)
     config.write(TOWER_SSH_CONFIG_PATH)
 
+
+@clitask("Updating ssh config with ConnectTimeout=1...")
+def add_connect_timeout():
+    config = ssh_config()
+    for host in config.hosts():
+        config.set(host, ConnectTimeout=1)
+    config.write(TOWER_SSH_CONFIG_PATH)
+
+
 def hosts():
-    return ssh_config().hosts()
+    hosts_list = sorted(ssh_config().hosts())
+    # put router in first position
+    if ROUTER_HOSTNAME in hosts_list:
+        router_index = hosts_list.index(ROUTER_HOSTNAME)
+        hosts_list.insert(0, hosts_list.pop(router_index))
+    return hosts_list
+
 
 def exists(host):
     return host in hosts()
+
 
 def is_online_host(host):
     if exists(host):
         return get_host_config_value(host, 'ONLINE') == 'true'
     raise UnkownHost(f"Unknown host: {host}")
 
+
 def is_up(host):
     if exists(host):
         try:
-            ssh(host,  '-o', 'ConnectTimeout=2', 'ls') # Running a command over SSH command should tell us if the host is up.
+            ssh(host, 'ls') # Running a command over SSH command should tell us if the host is up.
         except ErrorReturnCode:
             return False
         return True
     raise UnkownHost(f"Unknown host: {host}")
+
 
 def status(host = None, full = True):
     if host:
@@ -149,7 +174,8 @@ def status(host = None, full = True):
                 host_info['cpu-temperature'] = 'N/A'
             host_info['packages-installed'] = ', '.join(get_installed_packages(host))
         return host_info
-    return sorted([status(host, False) for host in hosts()], key=lambda k: k['name'])
+    return [status(host, False) for host in hosts()]
+
 
 def display_status(host = None):
     all_status = status(host)
@@ -188,6 +214,7 @@ def display_status(host = None):
     console = Console()
     console.print(table)
 
+
 def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
     network = ".".join(tower_network.split(".")[0:3]) + "."
     for host_name in hosts():
@@ -199,6 +226,7 @@ def get_next_host_ip(tower_network, first=FIRST_HOST_IP):
                 return get_next_host_ip(tower_network, first=first + 1)
     return f"{network}{first}"
 
+
 @clitask("Waiting for host to be ready...")
 def wait_for_host_sshd(host, timeout):
     start_time = time.time()
@@ -207,6 +235,17 @@ def wait_for_host_sshd(host, timeout):
         if timeout and duration > timeout:
             raise DiscoveringTimeOut("Host discovery timeout")
         time.sleep(3)
+
+
+@clitask("Waiting for host(s) {0} to be ready...")
+def wait_for_hosts_sshd(hosts_list, timeout):
+    start_time = time.time()
+    while not all((is_up(host) for host in hosts_list)):
+        duration = time.time() - start_time
+        if timeout and duration > timeout:
+            raise DiscoveringTimeOut("Hosts discovery timeout")
+        time.sleep(3)
+
 
 def get_host_config(host):
     conf_path = os.path.join(TOWER_DIR, 'hosts', host, "tower.env")
@@ -219,9 +258,11 @@ def get_host_config(host):
         host_config[key] = value
     return host_config
 
+
 def get_host_config_value(host, key):
     host_config = get_host_config(host)
     return host_config.get(key, None)
+
 
 def get_version():
     versions = {
@@ -233,14 +274,17 @@ def get_version():
         versions['hosts'][host_name] = host_config.get('TOWEROS_VERSION', 'N/A')
     return versions
 
+
 def color_name_list():
     return [color[1] for color in COLORS]
+
 
 def color_code(host):
     for color in COLORS:
         if color[1] == host:
             return color[0]
     raise InvalidColor(f"Invalid color name: {host}")
+
 
 def color_hex(code_or_name):
     for color in COLORS:
@@ -252,8 +296,10 @@ def color_hex(code_or_name):
                 return color[2]
     raise InvalidColor(f"Invalid color code or name: {code_or_name}")
 
+
 def get_next_color_name():
     return COLORS[len(hosts()) % len(COLORS)][1]
+
 
 def get_host_color_name(host):
     host_config = get_host_config(host)
@@ -263,10 +309,12 @@ def get_host_color_name(host):
             return color[1]
     return COLORS[0][1]
 
+
 def get_hex_host_color(host):
     host_config = get_host_config(host)
     host_color_code= int(host_config.get('COLOR', COLORS[0][0]))
     return color_hex(host_color_code)
+
 
 def get_installed_packages(host):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
@@ -274,10 +322,12 @@ def get_installed_packages(host):
         return open(apk_world, 'r', encoding="UTF-8").read().strip().split("\n")
     return []
 
+
 def save_installed_packages(host, installed_packages):
     apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
     with open(apk_world, 'w', encoding="UTF-8") as file_pointer:
         file_pointer.write("\n".join(installed_packages))
+
 
 @clitask("Syncing offline host time with `router`...")
 def sync_time(offline_host = None):
@@ -295,3 +345,35 @@ def sync_time(offline_host = None):
     # update thinclient time
     now = ssh(ROUTER_HOSTNAME, 'date').strip()
     Command('sh')('-c', f"sudo date -s '{now}'")
+
+
+@clitask("Shutting down host {0}...")
+def poweroff_host(host):
+    if is_up(host):
+        ssh(host, 'sudo poweroff')
+
+
+def poweroff(host=None):
+    if host:
+        poweroff_host(host)
+    else:
+        for the_host in hosts():
+            poweroff_host(the_host)
+
+
+@clitask("Deleting {0} config...")
+def delete_host_config(host):
+    if not exists(host):
+        return
+    config = ssh_config()
+    host_ip = config.host(host)['hostname']
+    config.remove(host)
+    config.write(TOWER_SSH_CONFIG_PATH)
+    if os.path.exists(KNOWN_HOSTS_PATH):
+        sed('-i', f'/{host_ip}/d', KNOWN_HOSTS_PATH)
+    host_dir = os.path.join(TOWER_DIR, 'hosts', host)
+    if os.path.exists(host_dir):
+        Command('sh')('-c', f"rm -rf {host_dir}")
+    status_file = os.path.join(TOWER_DIR, f'{host}_status')
+    if os.path.exists(status_file):
+        Command('sh')('-c', f"rm -f {status_file}")

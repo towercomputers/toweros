@@ -94,6 +94,7 @@ def gen_md_help(parser):
     for cmd in cli_help['commands']:
         # command name
         md_doc.append(f"### `tower {cmd['name']}`")
+        md_doc.append(cmd["help"])
         # usage
         md_doc.append(md_div_courrier(f"usage: {cmd['usage']}"))
         # required arguments

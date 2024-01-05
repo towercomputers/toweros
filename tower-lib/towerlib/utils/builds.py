@@ -31,9 +31,9 @@ def download_alpine_rpi():
 
 def find_host_image():
     if os.path.isdir(config.TOWER_BUILDS_DIR):
-        compressed_host_images = glob.glob(os.path.join(config.TOWER_BUILDS_DIR, 'toweros-host-*.img'))
+        compressed_host_images = glob.glob(os.path.join(config.TOWER_BUILDS_DIR, 'toweros-host-*.xz'))
         compressed_host_images.sort()
-        uncompressed_host_images = glob.glob(os.path.join(config.TOWER_BUILDS_DIR, 'toweros-host-*.xz'))
+        uncompressed_host_images = glob.glob(os.path.join(config.TOWER_BUILDS_DIR, 'toweros-host-*.img'))
         uncompressed_host_images.sort()
         if compressed_host_images and uncompressed_host_images:
             compressed_name = os.path.basename(compressed_host_images[-1]).replace('.img.xz', '')

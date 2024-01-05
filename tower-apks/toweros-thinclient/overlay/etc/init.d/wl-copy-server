@@ -1,0 +1,22 @@
+#!/sbin/openrc-run
+
+name="wl-copy-server"
+pidfile="/run/wl-copy-server.pid"
+command_background=true
+
+start() {
+    ebegin "Starting wl-copy-server"
+        sh /var/towercomputers/scripts/wl-copy-server.sh &
+        echo $! > $pidfile
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping wl-copy-server"
+        kill $(cat $pidfile) >/dev/null 2>&1 || true
+        # kill all wl-copy processes
+        for pid in $(ps -ax | grep 'wl-copy' | grep -v 'grep' | grep -v 'paste' | grep -v 'watch' | grep -v 'openrc-run' | awk '{print $1}'); do
+            kill $pid >/dev/null 2>&1 || true
+        done
+    eend $?
+}

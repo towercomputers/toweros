@@ -1,7 +1,0 @@
-#!/sbin/openrc-run
-
-name="supercronic"
-command="supercronic"
-pidfile="/run/supercronic.pid"
-command_args="/etc/crontabs/supercronic"
-command_background=true
