@@ -8,7 +8,7 @@
 ## COMMANDS
 <div style="margin:0 50px">
 <b>tower</b> <u><a href="#tower-provision">provision</a></u><br /><div style="margin:0 50px">Prepare the bootable device needed to provision a host</div><br />
-<b>tower</b> <u><a href="#tower-upgrade">upgrade</a></u><br /><div style="margin:0 50px">Prepare the bootable device needed to upgrade a host</div><br />
+<b>tower</b> <u><a href="#tower-upgrade">upgrade</a></u><br /><div style="margin:0 50px">Upgrade the Thin Client or hosts to the latest ToweOS version</div><br />
 <b>tower</b> <u><a href="#tower-install">install</a></u><br /><div style="margin:0 50px">Install an application on a host with APK</div><br />
 <b>tower</b> <u><a href="#tower-run">run</a></u><br /><div style="margin:0 50px">Run an application on the specified host, with the GUI on the thin client.</div><br />
 <b>tower</b> <u><a href="#tower-status">status</a></u><br /><div style="margin:0 50px">Check the status of all hosts in the Tower system.</div><br />
@@ -18,6 +18,7 @@
 <b>tower</b> <u><a href="#tower-deprovision">deprovision</a></u><br /><div style="margin:0 50px">Deprovision a host.</div><br />
 </div>
 ### `tower provision`
+Prepare the bootable device needed to provision a host
 <div style="margin:0 50px; font-family:Courier">usage: tower provision [-h] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force] [--public-key-path PUBLIC_KEY_PATH] [--private-key-path PRIVATE_KEY_PATH] [--password PASSWORD] [--keyboard-layout KEYBOARD_LAYOUT] [--keyboard-variant KEYBOARD_VARIANT] [--timezone TIMEZONE] [--lang LANG] [--online] [--offline] [--wlan-ssid WLAN_SSID] [--wlan-password WLAN_PASSWORD] [--color {White,Red,Green,Yellow,Blue,Magenta,Cyan,Light gray,Light red,Light green,Light yellow,Light blue,Light magenta,Light cyan}] name</div>
 <div style="margin:0 50px"><br />
 <b>name</b><br /><div style="margin:0 50px">Host's name, used to refer to the host when performing other actions. (Required)</div><br />
@@ -46,6 +47,7 @@ Options:
 <b>--color</b><br /><div style="margin:0 50px">Color used for shell prompt and GUI. (Default: sequentially from the list, next: Yellow)</div><br />
 </div>
 ### `tower upgrade`
+Upgrade the Thin Client or hosts to the latest ToweOS version
 <div style="margin:0 50px; font-family:Courier">usage: tower upgrade [-h] [--hosts [HOSTS ...]] [--install-device [INSTALL_DEVICE ...]] [--boot-device BOOT_DEVICE] [--zero-device] [--no-confirm] [--image IMAGE] [--ifname IFNAME] [--no-wait] [--timeout TIMEOUT] [--force]</div>
 Options:
 <div style="margin:0 50px">
@@ -61,12 +63,14 @@ Options:
 <b>--force</b><br /><div style="margin:0 50px">Overwrite the configuration for an existing host (Default: False)</div><br />
 </div>
 ### `tower install`
+Install an application on a host with APK
 <div style="margin:0 50px; font-family:Courier">usage: tower install [-h] host packages [packages ...]</div>
 <div style="margin:0 50px"><br />
 <b>host</b><br /><div style="margin:0 50px">Host to install the package on (Required)</div><br />
 <b>packages</b><br /><div style="margin:0 50px">Package(s) to install (Required).</div><br />
 </div>
 ### `tower run`
+Run an application on the specified host, with the GUI on the thin client.
 <div style="margin:0 50px; font-family:Courier">usage: tower run [-h] [--uncolored] [--vnc-speeds VNC_SPEEDS] [--vnc-grab] host run_command [run_command ...]</div>
 <div style="margin:0 50px"><br />
 <b>host</b><br /><div style="margin:0 50px">Host's name. This name must match the `name` used with the `provision` command. (Required)</div><br />
@@ -79,6 +83,7 @@ Options:
 <b>--vnc-grab</b><br /><div style="margin:0 50px">Grab host keyboard and mouse events (run x11vnc with -grabkbd and -grabptr flags). (Default: False except for Firefox)</div><br />
 </div>
 ### `tower status`
+Check the status of all hosts in the Tower system.
 <div style="margin:0 50px; font-family:Courier">usage: tower status [-h] [--host HOST] [--json]</div>
 Options:
 <div style="margin:0 50px">
@@ -86,6 +91,7 @@ Options:
 <b>--json</b><br /><div style="margin:0 50px">Json output. (Default: False)</div><br />
 </div>
 ### `tower wlan-connect`
+Update WiFi credentials on the router.
 <div style="margin:0 50px; font-family:Courier">usage: tower wlan-connect [-h] --ssid SSID --password PASSWORD</div>
 Options:
 <div style="margin:0 50px">
@@ -93,14 +99,17 @@ Options:
 <b>--password</b><br /><div style="margin:0 50px">WiFi password</div><br />
 </div>
 ### `tower version`
+Get the version of TowerOS installed on the thin client and hosts.
 <div style="margin:0 50px; font-family:Courier">usage: tower version [-h]</div>
 ### `tower poweroff`
+Poweroff all hosts.
 <div style="margin:0 50px; font-family:Courier">usage: tower poweroff [-h] [--host HOST]</div>
 Options:
 <div style="margin:0 50px">
 <b>--host</b><br /><div style="margin:0 50px">Name of the host you want to poweroff.</div><br />
 </div>
 ### `tower deprovision`
+Deprovision a host.
 <div style="margin:0 50px; font-family:Courier">usage: tower deprovision [-h] [--no-confirm] name</div>
 <div style="margin:0 50px"><br />
 <b>name</b><br /><div style="margin:0 50px">Host's name to delete (Required)</div><br />

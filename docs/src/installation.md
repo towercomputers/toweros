@@ -65,11 +65,11 @@ During an upgrade the system is completely reinstalled. Only the `/home` folder,
 Before starting the upgrade, make sure that:
 
 - If you have data outside of thinclient and/or hosts `/home`, make sure to make a backup.
-- That all hosts are turned on with their own boot devices inserted.
+- All hosts are turned on with their own boot devices inserted.
 
 ## Host Upgrades
 
-The hosts are automatically updated at the end of the Thin Client upgrade. You can also manually upgrade them with:
+The hosts are automatically upgraded at the end of the Thin Client upgrade. You can also manually upgrade them with:
 
 ```
 [thinclient]$ tower upgrade --hosts
