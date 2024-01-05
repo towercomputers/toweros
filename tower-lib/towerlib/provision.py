@@ -296,14 +296,17 @@ def display_pre_upgrade_warning(host, boot_device):
 
 
 def get_upgradable_hosts():
-    upgradable_hosts = []
+    upgradable_hosts, no_upgradable_host = [], []
     for host in sshconf.hosts():
         if not sshconf.is_up(host):
+            no_upgradable_host.append(host)
             continue
         no_root_devices = find_no_root_device(host)
         if len(no_root_devices) == 1:
             upgradable_hosts.append(host)
-    return upgradable_hosts
+        else:
+            no_upgradable_host.append(host)
+    return upgradable_hosts, no_upgradable_host
 
 
 @utils.clitask("Upgrading {0}...", timer_message="Host upgraded in {0}.", task_parent=True)

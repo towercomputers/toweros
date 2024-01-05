@@ -339,6 +339,7 @@ install_secure_boot() {
 
 
 upgrade_hosts() {
+    umount /mnt/boot
     if [ -d /mnt/home/$USERNAME/.local/tower ]; then
         # move tower configuration
         mkdir -p /home/$USERNAME/.local/
@@ -385,7 +386,6 @@ install_thinclient() {
 
 unmount_and_reboot() {
     rm -f /mnt/crypto_keyfile.bin
-    umount /mnt/boot
     umount /mnt/home
     umount /mnt
     reboot

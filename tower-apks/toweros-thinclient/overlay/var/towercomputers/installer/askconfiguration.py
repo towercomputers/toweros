@@ -323,20 +323,41 @@ def end_install():
     input()
 
 
+def prepare_hosts_message(no_upgradable_host):
+    no_upgradable_host_str = ", ".join([f"`{host}`" for host in no_upgradable_host])
+    rprint(Text(f"WARNING: The following hosts cannot be upgraded automatically: {no_upgradable_host_str}", style="red bold"))
+    prepare_hosts_message = "Please ensure that the thin client is connected to all host network switches (you may temporarily remove the thin client boot drive if you need to) and that all hosts are turned on with their own boot drives inserted."
+    prepare_hosts_message += "\n\nPress ENTER when you are ready to proceed."
+    rprint(Text(prepare_hosts_message, style="purple"))
+    input()
+
+
 def end_upgrade():
     print_header()
     print("\n")
     rprint(Text("Congratulations! TowerOS-ThinClient has been successfully installed.", style="green bold"))
     print("\n")
-    upgradable_hosts = provision.get_upgradable_hosts()
+
+    upgradable_hosts, no_upgradable_host = provision.get_upgradable_hosts()
+    if len(no_upgradable_host) > 0:
+        prepare_hosts_message(no_upgradable_host)
+        upgradable_hosts, no_upgradable_host = provision.get_upgradable_hosts()
+
     if len(upgradable_hosts) == 0:
         rprint(Text("No hosts are upgradable.", style="purple bold"))
         rprint(END_MESSAGE)
         input()
         return
+
     upgradable_hosts_str = ", ".join([f"`{host}`" for host in upgradable_hosts])
+    no_upgradable_host_str = ", ".join([f"`{host}`" for host in no_upgradable_host])
+    
+    if len(no_upgradable_host) > 0:
+        rprint(Text(f"WARNING: The following hosts will not be upgraded: {no_upgradable_host_str}", style="red bold"))
+    
     upgradable_hosts_text = Text(f"Do you want to upgrade the following hosts: {upgradable_hosts_str}?", style="purple bold")
-    if Confirm.ask(upgradable_hosts_text, default=True):
+    default_answer = len(no_upgradable_host) == 0
+    if Confirm.ask(upgradable_hosts_text, default=default_answer):
         with open(f"{tempfile.gettempdir()}/upgradable-hosts", 'w', encoding="UTF-8") as fptower:
             fptower.write(" ".join(upgradable_hosts))
     else:
