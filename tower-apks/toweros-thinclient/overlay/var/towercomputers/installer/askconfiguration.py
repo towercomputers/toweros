@@ -342,6 +342,7 @@ def end_upgrade():
     upgradable_hosts, no_upgradable_host = provision.get_upgradable_hosts()
     if len(no_upgradable_host) > 0:
         prepare_hosts_message(no_upgradable_host)
+        run_cmd(["doas", "sh", "/etc/local.d/01_init_network.start"])
         upgradable_hosts, no_upgradable_host = provision.get_upgradable_hosts()
 
     if len(upgradable_hosts) == 0:

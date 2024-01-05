@@ -31,7 +31,7 @@ iface eth0:0 inet static
     address 192.168.3.100/24
 EOF
   fi
-  rc-service networking start
+  rc-service networking restart
 }
 
 swap_eth0_with() {
