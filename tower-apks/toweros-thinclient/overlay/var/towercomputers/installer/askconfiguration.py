@@ -326,9 +326,9 @@ def end_install():
 def prepare_hosts_message(no_upgradable_host):
     no_upgradable_host_str = ", ".join([f"`{host}`" for host in no_upgradable_host])
     rprint(Text(f"WARNING: The following hosts cannot be upgraded automatically: {no_upgradable_host_str}", style="red bold"))
-    prepare_hosts_message = "Please ensure that the thin client is connected to all host network switches (you may temporarily remove the thin client boot drive if you need to) and that all hosts are turned on with their own boot drives inserted."
-    prepare_hosts_message += "\n\nPress ENTER when you are ready to proceed."
-    rprint(Text(prepare_hosts_message, style="purple"))
+    prepare_hosts_message_str = "Please ensure that the thin client is connected to all host network switches (you may temporarily remove the thin client boot drive if you need to) and that all hosts are turned on with their own boot drives inserted."
+    prepare_hosts_message_str += "\n\nPress ENTER when you are ready to proceed."
+    rprint(Text(prepare_hosts_message_str, style="purple"))
     input()
 
 
@@ -351,10 +351,10 @@ def end_upgrade():
 
     upgradable_hosts_str = ", ".join([f"`{host}`" for host in upgradable_hosts])
     no_upgradable_host_str = ", ".join([f"`{host}`" for host in no_upgradable_host])
-    
+
     if len(no_upgradable_host) > 0:
         rprint(Text(f"WARNING: The following hosts will not be upgraded: {no_upgradable_host_str}", style="red bold"))
-    
+
     upgradable_hosts_text = Text(f"Do you want to upgrade the following hosts: {upgradable_hosts_str}?", style="purple bold")
     default_answer = len(no_upgradable_host) == 0
     if Confirm.ask(upgradable_hosts_text, default=default_answer):
