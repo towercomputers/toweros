@@ -107,7 +107,7 @@ set_config_from_root_partition() {
     # copy ETH0_MAC if exists
     if [ -f /ROOT/etc/local.d/eth0_mac ]; then
         cp /ROOT/etc/local.d/eth0_mac /etc/local.d/eth0_mac
-        rc-service networking restart
+        sh /etc/local.d/01_init_network.start
     fi
     umount /ROOT
 }
