@@ -24,7 +24,7 @@ check_and_copy_key_from_boot_disk() {
 }
 
 create_lvm_partitions() {
-	# zeroing root drive
+	# zeroing root device
     dd if=/dev/zero of=$LVM_DISK bs=512 count=1 conv=notrunc
 	# copy LUKS key from boot disk
 	cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
@@ -310,7 +310,7 @@ init_configuration() {
 			LVM_DISK=/dev/sda
 		fi
 	else
-		echo "`tower.env` not found. Please ensure the root drive is not bootable, or try booting with the root drive removed for the first part of the boot sequence."
+		echo "`tower.env` not found. Please ensure the root device is not bootable, or try booting with the root device removed for the first part of the boot sequence."
 		exit 1
 	fi
 

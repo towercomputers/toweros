@@ -347,7 +347,7 @@ def sync_time(offline_host = None):
     Command('sh')('-c', f"sudo date -s '{now}'")
 
 
-@clitask("Shutting down host `{0}`...")
+@clitask("Shutting down host {0}...")
 def poweroff_host(host):
     if is_up(host):
         ssh(host, 'sudo poweroff')
@@ -361,7 +361,7 @@ def poweroff(host=None):
             poweroff_host(the_host)
 
 
-@clitask("Deleting `{0}` config...")
+@clitask("Deleting {0} config...")
 def delete_host_config(host):
     if not exists(host):
         return

@@ -50,7 +50,7 @@ Using CM4s and the [DeskPi Super6C Board](https://deskpi.com/collections/deskpi-
 Using standard Raspberry Pi 4B/5s for your system is most appropriate if it does not need to be portable, because of the additional bulk of the Raspberry Pi form factor. If you wish to support offline hosts, then you need two unmanaged switches; otherwise, one will do.
 
 #### Requirements
-- If your system is based on Raspberry PI 4B/5s, you can use either an SD card or a USB key for each file system. Note: The speed of the root file system will have a significant impact on overall system performance. With the Raspberry Pi 4B, getting the best performance requires that a fast USB drive be used for the root file system and that it be connected _via_ the blue USB 3.0 port.
+- If your system is based on Raspberry PI 4B/5s, you can use either an SD card or a USB key for each file system. Note: The speed of the root file system will have a significant impact on overall system performance. With the Raspberry Pi 4B, getting the best performance requires that a fast USB device be used for the root file system and that it be connected _via_ the blue USB 3.0 port.
 - One Ethernet cable per host
 - One unmanaged (gigabit) switch per host network
 - If you are using a PoE switch, you will need one PoE hat per host; if not, a USB hub may be used for power delivery.

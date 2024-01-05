@@ -9,6 +9,6 @@ else
     echo "You can use the \`bat\` tool to view markdown files; For example \`bat ~/docs/usage.md\`." >> /etc/issue
     echo "" >> /etc/issue
     
-    echo "WARNING: For security reasons, make sure to remove the boot drive." >> /etc/issue
+    echo "WARNING: For security reasons, make sure to remove the boot device." >> /etc/issue
     echo "" >> /etc/issue
 fi

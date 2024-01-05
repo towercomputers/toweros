@@ -15,6 +15,7 @@ from rich.prompt import Prompt, Confirm
 from rich.console import Console
 
 from towerlib import provision
+from towerlib.utils.decorators import join_list
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
 with open(LOCALE_FILE, "r", encoding="UTF-8") as file_pointer:
@@ -23,7 +24,7 @@ with open(LOCALE_FILE, "r", encoding="UTF-8") as file_pointer:
 TIMEZONES = LOCALE["timezones"]
 KEYBOARDS = LOCALE["keyboards"]
 LANGS = LOCALE["langs"]
-END_MESSAGE = Text("Be sure to remove the drive that contains the installation image. Then press \"Enter\" to reboot.", style="purple bold")
+END_MESSAGE = Text("Be sure to remove the device that contains the installation image. Then press \"Enter\" to reboot.", style="purple bold")
 
 
 def run_cmd(cmd, to_json=False):
@@ -131,12 +132,12 @@ def get_installation_type():
 
 
 def get_target_drive(upgrade=False):
-    install_title = "Please select the drive you'd like to use for the root device of the thin client"
-    upgrade_title = "Please select the root drive for the thin client"
+    install_title = "Please select the device you'd like to use for the root partition of the thin client"
+    upgrade_title = "Please select the root device for the thin client"
     drive = select_value(
         disk_list(),
         upgrade_title if upgrade else install_title,
-        "Target drive",
+        "Target device",
         no_columns=True
     )
     return drive[drive.index('/dev/'):].split(" ")[0].strip()
@@ -144,14 +145,14 @@ def get_target_drive(upgrade=False):
 
 def get_cryptkey_drive(os_target, upgrade=False):
     no_selected_drives = disk_list(exclude=os_target)
-    please_refresh = '<-- Let me insert a drive and refresh the list!'
+    please_refresh = '<-- Let me insert a device and refresh the list!'
     no_selected_drives.append(please_refresh)
-    install_title = "Please select the drive you'd like to put the disk encryption keyfile on."
-    upgrade_title = "Please select the drive that holds the disk encryption keyfile."
+    install_title = "Please select the device you'd like to put the disk encryption keyfile on."
+    upgrade_title = "Please select the device that holds the disk encryption keyfile."
     drive = select_value(
         no_selected_drives,
         upgrade_title if upgrade else install_title,
-        "Target keyfile drive",
+        "Target keyfile device",
         no_columns=True
     )
     if drive == please_refresh:
@@ -259,8 +260,8 @@ def print_value(label, value):
 def confirm_config(config):
     print_title("Please confirm the current configuration:")
     print_value("Installation type", config['INSTALLATION_TYPE'])
-    print_value("Target drive", config['TARGET_DRIVE'])
-    print_value("Cryptkey drive", config['CRYPTKEY_DRIVE'])
+    print_value("Target device", config['TARGET_DRIVE'])
+    print_value("Cryptkey device", config['CRYPTKEY_DRIVE'])
     if config['INSTALLATION_TYPE'] != 'upgrade':
         print_value("Secure Boot", config['SECURE_BOOT'])
         print_value("Language", config['LANG'])
@@ -326,8 +327,8 @@ def end_install():
 def prepare_hosts_message(no_upgradable_host):
     no_upgradable_host_str = ", ".join([f"`{host}`" for host in no_upgradable_host])
     rprint(Text(f"WARNING: The following hosts cannot be upgraded automatically: {no_upgradable_host_str}", style="red bold"))
-    prepare_hosts_message_str = "Please ensure that the thin client is connected to all host network switches (you may temporarily remove the thin client boot drive if you need to) and that all hosts are turned on with their own boot drives inserted."
-    prepare_hosts_message_str += "\n\nPress ENTER when you are ready to proceed."
+    prepare_hosts_message_str = "Please ensure that the thin client is connected to all host network switches (you may temporarily remove the thin client boot device if you need to) and that all hosts are turned on with their own boot devices inserted."
+    prepare_hosts_message_str += "\nPress ENTER when you are ready to proceed."
     rprint(Text(prepare_hosts_message_str, style="purple"))
     input()
 
@@ -335,7 +336,7 @@ def prepare_hosts_message(no_upgradable_host):
 def end_upgrade():
     print_header()
     print("\n")
-    rprint(Text("Congratulations! TowerOS-ThinClient has been successfully installed.", style="green bold"))
+    rprint(Text("Congratulations! TowerOS-ThinClient has been successfully upgraded.", style="green bold"))
     print("\n")
 
     upgradable_hosts, no_upgradable_host = provision.get_upgradable_hosts()
@@ -349,8 +350,8 @@ def end_upgrade():
         input()
         return
 
-    upgradable_hosts_str = ", ".join([f"`{host}`" for host in upgradable_hosts])
-    no_upgradable_host_str = ", ".join([f"`{host}`" for host in no_upgradable_host])
+    upgradable_hosts_str = join_list(upgradable_hosts)
+    no_upgradable_host_str = join_list(no_upgradable_host)
 
     if len(no_upgradable_host) > 0:
         rprint(Text(f"WARNING: The following hosts will not be upgraded: {no_upgradable_host_str}", style="red bold"))
@@ -368,7 +369,7 @@ def end_upgrade():
 def end_hosts_upgrade():
     print_header()
     print("\n")
-    rprint(Text("Congratulations! TowerOS-Host has been successfully installed in hosts.", style="green bold"))
+    rprint(Text("Congratulations! TowerOS-Host has been successfully upgraded in hosts.", style="green bold"))
     print("\n")
     rprint(END_MESSAGE)
     input()

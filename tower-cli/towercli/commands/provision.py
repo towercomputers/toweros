@@ -39,12 +39,12 @@ def add_args(argparser, upgrade=False):
         parser.add_argument(
             '--install-device',
             nargs='*',
-            help="""Path to virtual device for the SD card or USB drive.""",
+            help="""Path to virtual device for the SD card or USB key.""",
             required=False,
         )
     parser.add_argument(
         '--boot-device',
-        help="""Path to virtual device for the SD card or USB drive.""",
+        help="""Path to virtual device for the SD card or USB key.""",
         required=False,
         default=""
     )

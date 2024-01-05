@@ -215,8 +215,8 @@ def display_pre_discovering_message():
     message = "Boot device ready.\n"
     message += "- Make sure that the host and thin client are connected to the same switch and to the correct interface and network "
     message += f"({config.TOWER_NETWORK_OFFLINE} for offline hosts and {config.TOWER_NETWORK_ONLINE} for online hosts).\n"
-    message += "- Make sure that the host root drive is plugged into the host.\n"
-    message += "- Remove the host boot drive from the thin client and insert it into the host being provisioned.\n"
+    message += "- Make sure that the host root device is plugged into the host.\n"
+    message += "- Remove the host boot device from the thin client and insert it into the host being provisioned.\n"
     message += "- Turn on the host and wait for it to be discovered on the network... (This step can take up to 10 minutes under normal circumstances, depending mostly on the speed of the root device. If the host has still not discovered in that time period, you can troubleshoot by connecting a screen and a keyboard to it.\n"
     rprint(Text(message, style='green'))
 
@@ -309,7 +309,7 @@ def get_upgradable_hosts():
     return upgradable_hosts, no_upgradable_host
 
 
-@utils.clitask("Upgrading {0}...", timer_message="Host upgraded in {0}.", task_parent=True)
+@utils.clitask("Upgrading {0}...", timer_message="Host(s) upgraded in {0}.", task_parent=True)
 def upgrade_hosts(hosts, args):
     host_params = {}
     for host in hosts:

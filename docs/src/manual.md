@@ -22,7 +22,7 @@
 </div>
 Options:
 <div style="margin:0 50px">
-<b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
+<b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB key</div><br />
 <b>--zero-device</b><br /><div style="margin:0 50px">Zero the target device before copying the installation image to it. (Default: False)</div><br />
 <b>--no-confirm</b><br /><div style="margin:0 50px">Don't ask for confirmation. (Default: False)</div><br />
 <b>--image</b><br /><div style="margin:0 50px">Path to installation image</div><br />
@@ -50,7 +50,7 @@ Options:
 </div>
 Options:
 <div style="margin:0 50px">
-<b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB drive</div><br />
+<b>--boot-device</b><br /><div style="margin:0 50px">Path to virtual device for the SD card or USB key</div><br />
 <b>--zero-device</b><br /><div style="margin:0 50px">Zero the target device before copying the installation image to it. (Default: False)</div><br />
 <b>--no-confirm</b><br /><div style="margin:0 50px">Don't ask for confirmation. (Default: False)</div><br />
 <b>--image</b><br /><div style="margin:0 50px">Path to installation image</div><br />

@@ -324,7 +324,7 @@ def burn_image(image_file, device, new_config, zero_device=False):
         cleanup()
 
 
-@clitask("Transfering image {0} to host `{1}`...")
+@clitask("Transferring image {0} to host {1}...")
 def copy_image_to_host(image_file, host):
     scp(image_file, f'{host}:')
 
@@ -334,7 +334,7 @@ def zero_device_in_host(host, device):
     ssh(host, f'sudo dd if=/dev/zero of={device} bs=8M')
 
 
-@clitask("Burning image {1} in `{2}`...")
+@clitask("Burning image {1} in {2}...")
 def copy_image_in_host_device(host, image_file, device):
     try:
         buf = StringIO()
@@ -377,14 +377,14 @@ def insert_tower_env_in_host(host, boot_part, host_config):
     ssh(host, 'sudo rm -rf /boot', **debug_args)
 
 
-@clitask("Rebooting host `{0}`...")
+@clitask("Rebooting host {0}...")
 def reboot_host(host):
     ssh(host, "sudo reboot")
     while sshconf.is_up(host):
         time.sleep(1)
 
 
-@clitask("Installing TowserOS-Host on {0}...", timer_message="TowserOS-Host installed in {0}.", task_parent=True)
+@clitask("Installing TowserOS-Host on host {0}...", timer_message="TowserOS-Host installed in {0}.", task_parent=True)
 def burn_image_in_host(host, image_file, device, new_config, zero_device=False):
     try:
         # make sure the password is not stored in th sd-card

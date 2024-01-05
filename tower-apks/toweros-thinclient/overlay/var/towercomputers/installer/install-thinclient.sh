@@ -13,10 +13,10 @@ update_passord() {
 
 
 initialize_disks() {
-    # zeroing root drive
+    # zeroing root device
     dd if=/dev/zero of=$TARGET_DRIVE bs=512 count=1 conv=notrunc
     parted $TARGET_DRIVE mklabel gpt
-    # zeroing boot drive
+    # zeroing boot device
     dd if=/dev/zero of=$CRYPTKEY_DRIVE bs=512 count=1 conv=notrunc
     parted $CRYPTKEY_DRIVE mklabel gpt
 }

@@ -17,6 +17,7 @@ def exec_task(function, sudo, *args, **kwargs):
     else:
         return function(*args, **kwargs)
 
+
 def get_duration_text(start_time, timer_message, message=""):
     duration = timedelta(seconds=time.time() - start_time)
     if duration.seconds > 0:
@@ -30,12 +31,23 @@ def get_duration_text(start_time, timer_message, message=""):
         return timer_message.format(str_duration)
     return message
 
+
+def join_list(item_list):
+    str_list = ", ".join([f"`{item}`" for item in item_list])
+    return f"[{str_list}]"
+
+def format_arg(arg):
+    if isinstance(arg, list):
+        return join_list(arg)
+    return f"`{arg}`"
+
 def clitask(message=None, timer=True, timer_message="Done in {0}", sudo=False, task_parent=False):
     def decorator(function):
         def new_function(*args, **kwargs):
             if timer:
                 start_time = time.time()
             args_values = list(args) + list(kwargs.values())
+            args_values = [format_arg(arg) for arg in args_values]
             formated_message = message.format(*args_values)
             if task_parent:
                 rich_print(f"[bold blue]{formated_message}")
