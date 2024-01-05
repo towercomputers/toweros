@@ -90,7 +90,10 @@ Once the `router` is installed:
 | SSH welcome message is disabled. | `[thinclient]$ ssh <host>` | No message before the prompt. |
 | Graphical applications can be launched via the `sfwbar` menu.  | Click on the desired application. | Application should be launched. |
 | Graphical applications can be launched via the terminal.  | `[thinclient]$ tower <host> run <application>` | Application should be launched. |
+| Graphical applications can be resized.  | `[thinclient]$ tower <host> run <application>` and resize the window. | Application on the host should be resized. |
 | Copy/past is possible between two hosts. | Open two graphicals application on two different host and try a copy/past. | Past must work. |
+| Copy/past is possible from thinclient to host. | Open two graphicals application on the host and the thinclient and try a copy/past. | Past must work. |
+| Copy/past is possible from host to thinclient. | Open two graphicals application on the host and the thinclient and try a copy/past. | Past must work. |
 | Online applications must work correctly on online hosts. | `[thinclient]$ tower web install midori`<br />`[thinclient]$ tower web run midori` | You can browse the web. |
 | `tor` proxy is enabled for online host. | `[thinclient]$ ssh web curl --socks5 192.168.2.1:9050 https://check.torproject.org/api/ip` | `{"IsTor":true,"IP":"109.70.100.71"}` |
 | The time on online hosts must be correct. | `[thinclient]$ ssh web date` | The correct date and time. |
