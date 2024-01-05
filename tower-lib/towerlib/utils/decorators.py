@@ -33,6 +33,8 @@ def get_duration_text(start_time, timer_message, message=""):
 
 
 def join_list(item_list):
+    if len(item_list) == 1:
+        return f"`{item_list[0]}`"
     str_list = ", ".join([f"`{item}`" for item in item_list])
     return f"[{str_list}]"
 

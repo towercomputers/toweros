@@ -237,7 +237,7 @@ def wait_for_host_sshd(host, timeout):
         time.sleep(3)
 
 
-@clitask("Waiting for hosts {0} to be ready...")
+@clitask("Waiting for host(s) {0} to be ready...")
 def wait_for_hosts_sshd(hosts_list, timeout):
     start_time = time.time()
     while not all((is_up(host) for host in hosts_list)):
