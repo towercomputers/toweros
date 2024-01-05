@@ -104,6 +104,11 @@ set_config_from_root_partition() {
     fi
     # set startx on login
     STARTW_ON_LOGIN="false" # in any case, already present in /home if needed
+    # copy ETH0_MAC if exists
+    if [ -f /ROOT/etc/local.d/eth0_mac ]; then
+        cp /ROOT/etc/local.d/eth0_mac /etc/local.d/eth0_mac
+        rc-service networking restart
+    fi
     umount /ROOT
 }
 
@@ -198,6 +203,9 @@ configure_user() {
     fi
     # set ownership
     chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
+    # copy ETH0_MAC if exists
+    mkdir -p /mnt/etc/local.d
+    cp /etc/local.d/eth0_mac /mnt/etc/local.d/ || true
 }
 
 
