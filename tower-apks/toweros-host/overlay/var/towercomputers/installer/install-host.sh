@@ -254,8 +254,7 @@ clone_live_system_to_disk() {
     cmdline="modules=$modules $kernel_opts"
     echo "$cmdline" > $BOOT_MEDIA/cmdline.txt
 
-	# Get branch from buildhost.py
-	# configure apk repositories if host is online
+	# configure apk repositories
 	mkdir -p /mnt/etc/apk
 	cat <<EOF > /mnt/etc/apk/repositories
 http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main

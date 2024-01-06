@@ -279,9 +279,7 @@ clone_live_system_to_disk() {
     # install packages
     local apkflags="--quiet --progress --update-cache --clean-protected"
     # default alpine packages
-    local pkgs="alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none"
-    # toweros packages
-    pkgs="$pkgs toweros-thinclient"
+    local pkgs="toweros-thinclient"
     # local repos
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
     local repoflags=
@@ -294,6 +292,14 @@ clone_live_system_to_disk() {
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
+
+    # configure apk repositories
+	mkdir -p /mnt/etc/apk
+	cat <<EOF > /mnt/etc/apk/repositories
+http://dl-cdn.alpinelinux.org/alpine/latest-stable/main
+http://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
+EOF
 
     # disable modloop in /mnt
     rm -f /mnt/etc/runlevels/sysinit/modloop
