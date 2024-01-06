@@ -228,7 +228,7 @@ clone_live_system_to_disk() {
 
     # install packages
     local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
-    local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
+    local pkgs="toweros-host"
     local repoflags="--repository $BOOT_MEDIA/apks"
     apk add --root /mnt $apkflags --overlay-from-stdin --force-overwrite $repoflags $pkgs <$ovlfiles
 
