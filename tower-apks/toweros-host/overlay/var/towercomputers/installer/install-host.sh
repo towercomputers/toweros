@@ -256,14 +256,12 @@ clone_live_system_to_disk() {
 
 	# Get branch from buildhost.py
 	# configure apk repositories if host is online
-	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
-		mkdir -p /mnt/etc/apk
-		cat <<EOF > /mnt/etc/apk/repositories 
+	mkdir -p /mnt/etc/apk
+	cat <<EOF > /mnt/etc/apk/repositories
 http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main
 http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
-	fi
 
 	# migrate from sudo to doas
 	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true

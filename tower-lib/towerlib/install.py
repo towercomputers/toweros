@@ -26,21 +26,6 @@ def sprint(value):
     print(value.decode("utf-8", 'ignore') if isinstance(value, bytes) else value, end='', flush=True)
 
 
-def prepare_repositories_file(host):
-    file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
-    # use temporary file as lock file
-    if os.path.exists(file_name):
-        raise LockException(f"f{file_name} already exists! Is another install in progress? If not, delete this file and try again.")
-    # generate temporary apk repositories
-    with open(file_name, 'w', encoding="UTF-8") as file_pointer:
-        for repo in APK_REPOS_URL:
-            file_pointer.write(f"{repo}\n")
-    # copy apk repositories in offline host
-    if host != 'thinclient':
-        scp(file_name, f"{host}:~/")
-        rm('-f', file_name)
-
-
 def offline_cmd(host, cmd):
     if host == 'thinclient':
         Command('sh')('-c', cmd)
@@ -50,8 +35,6 @@ def offline_cmd(host, cmd):
 
 @clitask("Preparing installation...")
 def prepare_offline_host(host):
-    # prepare apk repositories in offline host
-    prepare_repositories_file(host)
     # add repo host in /etc/hosts
     offline_cmd(host, 'sudo cp /etc/hosts /etc/hosts.bak')
     offline_cmd(host, f"echo '127.0.0.1 {APK_REPOS_HOST}\n' | sudo tee /etc/hosts")
@@ -61,11 +44,6 @@ def prepare_offline_host(host):
 
 
 def cleanup_offline_host(host):
-    # remove temporary apk repositories in thinclient
-    file_name = f'~/repositories.offline.{host}'
-    if host == 'thinclient':
-        file_name = os.path.expanduser(file_name)
-    offline_cmd(host, f"rm -f {file_name}")
     # restore /etc/hosts
     offline_cmd(host, "sudo mv /etc/hosts.bak /etc/hosts")
     # clean iptables
@@ -123,7 +101,7 @@ def install_in_offline_host(host, packages):
             ssh(
                 '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
                 host,
-                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress -v add {' '.join(packages)}",
+                f"sudo apk --progress -v add {' '.join(packages)}",
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
             )
@@ -146,8 +124,7 @@ def install_in_thinclient(packages):
         open_router_tunnel()
         logger.info("Running apk in thinclient...")
         try:
-            repo_file = os.path.expanduser('~/repositories.offline.thinclient')
-            apk_cmd = f"sudo apk --repositories-file {repo_file} --progress add {' '.join(packages)}"
+            apk_cmd = f"sudo apk --progress add {' '.join(packages)}"
             Command('sh')('-c',
                 apk_cmd,
                 _err_to_out=True, _out=sprint, _in=sys.stdin,
