@@ -1,10 +1,11 @@
-import os
 import logging
 import sys
 import time
+import signal
 
 from rich.prompt import Confirm
 from rich.text import Text
+from rich import print as rprint
 
 from towerlib.utils.shell import ssh, scp, rm, Command, ErrorReturnCode
 from towerlib.utils import clitask
@@ -21,6 +22,8 @@ APK_REPOS_URL = [
 ]
 LOCAL_TUNNELING_PORT = 8666
 
+signal.signal(signal.SIGTRAP, signal.default_int_handler)
+signal.signal(signal.SIGHUP, signal.default_int_handler)
 
 def sprint(value):
     print(value.decode("utf-8", 'ignore') if isinstance(value, bytes) else value, end='', flush=True)
@@ -145,8 +148,7 @@ def can_install(host):
         raise TowerException(f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
 
 
-def install_packages(host, packages):
-    can_install(host)
+def display_install_warning(host):
     if host == 'thinclient':
         confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on hosts. Are you sure you want to install this package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
@@ -155,6 +157,11 @@ def install_packages(host, packages):
         confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on other hosts. Are you sure you want to install this package on the router?", style='red')
         if not Confirm.ask(confirmation):
             return
+
+
+def install_packages(host, packages):
+    can_install(host)
+    display_install_warning(host)
     if host == 'thinclient':
         install_in_thinclient(packages)
     elif is_online_host(host):
@@ -168,3 +175,24 @@ def reinstall_all_packages(host):
     packages = get_installed_packages(host)
     if packages:
         install_packages(host, packages)
+
+
+@clitask("Opening APK tunnel with {0}...", task_parent=True)
+def open_apk_tunnel(host):
+    if host != "thinclient" and sshconf.is_online_host(host):
+        raise TowerException(f"`{host}` is an online host. You can use `apk` command directly in `{host}`.")
+    can_install(host)
+    display_install_warning(host)
+    try:
+        prepare_offline_host(host)
+        open_router_tunnel()
+        if host != "thinclient":
+            ssh('-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-N', host, _bg=True, _bg_exc=False)
+        message = f"APK tunnel opened. You can use `apk` command in host `{host}` with `ssh {host} sudo apk ...`.\nPress Ctrl+C to close it."
+        rprint(Text(message, style="green bold"))
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        cleanup(host)
