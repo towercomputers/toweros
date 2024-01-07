@@ -66,7 +66,6 @@ def cleanup(host):
     cleanup_offline_host(host)
 
 
-@clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_online_host(host, packages):
     # we just need to run apk with ssh...
     try:
@@ -92,7 +91,6 @@ def open_router_tunnel():
     time.sleep(1)
 
 
-@clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_offline_host(host, packages):
     try:
         prepare_offline_host(host)
@@ -119,7 +117,6 @@ def install_in_offline_host(host, packages):
             raise TowerException(f"Error while installing packages in {host}")
 
 
-@clitask("Installing {0} in thin client...", task_parent=True)
 def install_in_thinclient(packages):
     error = False
     try:
@@ -146,22 +143,26 @@ def can_install(host):
         raise TowerException(f"`{host}` is down. Please start it first.")
     if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(config.ROUTER_HOSTNAME):
         raise TowerException(f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
+    if not sshconf.is_up(config.ROUTER_HOSTNAME):
+        raise TowerException(f"`{config.ROUTER_HOSTNAME}` is down. Please start it first.")
 
 
 def display_install_warning(host):
     if host == 'thinclient':
         confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on hosts. Are you sure you want to install this package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
-            return
+            raise TowerException("Installation aborted.")
     if host == 'router':
         confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on other hosts. Are you sure you want to install this package on the router?", style='red')
         if not Confirm.ask(confirmation):
-            return
+            raise TowerException("Installation aborted.")
 
 
-def install_packages(host, packages):
+@clitask("Installing {1} in {0}...", task_parent=True)
+def install_packages(host, packages, no_confirm=False):
     can_install(host)
-    display_install_warning(host)
+    if not no_confirm:
+        display_install_warning(host)
     if host == 'thinclient':
         install_in_thinclient(packages)
     elif is_online_host(host):
@@ -174,7 +175,7 @@ def reinstall_all_packages(host):
     can_install(host)
     packages = get_saved_packages(host)
     if packages:
-        install_packages(host, packages)
+        install_packages(host, packages, no_confirm=True)
 
 
 @clitask("Opening APK tunnel with {0}...", task_parent=True)

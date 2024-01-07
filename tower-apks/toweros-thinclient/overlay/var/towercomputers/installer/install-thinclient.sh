@@ -104,6 +104,14 @@ set_config_from_root_partition() {
     fi
     # set startx on login
     STARTW_ON_LOGIN="false" # in any case, already present in /home if needed
+    # get installed packages
+    ALL_INSTALLED_PACKAGES=$(cat /ROOT/etc/apk/world)
+    INSTALLED_PACKAGES=""
+    for package in $ALL_INSTALLED_PACKAGES; do
+        if [[ ! "$DEFAULT_PACKAGES" == *"$package"* ]]; then
+            INSTALLED_PACKAGES="$INSTALLED_PACKAGES $package"
+        fi
+    done
     # copy ETH0_MAC if exists
     if [ -f /ROOT/etc/local.d/eth0_mac ]; then
         cp /ROOT/etc/local.d/eth0_mac /etc/local.d/eth0_mac
@@ -360,6 +368,12 @@ upgrade_hosts() {
             # upgrade upgradable hosts
             runuser -u $USERNAME -- tower upgrade --hosts $(cat /tmp/upgradable-hosts)
             python $SCRIPT_DIR/askconfiguration.py end-hosts-upgrade
+        fi
+        if [ -d /mnt/home/$USERNAME/.local/tower/hosts/router ]; then
+            if [ "$INSTALLED_PACKAGES" != "" ]; then
+                # re-install thinclient package
+                runuser -u $USERNAME -- tower install thinclient $INSTALLED_PACKAGES || true
+            fi
         fi
         # move updated tower configuration back
         cp -r /mnt/home/$USERNAME/.local/tower /home/$USERNAME/.local/

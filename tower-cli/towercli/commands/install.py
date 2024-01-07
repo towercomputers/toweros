@@ -19,6 +19,13 @@ def add_args(argparser):
         help="""Package(s) to install (Required).""",
         nargs='+'
     )
+    install_parser.add_argument(
+        '--no-confirm',
+        help="""Don't ask for confirmation. (Default: False)""",
+        required=False,
+        action='store_true',
+        default=False
+    )
 
 def check_args(args, parser_error):
     name = args.host[0]
@@ -32,4 +39,4 @@ def check_args(args, parser_error):
             parser_error(f"Invalid package name:{pkg_name}")
 
 def execute(args):
-    install.install_packages(args.host[0], args.packages)
+    install.install_packages(args.host[0], args.packages, args.no_confirm)
