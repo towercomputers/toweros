@@ -279,7 +279,9 @@ clone_live_system_to_disk() {
     # install packages
     local apkflags="--quiet --progress --update-cache --clean-protected"
     # default alpine packages
-    local pkgs="toweros-thinclient"
+    local pkgs="alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none"
+    # toweros packages
+    pkgs="$pkgs toweros-thinclient"
     # local repos
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
     local repoflags=
