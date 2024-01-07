@@ -46,14 +46,6 @@ def copy_desktop_files(host, package):
         Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{share_icon_folder} || true")
         restart_sfwbar()
 
-def add_installed_package(host, package):
-    # save package in host world
-    installed_packages = get_installed_packages(host)
-    if package not in installed_packages:
-        installed_packages.append(package)
-        save_installed_packages(host, installed_packages)
-    # copy desktop files from host to thinclient
-    copy_desktop_files(host, package)
 
 STATUS_KEYS = {
     "name": "Name",

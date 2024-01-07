@@ -9,8 +9,8 @@ from rich import print as rprint
 
 from towerlib.utils.shell import ssh, scp, rm, Command, ErrorReturnCode
 from towerlib.utils import clitask
-from towerlib.utils.menu import add_installed_package, get_installed_packages
-from towerlib.sshconf import is_online_host
+from towerlib.utils.menu import copy_desktop_files
+from towerlib.sshconf import is_online_host, get_installed_packages
 from towerlib.utils.exceptions import LockException, TowerException
 from towerlib import sshconf, config
 
@@ -77,7 +77,7 @@ def install_in_online_host(host, packages):
             _out_bufsize=0, _err_bufsize=0,
         )
         for package in packages:
-            add_installed_package(host, package)
+            copy_desktop_files(host, package)
     except ErrorReturnCode as exc:
         raise TowerException(f"Error while installing packages in {host}") from exc
 
@@ -112,7 +112,7 @@ def install_in_offline_host(host, packages):
             error = True # error in remote host is already displayed
         if not error:
             for package in packages:
-                add_installed_package(host, package)
+                copy_desktop_files(host, package)
     finally:
         cleanup(host)
         if error:

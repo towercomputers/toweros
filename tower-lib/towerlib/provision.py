@@ -334,6 +334,8 @@ def upgrade_hosts(hosts, args):
         return
 
     for host in hosts:
+        # backup installed packages
+        sshconf.save_installed_packages(host)
         # copy TowerOS-Host image to boot device
         buildhost.burn_image_in_host(
             host,

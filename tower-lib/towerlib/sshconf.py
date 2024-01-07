@@ -7,7 +7,7 @@ from rich.table import Table
 from rich.text import Text
 from sshconf import read_ssh_config, empty_ssh_config_file
 
-from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command
+from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command, cat
 from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost, InvalidColor
 from towerlib.__about__ import __version__
@@ -317,16 +317,30 @@ def get_hex_host_color(host):
 
 
 def get_installed_packages(host):
-    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    if os.path.exists(apk_world):
-        return open(apk_world, 'r', encoding="UTF-8").read().strip().split("\n")
+    host_bakup_path = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    thinclient_backup_path = os.path.join(TOWER_DIR, 'thinclient_world')
+    backup_path = host_bakup_path if host != "thinclient" else thinclient_backup_path
+    if os.path.exists(backup_path):
+        return open(backup_path, 'r', encoding="UTF-8").read().strip().split("\n")
     return []
 
 
-def save_installed_packages(host, installed_packages):
-    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    with open(apk_world, 'w', encoding="UTF-8") as file_pointer:
-        file_pointer.write("\n".join(installed_packages))
+@clitask("Saving installed package in {0}...")
+def save_installed_packages(host):
+    host_default_packages = ['toweros-host']
+    thinclient_default_packages = 'toweros-thinclient alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none'.split(" ")
+    host_bakup_path = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    thinclient_backup_path = os.path.join(TOWER_DIR, 'thinclient_world')
+    backup_path = host_bakup_path if host != "thinclient" else thinclient_backup_path
+    current_world = []
+    if host == "thinclient":
+        thinclient_world = cat('/etc/apk/world').strip().split("\n")
+        current_world = [package for package in thinclient_world if package not in thinclient_default_packages]
+    else:
+        host_world = ssh(host, 'cat /etc/apk/world').strip().split("\n")
+        current_world = [package for package in host_world if package not in host_default_packages]
+    with open(backup_path, 'w', encoding="UTF-8") as file_pointer:
+        file_pointer.write("\n".join(current_world))
 
 
 @clitask("Syncing offline host time with `router`...")
