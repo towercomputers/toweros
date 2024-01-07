@@ -228,9 +228,8 @@ clone_live_system_to_disk() {
 
     # install packages
     local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
-    local pkgs="toweros-host"
     local repoflags="--repository $BOOT_MEDIA/apks"
-    apk add --root /mnt $apkflags --overlay-from-stdin --force-overwrite $repoflags $pkgs <$ovlfiles
+    apk add --root /mnt $apkflags --overlay-from-stdin --force-overwrite $repoflags $DEFAULT_PACKAGES <$ovlfiles
 
     # clean chroot
     umount /mnt/proc
@@ -283,7 +282,7 @@ init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR, ALPINE_BRANCH
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR, ALPINE_BRANCH, DEFAULT_PACKAGES
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env

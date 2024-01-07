@@ -38,6 +38,9 @@ HOST_ALPINE_BRANCH = "v3.19"
 THINCLIENT_ALPINE_BRANCH = "v3.19"
 ALPINE_RPI_URL = "https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/aarch64/alpine-rpi-3.19.0-aarch64.tar.gz"
 ALPINE_RPI_CHECKSUM = "5621e7e597c3242605cd403a0a9109ec562892a6c8a185852b6b02ff88f5503c"
+HOST_DEFAULT_PACKAGES = 'toweros-host'.split(" ")
+THINCLIENT_DEFAULT_PACKAGES = 'toweros-thinclient alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none'.split(" ")
+
 
 VNC_VIEWER_CSS = """
 headerbar {

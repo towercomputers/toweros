@@ -4,7 +4,7 @@ import json
 from towerlib.utils.shell import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
-from towerlib.sshconf import get_host_color_name, hosts, get_installed_packages, save_installed_packages, status as get_status
+from towerlib.sshconf import get_host_color_name, hosts, status as get_status
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
 def restart_sfwbar():

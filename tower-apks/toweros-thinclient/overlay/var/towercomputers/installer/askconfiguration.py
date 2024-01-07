@@ -16,6 +16,7 @@ from rich.console import Console
 
 from towerlib import provision
 from towerlib.utils.decorators import join_list
+from towerlib.config import THINCLIENT_DEFAULT_PACKAGES, THINCLIENT_ALPINE_BRANCH
 
 LOCALE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'locale.json')
 with open(LOCALE_FILE, "r", encoding="UTF-8") as file_pointer:
@@ -297,7 +298,10 @@ def print_header():
 def ask_config():
     print_header()
     confirmed = False
-    config = {}
+    config = {
+        'ALPINE_BRANCH': " ".join(THINCLIENT_ALPINE_BRANCH),
+        'DEFAULT_PACKAGES': " ".join(THINCLIENT_DEFAULT_PACKAGES),
+    }
     while not confirmed:
         config['INSTALLATION_TYPE'] = get_installation_type()
         is_upgrade = config['INSTALLATION_TYPE'] == 'upgrade'

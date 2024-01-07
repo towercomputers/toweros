@@ -111,6 +111,7 @@ def prepare_host_config(host, args):
         'COLOR': host_color,
         'INSTALLATION_TYPE': "install",
         'ALPINE_BRANCH': config.HOST_ALPINE_BRANCH,
+        'DEFAULT_PACKAGES': ' '.join(config.HOST_DEFAULT_PACKAGES),
     }
 
 

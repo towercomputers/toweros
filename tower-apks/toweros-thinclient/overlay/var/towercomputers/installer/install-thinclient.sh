@@ -278,10 +278,6 @@ clone_live_system_to_disk() {
 
     # install packages
     local apkflags="--quiet --progress --update-cache --clean-protected"
-    # default alpine packages
-    local pkgs="alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none"
-    # toweros packages
-    pkgs="$pkgs toweros-thinclient"
     # local repos
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
     local repoflags=
@@ -289,7 +285,7 @@ clone_live_system_to_disk() {
         repoflags="$repoflags --repository $i"
     done
     # install packages in /mnt
-    apk add --root /mnt $apkflags --initdb --overlay-from-stdin --force-overwrite $repoflags $pkgs <$ovlfiles
+    apk add --root /mnt $apkflags --initdb --overlay-from-stdin --force-overwrite $repoflags $DEFAULT_PACKAGES <$ovlfiles
 
     # clean chroot
     umount /mnt/proc
@@ -298,8 +294,8 @@ clone_live_system_to_disk() {
     # configure apk repositories
 	mkdir -p /mnt/etc/apk
 	cat <<EOF > /mnt/etc/apk/repositories
-http://dl-cdn.alpinelinux.org/alpine/latest-stable/main
-http://dl-cdn.alpinelinux.org/alpine/latest-stable/community
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
 
@@ -411,7 +407,7 @@ set_configuration() {
     # INSTALLATION_TYPE, ROOT_PASSWORD_HASH, USERNAME, PASSWORD_HASH,
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
-    # STARTW_ON_LOGIN
+    # STARTW_ON_LOGIN, DEFAULT_PACKAGES, ALPINE_BRANCH
     python $SCRIPT_DIR/askconfiguration.py
     source /root/tower.env
     if [ "$INSTALLATION_TYPE" == "upgrade" ]; then

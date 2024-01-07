@@ -10,7 +10,7 @@ from rich import print as rprint
 from towerlib.utils.shell import ssh, scp, rm, Command, ErrorReturnCode
 from towerlib.utils import clitask
 from towerlib.utils.menu import copy_desktop_files
-from towerlib.sshconf import is_online_host, get_installed_packages
+from towerlib.sshconf import is_online_host, get_saved_packages
 from towerlib.utils.exceptions import LockException, TowerException
 from towerlib import sshconf, config
 
@@ -172,7 +172,7 @@ def install_packages(host, packages):
 
 def reinstall_all_packages(host):
     can_install(host)
-    packages = get_installed_packages(host)
+    packages = get_saved_packages(host)
     if packages:
         install_packages(host, packages)
 
