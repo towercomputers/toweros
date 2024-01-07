@@ -60,7 +60,8 @@ Before installing a package with `pip`, check that there is no `apk` package ins
 
 1. Install `pip` package in offline host
 
-To install a package with `pip` you must create a virtual environment. Please refer to [the official documentation](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/).
+To install a package with `pip` you must create a virtual environment. Please refer to **[the official documentation](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/)**.
+Make sure to install your environment in the `/home` folder if you want it to be preserved during an upgrade.
 
         [thinclient]$ ssh office
         [office]$ mkdir myproject
