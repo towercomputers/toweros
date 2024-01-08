@@ -76,13 +76,11 @@ def download_edge_apks():
 
 @clitask("Prepare Tower CLI APK package...")
 def prepare_tower_apk():
-    if ARCH == 'x86_64':
-        with doas:
-            apk('update')
-        # build tower-cli
-        abuild('-r', _cwd=f"{REPO_PATH}/tower-apks/toweros-thinclient", _err_to_out=True, _out=logger.debug)
-    else:
-        prepare_tower_arm_apk()
+    with doas:
+        apk('update')
+    # build tower-cli
+    abuild('-r', '-f', _cwd=f"{REPO_PATH}/tower-apks/toweros-thinclient", _err_to_out=True, _out=logger.debug)
+
 
 def prepare_tower_arm_apk():
     out = {"_out": logger.debug, "_err_to_out": True}
@@ -116,7 +114,7 @@ def prepare_image():
     # download alpine aports form gitlab
     git('clone', '--depth=1', f'--branch={THINCLIENT_ALPINE_BRANCH[1:]}-stable', ALPINE_APORT_REPO, _cwd=WORKING_DIR)
     # copy tower custom scripts
-    copyfile(join_path(NOPYFILES_DIR, 'mkimg.tower.sh'), wdir('aports/scripts'))
+    copyfile(join_path(NOPYFILES_DIR, f'mkimg.tower-{ARCH}.sh'), wdir('aports/scripts'))
     copyfile(join_path(NOPYFILES_DIR, 'genapkovl-toweros-thinclient.sh'), wdir('aports/scripts'))
     with doas:
         apk('update')
@@ -127,15 +125,16 @@ def prepare_image():
         '--repository', APK_LOCAL_REPOSITORY,
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/community',
-        '--profile', 'tower',
+        '--profile', f'tower',
         '--tag', __version__,
          _err_to_out=True, _out=logger.debug,
          _cwd=WORKING_DIR
     )
-    image_src_path = wdir(f"alpine-tower-{__version__}-{ARCH}.iso")
+    image_extension = 'iso' if ARCH == 'x86_64' else 'tar.gz'
+    image_src_path = wdir(f"alpine-tower-{__version__}-{ARCH}.{image_extension}")
     image_dest_path = join_path(
         TOWER_BUILDS_DIR,
-        f'toweros-thinclient-{__version__}-{ARCH}.iso'
+        f'toweros-thinclient-{__version__}-{ARCH}.{image_extension}'
     )
     with doas:
         cp(image_src_path, image_dest_path)

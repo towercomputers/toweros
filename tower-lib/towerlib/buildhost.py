@@ -13,7 +13,7 @@ from towerlib.utils.shell import (
     cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl,
-    scp, ssh, runuser, abuild,
+    scp, ssh, runuser, abuild, ls, doas
 )
 
 from towerlib import utils, config, sshconf
@@ -79,7 +79,8 @@ def build_brcrm_cm4_apk(repo_path):
         f'runuser -u {USERNAME} -- abuild -r',
         _cwd=f"{REPO_PATH}/tower-apks/linux-firmware-brcm-cm4"
     )
-    cp(f"{APK_LOCAL_REPOSITORY}/x86_64/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
+    arch = Command('sh')('-c', 'arch').strip()
+    cp(f"{APK_LOCAL_REPOSITORY}/{arch}/linux-firmware-brcm-cm4-1.0-r0.apk", repo_path)
 
 
 def build_toweros_host_apk(repo_path):
@@ -100,6 +101,8 @@ def build_toweros_host_apk(repo_path):
     else:
         with runuser.bake('-u', USERNAME, '--'):
             abuild('-r', _cwd=f"{REPO_PATH}/tower-apks/toweros-host", **out)
+            with doas:
+                cp(f'{APK_LOCAL_REPOSITORY}/{arch}/toweros-host-{__version__}-r0.apk', repo_path)
 
 
 def prepare_apk_repos(private_key_path):
