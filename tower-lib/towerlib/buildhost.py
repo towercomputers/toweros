@@ -13,7 +13,7 @@ from towerlib.utils.shell import (
     cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl,
-    scp, ssh, runuser,
+    scp, ssh, runuser, abuild,
 )
 
 from towerlib import utils, config, sshconf
@@ -83,18 +83,23 @@ def build_brcrm_cm4_apk(repo_path):
 
 
 def build_toweros_host_apk(repo_path):
+    arch = Command('sh')('-c', 'arch').strip()
     out = {"_out": logger.debug, "_err_to_out": True}
-    with runuser.bake('-u', USERNAME, '--'):
-        ssh(BUILDER_HOST, 'sudo apk add alpine-sdk', **out)
-        ssh(BUILDER_HOST, f'sudo addgroup {USERNAME} abuild', **out)
-        ssh(BUILDER_HOST, 'rm -rf .abuild tower-apks tower-lib', **out)
-        scp('-r', f'{REPO_PATH}/tower-apks', f'{BUILDER_HOST}:', **out)
-        scp('-r', f'{REPO_PATH}/tower-lib', f'{BUILDER_HOST}:', **out)
-        scp('-r', f'/home/{USERNAME}/.abuild', f'{BUILDER_HOST}:', **out)
-        ssh(BUILDER_HOST, 'sudo cp .abuild/*.pub /etc/apk/keys/', **out)
-        ssh(BUILDER_HOST, 'cd tower-apks/toweros-host && abuild -r', **out)
-        scp(f'{BUILDER_HOST}:packages/tower-apks/{ARCH}/toweros-host-{__version__}-r0.apk', TMP_DIR, **out)
-    cp(f'{TMP_DIR}/toweros-host-{__version__}-r0.apk', repo_path)
+    if arch != 'aarch64':
+        with runuser.bake('-u', USERNAME, '--'):
+            ssh(BUILDER_HOST, 'sudo apk add alpine-sdk', **out)
+            ssh(BUILDER_HOST, f'sudo addgroup {USERNAME} abuild', **out)
+            ssh(BUILDER_HOST, 'rm -rf .abuild tower-apks tower-lib', **out)
+            scp('-r', f'{REPO_PATH}/tower-apks', f'{BUILDER_HOST}:', **out)
+            scp('-r', f'{REPO_PATH}/tower-lib', f'{BUILDER_HOST}:', **out)
+            scp('-r', f'/home/{USERNAME}/.abuild', f'{BUILDER_HOST}:', **out)
+            ssh(BUILDER_HOST, 'sudo cp .abuild/*.pub /etc/apk/keys/', **out)
+            ssh(BUILDER_HOST, 'cd tower-apks/toweros-host && abuild -r', **out)
+            scp(f'{BUILDER_HOST}:packages/tower-apks/{ARCH}/toweros-host-{__version__}-r0.apk', TMP_DIR, **out)
+        cp(f'{TMP_DIR}/toweros-host-{__version__}-r0.apk', repo_path)
+    else:
+        with runuser.bake('-u', USERNAME, '--'):
+            abuild('-r', _cwd=f"{REPO_PATH}/tower-apks/toweros-host", **out)
 
 
 def prepare_apk_repos(private_key_path):

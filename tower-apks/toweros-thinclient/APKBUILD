@@ -43,8 +43,11 @@ build() {
         --output $srcdir/tower.1
     gzip $srcdir/tower.1
     # generate iptables rules
+    sudo cp /etc/iptables/rules-save /etc/iptables/rules-save.bak
     sudo sh $CURRENT_DIR/overlay/var/towercomputers/installer/configure-firewall.sh
     sudo iptables-save > $srcdir/rules-save
+    sudo mv /etc/iptables/rules-save.bak /etc/iptables/rules-save
+    sudo rc-service iptables restart
     # build toweros-host image
     cd $ROOT_DIR/tower-build-cli
     ./tower-build host --build-dir $srcdir
