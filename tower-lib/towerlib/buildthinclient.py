@@ -119,6 +119,16 @@ def prepare_image():
     return image_dest_path
 
 
+def convert_archive_to_image(image_path):
+    image_extension = 'iso' if ARCH == 'x86_64' else 'tar.gz'
+    if image_extension == 'iso':
+        return image_path
+    # convert to image
+    with doas:
+        targz_to_image(image_path)
+    return image_path.replace('.tar.gz', '.img.gz')
+
+
 @clitask("Building TowserOS-ThinClient image...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
 def build_image():
     image_path = None
@@ -128,6 +138,7 @@ def build_image():
         download_edge_apks()
         prepare_tower_apks()
         image_path = prepare_image()
+        image_path = convert_archive_to_image(image_path)
     finally:
         cleanup()
     if image_path:
@@ -159,10 +170,12 @@ def prepare_host_for_build(build_host):
     ssh(build_host, f"sudo pip install -e toweros/tower-cli --break-system-packages --no-deps", **out)
 
 
-@clitask("Transferring archive from host {0} to thin client...")
-def copy_archive_from_host(build_host):
+@clitask("Transferring image from host {0} to thin client...")
+def copy_image_from_host(build_host):
     out = {"_out": logger.debug, "_err_to_out": True}
-    archive_name = f"toweros-thinclient-{__version__}-aarch64.tar.gz"
+    host_arch = ssh(build_host, "arch").strip()
+    image_extension = 'iso' if host_arch == 'x86_64' else 'img.gz'
+    archive_name = f"toweros-thinclient-{__version__}-{host_arch}.{image_extension}"
     archive_dest_path = join_path(TOWER_BUILDS_DIR, archive_name)
     scp(f"{build_host}:{archive_dest_path}", TMP_DIR, **out)
     with doas:
@@ -186,8 +199,5 @@ def build_image_in_host(build_host, verbose=False):
         _err=sprint, _out=sprint, _in=sys.stdin,
         _out_bufsize=0, _err_bufsize=0,
     )
-    archive_path = copy_archive_from_host(build_host)
-    image_path = archive_path.replace('.tar.gz', '.img')
-    with doas:
-        targz_to_image(archive_path, image_path)
-    logger.info("Image ready: %s", f"{image_path}.gz")
+    image_path = copy_image_from_host(build_host)
+    logger.info("Image ready: %s", image_path)

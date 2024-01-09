@@ -84,7 +84,11 @@ def folder_to_image(folder, image_path):
     sh_cmd(f"pigz -v -f -9 {image_path}", **out)
 
 @clitask("Converting archive {} to image disk...")
-def targz_to_image(targz_path, image_path):
+def targz_to_image(targz_path):
+    archive_name = os.path.basename(targz_path)
+    archive_folder = os.path.dirname(targz_path)
+    image_name = archive_name.replace(".tar.gz", ".img")
+    image_path = os.path.join(archive_folder, image_name)
     tmp_folder = f"/{TMP_DIR}/tower-build-{uuid.uuid4()}"
     sh_cmd(f"mkdir -p {tmp_folder}")
     sh_cmd(f"tar -xpf {targz_path} -C {tmp_folder}")
