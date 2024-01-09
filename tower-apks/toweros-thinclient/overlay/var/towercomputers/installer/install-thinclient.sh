@@ -3,7 +3,7 @@
 set -e
 set -x
 
-ARCH="x86_64"
+ARCH="$(arch)"
 
 update_passord() {
     REPLACE="$1:$2:"
@@ -262,17 +262,19 @@ update_live_system() {
     disable_installer
 }
 
+generate_mkinitfs() {
+    mkdir -p /mnt/etc/mkinitfs/features.d
+    features="base usb vfat ext4 nvme vmd lvm cryptsetup cryptkey"
+    features="$features ata ide scsi mmc virtio keymap resume"
+    echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
+}
 
 clone_live_system_to_disk() {
     # backup local config in apkovl
     ovlfiles=/tmp/ovlfiles
     lbu package - | tar -C "/mnt" -zxv > $ovlfiles
 
-    # generate mkinitfs.conf
-    mkdir -p /mnt/etc/mkinitfs/features.d
-    features="ata base ide scsi usb virtio vfat ext4 nvme vmd lvm keymap"
-    features="$features cryptsetup cryptkey resume"
-    echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
+    generate_mkinitfs
 
     # copy apk keys
     mkdir -p /mnt/etc/apk/keys/
@@ -313,38 +315,47 @@ EOF
 
 
 install_bootloader() {
-    # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
-    kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
-    modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
-    # add cryptsetup and cryptkey to kernel options
-    kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
-    modules="$modules,cryptsetup,cryptkey"
+    if [ "$ARCH" == "x86_64" ]; then
+        # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
+        kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
+        modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
+        # add cryptsetup and cryptkey to kernel options
+        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
+        modules="$modules,cryptsetup,cryptkey"
 
-    # setup syslinux
-    sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
-        -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
-        -e "s:^modules=.*:modules=$modules:" \
-        /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
+        # setup syslinux
+        sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
+            -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
+            -e "s:^modules=.*:modules=$modules:" \
+            /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
 
-    dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
+        dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
 
-    extlinux --install /mnt/boot
-    chroot /mnt/ update-extlinux
+        extlinux --install /mnt/boot
+        chroot /mnt/ update-extlinux
 
-    mkdir -p /mnt/boot/EFI/boot
-    cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
-    sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
-    sed -i 's/Alpine\/Linux/TowerOS-ThinClient/g' /mnt/boot/EFI/boot/syslinux.cfg
-    sed -i 's/Alpine /TowerOS-ThinClient /g' /mnt/boot/EFI/boot/syslinux.cfg
-    rm -f /mnt/boot/*.c32
-    rm -f /mnt/boot/*.sys
-    rm -f /mnt/boot/extlinux.conf
-    cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
+        mkdir -p /mnt/boot/EFI/boot
+        cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
+        sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
+        sed -i 's/Alpine\/Linux/TowerOS-ThinClient/g' /mnt/boot/EFI/boot/syslinux.cfg
+        sed -i 's/Alpine /TowerOS-ThinClient /g' /mnt/boot/EFI/boot/syslinux.cfg
+        rm -f /mnt/boot/*.c32
+        rm -f /mnt/boot/*.sys
+        rm -f /mnt/boot/extlinux.conf
+        cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
+    elif [ "$ARCH" == "aarch64" ]; then
+        # update cmdline.txt
+        kernel_opts="quiet console=tty1 rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
+        kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$TARGET_DRIVE cryptkey=yes cryptdm=lvmcrypt"
+        modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey"
+        cmdline="modules=$modules $kernel_opts"
+        echo "$cmdline" > /mnt/boot/cmdline.txt
+    fi
 }
 
 
 install_secure_boot() {
-    if [ "$SECURE_BOOT" = "true" ]; then
+    if [ "$SECURE_BOOT" == "true" ] && [ "$ARCH" == "x86_64" ]; then
         sbctl create-keys
         cp /mnt/boot/EFI/boot/bootx64.efi /mnt/boot/EFI/boot/bootx64.efi.unsigned
         sbctl sign /mnt/boot/EFI/boot/bootx64.efi

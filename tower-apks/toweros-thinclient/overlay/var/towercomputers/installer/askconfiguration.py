@@ -35,27 +35,28 @@ def run_cmd(cmd, to_json=False):
     return out
 
 
-def get_mountpoints():
-    all_devices = run_cmd(['lsblk', '-J'], to_json=True)
-    mountpoints = {}
-    for device in all_devices['blockdevices']:
-        if device['type'] == 'disk':
-            mountpoints[f"/dev/{device['name']}"] = device['mountpoints'][0]
-    return mountpoints
-
-
 def disk_list(exclude=None):
-    all_disks = run_cmd(['lsscsi']).split("\n")
-    mountpoints = get_mountpoints()
+    all_disks = run_cmd(['lsblk', '-o', 'MODEL,VENDOR,SIZE,TYPE,MOUNTPOINTS,PATH', '-J', '-d'], to_json=True)
     disks = []
-    for disk in all_disks:
-        path = disk[disk.index('/dev/'):].split(" ")[0].strip()
-        if exclude and path == exclude:
+    for device in all_disks['blockdevices']:
+        if device['type'] != 'disk':
             continue
-        if path not in mountpoints:
+        if exclude and device['path'] == exclude:
             continue
-        if mountpoints[path] is not None:
+        if device['mountpoints'][0] is not None:
             continue
+        if device['vendor'] is None:
+            if device['path'].startswith('/dev/mmcblk'):
+                device['vendor'] = "SD/MMC"
+            else:
+                device['vendor'] = "N/A"
+        if device['model'] is None:
+            device['model'] = "N/A"
+        disk_name = f"{device['vendor'].strip()} {device['model'].strip()}"
+        disk  = f"{device['type']}    "
+        disk += f"{disk_name}    "
+        disk += f"{device['size']}    "
+        disk += f"{device['path']}"
         disks.append(disk)
     return disks
 
