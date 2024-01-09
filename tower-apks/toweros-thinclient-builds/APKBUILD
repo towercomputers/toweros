@@ -1,0 +1,28 @@
+CURRENT_DIR=$(pwd)
+ROOT_DIR="$CURRENT_DIR/../.."
+
+pkgname=toweros-thinclient-builds
+pkgver=$(cat $ROOT_DIR/tower-lib/towerlib/__about__.py  | awk '{print $NF}' | sed 's/"//g')
+pkgrel=0
+pkgdesc="TowerOS-ThinClient Builds"
+url="https://toweros.org/"
+arch="x86_64"
+license="Apache-2.0"
+
+
+build() {
+    # build toweros-host image
+    cd $ROOT_DIR/tower-build-cli
+    ./tower-build host --build-dir $srcdir
+    cd $CURRENT_DIR
+}
+
+check() {
+    return 0
+}
+
+package() {
+    # install host images
+    mkdir -p $pkgdir/var/towercomputers/builds
+    cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
+}

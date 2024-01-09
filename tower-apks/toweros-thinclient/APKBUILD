@@ -49,10 +49,6 @@ build() {
     sudo mv /etc/iptables/rules-save.bak /etc/iptables/rules-save
     sudo cat /etc/iptables/rules-save | sudo iptables-restore
     sudo rc-service iptables restart
-    # build toweros-host image
-    #cd $ROOT_DIR/tower-build-cli
-    #./tower-build host --build-dir $srcdir
-    cd $CURRENT_DIR
     # copy oxygen theme icons
     mkdir -p $srcdir/icons
     cp -r /usr/share/icons/oxygen/base/48x48/* $srcdir/icons/
@@ -86,9 +82,6 @@ package() {
     chmod +x $pkgdir/etc/init.d/wl-copy-watch
     chmod +x $pkgdir/etc/init.d/wl-copy-tunneler
     chmod +x $pkgdir/etc/profile.d/tower-env.sh
-    # install host images
-    mkdir -p $pkgdir/var/towercomputers/builds
-    #cp $srcdir/*.xz $pkgdir/var/towercomputers/builds/
     # install docs
     cp -r $srcdir/docs $pkgdir/var/towercomputers/
     mkdir -p $pkgdir/usr/share/man/man1

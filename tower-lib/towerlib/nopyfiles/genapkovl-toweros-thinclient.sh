@@ -39,13 +39,25 @@ tty6::respawn:/sbin/getty 38400 tty6
 EOF
 
 mkdir -p "$tmp"/etc/apk
-cat <<EOF > "$tmp"/etc/apk/world
+
+if [ "$(arch)" == "aarch64" ]; then
+    cat <<EOF > "$tmp"/etc/apk/world
 alpine-base
 raspberrypi-bootloader
 inux-firmware-brcm
-linux-rpi
 toweros-thinclient
 EOF
+else
+    cat <<EOF > "$tmp"/etc/apk/world
+alpine-base
+syslinux
+intel-media-driver
+libva-intel-driver
+linux-firmware
+linux-firmware-none
+toweros-thinclient
+EOF
+fi
 
 rc_add() {
     mkdir -p "$tmp"/etc/runlevels/"$2"
@@ -55,6 +67,8 @@ rc_add() {
 rc_add modloop sysinit
 
 # generate apk overlay
-#tar -c -C "$tmp" ./ | gzip -9n > $HOSTNAME.apkovl.tar.gz
-tar -c -C "$tmp" etc | gzip -9n > headless.apkovl.tar.gz
-#cp $HOSTNAME.apkovl.tar.gz ~/
+if [ "$(arch)" == "aarch64" ]; then
+    tar -c -C "$tmp" etc | gzip -9n > headless.apkovl.tar.gz
+else
+    tar -c -C "$tmp" ./ | gzip -9n > $HOSTNAME.apkovl.tar.gz
+fi

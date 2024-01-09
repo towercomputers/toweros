@@ -7,7 +7,7 @@ import sys
 import tempfile
 import getpass
 
-from towerlib.utils.shell import rm, git, Command, apk, cp, abuild, abuild_sign, runuser, ssh, scp
+from towerlib.utils.shell import rm, git, Command, apk, cp, abuild, abuild_sign, arch, ssh, scp
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import doas
 from towerlib.utils.network import download_file
@@ -17,8 +17,7 @@ from towerlib.config import THINCLIENT_ALPINE_BRANCH, APK_LOCAL_REPOSITORY, TOWE
 
 logger = logging.getLogger('tower')
 
-#ARCH = 'x86_64'
-ARCH = "aarch64"
+ARCH = arch().strip()
 
 WORKING_DIR_NAME = 'build-toweros-thinclient-work'
 WORKING_DIR = join_path(os.path.expanduser('~'), WORKING_DIR_NAME)
@@ -74,40 +73,14 @@ def download_edge_apks():
     abuild_sign(f'{APK_LOCAL_REPOSITORY}/{ARCH}/APKINDEX.tar.gz')
 
 
-@clitask("Prepare Tower CLI APK package...")
-def prepare_tower_apk():
+@clitask("Prepare `toweros-thinclient` APK packages...")
+def prepare_tower_apks():
     with doas:
         apk('update')
     # build tower-cli
     abuild('-r', '-f', _cwd=f"{REPO_PATH}/tower-apks/toweros-thinclient", _err_to_out=True, _out=logger.debug)
+    abuild('-r', '-f', _cwd=f"{REPO_PATH}/tower-apks/toweros-thinclient-builds", _err_to_out=True, _out=logger.debug)
 
-
-def prepare_tower_arm_apk():
-    out = {"_out": logger.debug, "_err_to_out": True}
-    # install abuild
-    ssh(BUILDER_HOST, 'sudo apk add alpine-sdk', **out)
-    ssh(BUILDER_HOST, f'sudo addgroup {USERNAME} abuild', **out)
-    # clean previous build
-    ssh(BUILDER_HOST, 'rm -rf .abuild toweros packages', **out)
-    # copy toweros repo
-    scp('-r', f'{REPO_PATH}', f'{BUILDER_HOST}:', **out)
-    # copy abuild key
-    scp('-r', f'/home/{USERNAME}/.abuild', f'{BUILDER_HOST}:', **out)
-    ssh(BUILDER_HOST, 'sudo cp .abuild/*.pub /etc/apk/keys/', **out)
-    # copy edge apks
-    ssh(BUILDER_HOST, 'mkdir -p packages/tower-apks/')
-    scp('-r', f'{APK_LOCAL_REPOSITORY}/{ARCH}', f'{BUILDER_HOST}:packages/tower-apks/', **out)
-    ssh(BUILDER_HOST, 'sudo cp /etc/apk/repositories /etc/apk/repositories.bak')
-    ssh(BUILDER_HOST, f"echo '/home/{USERNAME}/packages/tower-apks/' | sudo tee -a /etc/apk/repositories")
-    # update apk index
-    ssh(BUILDER_HOST, 'sudo apk update', **out)
-    # build toweros-thinclient
-    ssh(BUILDER_HOST, 'cd toweros/tower-apks/toweros-thinclient && abuild -r', **out)
-    # copy apk to local repo
-    scp(f'{BUILDER_HOST}:packages/tower-apks/{ARCH}/toweros-thinclient-{__version__}-r0.apk', TMP_DIR, **out)
-    cp(f'{TMP_DIR}/toweros-host-{__version__}-r0.apk', f'{APK_LOCAL_REPOSITORY}/{ARCH}')
-    # restore apk repositories
-    ssh(BUILDER_HOST, 'sudo mv /etc/apk/repositories.bak /etc/apk/repositories')
 
 @clitask("Building thin client image, be patient...")
 def prepare_image():
@@ -148,7 +121,7 @@ def build_image():
         check_abuild_key()
         prepare_working_dir()
         download_edge_apks()
-        prepare_tower_apk()
+        prepare_tower_apks()
         image_path = prepare_image()
     finally:
         cleanup()
