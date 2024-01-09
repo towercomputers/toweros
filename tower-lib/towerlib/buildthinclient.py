@@ -12,8 +12,9 @@ from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import doas
 from towerlib.utils.network import download_file
 from towerlib.__about__ import __version__
-from towerlib.utils.exceptions import LockException
+from towerlib.utils.exceptions import LockException, UnkownHost, TowerException
 from towerlib.config import THINCLIENT_ALPINE_BRANCH, APK_LOCAL_REPOSITORY, TOWER_BUILDS_DIR
+from towerlib import sshconf
 
 logger = logging.getLogger('tower')
 
@@ -26,7 +27,6 @@ REPO_PATH = os.path.abspath(join_path(os.path.dirname(__file__), '..', '..'))
 ALPINE_APORT_REPO = 'https://gitlab.alpinelinux.org/alpine/aports.git'
 
 TMP_DIR = tempfile.gettempdir()
-BUILDER_HOST = "rpi5"
 USERNAME = getpass.getuser()
 
 EDGE_REPO = f'https://dl-cdn.alpinelinux.org/alpine/edge/testing/{ARCH}/'
@@ -37,6 +37,10 @@ EDGE_APKS = [
 
 def wdir(path):
     return join_path(WORKING_DIR, path)
+
+
+def sprint(value):
+    print(value.decode("utf-8", 'ignore') if isinstance(value, bytes) else value, end='', flush=True)
 
 
 def prepare_working_dir():
@@ -127,3 +131,60 @@ def build_image():
         cleanup()
     if image_path:
         logger.info("Image ready: %s", image_path)
+
+
+@clitask("Preparing host {0} for build...")
+def prepare_host_for_build(build_host):
+    out = {"_out": logger.debug, "_err_to_out": True}
+    # clean previous install
+    ssh(build_host, 'rm -rf toweros .abuild packages', **out)
+    # copy toweros repo
+    scp('-r', REPO_PATH, f'{build_host}:', **out)
+    # install apk keys
+    scp('-r', f"/home/{USERNAME}/.abuild", f'{build_host}:', **out)
+    ssh(build_host, "sudo cp .abuild/*.pub /etc/apk/keys/", **out)
+    # install packages
+    build_depends = [
+        "alpine-sdk", "xz", "rsync", "perl-utils", "musl-locales",
+        "py3-pip", "py3-requests", "py3-rich", "cairo", "cairo-dev", "python3-dev",
+        "gobject-introspection", "gobject-introspection-dev",
+        "xsetroot", "losetup", "squashfs-tools", "xorriso", "pigz", "mtools",
+    ]
+    ssh(build_host, f"sudo apk update", **out)
+    ssh(build_host, f"sudo apk add {' '.join(build_depends)}", **out)
+    ssh(build_host, f"sudo addgroup {USERNAME} abuild", **out)
+    # install tower-lib abd tower-cli
+    ssh(build_host, f"sudo pip install -e toweros/tower-lib --break-system-packages", **out)
+    ssh(build_host, f"sudo pip install -e toweros/tower-cli --break-system-packages --no-deps", **out)
+
+
+@clitask("Transferring image from host {0} to thin client...")
+def copy_image_from_host(build_host):
+    out = {"_out": logger.debug, "_err_to_out": True}
+    host_arch = ssh(build_host, "arch", **out).strip()
+    image_extension = 'iso' if host_arch == 'x86_64' else 'tar.gz'
+    image_name = f"alpine-tower-{__version__}-{host_arch}.{image_extension}"
+    image_dest_path = join_path(TOWER_BUILDS_DIR, image_name)
+    scp(f"{build_host}:{image_dest_path}", TMP_DIR, **out)
+    with doas:
+        cp(join_path(TMP_DIR, image_name), TOWER_BUILDS_DIR)
+    logger.info("Image ready: %s", image_dest_path)
+
+
+@clitask("Building TowserOS-ThinClient image in {0}...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
+def build_image_in_host(build_host, verbose=False):
+    if not sshconf.exists(build_host):
+        raise UnkownHost(f"Host {build_host} not found.")
+    if not sshconf.is_up(build_host):
+        raise TowerException(f"Host {build_host} is not up.")
+    # prepare host
+    prepare_host_for_build(build_host)
+    # build image
+    verbose_opt = "--verbose" if verbose else ""
+    ssh(
+        '-t', build_host,
+        f"cd toweros/tower-build-cli && ./tower-build {verbose_opt} thinclient",
+        _err=sprint, _out=sprint, _in=sys.stdin,
+        _out_bufsize=0, _err_bufsize=0,
+    )
+    copy_image_from_host(build_host)

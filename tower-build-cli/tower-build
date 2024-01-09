@@ -31,9 +31,14 @@ def parse_arguments():
         help="Use `build-tower-image {thinclient|host} --help` to get options list for each image."
     )
 
-    subparser.add_parser(
+    thinclient_parser = subparser.add_parser(
         'thinclient',
         help="""Command used to generate thinclient image"""
+    )
+    thinclient_parser.add_argument(
+        '--in-host',
+        required=False,
+        help="""Build image inside host""",
     )
 
     host_parser = subparser.add_parser(
@@ -60,7 +65,10 @@ def main():
     if args.image_name == 'host':
         buildhost.build_image(args.uncompressed, args.build_dir)
     elif args.image_name == 'thinclient':
-        buildthinclient.build_image()
+        if args.in_host:
+            buildthinclient.build_image_in_host(args.in_host, verbose=args.verbose)
+        else:
+            buildthinclient.build_image()
 
 if __name__ == '__main__':
     sys.exit(main())
