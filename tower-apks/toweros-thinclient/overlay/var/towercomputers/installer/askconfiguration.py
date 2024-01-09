@@ -181,7 +181,9 @@ def check_secure_boot_status():
     return True
 
 
-def get_secure_boot():
+def get_secure_boot(arch):
+    if arch != 'x86_64':
+        return False
     print_title("Secure boot")
     with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?")
     if with_secure_boot and not check_secure_boot_status():
@@ -310,7 +312,7 @@ def ask_config():
         config['TARGET_DRIVE'] = get_target_drive(is_upgrade)
         config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_upgrade)
         if not is_upgrade:
-            config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
+            config['SECURE_BOOT'] = "true" if get_secure_boot(arch) else "false"
             config['LANG'] = get_lang()
             config['TIMEZONE'] = get_timezone()
             config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
