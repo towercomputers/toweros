@@ -126,7 +126,7 @@ def select_by_letter(title, ask1, ask2, values):
 def get_installation_type():
     return select_value(
         ['Install TowerOS-ThinClient', 'Upgrade TowerOS-ThinClient'],
-        "Do you want to reinstall TowerOS or upgrade an existing installation?",
+        "Do you want to install TowerOS or upgrade an existing installation?",
         "Select the installation type",
         no_columns=True
     ).split(" ", maxsplit=1)[0].lower()

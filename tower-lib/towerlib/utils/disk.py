@@ -2,11 +2,15 @@ import json
 import logging
 import time
 import os
+import tempfile
+import uuid
 
-from towerlib.utils.shell import lsblk, umount, ErrorReturnCode, doas
+from towerlib.utils.shell import lsblk, umount, ErrorReturnCode, doas, Command
+from towerlib.utils.decorators import clitask
 
 logger = logging.getLogger('tower')
 
+TMP_DIR = tempfile.gettempdir()
 
 def unmount_all(device):
     result = lsblk('-J', '-T', device)
@@ -64,3 +68,25 @@ def select_boot_device():
 
 def select_install_device():
     return select_device("install")
+
+
+def sh_cmd(cmd, **kwargs):
+    return Command('sh')('-c', cmd, **kwargs)
+
+def folder_to_image(folder, image_path):
+    out = {"_out": logger.debug, "_err_to_out": True}
+    sh_cmd(f"sync {folder}")
+    get_size_cmd = f"du -L -k -s {folder} | awk '{{print $1 + 16384}}'"
+    image_size = int(sh_cmd(get_size_cmd))
+    sh_cmd(f"dd if=/dev/zero of={image_path} bs=1M count={image_size // 1024}")
+    sh_cmd(f"mformat -i {image_path} -N 0 ::", **out)
+    sh_cmd(f"mcopy -s -i {image_path} {folder}/* {folder}/.alpine-release ::", **out)
+    sh_cmd(f"pigz -v -f -9 {image_path}", **out)
+
+@clitask("Converting archive {} to image disk...")
+def targz_to_image(targz_path, image_path):
+    tmp_folder = f"/{TMP_DIR}/tower-build-{uuid.uuid4()}"
+    sh_cmd(f"mkdir -p {tmp_folder}")
+    sh_cmd(f"tar -xpf {targz_path} -C {tmp_folder}")
+    folder_to_image(tmp_folder, image_path)
+    sh_cmd(f"rm -rf {tmp_folder}")

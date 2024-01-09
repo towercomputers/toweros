@@ -11,6 +11,7 @@ from towerlib.utils.shell import rm, git, Command, apk, cp, abuild, abuild_sign,
 from towerlib.utils.decorators import clitask
 from towerlib.utils.shell import doas
 from towerlib.utils.network import download_file
+from towerlib.utils.disk import targz_to_image
 from towerlib.__about__ import __version__
 from towerlib.utils.exceptions import LockException, UnkownHost, TowerException
 from towerlib.config import THINCLIENT_ALPINE_BRANCH, APK_LOCAL_REPOSITORY, TOWER_BUILDS_DIR
@@ -158,17 +159,15 @@ def prepare_host_for_build(build_host):
     ssh(build_host, f"sudo pip install -e toweros/tower-cli --break-system-packages --no-deps", **out)
 
 
-@clitask("Transferring image from host {0} to thin client...")
-def copy_image_from_host(build_host):
+@clitask("Transferring archive from host {0} to thin client...")
+def copy_archive_from_host(build_host):
     out = {"_out": logger.debug, "_err_to_out": True}
-    host_arch = ssh(build_host, "arch", **out).strip()
-    image_extension = 'iso' if host_arch == 'x86_64' else 'tar.gz'
-    image_name = f"alpine-tower-{__version__}-{host_arch}.{image_extension}"
-    image_dest_path = join_path(TOWER_BUILDS_DIR, image_name)
-    scp(f"{build_host}:{image_dest_path}", TMP_DIR, **out)
+    archive_name = f"toweros-thinclient-{__version__}-aarch64.tar.gz"
+    archive_dest_path = join_path(TOWER_BUILDS_DIR, archive_name)
+    scp(f"{build_host}:{archive_dest_path}", TMP_DIR, **out)
     with doas:
-        cp(join_path(TMP_DIR, image_name), TOWER_BUILDS_DIR)
-    logger.info("Image ready: %s", image_dest_path)
+        cp(join_path(TMP_DIR, archive_name), TOWER_BUILDS_DIR)
+    return archive_dest_path
 
 
 @clitask("Building TowserOS-ThinClient image in {0}...", timer_message="TowserOS-ThinClient image built in {0}.", task_parent=True)
@@ -187,4 +186,8 @@ def build_image_in_host(build_host, verbose=False):
         _err=sprint, _out=sprint, _in=sys.stdin,
         _out_bufsize=0, _err_bufsize=0,
     )
-    copy_image_from_host(build_host)
+    archive_path = copy_archive_from_host(build_host)
+    image_path = archive_path.replace('.tar.gz', '.img')
+    with doas:
+        targz_to_image(archive_path, image_path)
+    logger.info("Image ready: %s", f"{image_path}.gz")
