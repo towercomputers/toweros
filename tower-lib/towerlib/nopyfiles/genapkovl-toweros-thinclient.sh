@@ -44,7 +44,7 @@ if [ "$(arch)" == "aarch64" ]; then
     cat <<EOF > "$tmp"/etc/apk/world
 alpine-base
 raspberrypi-bootloader
-inux-firmware-brcm
+linux-firmware-brcm
 toweros-thinclient
 EOF
 else
