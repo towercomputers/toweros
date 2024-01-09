@@ -299,9 +299,10 @@ def print_header():
 def ask_config():
     print_header()
     confirmed = False
+    arch = run_cmd(['arch'])
     config = {
         'ALPINE_BRANCH': " ".join(THINCLIENT_ALPINE_BRANCH),
-        'DEFAULT_PACKAGES': " ".join(THINCLIENT_DEFAULT_PACKAGES),
+        'DEFAULT_PACKAGES': " ".join(THINCLIENT_DEFAULT_PACKAGES[arch]),
     }
     while not confirmed:
         config['INSTALLATION_TYPE'] = get_installation_type()
