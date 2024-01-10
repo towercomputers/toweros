@@ -185,7 +185,7 @@ def get_secure_boot(arch):
     if arch != 'x86_64':
         return False
     print_title("Secure boot")
-    with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?")
+    with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?", default=False)
     if with_secure_boot and not check_secure_boot_status():
         continue_without_secure_boot = Confirm.ask("Do you want to continue without Secure Boot (y), or do you want to reboot (n)?")
         if continue_without_secure_boot:
@@ -229,7 +229,7 @@ def get_keymap():
 
 def get_startw_on_login():
     print_title("Start Wayland on login")
-    return Confirm.ask("Do you want to automatically start the graphical interface on login?")
+    return Confirm.ask("Do you want to automatically start the graphical interface on login?", default=True)
 
 
 def get_user_information():
@@ -312,10 +312,11 @@ def ask_config():
         config['TARGET_DRIVE'] = get_target_drive(is_upgrade)
         config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_upgrade)
         if not is_upgrade:
-            config['SECURE_BOOT'] = "true" if get_secure_boot(arch) else "false"
+            config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
+            run_cmd(["setup-keymap", config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT']])
             config['LANG'] = get_lang()
             config['TIMEZONE'] = get_timezone()
-            config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
+            config['SECURE_BOOT'] = "true" if get_secure_boot(arch) else "false"
             config['STARTW_ON_LOGIN'] = "true" if get_startw_on_login() else "false"
             config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
             config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']
