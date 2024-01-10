@@ -55,6 +55,8 @@ intel-media-driver
 libva-intel-driver
 linux-firmware
 linux-firmware-none
+grub-efi
+efibootmgr
 toweros-thinclient
 EOF
 fi

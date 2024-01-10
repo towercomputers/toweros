@@ -21,6 +21,6 @@ profile_tower() {
             apks="$apks $_a-$_k"
         done
     done
-    apks="$apks syslinux linux-firmware linux-firmware-none intel-media-driver libva-intel-driver"
+    apks="$apks syslinux linux-firmware linux-firmware-none intel-media-driver libva-intel-driver grub-efi efibootmgr"
     apks="$apks toweros-thinclient toweros-thinclient-builds"
 }
