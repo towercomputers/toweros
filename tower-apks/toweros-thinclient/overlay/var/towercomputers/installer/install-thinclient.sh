@@ -317,25 +317,22 @@ EOF
 
 
 install_bootloader() {
+    # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
+    kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
+    kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
+    modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey,keymap"
+    # x86_64
     if [ "$ARCH" == "x86_64" ]; then
-        # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
-        kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
-        modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
-        # add cryptsetup and cryptkey to kernel options
-        kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
-        modules="$modules,cryptsetup,cryptkey"
-
-        # setup syslinux
+         # setup syslinux
         sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
             -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
             -e "s:^modules=.*:modules=$modules:" \
             /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
-
+        # write MBR
         dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
-
+        # install syslinux
         extlinux --install /mnt/boot
         chroot /mnt/ update-extlinux
-
         mkdir -p /mnt/boot/EFI/boot
         cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
         sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
@@ -345,11 +342,10 @@ install_bootloader() {
         rm -f /mnt/boot/*.sys
         rm -f /mnt/boot/extlinux.conf
         cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
+    # RPI
     elif [ "$ARCH" == "aarch64" ]; then
         # update cmdline.txt
-        kernel_opts="debug_init=1 console=tty1 rootfstype=ext4"
-        kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
-        modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey"
+        kernel_opts="console=tty1 $kernel_opts"
         cmdline="modules=$modules $kernel_opts"
         echo "$cmdline" > /mnt/boot/cmdline.txt
     fi
