@@ -262,17 +262,14 @@ update_live_system() {
     disable_installer
 }
 
-generate_mkinitfs() {
-    #mkdir -p /mnt/etc/mkinitfs/features.d
-    #features="base usb vfat ext4 nvme vmd lvm cryptsetup cryptkey kms"
-    #features="$features ata ide scsi mmc virtio keymap resume"
-    #echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 
-    # generate mkinitfs.conf
+generate_mkinitfs() {
     mkdir -p /mnt/etc/mkinitfs/features.d
-    features="base mmc usb ext4 mmc vfat nvme vmd lvm cryptsetup cryptkey"
+    features="base usb vfat ext4 nvme vmd lvm cryptsetup cryptkey kms"
+    features="$features ata ide scsi mmc virtio keymap resume"
     echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 }
+
 
 clone_live_system_to_disk() {
     # backup local config in apkovl

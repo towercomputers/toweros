@@ -23,7 +23,7 @@ profile_tower() {
             apks="$apks $_a-$_k"
         done
     done
-    apks="$apks raspberrypi-bootloader linux-firmware-brcm lvm2"
+    apks="$apks raspberrypi-bootloader linux-firmware-brcm"
     apks="$apks toweros-thinclient toweros-thinclient-builds"
 }
 
