@@ -103,7 +103,7 @@ def prepare_image():
         '--repository', APK_LOCAL_REPOSITORY,
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/main',
         '--repository', f'http://dl-cdn.alpinelinux.org/alpine/{THINCLIENT_ALPINE_BRANCH}/community',
-        '--profile', f'tower',
+        '--profile', 'tower',
         '--tag', __version__,
          _err_to_out=True, _out=logger.debug,
          _cwd=WORKING_DIR
@@ -162,12 +162,12 @@ def prepare_host_for_build(build_host):
         "gobject-introspection", "gobject-introspection-dev",
         "xsetroot", "losetup", "squashfs-tools", "xorriso", "pigz", "mtools",
     ]
-    ssh(build_host, f"sudo apk update", **out)
+    ssh(build_host, "sudo apk update", **out)
     ssh(build_host, f"sudo apk add {' '.join(build_depends)}", **out)
     ssh(build_host, f"sudo addgroup {USERNAME} abuild", **out)
     # install tower-lib abd tower-cli
-    ssh(build_host, f"sudo pip install -e toweros/tower-lib --break-system-packages", **out)
-    ssh(build_host, f"sudo pip install -e toweros/tower-cli --break-system-packages --no-deps", **out)
+    ssh(build_host, "sudo pip install -e toweros/tower-lib --break-system-packages", **out)
+    ssh(build_host, "sudo pip install -e toweros/tower-cli --break-system-packages --no-deps", **out)
 
 
 @clitask("Transferring image from host {0} to thin client...")

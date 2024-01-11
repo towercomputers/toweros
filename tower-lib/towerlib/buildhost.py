@@ -13,7 +13,7 @@ from towerlib.utils.shell import (
     cp, rm, sync, rsync, chown, truncate, mkdir,
     tar, xz, apk, dd,
     losetup, abuild_sign, openssl,
-    scp, ssh, runuser, abuild, ls, doas
+    scp, ssh, runuser, abuild, doas
 )
 
 from towerlib import utils, config, sshconf

@@ -7,11 +7,11 @@ from rich.prompt import Confirm
 from rich.text import Text
 from rich import print as rprint
 
-from towerlib.utils.shell import ssh, scp, rm, Command, ErrorReturnCode
+from towerlib.utils.shell import ssh, Command, ErrorReturnCode
 from towerlib.utils import clitask
 from towerlib.utils.menu import copy_desktop_files
 from towerlib.sshconf import is_online_host, get_saved_packages
-from towerlib.utils.exceptions import LockException, TowerException
+from towerlib.utils.exceptions import TowerException
 from towerlib import sshconf, config
 
 logger = logging.getLogger('tower')

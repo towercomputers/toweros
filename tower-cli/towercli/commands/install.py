@@ -20,6 +20,7 @@ def add_args(argparser):
         nargs='+'
     )
     install_parser.add_argument(
+        # pylint: disable=duplicate-code
         '--no-confirm',
         help="""Don't ask for confirmation. (Default: False)""",
         required=False,
