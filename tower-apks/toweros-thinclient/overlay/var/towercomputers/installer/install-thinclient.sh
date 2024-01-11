@@ -263,9 +263,14 @@ update_live_system() {
 }
 
 generate_mkinitfs() {
+    #mkdir -p /mnt/etc/mkinitfs/features.d
+    #features="base usb vfat ext4 nvme vmd lvm cryptsetup cryptkey kms"
+    #features="$features ata ide scsi mmc virtio keymap resume"
+    #echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
+
+    # generate mkinitfs.conf
     mkdir -p /mnt/etc/mkinitfs/features.d
-    features="base usb vfat ext4 nvme vmd lvm cryptsetup cryptkey"
-    features="$features ata ide scsi mmc virtio keymap resume"
+    features="base mmc usb ext4 mmc vfat nvme vmd lvm cryptsetup cryptkey"
     echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
 }
 
@@ -345,8 +350,8 @@ install_bootloader() {
         cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
     elif [ "$ARCH" == "aarch64" ]; then
         # update cmdline.txt
-        kernel_opts="quiet console=tty1 rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
-        kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$TARGET_DRIVE cryptkey=yes cryptdm=lvmcrypt"
+        kernel_opts="debug_init=1 console=tty1 rootfstype=ext4"
+        kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
         modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey"
         cmdline="modules=$modules $kernel_opts"
         echo "$cmdline" > /mnt/boot/cmdline.txt

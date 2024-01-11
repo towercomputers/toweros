@@ -45,6 +45,7 @@ if [ "$(arch)" == "aarch64" ]; then
 alpine-base
 raspberrypi-bootloader
 linux-firmware-brcm
+lvm2
 toweros-thinclient
 EOF
 else
@@ -70,7 +71,7 @@ rc_add modloop sysinit
 
 # generate apk overlay
 if [ "$(arch)" == "aarch64" ]; then
-    tar -c -C "$tmp" etc | gzip -9n > headless.apkovl.tar.gz
+    tar -c -C "$tmp" ./ | gzip -9n > $HOSTNAME.apkovl.tar.gz
 else
     tar -c -C "$tmp" ./ | gzip -9n > $HOSTNAME.apkovl.tar.gz
 fi

@@ -10,7 +10,8 @@ profile_tower() {
     arch="aarch64"
     kernel_flavors="rpi"
     kernel_cmdline="console=tty1"
-    initfs_features="base squashfs mmc usb kms dhcp https"
+    initfs_features="base squashfs mmc usb kms dhcp https vmd lvm cryptsetup cryptkey"
+    kernel_addons="zfs"
     grub_mod=
     hostname="rpi"
     
@@ -22,7 +23,7 @@ profile_tower() {
             apks="$apks $_a-$_k"
         done
     done
-    apks="$apks raspberrypi-bootloader linux-firmware-brcm"
+    apks="$apks raspberrypi-bootloader linux-firmware-brcm lvm2"
     apks="$apks toweros-thinclient toweros-thinclient-builds"
 }
 

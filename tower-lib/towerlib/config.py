@@ -41,7 +41,7 @@ ALPINE_RPI_CHECKSUM = "5621e7e597c3242605cd403a0a9109ec562892a6c8a185852b6b02ff8
 HOST_DEFAULT_PACKAGES = 'toweros-host'.split(" ")
 THINCLIENT_DEFAULT_PACKAGES = {
     'x86_64': 'toweros-thinclient toweros-thinclient-builds alpine-base linux-lts xtables-addons-lts zfs-lts syslinux intel-media-driver libva-intel-driver linux-firmware linux-firmware-none'.split(" "),
-    'aarch64': 'toweros-thinclient toweros-thinclient-builds alpine-base linux-rpi raspberrypi-bootloader linux-firmware-brcm'.split(" "),
+    'aarch64': 'toweros-thinclient toweros-thinclient-builds alpine-base linux-rpi raspberrypi-bootloader zfs-rpi linux-firmware-brcm lvm2'.split(" "),
 }
 
 VNC_VIEWER_CSS = """

@@ -303,7 +303,7 @@ def ask_config():
     confirmed = False
     arch = run_cmd(['arch'])
     config = {
-        'ALPINE_BRANCH': " ".join(THINCLIENT_ALPINE_BRANCH),
+        'ALPINE_BRANCH': THINCLIENT_ALPINE_BRANCH,
         'DEFAULT_PACKAGES': " ".join(THINCLIENT_DEFAULT_PACKAGES[arch]),
     }
     while not confirmed:
