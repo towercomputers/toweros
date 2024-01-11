@@ -35,27 +35,28 @@ def run_cmd(cmd, to_json=False):
     return out
 
 
-def get_mountpoints():
-    all_devices = run_cmd(['lsblk', '-J'], to_json=True)
-    mountpoints = {}
-    for device in all_devices['blockdevices']:
-        if device['type'] == 'disk':
-            mountpoints[f"/dev/{device['name']}"] = device['mountpoints'][0]
-    return mountpoints
-
-
 def disk_list(exclude=None):
-    all_disks = run_cmd(['lsscsi']).split("\n")
-    mountpoints = get_mountpoints()
+    all_disks = run_cmd(['lsblk', '-o', 'MODEL,VENDOR,SIZE,TYPE,MOUNTPOINTS,PATH', '-J', '-d'], to_json=True)
     disks = []
-    for disk in all_disks:
-        path = disk[disk.index('/dev/'):].split(" ")[0].strip()
-        if exclude and path == exclude:
+    for device in all_disks['blockdevices']:
+        if device['type'] != 'disk':
             continue
-        if path not in mountpoints:
+        if exclude and device['path'] == exclude:
             continue
-        if mountpoints[path] is not None:
+        if device['mountpoints'][0] is not None:
             continue
+        if device['vendor'] is None:
+            if device['path'].startswith('/dev/mmcblk'):
+                device['vendor'] = "SD/MMC"
+            else:
+                device['vendor'] = "N/A"
+        if device['model'] is None:
+            device['model'] = "N/A"
+        disk_name = f"{device['vendor'].strip()} {device['model'].strip()}"
+        disk  = f"{device['type']}    "
+        disk += f"{disk_name}    "
+        disk += f"{device['size']}    "
+        disk += f"{device['path']}"
         disks.append(disk)
     return disks
 
@@ -126,7 +127,7 @@ def select_by_letter(title, ask1, ask2, values):
 def get_installation_type():
     return select_value(
         ['Install TowerOS-ThinClient', 'Upgrade TowerOS-ThinClient'],
-        "Do you want to reinstall TowerOS or upgrade an existing installation?",
+        "Do you want to install TowerOS or upgrade an existing installation?",
         "Select the installation type",
         no_columns=True
     ).split(" ", maxsplit=1)[0].lower()
@@ -180,9 +181,11 @@ def check_secure_boot_status():
     return True
 
 
-def get_secure_boot():
+def get_secure_boot(arch):
+    if arch != 'x86_64':
+        return False
     print_title("Secure boot")
-    with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?")
+    with_secure_boot = Confirm.ask("Do you want to set up TowerOS-ThinClient with Secure Boot?", default=False)
     if with_secure_boot and not check_secure_boot_status():
         continue_without_secure_boot = Confirm.ask("Do you want to continue without Secure Boot (y), or do you want to reboot (n)?")
         if continue_without_secure_boot:
@@ -226,7 +229,7 @@ def get_keymap():
 
 def get_startw_on_login():
     print_title("Start Wayland on login")
-    return Confirm.ask("Do you want to automatically start the graphical interface on login?")
+    return Confirm.ask("Do you want to automatically start the graphical interface on login?", default=True)
 
 
 def get_user_information():
@@ -298,9 +301,10 @@ def print_header():
 def ask_config():
     print_header()
     confirmed = False
+    arch = run_cmd(['arch'])
     config = {
-        'ALPINE_BRANCH': " ".join(THINCLIENT_ALPINE_BRANCH),
-        'DEFAULT_PACKAGES': " ".join(THINCLIENT_DEFAULT_PACKAGES),
+        'ALPINE_BRANCH': THINCLIENT_ALPINE_BRANCH,
+        'DEFAULT_PACKAGES': " ".join(THINCLIENT_DEFAULT_PACKAGES[arch]),
     }
     while not confirmed:
         config['INSTALLATION_TYPE'] = get_installation_type()
@@ -308,10 +312,11 @@ def ask_config():
         config['TARGET_DRIVE'] = get_target_drive(is_upgrade)
         config['CRYPTKEY_DRIVE'] = get_cryptkey_drive(config['TARGET_DRIVE'], is_upgrade)
         if not is_upgrade:
-            config['SECURE_BOOT'] = "true" if get_secure_boot() else "false"
+            config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
+            run_cmd(["setup-keymap", config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT']])
             config['LANG'] = get_lang()
             config['TIMEZONE'] = get_timezone()
-            config['KEYBOARD_LAYOUT'], config['KEYBOARD_VARIANT'] = get_keymap()
+            config['SECURE_BOOT'] = "true" if get_secure_boot(arch) else "false"
             config['STARTW_ON_LOGIN'] = "true" if get_startw_on_login() else "false"
             config['USERNAME'], config['PASSWORD_HASH'] = get_user_information()
             config['ROOT_PASSWORD_HASH'] = config['PASSWORD_HASH']

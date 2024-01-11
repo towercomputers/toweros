@@ -7,7 +7,7 @@ from rich.table import Table
 from rich.text import Text
 from sshconf import read_ssh_config, empty_ssh_config_file
 
-from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command, cat
+from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command, cat, arch
 from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost, InvalidColor
 from towerlib.__about__ import __version__
@@ -322,7 +322,8 @@ def get_hex_host_color(host):
 def get_installed_packages(host):
     if host == "thinclient":
         thinclient_world = cat('/etc/apk/world').strip().split("\n")
-        return [package for package in thinclient_world if package not in THINCLIENT_DEFAULT_PACKAGES]
+        default_packages = THINCLIENT_DEFAULT_PACKAGES[arch().strip()]
+        return [package for package in thinclient_world if package not in default_packages]
     host_world = ssh(host, 'cat /etc/apk/world').strip().split("\n")
     return [package for package in host_world if package not in HOST_DEFAULT_PACKAGES]
 

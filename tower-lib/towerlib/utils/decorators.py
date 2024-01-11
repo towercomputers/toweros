@@ -7,6 +7,7 @@ from yaspin.spinners import Spinners
 from rich import print as rich_print
 
 from towerlib.utils.shell import doas
+from towerlib.config import TOWER_BUILDS_DIR
 
 logger = logging.getLogger('tower')
 
@@ -41,7 +42,9 @@ def join_list(item_list):
 def format_arg(arg):
     if isinstance(arg, list):
         return join_list(arg)
-    return f"`{arg}`"
+    value = str(arg)
+    value = value.replace(f'{TOWER_BUILDS_DIR}/', '')
+    return f"`{value}`"
 
 def clitask(message=None, timer=True, timer_message="Done in {0}", sudo=False, task_parent=False):
     def decorator(function):

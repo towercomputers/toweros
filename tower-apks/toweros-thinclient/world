@@ -33,13 +33,10 @@ acct-openrc
 alpine-conf
 sfdisk
 fakeroot
-syslinux
 xorriso
 squashfs-tools
 mtools
 dosfstools
-grub-efi
-efibootmgr
 abuild
 agetty
 runuser
@@ -54,8 +51,6 @@ udev-init-scripts
 udev-init-scripts-openrc
 mesa-dri-gallium
 mesa-va-gallium
-intel-media-driver
-libva-intel-driver
 font-dejavu
 font-awesome
 seatd
@@ -115,3 +110,4 @@ gtk-vnc
 sfwbar
 sfwbar-doc
 wl-clipboard
+pigz

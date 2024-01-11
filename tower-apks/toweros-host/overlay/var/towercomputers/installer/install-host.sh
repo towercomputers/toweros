@@ -9,6 +9,7 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
+
 check_and_copy_key_from_boot_disk() {
 	if ! [ -f "$BOOT_MEDIA/crypto_keyfile.bin" ]; then
         echo "Key file not found in boot partition"
@@ -22,6 +23,7 @@ check_and_copy_key_from_boot_disk() {
     cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
     chmod 0400 /crypto_keyfile.bin
 }
+
 
 create_lvm_partitions() {
 	# zeroing root device
@@ -48,6 +50,7 @@ create_lvm_partitions() {
 	HOME_PARTITION="/dev/vg0/home"
 }
 
+
 activate_lvm_disk() {
     # initialize the LUKS partition
     cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
@@ -56,6 +59,7 @@ activate_lvm_disk() {
     HOME_PARTITION="/dev/vg0/home"
     ROOT_PARTITION="/dev/vg0/root"
 }
+
 
 prepare_root_partition() {
 	if [ "$INSTALLATION_TYPE" == "install" ]; then
@@ -80,6 +84,7 @@ prepare_root_partition() {
 	# copy LUKS key
 	cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
 }
+
 
 prepare_home_directory() {
 	# create first user
@@ -106,6 +111,7 @@ fi
 EOF
 	chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
+
 
 update_live_system() {
 	# TODO: set locale
@@ -197,6 +203,7 @@ EOF
 	chmod 600 /etc/ssh/ssh_host_*
 }
 
+
 clone_live_system_to_disk() {
     # install base system
     ovlfiles=/tmp/ovlfiles
@@ -265,6 +272,7 @@ EOF
 	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
 }
 
+
 clean_and_reboot() {
 	# disable auto installation on boot
 	mv /mnt/etc/local.d/install-host.start /mnt/etc/local.d/install.bak || true
@@ -277,6 +285,7 @@ clean_and_reboot() {
 	# reboot
 	reboot
 }
+
 
 init_configuration() {
 	# tower.env MUST contains the following variables:
