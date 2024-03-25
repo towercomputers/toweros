@@ -66,6 +66,9 @@ enum.item(2)[Qubes OS relies on the security properties of the hardware it runs 
 #v(-15pt)
 #quote(attribution: "J. Rutkowska")[“Other problems arise from the underlying architecture of the x86 platform, where various inter-VM side- and covert-channels are made possible thanks to the aggressively optimized multi-core CPU architecture, most spectacularly demonstrated by the recently published #link("https://meltdownattack.com")[Meltdown and Spectre attacks]. Fundamental problems in other areas of the underlying hardware have also been discovered, such as the #link("https://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html")[Row Hammer Attack].”@rutkowska]#v(5pt)],
 
+  // TODO
+  // https://comsec.ethz.ch/research/dram/zenhammer/
+
 enum.item(3)[The complexity inherent in the design of Qubes OS makes the operating system difficult both to maintain and to use. Accordingly, Qubes OS development has slowed significantly in recent years: as of December 2022, the last release (v4.1.x, in February 2022) came almost four years after the previous one (v4.0.x in March 2018).@download],
 
 enum.item(4)[Qubes OS has support only for extremely few hardware configurations. As of December 2022, are only three laptops that are known to be fully compatible with Qubes OS.@certified With only moderate effort, TowerOS may be hybridized with any modern operating system so long as that operating system supports the standard network interfaces required for SSH, etc. This flexibility can enable the system to run a wide variety of software and hardware.]
