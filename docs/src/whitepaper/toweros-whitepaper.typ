@@ -9,7 +9,7 @@
       url: "https://github.com/towercomputers/toweros"
     ),
   ),
-  abstract: [We describe TowerOS, a system architecture for converged multi-level secure (MLS) computing in which isolation between security domains is enforced at a network boundary rather than within a single shared-kernel or hypervisor-based platform.  Each security domain runs on an independent headless host, while a thin client provides a unified user interface by compositing remote application displays over standard, widely-deployed cryptographic protocols. This design aims to reduce the cross-domain trusted computing base relative to software-boundary approaches while retaining the usability benefits of a single, integrated desktop.],
+  abstract: [We describe TowerOS, a system architecture for converged multi-level secure (MLS) computing in which isolation between security domains is enforced at a network boundary rather than within a single shared-kernel or hypervisor-based platform. Each security domain runs on an independent headless host, while a thin client provides a unified user interface by compositing remote application displays over standard, widely-deployed cryptographic protocols. This design aims to reduce the cross-domain trusted computing base relative to software-boundary approaches while retaining the usability benefits of a single, integrated desktop.],
 )
 
 #set quote(block: true)
@@ -51,11 +51,11 @@ With TowerOS, we hope to address this deficiency in the software ecosystem. In t
 == Advantages
 #enum(
 enum.item(1)[Most importantly, Qubes OS relies heavily on the security guarantees of Xen, which is large, complicated, and has a history of serious security vulnerabilities.@deraadt
-#v(-15pt)
+
 #quote(attribution: "J. Rutkowska")[“In recent years, as more and more top notch researchers have begun scrutinizing Xen, a number of #link("https://xenbits.xen.org/xsa/")[security bugs] have been discovered. While #link("https://www.qubes-os.org/security/xsa/")[many] of them did not affect the security of Qubes OS, there were still too many that did.”@rutkowska]#v(5pt)],
 
 enum.item(2)[Qubes OS relies on the security properties of the hardware it runs on.
-#v(-15pt)
+
 #quote(attribution: "J. Rutkowska")[“Other problems arise from the underlying architecture of the x86 platform, where various inter-VM side- and covert-channels are made possible thanks to the aggressively optimized multi-core CPU architecture, most spectacularly demonstrated by the recently published #link("https://meltdownattack.com")[Meltdown and Spectre attacks]. Fundamental problems in other areas of the underlying hardware have also been discovered, such as the #link("https://googleprojectzero.blogspot.com/2015/03/exploiting-dram-rowhammer-bug-to-gain.html")[Row Hammer Attack].”@rutkowska]#v(5pt)],
 
   // TODO

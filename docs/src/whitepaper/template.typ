@@ -81,23 +81,26 @@
       #it.body
       #v(13.75pt, weak: true)
     ] else if it.level == 2 [
-      // Second-level headings are run-ins.
+      // Second-level headings are centered smallcaps, similar to level 1.
       #set par(first-line-indent: 0pt)
-      #set text(style: "italic")
-      #v(10pt, weak: true)
+      #set align(center)
+      #set text(11pt)
+      #show: smallcaps
+      #v(16pt, weak: true)
       #if it.numbering != none {
         numbering("A.", deepest)
         h(7pt, weak: true)
       }
       #it.body
-      #v(10pt, weak: true)
+      #v(12pt, weak: true)
     ] else [
-      // Third level headings are run-ins too, but different.
+      // Third level headings are run-ins with a trailing colon.
       #if it.level == 3 {
         numbering("1)", deepest)
-        [ ]
+        h(7pt, weak: true)
       }
-      _#(it.body):_
+      #emph[#it.body:]
+      h(0.35em, weak: true)
     ]
   }
 
