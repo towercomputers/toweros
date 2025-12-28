@@ -29,7 +29,7 @@
   set document(title: title, author: authors.map(author => author.name))
 
   // Set the body font.
-  set text(font: "STIX Two Text", size: 10pt)
+  set text(font: "Times New Roman", size: 10pt)
 
   // Configure the page.
   set page(
@@ -56,9 +56,9 @@
 
   // Configure headings.
   set heading(numbering: "I.A.1.")
-  show heading: it => locate(loc => {
+  show heading: it => context {
     // Find out the final number of the heading counter.
-    let levels = counter(heading).at(loc)
+    let levels = counter(heading).at(here())
     let deepest = if levels != () {
       levels.last()
     } else {
@@ -99,7 +99,7 @@
       }
       _#(it.body):_
     ]
-  })
+  }
 
   // Display the paper's title.
   v(3pt, weak: true)
@@ -139,8 +139,7 @@
 
   // Start two column mode and configure paragraph properties.
   show: columns.with(2, gutter: 12pt)
-  set par(justify: true, first-line-indent: 1em)
-  show par: set block(spacing: 0.65em)
+  set par(justify: true, first-line-indent: 1em, spacing: 0.65em)
 
   // Display abstract and index terms.
   if abstract != none [
