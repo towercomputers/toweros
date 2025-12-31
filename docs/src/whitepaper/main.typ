@@ -1,4 +1,4 @@
-#import "template.typ": *
+#import "style/ieee.typ": *
 #show: ieee.with(
   title: "TowerOS: An Operating System for Network-Boundary
   Converged Multi-Level Secure Computing",
