@@ -17,6 +17,7 @@ from towercli.commands import (
     synctime,
     poweroff,
     deprovision,
+    apktunnel,
 )
 
 
@@ -54,6 +55,7 @@ def towercli_parser():
     version.add_args(subparser)
     poweroff.add_args(subparser)
     deprovision.add_args(subparser)
+    apktunnel.add_args(subparser)
     mdhelp.add_args(subparser) # hidden command
     synctime.add_args(subparser) # hidden command
     utils.mdhelp.insert_autocompletion_command(parser) # hidden command

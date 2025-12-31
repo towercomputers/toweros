@@ -17,3 +17,10 @@ echo "https://dl-cdn.alpinelinux.org/alpine/latest-stable/community" | sudo tee 
 
 # restart network
 sudo rc-service networking restart
+
+# wait for connection
+while ! ping -c 1 -n -w 2 www.google.com &> /dev/null
+do
+    echo "Waiting for connection..."
+done
+echo "Connected!"

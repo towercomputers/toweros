@@ -1,10 +1,7 @@
 name: License Scanner
 
 on:
-  push:
-    branches: [ "master", "dev" ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ "master" ]
 
 jobs:
@@ -22,7 +19,14 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y libgirepository1.0-dev
+        sudo apt-get install -y \
+          libgirepository1.0-dev \
+          libcairo2-dev \
+          pkg-config \
+          python3-dev \
+          libffi-dev \
+          gobject-introspection \
+          libglib2.0-dev
         python -m pip install --upgrade pip
         pip install license_scanner
         pip install -e tower-lib

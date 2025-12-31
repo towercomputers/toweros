@@ -1,16 +1,17 @@
-import os
 import logging
 import sys
 import time
+import signal
 
 from rich.prompt import Confirm
 from rich.text import Text
+from rich import print as rprint
 
-from towerlib.utils.shell import ssh, scp, rm, Command, ErrorReturnCode
+from towerlib.utils.shell import ssh, Command, ErrorReturnCode
 from towerlib.utils import clitask
-from towerlib.utils.menu import add_installed_package, get_installed_packages
-from towerlib.sshconf import is_online_host
-from towerlib.utils.exceptions import LockException, TowerException
+from towerlib.utils.menu import copy_desktop_files
+from towerlib.sshconf import is_online_host, get_saved_packages
+from towerlib.utils.exceptions import TowerException
 from towerlib import sshconf, config
 
 logger = logging.getLogger('tower')
@@ -21,24 +22,11 @@ APK_REPOS_URL = [
 ]
 LOCAL_TUNNELING_PORT = 8666
 
+signal.signal(signal.SIGTRAP, signal.default_int_handler)
+signal.signal(signal.SIGHUP, signal.default_int_handler)
 
 def sprint(value):
     print(value.decode("utf-8", 'ignore') if isinstance(value, bytes) else value, end='', flush=True)
-
-
-def prepare_repositories_file(host):
-    file_name = os.path.join(os.path.expanduser('~'), f'repositories.offline.{host}')
-    # use temporary file as lock file
-    if os.path.exists(file_name):
-        raise LockException(f"f{file_name} already exists! Is another install in progress? If not, delete this file and try again.")
-    # generate temporary apk repositories
-    with open(file_name, 'w', encoding="UTF-8") as file_pointer:
-        for repo in APK_REPOS_URL:
-            file_pointer.write(f"{repo}\n")
-    # copy apk repositories in offline host
-    if host != 'thinclient':
-        scp(file_name, f"{host}:~/")
-        rm('-f', file_name)
 
 
 def offline_cmd(host, cmd):
@@ -50,8 +38,6 @@ def offline_cmd(host, cmd):
 
 @clitask("Preparing installation...")
 def prepare_offline_host(host):
-    # prepare apk repositories in offline host
-    prepare_repositories_file(host)
     # add repo host in /etc/hosts
     offline_cmd(host, 'sudo cp /etc/hosts /etc/hosts.bak')
     offline_cmd(host, f"echo '127.0.0.1 {APK_REPOS_HOST}\n' | sudo tee /etc/hosts")
@@ -61,11 +47,6 @@ def prepare_offline_host(host):
 
 
 def cleanup_offline_host(host):
-    # remove temporary apk repositories in thinclient
-    file_name = f'~/repositories.offline.{host}'
-    if host == 'thinclient':
-        file_name = os.path.expanduser(file_name)
-    offline_cmd(host, f"rm -f {file_name}")
     # restore /etc/hosts
     offline_cmd(host, "sudo mv /etc/hosts.bak /etc/hosts")
     # clean iptables
@@ -85,7 +66,6 @@ def cleanup(host):
     cleanup_offline_host(host)
 
 
-@clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_online_host(host, packages):
     # we just need to run apk with ssh...
     try:
@@ -96,7 +76,7 @@ def install_in_online_host(host, packages):
             _out_bufsize=0, _err_bufsize=0,
         )
         for package in packages:
-            add_installed_package(host, package)
+            copy_desktop_files(host, package)
     except ErrorReturnCode as exc:
         raise TowerException(f"Error while installing packages in {host}") from exc
 
@@ -111,7 +91,6 @@ def open_router_tunnel():
     time.sleep(1)
 
 
-@clitask("Installing {1} in {0}...", task_parent=True)
 def install_in_offline_host(host, packages):
     try:
         prepare_offline_host(host)
@@ -123,7 +102,7 @@ def install_in_offline_host(host, packages):
             ssh(
                 '-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-t',
                 host,
-                f"sudo apk --repositories-file ~/repositories.offline.{host} --progress -v add {' '.join(packages)}",
+                f"sudo apk --progress -v add {' '.join(packages)}",
                 _err=sprint, _out=sprint, _in=sys.stdin,
                 _out_bufsize=0, _err_bufsize=0,
             )
@@ -131,14 +110,13 @@ def install_in_offline_host(host, packages):
             error = True # error in remote host is already displayed
         if not error:
             for package in packages:
-                add_installed_package(host, package)
+                copy_desktop_files(host, package)
     finally:
         cleanup(host)
         if error:
             raise TowerException(f"Error while installing packages in {host}")
 
 
-@clitask("Installing {0} in thin client...", task_parent=True)
 def install_in_thinclient(packages):
     error = False
     try:
@@ -146,8 +124,7 @@ def install_in_thinclient(packages):
         open_router_tunnel()
         logger.info("Running apk in thinclient...")
         try:
-            repo_file = os.path.expanduser('~/repositories.offline.thinclient')
-            apk_cmd = f"sudo apk --repositories-file {repo_file} --progress add {' '.join(packages)}"
+            apk_cmd = f"sudo apk --progress add {' '.join(packages)}"
             Command('sh')('-c',
                 apk_cmd,
                 _err_to_out=True, _out=sprint, _in=sys.stdin,
@@ -166,18 +143,26 @@ def can_install(host):
         raise TowerException(f"`{host}` is down. Please start it first.")
     if (host == "thinclient" or not sshconf.is_online_host(host)) and not sshconf.exists(config.ROUTER_HOSTNAME):
         raise TowerException(f"`{host}` is an offline host and `{config.ROUTER_HOSTNAME}` host was not found. Please provision it first.")
+    if not sshconf.is_up(config.ROUTER_HOSTNAME):
+        raise TowerException(f"`{config.ROUTER_HOSTNAME}` is down. Please start it first.")
 
 
-def install_packages(host, packages):
-    can_install(host)
+def display_install_warning(host):
     if host == 'thinclient':
         confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on hosts. Are you sure you want to install this package directly on the thin client?", style='red')
         if not Confirm.ask(confirmation):
-            return
+            raise TowerException("Installation aborted.")
     if host == 'router':
         confirmation = Text("This is a *dangerous operation*. Packages should normally be installed only on other hosts. Are you sure you want to install this package on the router?", style='red')
         if not Confirm.ask(confirmation):
-            return
+            raise TowerException("Installation aborted.")
+
+
+@clitask("Installing {1} in {0}...", task_parent=True)
+def install_packages(host, packages, no_confirm=False):
+    can_install(host)
+    if not no_confirm:
+        display_install_warning(host)
     if host == 'thinclient':
         install_in_thinclient(packages)
     elif is_online_host(host):
@@ -188,6 +173,27 @@ def install_packages(host, packages):
 
 def reinstall_all_packages(host):
     can_install(host)
-    packages = get_installed_packages(host)
+    packages = get_saved_packages(host)
     if packages:
-        install_packages(host, packages)
+        install_packages(host, packages, no_confirm=True)
+
+
+@clitask("Opening APK tunnel with {0}...", task_parent=True)
+def open_apk_tunnel(host):
+    if host != "thinclient" and sshconf.is_online_host(host):
+        raise TowerException(f"`{host}` is an online host. You can use `apk` command directly in `{host}`.")
+    can_install(host)
+    display_install_warning(host)
+    try:
+        prepare_offline_host(host)
+        open_router_tunnel()
+        if host != "thinclient":
+            ssh('-R', f'4443:127.0.0.1:{LOCAL_TUNNELING_PORT}', '-N', host, _bg=True, _bg_exc=False)
+        message = f"APK tunnel opened. You can use `apk` command in host `{host}` with `ssh {host} sudo apk ...`.\nPress Ctrl+C to close it."
+        rprint(Text(message, style="green bold"))
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        cleanup(host)

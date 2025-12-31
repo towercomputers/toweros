@@ -1,0 +1,64 @@
+# source: https://madaidans-insecurities.github.io/guides/linux-hardening.html#kernel
+
+### Kernel ###
+
+# mitigate kernel pointer leaks
+kernel.kptr_restrict=2
+# restricts the kernel log to the CAP_SYSLOG capability
+kernel.dmesg_restrict=1
+# prevents screen information leaks during boot
+kernel.printk=3 3 3 3
+# restrict eBPF to the CAP_BPF capability (CAP_SYS_ADMIN on kernel versions prior to 5.8)
+kernel.unprivileged_bpf_disabled=1
+# This restricts loading TTY line disciplines to the CAP_SYS_MODULE capability
+dev.tty.ldisc_autoload=0
+# disable SysRq
+kernel.sysrq=0
+# restricts all usage of performance events to the CAP_PERFMON capability (CAP_SYS_ADMIN on kernel versions prior to 5.8)
+kernel.perf_event_paranoid=3
+
+### Network ###
+
+# This helps protect against SYN flood attacks
+net.ipv4.tcp_syncookies=1
+# This protects against time-wait assassination
+net.ipv4.tcp_rfc1337=1
+# protects against IP spoofing
+net.ipv4.conf.all.rp_filter=1
+net.ipv4.conf.default.rp_filter=1
+# disable ICMP redirect acceptance and sending to prevent man-in-the-middle attacks
+net.ipv4.conf.all.accept_redirects=0
+net.ipv4.conf.default.accept_redirects=0
+net.ipv4.conf.all.secure_redirects=0
+net.ipv4.conf.default.secure_redirects=0
+net.ipv6.conf.all.accept_redirects=0
+net.ipv6.conf.default.accept_redirects=0
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.send_redirects=0
+# This setting makes your system ignore all ICMP requests to avoid Smurf attacks
+net.ipv4.icmp_echo_ignore_all=1
+# disable source routing
+net.ipv4.conf.all.accept_source_route=0
+net.ipv4.conf.default.accept_source_route=0
+net.ipv6.conf.all.accept_source_route=0
+net.ipv6.conf.default.accept_source_route=0
+# disable IPv6 router advertisements
+net.ipv6.conf.all.accept_ra=0
+net.ipv6.conf.default.accept_ra=0
+# disables TCP SACK
+net.ipv4.tcp_sack=0
+net.ipv4.tcp_dsack=0
+net.ipv4.tcp_fack=0
+
+### User Space ###
+
+# Increase the bits of entropy used for mmap ASLR, improving its effectiveness.
+#vm.mmap_rnd_bits=32
+#vm.mmap_rnd_compat_bits=16
+# only permits symlinks to be followed when outside of a world-writable sticky directory, when the owner of the symlink and follower match or when the directory owner matches the symlink's owner
+fs.protected_symlinks=1
+# prevents hardlinks from being created by users that do not have read/write access to the source file
+fs.protected_hardlinks=1
+# These prevent creating files in potentially attacker-controlled environments
+fs.protected_fifos=2
+fs.protected_regular=2

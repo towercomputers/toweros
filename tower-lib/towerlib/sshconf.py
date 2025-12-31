@@ -7,7 +7,7 @@ from rich.table import Table
 from rich.text import Text
 from sshconf import read_ssh_config, empty_ssh_config_file
 
-from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command
+from towerlib.utils.shell import ssh, ErrorReturnCode, sed, touch, Command, cat, arch
 from towerlib.utils import clitask
 from towerlib.utils.exceptions import DiscoveringTimeOut, UnkownHost, InvalidColor
 from towerlib.__about__ import __version__
@@ -20,6 +20,8 @@ from towerlib.config import (
     KNOWN_HOSTS_PATH,
     COLORS,
     ROUTER_HOSTNAME,
+    HOST_DEFAULT_PACKAGES,
+    THINCLIENT_DEFAULT_PACKAGES
 )
 
 logger = logging.getLogger('tower')
@@ -166,13 +168,14 @@ def status(host = None, full = True):
                 host_info['memory-total'] = memory_available
                 host_info['cpu-usage'] = str(round(100 - float(ssh(host, 'mpstat').strip().split("\n")[-1].split(" ")[-1]), 2)) + "%"
                 host_info['cpu-temperature'] = inxi_info[inxi_info.index('cpu: ') + 5:inxi_info.index(' mobo: ')].strip()
+                host_info['packages-installed'] = ', '.join(get_installed_packages(host))
             else:
                 host_info['system'] = 'N/A'
                 host_info['memory-usage'] = 'N/A'
                 host_info['memory-total'] = 'N/A'
                 host_info['cpu-usage'] = 'N/A'
                 host_info['cpu-temperature'] = 'N/A'
-            host_info['packages-installed'] = ', '.join(get_installed_packages(host))
+                host_info['packages-installed'] = 'N/A'
         return host_info
     return [status(host, False) for host in hosts()]
 
@@ -317,16 +320,31 @@ def get_hex_host_color(host):
 
 
 def get_installed_packages(host):
-    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    if os.path.exists(apk_world):
-        return open(apk_world, 'r', encoding="UTF-8").read().strip().split("\n")
+    if host == "thinclient":
+        thinclient_world = cat('/etc/apk/world').strip().split("\n")
+        default_packages = THINCLIENT_DEFAULT_PACKAGES[arch().strip()]
+        return [package for package in thinclient_world if package not in default_packages]
+    host_world = ssh(host, 'cat /etc/apk/world').strip().split("\n")
+    return [package for package in host_world if package not in HOST_DEFAULT_PACKAGES]
+
+
+def get_saved_packages(host):
+    host_bakup_path = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    thinclient_backup_path = os.path.join(TOWER_DIR, 'thinclient_world')
+    backup_path = host_bakup_path if host != "thinclient" else thinclient_backup_path
+    if os.path.exists(backup_path):
+        return open(backup_path, 'r', encoding="UTF-8").read().strip().split("\n")
     return []
 
 
-def save_installed_packages(host, installed_packages):
-    apk_world = os.path.join(TOWER_DIR, 'hosts', host, 'world')
-    with open(apk_world, 'w', encoding="UTF-8") as file_pointer:
-        file_pointer.write("\n".join(installed_packages))
+@clitask("Saving installed package in {0}...")
+def save_installed_packages(host):
+    host_bakup_path = os.path.join(TOWER_DIR, 'hosts', host, 'world')
+    thinclient_backup_path = os.path.join(TOWER_DIR, 'thinclient_world')
+    backup_path = host_bakup_path if host != "thinclient" else thinclient_backup_path
+    current_world = get_installed_packages(host)
+    with open(backup_path, 'w', encoding="UTF-8") as file_pointer:
+        file_pointer.write("\n".join(current_world))
 
 
 @clitask("Syncing offline host time with `router`...")

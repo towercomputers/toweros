@@ -4,7 +4,7 @@ import json
 from towerlib.utils.shell import ssh, mkdir, sed, scp, mv, Command
 
 from towerlib.utils.decorators import clitask
-from towerlib.sshconf import get_host_color_name, hosts, get_installed_packages, save_installed_packages, status as get_status
+from towerlib.sshconf import get_host_color_name, hosts, status as get_status
 from towerlib.config import TOWER_DIR, DESKTOP_FILES_DIR
 
 def restart_sfwbar():
@@ -46,14 +46,6 @@ def copy_desktop_files(host, package):
         Command('sh')('-c', f"gtk-update-icon-cache -f -t /usr/{share_icon_folder} || true")
         restart_sfwbar()
 
-def add_installed_package(host, package):
-    # save package in host world
-    installed_packages = get_installed_packages(host)
-    if package not in installed_packages:
-        installed_packages.append(package)
-        save_installed_packages(host, installed_packages)
-    # copy desktop files from host to thinclient
-    copy_desktop_files(host, package)
 
 STATUS_KEYS = {
     "name": "Name",

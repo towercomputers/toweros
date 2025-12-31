@@ -2,6 +2,7 @@ site_name: Documentation
 site_url: https://toweros.org
 repo_url: https://github.com/towercomputers/toweros/
 repo_name: TowerOS
+copyright: © Tower Computers 2023
 docs_dir: src
 markdown_extensions:
     - attr_list

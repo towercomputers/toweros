@@ -9,6 +9,7 @@ update_passord() {
     sed -i "s/^$1:[^:]*:/$ESCAPED_REPLACE/g" /etc/shadow
 }
 
+
 check_and_copy_key_from_boot_disk() {
 	if ! [ -f "$BOOT_MEDIA/crypto_keyfile.bin" ]; then
         echo "Key file not found in boot partition"
@@ -22,6 +23,7 @@ check_and_copy_key_from_boot_disk() {
     cp $BOOT_MEDIA/crypto_keyfile.bin /crypto_keyfile.bin
     chmod 0400 /crypto_keyfile.bin
 }
+
 
 create_lvm_partitions() {
 	# zeroing root device
@@ -48,6 +50,7 @@ create_lvm_partitions() {
 	HOME_PARTITION="/dev/vg0/home"
 }
 
+
 activate_lvm_disk() {
     # initialize the LUKS partition
     cryptsetup luksOpen $LVM_DISK lvmcrypt --key-file=/crypto_keyfile.bin
@@ -56,6 +59,7 @@ activate_lvm_disk() {
     HOME_PARTITION="/dev/vg0/home"
     ROOT_PARTITION="/dev/vg0/root"
 }
+
 
 prepare_root_partition() {
 	if [ "$INSTALLATION_TYPE" == "install" ]; then
@@ -80,6 +84,7 @@ prepare_root_partition() {
 	# copy LUKS key
 	cp /crypto_keyfile.bin /mnt/crypto_keyfile.bin
 }
+
 
 prepare_home_directory() {
 	# create first user
@@ -106,6 +111,7 @@ fi
 EOF
 	chown -R "$USERNAME:$USERNAME" "/mnt/home/$USERNAME"
 }
+
 
 update_live_system() {
 	# TODO: set locale
@@ -197,6 +203,7 @@ EOF
 	chmod 600 /etc/ssh/ssh_host_*
 }
 
+
 clone_live_system_to_disk() {
     # install base system
     ovlfiles=/tmp/ovlfiles
@@ -228,9 +235,8 @@ clone_live_system_to_disk() {
 
     # install packages
     local apkflags="--initdb --quiet --progress --update-cache --clean-protected"
-    local pkgs="$(grep -h -v -w sfdisk /mnt/etc/apk/world 2>/dev/null)"
     local repoflags="--repository $BOOT_MEDIA/apks"
-    apk add --root /mnt $apkflags --overlay-from-stdin --force-overwrite $repoflags $pkgs <$ovlfiles
+    apk add --root /mnt $apkflags --overlay-from-stdin --force-overwrite $repoflags $DEFAULT_PACKAGES <$ovlfiles
 
     # clean chroot
     umount /mnt/proc
@@ -254,20 +260,18 @@ clone_live_system_to_disk() {
     cmdline="modules=$modules $kernel_opts"
     echo "$cmdline" > $BOOT_MEDIA/cmdline.txt
 
-	# Get branch from buildhost.py
-	# configure apk repositories if host is online
-	if [ "$HOSTNAME" == "router" ] || [ "$ONLINE" == "true" ]; then
-		mkdir -p /mnt/etc/apk
-		cat <<EOF > /mnt/etc/apk/repositories 
+	# configure apk repositories
+	mkdir -p /mnt/etc/apk
+	cat <<EOF > /mnt/etc/apk/repositories
 http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main
 http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
 #http://dl-cdn.alpinelinux.org/alpine/edge/testing
 EOF
-	fi
 
 	# migrate from sudo to doas
 	ln -s /usr/bin/doas /mnt/usr/bin/sudo || true
 }
+
 
 clean_and_reboot() {
 	# disable auto installation on boot
@@ -282,11 +286,12 @@ clean_and_reboot() {
 	reboot
 }
 
+
 init_configuration() {
 	# tower.env MUST contains the following variables:
 	# HOSTNAME, USERNAME, PUBLIC_KEY, PASSWORD_HASH, KEYBOARD_LAYOUT, KEYBOARD_VARIANT, 
 	# TIMEZONE, LANG, ONLINE, WLAN_SSID, WLAN_SHARED_KEY, THIN_CLIENT_IP, TOWER_NETWORK, 
-	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR, ALPINE_BRANCH
+	# STATIC_HOST_IP, ROUTER_IP, INSTALLATION_TYPE, COLOR, ALPINE_BRANCH, DEFAULT_PACKAGES
 
 	if [ -f /media/usb/tower.env ]; then # boot on usb
 		source /media/usb/tower.env

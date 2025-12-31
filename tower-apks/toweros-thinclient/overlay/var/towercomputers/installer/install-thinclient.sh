@@ -3,7 +3,7 @@
 set -e
 set -x
 
-ARCH="x86_64"
+ARCH="$(arch)"
 
 update_passord() {
     REPLACE="$1:$2:"
@@ -104,6 +104,14 @@ set_config_from_root_partition() {
     fi
     # set startx on login
     STARTW_ON_LOGIN="false" # in any case, already present in /home if needed
+    # get installed packages
+    ALL_INSTALLED_PACKAGES=$(cat /ROOT/etc/apk/world)
+    INSTALLED_PACKAGES=""
+    for package in $ALL_INSTALLED_PACKAGES; do
+        if [[ ! "$DEFAULT_PACKAGES" == *"$package"* ]]; then
+            INSTALLED_PACKAGES="$INSTALLED_PACKAGES $package"
+        fi
+    done
     # copy ETH0_MAC if exists
     if [ -f /ROOT/etc/local.d/eth0_mac ]; then
         cp /ROOT/etc/local.d/eth0_mac /etc/local.d/eth0_mac
@@ -255,16 +263,20 @@ update_live_system() {
 }
 
 
+generate_mkinitfs() {
+    mkdir -p /mnt/etc/mkinitfs/features.d
+    features="base usb vfat ext4 nvme vmd lvm cryptsetup cryptkey kms"
+    features="$features ata ide scsi mmc virtio keymap resume"
+    echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
+}
+
+
 clone_live_system_to_disk() {
     # backup local config in apkovl
     ovlfiles=/tmp/ovlfiles
     lbu package - | tar -C "/mnt" -zxv > $ovlfiles
 
-    # generate mkinitfs.conf
-    mkdir -p /mnt/etc/mkinitfs/features.d
-    features="ata base ide scsi usb virtio vfat ext4 nvme vmd lvm keymap"
-    features="$features cryptsetup cryptkey resume"
-    echo "features=\"$features\"" > /mnt/etc/mkinitfs/mkinitfs.conf
+    generate_mkinitfs
 
     # copy apk keys
     mkdir -p /mnt/etc/apk/keys/
@@ -278,10 +290,6 @@ clone_live_system_to_disk() {
 
     # install packages
     local apkflags="--quiet --progress --update-cache --clean-protected"
-    # default alpine packages
-    local pkgs="alpine-base linux-lts xtables-addons-lts zfs-lts linux-firmware linux-firmware-none"
-    # toweros packages
-    pkgs="$pkgs toweros-thinclient"
     # local repos
     local repos="$(sed -e 's/\#.*//' "$ROOT"/etc/apk/repositories 2>/dev/null)"
     local repoflags=
@@ -289,11 +297,19 @@ clone_live_system_to_disk() {
         repoflags="$repoflags --repository $i"
     done
     # install packages in /mnt
-    apk add --root /mnt $apkflags --initdb --overlay-from-stdin --force-overwrite $repoflags $pkgs <$ovlfiles
+    apk add --root /mnt $apkflags --initdb --overlay-from-stdin --force-overwrite $repoflags $DEFAULT_PACKAGES <$ovlfiles
 
     # clean chroot
     umount /mnt/proc
     umount /mnt/dev
+
+    # configure apk repositories
+	mkdir -p /mnt/etc/apk
+	cat <<EOF > /mnt/etc/apk/repositories
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/main
+http://dl-cdn.alpinelinux.org/alpine/$ALPINE_BRANCH/community
+#http://dl-cdn.alpinelinux.org/alpine/edge/testing
+EOF
 
     # disable modloop in /mnt
     rm -f /mnt/etc/runlevels/sysinit/modloop
@@ -303,36 +319,41 @@ clone_live_system_to_disk() {
 install_bootloader() {
     # https://madaidans-insecurities.github.io/guides/linux-hardening.html#result
     kernel_opts="quiet rootfstype=ext4 slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on vsyscall=none debugfs=off oops=panic module.sig_enforce=1 lockdown=confidentiality mce=0 loglevel=0"
-    modules="sd-mod,usb-storage,vfat,ext4,nvme,vmd,keymap,kms,lvm"
-    # add cryptsetup and cryptkey to kernel options
-    kernel_opts="$kernel_opts cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
-    modules="$modules,cryptsetup,cryptkey"
-
-    # setup syslinux
-    sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
-        -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
-        -e "s:^modules=.*:modules=$modules:" \
-        /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
-
-    dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
-
-    extlinux --install /mnt/boot
-    chroot /mnt/ update-extlinux
-
-    mkdir -p /mnt/boot/EFI/boot
-    cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
-    sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
-    sed -i 's/Alpine\/Linux/TowerOS-ThinClient/g' /mnt/boot/EFI/boot/syslinux.cfg
-    sed -i 's/Alpine /TowerOS-ThinClient /g' /mnt/boot/EFI/boot/syslinux.cfg
-    rm -f /mnt/boot/*.c32
-    rm -f /mnt/boot/*.sys
-    rm -f /mnt/boot/extlinux.conf
-    cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
+    kernel_opts="$kernel_opts root=$ROOT_PARTITION cryptroot=$LVM_PARTITION cryptkey=yes cryptdm=lvmcrypt"
+    modules="loop,squashfs,sd-mod,usb-storage,vfat,ext4,nvme,vmd,kms,lvm,cryptsetup,cryptkey,keymap"
+    # x86_64
+    if [ "$ARCH" == "x86_64" ]; then
+         # setup syslinux
+        sed -e "s:^root=.*:root=$ROOT_PARTITION:" \
+            -e "s:^default_kernel_opts=.*:default_kernel_opts=\"$kernel_opts\":" \
+            -e "s:^modules=.*:modules=$modules:" \
+            /etc/update-extlinux.conf > /mnt/etc/update-extlinux.conf
+        # write MBR
+        dd bs=440 count=1 conv=notrunc if=/usr/share/syslinux/mbr.bin of=$TARGET_DRIVE
+        # install syslinux
+        extlinux --install /mnt/boot
+        chroot /mnt/ update-extlinux
+        mkdir -p /mnt/boot/EFI/boot
+        cp /usr/share/syslinux/efi64/* /mnt/boot/EFI/boot
+        sed 's/\(initramfs-\|vmlinuz-\)/\/\1/g' /mnt/boot/extlinux.conf > /mnt/boot/EFI/boot/syslinux.cfg
+        sed -i 's/Alpine\/Linux/TowerOS-ThinClient/g' /mnt/boot/EFI/boot/syslinux.cfg
+        sed -i 's/Alpine /TowerOS-ThinClient /g' /mnt/boot/EFI/boot/syslinux.cfg
+        rm -f /mnt/boot/*.c32
+        rm -f /mnt/boot/*.sys
+        rm -f /mnt/boot/extlinux.conf
+        cp /mnt/boot/EFI/boot/syslinux.efi /mnt/boot/EFI/boot/bootx64.efi
+    # RPI
+    elif [ "$ARCH" == "aarch64" ]; then
+        # update cmdline.txt
+        kernel_opts="console=tty1 $kernel_opts"
+        cmdline="modules=$modules $kernel_opts"
+        echo "$cmdline" > /mnt/boot/cmdline.txt
+    fi
 }
 
 
 install_secure_boot() {
-    if [ "$SECURE_BOOT" = "true" ]; then
+    if [ "$SECURE_BOOT" == "true" ] && [ "$ARCH" == "x86_64" ]; then
         sbctl create-keys
         cp /mnt/boot/EFI/boot/bootx64.efi /mnt/boot/EFI/boot/bootx64.efi.unsigned
         sbctl sign /mnt/boot/EFI/boot/bootx64.efi
@@ -356,6 +377,12 @@ upgrade_hosts() {
             # upgrade upgradable hosts
             runuser -u $USERNAME -- tower upgrade --hosts $(cat /tmp/upgradable-hosts)
             python $SCRIPT_DIR/askconfiguration.py end-hosts-upgrade
+        fi
+        if [ -d /mnt/home/$USERNAME/.local/tower/hosts/router ]; then
+            if [ "$INSTALLED_PACKAGES" != "" ]; then
+                # re-install thinclient package
+                runuser -u $USERNAME -- tower install thinclient $INSTALLED_PACKAGES || true
+            fi
         fi
         # move updated tower configuration back
         cp -r /mnt/home/$USERNAME/.local/tower /home/$USERNAME/.local/
@@ -403,7 +430,7 @@ set_configuration() {
     # INSTALLATION_TYPE, ROOT_PASSWORD_HASH, USERNAME, PASSWORD_HASH,
     # LANG, TIMEZONE, KEYBOARD_LAYOUT, KEYBOARD_VARIANT,
     # TARGET_DRIVE, CRYPTKEY_DRIVE, SECURE_BOOT
-    # STARTW_ON_LOGIN
+    # STARTW_ON_LOGIN, DEFAULT_PACKAGES, ALPINE_BRANCH
     python $SCRIPT_DIR/askconfiguration.py
     source /root/tower.env
     if [ "$INSTALLATION_TYPE" == "upgrade" ]; then
